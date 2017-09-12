@@ -1,0 +1,22 @@
+@namespace("com.hedvig.generic.event")
+protocol UserCreatedEvent_v1 {
+
+record UserCreatedEvent_v1_Payload {
+
+  string id;
+
+  string name;
+
+}
+
+record UserCreatedEvent_v1 {
+
+  string event_id;
+
+  string created_at;
+
+  UserCreatedEvent_v1_Payload payload;
+}
+
+}
+
