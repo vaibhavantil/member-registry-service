@@ -32,12 +32,12 @@ public class KafkaPublisher {
 
         Properties props = new Properties();
 
-        props.put("bootstrap.servers", "localhost:9092");
-        props.put("acks", "all");
-        props.put("retries", 0);
+        props.put("bootstrap.servers", properties.bootstrap.servers);
+        props.put("acks", properties.acks);
+        props.put("retries", properties.retries);
         props.put("key.serializer", "io.confluent.kafka.serializers.KafkaAvroSerializer");
         props.put("value.serializer", "io.confluent.kafka.serializers.KafkaAvroSerializer");
-        props.put("schema.registry.url", "http://localhost:8081");
+        props.put("schema.registry.url", properties.schema.registry.url);
 
 
 

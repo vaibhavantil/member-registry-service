@@ -1,21 +1,39 @@
 package com.hedvig.generic.mustrename.externalEvents;
 
-import lombok.Value;
+import lombok.Getter;
+import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.stereotype.Component;
+import org.springframework.boot.context.properties.NestedConfigurationProperty;
 
-@ConfigurationProperties(prefix = "hedvig")
+@Getter
+@Setter
+@ConfigurationProperties(prefix = "hedvig.kafka")
 public class KafkaProperties {
-    public String bootstrapServers;
+
+    @Getter
+    @Setter
+    public static class Bootstrap {
+        public String servers;
+    }
 
     public String acks;
 
+    public Bootstrap bootstrap;
+
     public int retries;
 
-    public String keySerializer;
+    public Schema schema;
 
-    public String valueSerializer;
+    @Getter
+    @Setter
+    public static class Url {
+        public String url;
+    }
 
-    public String schemaRegistryUrl;
+    @Getter
+    @Setter
+    public static class Schema {
+        @NestedConfigurationProperty
+        public Url registry;
+    }
 }
