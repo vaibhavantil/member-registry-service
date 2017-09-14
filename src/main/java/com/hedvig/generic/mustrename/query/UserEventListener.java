@@ -17,7 +17,7 @@ public class UserEventListener {
 
     @EventHandler
     public void on(UserCreatedEvent e){
-        System.out.println(e);
+        System.out.println("UserEventListener: " + e);
         UserEntity user = new UserEntity();
         user.id = e.getId();
         user.name = e.getName();

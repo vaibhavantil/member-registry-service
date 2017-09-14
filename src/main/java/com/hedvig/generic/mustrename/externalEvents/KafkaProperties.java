@@ -22,6 +22,7 @@ public class KafkaProperties {
 
     public int retries;
 
+    @NestedConfigurationProperty
     public Schema schema = new Schema();
 
     @Getter
