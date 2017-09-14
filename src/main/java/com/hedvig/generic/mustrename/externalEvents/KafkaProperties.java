@@ -13,27 +13,27 @@ public class KafkaProperties {
     @Getter
     @Setter
     public static class Bootstrap {
-        public String servers;
+        public String servers = "";
     }
 
     public String acks;
 
-    public Bootstrap bootstrap;
+    public Bootstrap bootstrap = new Bootstrap();
 
     public int retries;
 
-    public Schema schema;
+    public Schema schema = new Schema();
 
     @Getter
     @Setter
     public static class Url {
-        public String url;
+        public String url = "";
     }
 
     @Getter
     @Setter
     public static class Schema {
         @NestedConfigurationProperty
-        public Url registry;
+        public Url registry = new Url();
     }
 }
