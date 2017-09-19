@@ -13,9 +13,9 @@ if [ -z "$TRAVIS_PULL_REQUEST" ] || [ "$TRAVIS_PULL_REQUEST" == "false" ]; then
     # Build and push
     docker build -t $IMAGE_NAME .
     echo "Pushing $IMAGE_NAME:latest"
-    docker tag $IMAGE_NAME:latest "$REMOTE_IMAGE_URL:latest"
-    docker push "$REMOTE_IMAGE_URL:latest"
-    echo "Pushed $IMAGE_NAME:latest"
+    docker tag $IMAGE_NAME:latest $REMOTE_IMAGE_URL:$TRAVIS_BUILD_NUMBER
+    docker push $REMOTE_IMAGE_URL:$TRAVIS_BUILD_NUMBER
+    echo "Pushed $IMAGE_NAME:$TRAVIS_BUILD_NUMBER"
   else
     echo "Skipping deploy because branch is not 'master'"
   fi
