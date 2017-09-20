@@ -1,4 +1,4 @@
-package com.hedvig.generic.mustrename.externalEvents;
+package com.hedvig.generic.customerregistry.externalEvents;
 
 import lombok.Getter;
 import lombok.Setter;

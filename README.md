@@ -14,3 +14,34 @@ When starting a new project follow the following list!
 5. Modify or remove the supplied aggregates, commands, events...
 7. Update this README file.
 6. Live long and prosper.
+
+
+
+- Sign up/Sign in
+  - Log each sign in request
+  - Create hedvigToken
+  - Send customerCreated events
+- Retrieie hedvigId for a personalInformationNumber
+- Retrieve customerInformation give a personalIdentificationNumber
+- Retrieve customerInformation from a given personalIdentificationNumber
+- Retrieve
+
+
+Entities
+ - Customer
+   - HedvigId
+   - Personal identification number
+   - Name
+   - Address (Street, Zip, City)
+   - Email
+   - Phone number
+   - Country
+
+   - Auth requests
+   -
+
+ - Commands
+   - Create customer
+     - personalNumber
+     - prefferedName
+     - fullName

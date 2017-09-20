@@ -1,23 +1,17 @@
-package com.hedvig.generic.mustrename.externalEvents;
+package com.hedvig.generic.customerregistry.externalEvents;
 
 import com.hedvig.generic.event.UserCreatedEvent_v1;
 import com.hedvig.generic.event.UserEvent_v1;
-import com.hedvig.generic.mustrename.events.UserCreatedEvent;
-import org.apache.jute.Record;
+import com.hedvig.generic.customerregistry.events.MemberCreatedEvent;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.clients.producer.RecordMetadata;
 import org.axonframework.eventhandling.EventHandler;
 import org.axonframework.eventhandling.EventMessage;
-import org.axonframework.eventhandling.Timestamp;
-import org.axonframework.messaging.Message;
-import org.axonframework.messaging.MetaData;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.time.Instant;
 import java.util.Properties;
-import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
@@ -26,7 +20,7 @@ public class KafkaPublisher {
 
     KafkaProducer<String, UserEvent_v1> producer;
 
-    @Autowired
+ /*   @Autowired
     public KafkaPublisher(KafkaProperties properties) {
         System.out.println("Configuring KafkaPublisher");
 
@@ -64,7 +58,7 @@ public class KafkaPublisher {
     }
 
     @EventHandler
-    public void on(UserCreatedEvent internalEvent, EventMessage message) throws ExecutionException, InterruptedException {
+    public void on(MemberCreatedEvent internalEvent, EventMessage message) throws ExecutionException, InterruptedException {
         UserEvent_v1 e = new UserEvent_v1();
         e.setCreatedAt(message.getTimestamp().toString());
         e.setEventId(message.getIdentifier());
@@ -78,5 +72,5 @@ public class KafkaPublisher {
         Future<RecordMetadata> future = this.producer.send(pr);
         this.producer.flush();
         RecordMetadata recordMetadata = future.get();
-    }
+    }*/
 }
