@@ -2,4 +2,7 @@
 
 aws s3 cp s3://dev-com-hedvig-cluster-ett-data/kube ~/.kube --recursive
 
-kubectl set image deployment/must-rename-deployment must-rename-deployment=$REMOTE_IMAGE_URL:$TRAVIS_BUILD_NUMBER
+curl -LO https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl
+chmod +x ./kubectl
+
+./kubectl set image deployment/customer-service customer-service=$REMOTE_IMAGE_URL:$TRAVIS_BUILD_NUMBER

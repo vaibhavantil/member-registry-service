@@ -22,8 +22,8 @@ When starting a new project follow the following list!
   - Create hedvigToken
   - Send customerCreated events
 - Retrieie hedvigId for a personalInformationNumber
-- Retrieve customerInformation give a personalIdentificationNumber
-- Retrieve customerInformation from a given personalIdentificationNumber
+- Retrieve customerInformation give a ssn
+- Retrieve customerInformation from a given ssn
 - Retrieve
 
 
