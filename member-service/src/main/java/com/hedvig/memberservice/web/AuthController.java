@@ -78,14 +78,6 @@ public class AuthController {
                         .body(response);
             }
 
-            member = memberRepo.findById(hid);
-
-            /*
-            if(member.get().getSsn() != ssn) {
-                log.error("Authenticated SSN does not match ssn from member!");
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
-            }*/ 
-
             List<PersonSearchResult> personList = bisnodeClient.match(ssn).getPersons();
             if(personList.size() != 1) {
                 log.error("Could not find person based on personnumer!");

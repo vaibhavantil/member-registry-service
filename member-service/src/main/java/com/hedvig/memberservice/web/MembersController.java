@@ -5,6 +5,7 @@ import com.hedvig.memberservice.commands.CreateMemberCommand;
 import com.hedvig.memberservice.query.MemberEntity;
 import com.hedvig.memberservice.query.MemberRepository;
 import com.hedvig.memberservice.web.dto.Member;
+import com.hedvig.memberservice.web.dto.Profile;
 import org.axonframework.commandhandling.gateway.CommandGateway;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,10 +20,13 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
+import java.util.ArrayList;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
+
+import java.util.List;
 
 @RestController()
 @RequestMapping("/member/")
@@ -69,6 +73,21 @@ public class MembersController {
 
         log.info("New member created with id: " + id);
         return ResponseEntity.ok("{\"memberId\":" + id + "}");
+    }
+
+    @RequestMapping("/me")
+    public ResponseEntity<Profile> me(){
+        Profile p = new Profile(
+                "Anakin Skywalker",
+                new ArrayList<String>(){{add("Padmé Amidala"); add("Luke Skywalker");}},
+                26,
+                "anakkin@skywalk.er",
+                "Krukmakargatan 5",
+                48,
+                "XXXX XXXX 1234",
+                "Rädda Barnen");
+
+        return ResponseEntity.ok(p);
     }
 
     @RequestMapping("/convert")
