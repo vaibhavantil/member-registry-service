@@ -25,7 +25,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
 @RestController()
-@RequestMapping("/v1/members/")
+@RequestMapping("/member/")
 public class MembersController {
 
     private final MemberRepository repo;
@@ -67,7 +67,8 @@ public class MembersController {
             return memberId;
         });
 
-        return ResponseEntity.ok("{\"memberId\":" + id + "\"}");
+        log.info("New member created with id: " + id);
+        return ResponseEntity.ok("{\"memberId\":" + id + "}");
     }
 
     @RequestMapping("/convert")

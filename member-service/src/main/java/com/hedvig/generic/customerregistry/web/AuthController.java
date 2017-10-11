@@ -6,7 +6,6 @@ import com.hedvig.external.billectaAPI.api.BankIdStatusType;
 import com.hedvig.external.bisnodeBCI.BisnodeClient;
 import com.hedvig.external.bisnodeBCI.dto.Person;
 import com.hedvig.external.bisnodeBCI.dto.PersonSearchResult;
-import com.hedvig.external.bisnodeBCI.dto.PersonSearchResultListResponse;
 import com.hedvig.generic.customerregistry.commands.StartOnBoardingCommand;
 import com.hedvig.generic.customerregistry.query.MemberEntity;
 import com.hedvig.generic.customerregistry.query.MemberRepository;
@@ -25,7 +24,7 @@ import java.util.List;
 import java.util.Optional;
 
 @RestController()
-@RequestMapping("/members/bankid/")
+@RequestMapping("/member/bankid/")
 public class AuthController {
 
     private final CommandGateway commandBus;

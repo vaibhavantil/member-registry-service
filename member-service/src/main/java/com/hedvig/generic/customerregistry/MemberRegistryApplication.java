@@ -20,10 +20,10 @@ import org.springframework.web.client.RestTemplate;
 public class MemberRegistryApplication {
 
     @Value("${hedvig.bisnode.clientId}")
-    String bisnodeClientId;
+    String bisnodeClientId = "";
 
     @Value("${hedvig.bisnode.clientKey}")
-    String bisnodeClientKey;
+    String bisnodeClientKey = "";
 
 	public static void main(String[] args) {
 
