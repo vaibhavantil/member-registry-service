@@ -25,6 +25,12 @@ public class MemberRegistryApplication {
     @Value("${hedvig.bisnode.clientKey}")
     String bisnodeClientKey = "";
 
+    @Value("${hedvig.billecta.secureToken}")
+    String billectaSecureToken;
+
+    @Value("${hedvig.billecta.creditorId}")
+    String billectaCreditorId;
+
 	public static void main(String[] args) {
 
 	    SpringApplication.run(MemberRegistryApplication.class, args);
@@ -53,9 +59,7 @@ public class MemberRegistryApplication {
 
     @Bean
     public BillectaApi buildBillectaApi(){
-        String creditorId = "";
-        String secureToken = "";
-        return new BillectaApi(creditorId, secureToken, new RestTemplate());
+        return new BillectaApi(billectaCreditorId, billectaSecureToken, new RestTemplate());
     }
 
     @Bean
