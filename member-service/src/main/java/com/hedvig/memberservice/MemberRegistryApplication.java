@@ -19,16 +19,16 @@ import org.springframework.web.client.RestTemplate;
 @EnableConfigurationProperties(KafkaProperties.class)
 public class MemberRegistryApplication {
 
-    @Value("${hedvig.bisnode.clientId}")
+    @Value("${hedvig.bisnode.client.id}")
     String bisnodeClientId = "";
 
-    @Value("${hedvig.bisnode.clientKey}")
+    @Value("${hedvig.bisnode.client.key}")
     String bisnodeClientKey = "";
 
-    @Value("${hedvig.billecta.secureToken}")
+    @Value("${hedvig.billecta.secure.token}")
     String billectaSecureToken;
 
-    @Value("${hedvig.billecta.creditorId}")
+    @Value("${hedvig.billecta.creditor.id}")
     String billectaCreditorId;
 
 	public static void main(String[] args) {
