@@ -47,8 +47,8 @@ public class AuthController {
     @RequestMapping(path="auth")
     public ResponseEntity<BankIdAuthResponse> auth(@RequestParam(required = false) String ssn) {
 
-        Optional<String> ssn = Optional.of(ssn);
-        BankIdAuthenticationStatus status = billectaApi.BankIdAuth(ssn);
+
+        BankIdAuthenticationStatus status = billectaApi.BankIdAuth(Optional.of(ssn));
 
         BankIdAuthResponse response = null;
         if(status.getStatus() == BankIdStatusType.STARTED) {
