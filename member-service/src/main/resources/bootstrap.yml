@@ -1,0 +1,9 @@
+spring:
+  application:
+    name: member-service
+  cloud:
+    config:
+      allow-override: false
+    kubernetes:
+      discovery:
+        enabled: false
