@@ -44,7 +44,7 @@ public class AuthController {
         this.bisnodeClient = bisnodeClient;
     }
 
-    @RequestMapping(path="auth")
+    @PostMapping(path="auth")
     public ResponseEntity<BankIdAuthResponse> auth(@RequestParam(required = false) String ssn) {
 
 
@@ -60,7 +60,7 @@ public class AuthController {
         return ResponseEntity.ok(response);
     }
 
-    @GetMapping(path="collect")
+    @PostMapping(path="collect")
     public ResponseEntity<BankIdAuthResponse> collect(@RequestParam String referenceToken, @RequestHeader(value="hedvig.token", required = false) Long hid) {
 
         BankIdAuthenticationStatus status = billectaApi.BankIdCollect(referenceToken);
@@ -84,7 +84,7 @@ public class AuthController {
             if(member.get().getSsn() != ssn) {
                 log.error("Authenticated SSN does not match ssn from member!");
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
-            }*/
+            }*/ 
 
             List<PersonSearchResult> personList = bisnodeClient.match(ssn).getPersons();
             if(personList.size() != 1) {
