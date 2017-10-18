@@ -8,6 +8,7 @@ import com.hedvig.memberservice.commands.AuthenticationAttemptCommand;
 import com.hedvig.memberservice.commands.InactivateMemberCommand;
 import com.hedvig.memberservice.query.MemberEntity;
 import com.hedvig.memberservice.query.MemberRepository;
+import com.hedvig.memberservice.web.dto.BankIdAuthRequest;
 import com.hedvig.memberservice.web.dto.BankIdAuthResponse;
 import org.axonframework.commandhandling.CommandBus;
 import org.axonframework.commandhandling.gateway.CommandGateway;
@@ -46,12 +47,9 @@ public class AuthController {
     }
 
     @PostMapping(path = "auth")
-    public ResponseEntity<BankIdAuthResponse> auth(@RequestParam(required = false) String ssn) {
+    public ResponseEntity<BankIdAuthResponse> auth(@RequestBody(required = true) BankIdAuthRequest request) {
 
-
-
-
-        BankIdAuthenticationStatus status = billectaApi.BankIdAuth(ssn);
+        BankIdAuthenticationStatus status = billectaApi.BankIdAuth(request.getSsn());
 
         BankIdAuthResponse response = null;
         if (status.getStatus() == BankIdStatusType.STARTED) {

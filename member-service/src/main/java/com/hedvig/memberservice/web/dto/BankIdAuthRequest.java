@@ -5,6 +5,6 @@ import lombok.Value;
 @Value
 public class BankIdAuthRequest {
 
-    private String personalIdentityNumber;
+    private String ssn;
 
 }
