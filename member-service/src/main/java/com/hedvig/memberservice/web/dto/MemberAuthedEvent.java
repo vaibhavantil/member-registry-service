@@ -1,21 +1,23 @@
 package com.hedvig.botService.web.dto;
 
+import com.hedvig.memberservice.web.dto.Member;
 import lombok.Value;
 
 import java.time.Instant;
-import java.util.UUID;
 
 @Value
 public class MemberAuthedEvent {
 
-    private UUID eventId;
+    private String eventId;
     private Long memberId;
     private Instant createdAt;
+    private Member member;
 
 
-    public MemberAuthedEvent(Long memberId) {
-        this.eventId = UUID.randomUUID();
+    public MemberAuthedEvent(Long memberId, String eventId, Instant timestamp, Member member) {
+        this.eventId = eventId;
         this.memberId = memberId;
-        this.createdAt = Instant.now();
+        this.createdAt = timestamp;
+        this.member = member;
     }
 }

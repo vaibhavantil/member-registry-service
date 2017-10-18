@@ -25,11 +25,12 @@ public class MemberEntity {
 
     @Getter
     @Setter
-    private String preferredName;
-    
+    private String firstName;
+
     @Getter
     @Setter
-    private String fullName;
+    private String lastName;
+
 
     @Getter
     @Setter

@@ -1,14 +1,18 @@
 package com.hedvig.memberservice.query;
 
+import com.hedvig.memberservice.aggregates.MemberStatus;
 import com.hedvig.memberservice.aggregates.PersonInformation;
 import com.hedvig.memberservice.aggregates.Telephone;
 import com.hedvig.memberservice.events.MemberCreatedEvent;
-import com.hedvig.memberservice.events.MemberStartedOnBoarding;
+import com.hedvig.memberservice.events.MemberInactivatedEvent;
+import com.hedvig.memberservice.events.MemberStartedOnBoardingEvent;
 import org.axonframework.eventhandling.EventHandler;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.Optional;
 
 @Component
 public class MemberEventListener {
@@ -31,15 +35,15 @@ public class MemberEventListener {
     }
 
     @EventHandler
-    public void on(MemberStartedOnBoarding e) {
+    public void on(MemberStartedOnBoardingEvent e) {
 
         MemberEntity member = userRepo.findOne(e.getMemberId());
 
         member.setStatus(e.getNewStatus().name());
         PersonInformation personInformation = e.getPersonInformation();
         member.setSsn(personInformation.getSsn());
-        member.setPreferredName(personInformation.getPreferredFirstName());
-        member.setFullName(personInformation.getFullName());
+        member.setFirstName(personInformation.getPreferredFirstName());
+        member.setLastName(personInformation.getFamilyName());
         member.setBirthDate(personInformation.getDateOfBirth());
 
         personInformation.getAddress().ifPresent( address -> {
@@ -59,4 +63,11 @@ public class MemberEventListener {
         userRepo.save(member);
 
     }
+
+    @EventHandler
+    void on(MemberInactivatedEvent e){
+        MemberEntity m = userRepo.findOne(e.getId());
+        m.setStatus(MemberStatus.INACTIVATED.name());
+    }
+
 }

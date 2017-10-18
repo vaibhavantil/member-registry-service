@@ -2,8 +2,11 @@ package com.hedvig.memberservice;
 
 import com.hedvig.external.billectaAPI.BillectaApi;
 import com.hedvig.external.bisnodeBCI.BisnodeClient;
+import com.hedvig.memberservice.aggregates.MemberAggregate;
 import com.hedvig.memberservice.externalEvents.KafkaProperties;
 import org.axonframework.config.EventHandlingConfiguration;
+import org.axonframework.eventsourcing.AggregateFactory;
+import org.axonframework.spring.eventsourcing.SpringPrototypeAggregateFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
@@ -11,6 +14,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Scope;
 import org.springframework.retry.backoff.FixedBackOffPolicy;
 import org.springframework.retry.policy.SimpleRetryPolicy;
 import org.springframework.retry.support.RetryTemplate;
@@ -71,5 +75,19 @@ public class MemberRegistryApplication {
     @Bean
     public RestTemplate restTemplate(RestTemplateBuilder builder) {
         return builder.build();
+    }
+
+    @Bean
+    @Scope("prototype")
+    public MemberAggregate memberAggregate(BisnodeClient bisnodeClient) {
+        return new MemberAggregate(bisnodeClient);
+    }
+
+    @Bean
+    public AggregateFactory<MemberAggregate> memberAggregateFactory() {
+        SpringPrototypeAggregateFactory<MemberAggregate> springPrototypeAggregateFactory = new SpringPrototypeAggregateFactory<>();
+        springPrototypeAggregateFactory.setPrototypeBeanName("memberAggregate");
+
+        return springPrototypeAggregateFactory;
     }
 }

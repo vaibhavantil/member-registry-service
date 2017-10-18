@@ -1,13 +1,24 @@
 package com.hedvig.memberservice.aggregates;
 
+import com.hedvig.external.bisnodeBCI.BisnodeClient;
+import com.hedvig.external.bisnodeBCI.dto.Person;
+import com.hedvig.external.bisnodeBCI.dto.PersonSearchResult;
+import com.hedvig.memberservice.commands.AuthenticationAttemptCommand;
 import com.hedvig.memberservice.commands.CreateMemberCommand;
-import com.hedvig.memberservice.commands.StartOnBoardingCommand;
-import com.hedvig.memberservice.events.MemberStartedOnBoarding;
+import com.hedvig.memberservice.commands.InactivateMemberCommand;
+import com.hedvig.memberservice.events.MemberAuthenticatedEvent;
 import com.hedvig.memberservice.events.MemberCreatedEvent;
+import com.hedvig.memberservice.events.MemberInactivatedEvent;
+import com.hedvig.memberservice.events.MemberStartedOnBoardingEvent;
 import org.axonframework.commandhandling.CommandHandler;
 import org.axonframework.commandhandling.model.AggregateIdentifier;
 import org.axonframework.eventsourcing.EventSourcingHandler;
 import org.axonframework.spring.stereotype.Aggregate;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+
+import java.util.List;
 
 import static org.axonframework.commandhandling.model.AggregateLifecycle.apply;
 
@@ -20,12 +31,17 @@ public class MemberAggregate {
     @AggregateIdentifier
     public Long id;
 
+    private Logger log = LoggerFactory.getLogger(MemberAggregate.class);
+
+    private  BisnodeClient bisnodeClient;
+
     private MemberStatus status;
 
     private PersonInformation personInformation;
 
-    public MemberAggregate(){
-
+    @Autowired
+    public MemberAggregate(BisnodeClient bisnodeClient) {
+        this.bisnodeClient = bisnodeClient;
     }
 
     @CommandHandler
@@ -33,17 +49,39 @@ public class MemberAggregate {
         apply(new MemberCreatedEvent(command.getMemberId(), MemberStatus.INITIATED));
     }
 
-    @CommandHandler void startOnBoarding(StartOnBoardingCommand command) throws Exception {
-        if(this.status != MemberStatus.INITIATED)
-            throw new RuntimeException("Member is not a prospect.");
+    @CommandHandler
+    void authAttempt(AuthenticationAttemptCommand command) {
+        if(this.status == MemberStatus.INITIATED) {
+            //Trigger fetching of bisnode data.
+            String ssn = command.getBankIdAuthResponse().getSSN();
+            List<PersonSearchResult> personList = bisnodeClient.match(ssn).getPersons();
+            if (personList.size() != 1) {
+                log.error("Could not find person based on personnumer!");
+                throw new RuntimeException(("Could not find person at bisnode."));
+            }
 
-        PersonInformation pi = new PersonInformation(command.getPerson());
-        pi.setSsn(command.getBankIdStatus().getSSN());
+            Person person = personList.get(0).getPerson();
 
-        apply(new MemberStartedOnBoarding(
-                command.getId(),
-                MemberStatus.ONBOARDING,
-                pi));
+            PersonInformation pi = new PersonInformation(ssn, person);
+
+
+            apply(new MemberStartedOnBoardingEvent(
+                    this.id,
+                    MemberStatus.ONBOARDING,
+                    pi));
+        }
+
+        apply(new MemberAuthenticatedEvent(this.id, command.getBankIdAuthResponse().getReferenceToken()));
+    }
+
+    @CommandHandler
+    void inactivateMember(InactivateMemberCommand command) {
+        if(this.status == MemberStatus.INITIATED) {
+            apply(new MemberInactivatedEvent(this.id));
+        } else {
+            String str = String.format("Cannot INACTIAVTE member %s in status: %s", this.id, this.status.name());
+            throw new RuntimeException(str);
+        }
     }
 
     @EventSourcingHandler
@@ -53,7 +91,7 @@ public class MemberAggregate {
     }
 
     @EventSourcingHandler
-    public void on(MemberStartedOnBoarding e){
+    public void on(MemberStartedOnBoardingEvent e){
         this.personInformation = e.getPersonInformation();
         this.status = e.getNewStatus();
     }

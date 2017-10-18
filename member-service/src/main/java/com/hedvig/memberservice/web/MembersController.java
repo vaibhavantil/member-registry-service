@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
@@ -49,8 +50,15 @@ public class MembersController {
     }
 
     @RequestMapping("/{memberId}")
-    public ResponseEntity<Member> index(@PathVariable String memberId) {
-        return ResponseEntity.ok(new Member("","","","","","","","",""));
+    public ResponseEntity<Member> index(@PathVariable Long memberId) {
+
+        Optional<MemberEntity> member = repo.findById(memberId);
+        if(member.isPresent()){
+
+            return ResponseEntity.ok(new Member(member.get()));
+        }
+
+        return ResponseEntity.notFound().build();
     }
 
     @RequestMapping("/helloHedvig")
@@ -79,6 +87,8 @@ public class MembersController {
     public ResponseEntity<Profile> me(){
         Profile p = new Profile(
                 "Anakin Skywalker",
+                "Anakin",
+                "Skywalker",
                 new ArrayList<String>(){{add("Padmé Amidala"); add("Luke Skywalker");}},
                 26,
                 "anakkin@skywalk.er",

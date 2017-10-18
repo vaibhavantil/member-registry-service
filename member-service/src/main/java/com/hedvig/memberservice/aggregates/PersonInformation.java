@@ -32,8 +32,8 @@ public class PersonInformation {
 
     public PersonInformation(){};
 
-    public PersonInformation(Person bisnodePerson) {
-        //this.ssn = bisnodePerson.getLegalId();
+    public PersonInformation(String ssn, Person bisnodePerson) {
+        this.ssn = ssn;
         this.bisnodeGEDI = bisnodePerson.getGedi();
         this.preferredFirstName = bisnodePerson.getPreferredFirstName();
         this.privateIdentity = bisnodePerson.getPrivateIdentity();

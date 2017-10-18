@@ -5,7 +5,7 @@ import com.hedvig.memberservice.aggregates.PersonInformation;
 import lombok.Value;
 
 @Value
-public class MemberStartedOnBoarding {
+public class MemberStartedOnBoardingEvent {
     private Long memberId;
     private MemberStatus newStatus;
     private PersonInformation personInformation;

@@ -23,14 +23,17 @@ public class BillectaApi {
         this.restTemplate = restTemplate;
     }
 
-    public BankIdAuthenticationStatus BankIdAuth(Optional<String> ssn) {
+    public BankIdAuthenticationStatus BankIdAuth(String ssn) {
         HttpEntity<String> entity = createHeaders();
 
+        String ssnOrEmpty = ssn == null ? "": ssn;
+
+
         UriTemplate uri = new UriTemplate(baseUrl + "bankid/authentication/{creditorId}?ssn={ssn}");
-        System.out.println(uri.expand(new HashMap<String,Object>(){{put("creditorId", creditorId); put("ssn", ssn.orElse(""));}}).toString());
+        System.out.println(uri.expand(new HashMap<String,Object>(){{put("creditorId", creditorId); put("ssn", ssnOrEmpty);}}).toString());
 
         ResponseEntity<BankIdAuthenticationStatus> status = restTemplate.exchange(
-                uri.expand(new HashMap<String,Object>(){{put("creditorId", creditorId); put("ssn", ssn.orElse(""));}}),
+                uri.expand(new HashMap<String,Object>(){{put("creditorId", creditorId); put("ssn", ssnOrEmpty);}}),
                 HttpMethod.PUT,
                 entity,
                 BankIdAuthenticationStatus.class

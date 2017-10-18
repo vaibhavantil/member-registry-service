@@ -23,7 +23,7 @@ public class TestApplication implements CommandLineRunner{
 
 
         BillectaApi api = new BillectaApi("myAwesomeCreditor", "muchSecureToken", new RestTemplate());
-        api.BankIdAuth(Optional.empty());
+        api.BankIdAuth(null);
     }
 
 }
