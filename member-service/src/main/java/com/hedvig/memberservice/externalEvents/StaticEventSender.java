@@ -27,8 +27,8 @@ public class StaticEventSender {
 
     private Logger log = LoggerFactory.getLogger(StaticEventSender.class);
 
-    @Value("${hedvig.bot-service.url}")
-    private String botServiceUrl;
+    @Value("${hedvig.bot-service.location:localhost:4081}")
+    private String botServiceLocation;
 
     private RestTemplate restTemplate;
     private final MemberRepository memberRepo;
@@ -53,11 +53,12 @@ public class StaticEventSender {
                 eventMessage.getTimestamp(),
                 p);
 
+        String url = "http://" + botServiceLocation + "/event/memberservice";
+
         HttpEntity<String> response = restTemplate.postForEntity(
-                "{url}/event/memberservice",
+                url,
                 externalEvent,
-                String.class,
-                botServiceUrl);
+                String.class);
 
         log.debug(response.toString());
     }
