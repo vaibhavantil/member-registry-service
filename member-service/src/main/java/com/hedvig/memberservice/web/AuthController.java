@@ -4,6 +4,7 @@ import com.hedvig.external.billectaAPI.BillectaApi;
 import com.hedvig.external.billectaAPI.api.BankIdAuthenticationStatus;
 import com.hedvig.external.billectaAPI.api.BankIdStatusType;
 import com.hedvig.external.bisnodeBCI.BisnodeClient;
+import com.hedvig.memberservice.aggregates.exceptions.BankIdReferenceUsedException;
 import com.hedvig.memberservice.commands.AuthenticationAttemptCommand;
 import com.hedvig.memberservice.commands.InactivateMemberCommand;
 import com.hedvig.memberservice.query.MemberEntity;
@@ -62,7 +63,7 @@ public class AuthController {
     }
 
     @PostMapping(path = "collect")
-    public ResponseEntity<BankIdAuthResponse> collect(@RequestParam String referenceToken, @RequestHeader(value = "hedvig.token", required = false) Long hid) {
+    public ResponseEntity<?> collect(@RequestParam String referenceToken, @RequestHeader(value = "hedvig.token", required = false) Long hid) {
 
         BankIdAuthenticationStatus status = billectaApi.BankIdCollect(referenceToken);
         BankIdAuthResponse response = new BankIdAuthResponse(status.getStatus(), status.getAutoStartToken(), status.getReferenceToken());
@@ -81,8 +82,12 @@ public class AuthController {
                 currentMemberId = m.getId();
             }
 
-            this.commandBus.sendAndWait(new AuthenticationAttemptCommand(currentMemberId, status));
-
+            try {
+                this.commandBus.sendAndWait(new AuthenticationAttemptCommand(currentMemberId, status));
+            }catch (BankIdReferenceUsedException e) {
+                log.info("Old reference token used: ", e);
+                return ResponseEntity.badRequest().body("{\"message\":\"" + e.getMessage() + "\"}");
+            }
             return ResponseEntity.ok().header("Hedvig.Id", currentMemberId.toString()).body(response);
         }
 

@@ -3,6 +3,7 @@ package com.hedvig.memberservice.aggregates;
 import com.hedvig.external.bisnodeBCI.BisnodeClient;
 import com.hedvig.external.bisnodeBCI.dto.Person;
 import com.hedvig.external.bisnodeBCI.dto.PersonSearchResult;
+import com.hedvig.memberservice.aggregates.exceptions.BankIdReferenceUsedException;
 import com.hedvig.memberservice.commands.AuthenticationAttemptCommand;
 import com.hedvig.memberservice.commands.CreateMemberCommand;
 import com.hedvig.memberservice.commands.InactivateMemberCommand;
@@ -18,7 +19,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import static org.axonframework.commandhandling.model.AggregateLifecycle.apply;
 
@@ -39,6 +43,8 @@ public class MemberAggregate {
 
     private PersonInformation personInformation;
 
+    private Set<String> authedReferenceTokens = new HashSet<>();
+
     @Autowired
     public MemberAggregate(BisnodeClient bisnodeClient) {
         this.bisnodeClient = bisnodeClient;
@@ -51,13 +57,18 @@ public class MemberAggregate {
 
     @CommandHandler
     void authAttempt(AuthenticationAttemptCommand command) {
+
+        if(authedReferenceTokens.contains(command.getBankIdAuthResponse().getReferenceToken())) {
+            throw new BankIdReferenceUsedException("BankId reference token already used.");
+        }
+
         if(this.status == MemberStatus.INITIATED) {
             //Trigger fetching of bisnode data.
             String ssn = command.getBankIdAuthResponse().getSSN();
             List<PersonSearchResult> personList = bisnodeClient.match(ssn).getPersons();
             if (personList.size() != 1) {
                 log.error("Could not find person based on personnumer!");
-                throw new RuntimeException(("Could not find person at bisnode."));
+                throw new RuntimeException("Could not find person at bisnode.");
             }
 
             Person person = personList.get(0).getPerson();
@@ -94,6 +105,11 @@ public class MemberAggregate {
     public void on(MemberStartedOnBoardingEvent e){
         this.personInformation = e.getPersonInformation();
         this.status = e.getNewStatus();
+    }
+
+    @EventSourcingHandler
+    public void on(MemberAuthenticatedEvent e) {
+        this.authedReferenceTokens.add(e.getBankIdReferenceToken());
     }
 }
 
