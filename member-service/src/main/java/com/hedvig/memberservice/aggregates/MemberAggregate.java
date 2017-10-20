@@ -13,6 +13,7 @@ import com.hedvig.memberservice.events.MemberInactivatedEvent;
 import com.hedvig.memberservice.events.MemberStartedOnBoardingEvent;
 import org.axonframework.commandhandling.CommandHandler;
 import org.axonframework.commandhandling.model.AggregateIdentifier;
+import org.axonframework.commandhandling.model.ApplyMore;
 import org.axonframework.eventsourcing.EventSourcingHandler;
 import org.axonframework.spring.stereotype.Aggregate;
 import org.slf4j.Logger;
@@ -62,6 +63,8 @@ public class MemberAggregate {
             throw new BankIdReferenceUsedException("BankId reference token already used.");
         }
 
+        ApplyMore applyChain = null;
+
         if(this.status == MemberStatus.INITIATED) {
             //Trigger fetching of bisnode data.
             String ssn = command.getBankIdAuthResponse().getSSN();
@@ -76,13 +79,22 @@ public class MemberAggregate {
             PersonInformation pi = new PersonInformation(ssn, person);
 
 
-            apply(new MemberStartedOnBoardingEvent(
+            applyChain = apply(new MemberStartedOnBoardingEvent(
                     this.id,
                     MemberStatus.ONBOARDING,
                     pi));
         }
 
-        apply(new MemberAuthenticatedEvent(this.id, command.getBankIdAuthResponse().getReferenceToken()));
+        MemberAuthenticatedEvent authenticatedEvent = new MemberAuthenticatedEvent(this.id, command.getBankIdAuthResponse().getReferenceToken());
+
+        if(applyChain != null)
+        {
+            applyChain.andThenApply( () ->  authenticatedEvent);
+        }
+        else {
+            apply(authenticatedEvent);
+        }
+
     }
 
     @CommandHandler
