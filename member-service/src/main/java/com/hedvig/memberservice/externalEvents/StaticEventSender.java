@@ -53,6 +53,8 @@ public class StaticEventSender {
                 eventMessage.getTimestamp(),
                 p);
 
+        log.info("Sening MemberAuthenticatedEvent {}", externalEvent);
+
         String url = "http://" + botServiceLocation + "/event/memberservice";
 
         HttpEntity<String> response = restTemplate.postForEntity(
