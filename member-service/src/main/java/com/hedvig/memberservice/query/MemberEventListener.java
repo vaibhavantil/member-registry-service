@@ -1,5 +1,6 @@
 package com.hedvig.memberservice.query;
 
+import com.hedvig.botService.web.dto.MemberAuthedEvent;
 import com.hedvig.memberservice.aggregates.MemberStatus;
 import com.hedvig.memberservice.aggregates.PersonInformation;
 import com.hedvig.memberservice.aggregates.Telephone;
@@ -7,6 +8,9 @@ import com.hedvig.memberservice.events.MemberCreatedEvent;
 import com.hedvig.memberservice.events.MemberInactivatedEvent;
 import com.hedvig.memberservice.events.MemberStartedOnBoardingEvent;
 import org.axonframework.eventhandling.EventHandler;
+import org.axonframework.eventhandling.EventMessage;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
@@ -17,6 +21,7 @@ import java.util.Optional;
 @Component
 public class MemberEventListener {
 
+    private final Logger logger = LoggerFactory.getLogger(MemberEventListener.class);
     private final MemberRepository userRepo;
 
     @Autowired
@@ -35,7 +40,8 @@ public class MemberEventListener {
     }
 
     @EventHandler
-    public void on(MemberStartedOnBoardingEvent e) {
+    public void on(MemberStartedOnBoardingEvent e, EventMessage<MemberStartedOnBoardingEvent> eventMessage) {
+        logger.debug("Started handling event: {}", eventMessage.getIdentifier());
 
         MemberEntity member = userRepo.findOne(e.getMemberId());
 
@@ -60,8 +66,9 @@ public class MemberEventListener {
             member.setPhoneNumber(main.getNumber());
         }
 
-        userRepo.save(member);
+        userRepo.saveAndFlush(member);
 
+        logger.debug("Completed handling event: {}", eventMessage.getIdentifier());
     }
 
     @EventHandler

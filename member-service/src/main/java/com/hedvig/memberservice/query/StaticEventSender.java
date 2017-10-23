@@ -1,14 +1,11 @@
-package com.hedvig.memberservice.externalEvents;
+package com.hedvig.memberservice.query;
 
 import com.hedvig.botService.web.dto.MemberAuthedEvent;
 import com.hedvig.memberservice.events.MemberAuthenticatedEvent;
-import com.hedvig.memberservice.query.MemberEntity;
-import com.hedvig.memberservice.query.MemberRepository;
 import com.hedvig.memberservice.web.dto.Member;
-import com.hedvig.memberservice.web.dto.Profile;
+import org.axonframework.config.ProcessingGroup;
 import org.axonframework.eventhandling.EventHandler;
 import org.axonframework.eventhandling.EventMessage;
-import org.axonframework.messaging.MetaData;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,15 +14,11 @@ import org.springframework.http.HttpEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
-import java.time.LocalDate;
-import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
-import java.util.List;
-
 @Component
+@ProcessingGroup("com.hedvig.memberservice.query")
 public class StaticEventSender {
 
-    private Logger log = LoggerFactory.getLogger(StaticEventSender.class);
+    private Logger logger = LoggerFactory.getLogger(StaticEventSender.class);
 
     @Value("${hedvig.bot-service.location:localhost:4081}")
     private String botServiceLocation;
@@ -43,6 +36,7 @@ public class StaticEventSender {
     @EventHandler
     public void on(MemberAuthenticatedEvent e, EventMessage<MemberAuthedEvent> eventMessage) {
 
+        logger.debug("Started handling event: {}", eventMessage.getIdentifier());
         MemberEntity me = memberRepo.findOne(e.getMemberId());
 
         Member p = new Member(me);
@@ -53,7 +47,7 @@ public class StaticEventSender {
                 eventMessage.getTimestamp(),
                 p);
 
-        log.info("Sening MemberAuthenticatedEvent {}", externalEvent);
+        logger.info("Sening MemberAuthenticatedEvent {}", externalEvent);
 
         String url = "http://" + botServiceLocation + "/event/memberservice";
 
@@ -62,6 +56,7 @@ public class StaticEventSender {
                 externalEvent,
                 String.class);
 
-        log.debug(response.toString());
+        logger.debug(response.toString());
+        logger.debug("Completed handling event: {}", eventMessage.getIdentifier());
     }
 }
