@@ -1,6 +1,7 @@
 package com.hedvig.memberservice;
 
 import com.hedvig.external.billectaAPI.BillectaApi;
+import com.hedvig.external.billectaAPI.BillectaClient;
 import com.hedvig.external.bisnodeBCI.BisnodeClient;
 import com.hedvig.memberservice.aggregates.MemberAggregate;
 import com.hedvig.memberservice.externalEvents.KafkaProperties;
@@ -13,15 +14,21 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.web.client.RestTemplateBuilder;
+import org.springframework.cloud.netflix.feign.EnableFeignClients;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Scope;
 import org.springframework.retry.backoff.FixedBackOffPolicy;
 import org.springframework.retry.policy.SimpleRetryPolicy;
 import org.springframework.retry.support.RetryTemplate;
 import org.springframework.web.client.RestTemplate;
 
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
+
 @SpringBootApplication
 @EnableConfigurationProperties(KafkaProperties.class)
+@EnableFeignClients({"com.hedvig.external.billectaAPI"})
 public class MemberRegistryApplication {
 
     @Value("${hedvig.bisnode.client.id}")
@@ -35,6 +42,9 @@ public class MemberRegistryApplication {
 
     @Value("${hedvig.billecta.creditor.id}")
     String billectaCreditorId;
+
+    @Value("${hedvig.billecta.url")
+    String baseUrl;
 
 	public static void main(String[] args) {
 
@@ -63,8 +73,13 @@ public class MemberRegistryApplication {
     }
 
     @Bean
-    public BillectaApi buildBillectaApi(){
-        return new BillectaApi(billectaCreditorId, billectaSecureToken, new RestTemplate());
+    public  ScheduledExecutorService executorService() {
+        return new ScheduledThreadPoolExecutor(5);
+    }
+
+    @Bean
+    public BillectaApi buildBillectaApi(BillectaClient billectaClient, ScheduledExecutorService executorService){
+        return new BillectaApi(billectaCreditorId, billectaSecureToken, new RestTemplate(), baseUrl, billectaClient, executorService);
     }
 
     @Bean
