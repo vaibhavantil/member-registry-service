@@ -1,6 +1,5 @@
 package com.hedvig.memberservice.query;
 
-import com.hedvig.botService.web.dto.MemberAuthedEvent;
 import com.hedvig.memberservice.aggregates.MemberStatus;
 import com.hedvig.memberservice.aggregates.PersonInformation;
 import com.hedvig.memberservice.aggregates.Telephone;
@@ -12,11 +11,9 @@ import org.axonframework.eventhandling.EventMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
-import java.util.Optional;
 
 @Component
 public class MemberEventListener {

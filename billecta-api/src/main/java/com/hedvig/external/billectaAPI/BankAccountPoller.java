@@ -15,36 +15,45 @@ public class BankAccountPoller implements Runnable {
     private final Logger log = LoggerFactory.getLogger(BankAccountPoller.class);
     private final String publicId;
     private final BillectaApi api;
-    private final ScheduledExecutorService xecutor;
-    private Consumer<BankAccountRequest> completeAction;
+    private final ScheduledExecutorService executor;
+    private Consumer<BankAccountRequest> onComplete;
+    private final Consumer<String> onError;
 
-    private int noExecutions = 0;
+    private int numberOfExecutions = 0;
     private int maxExecutions = 30;
 
     public BankAccountPoller(String publicId,
                              BillectaApi api,
-                             ScheduledExecutorService xecutor, Consumer<BankAccountRequest> completeAction) {
+                             ScheduledExecutorService executor,
+                             Consumer<BankAccountRequest> onComplete,
+                             Consumer<String> onError) {
         this.publicId = publicId;
         this.api = api;
-        this.xecutor = xecutor;
-        this.completeAction = completeAction;
+        this.executor = executor;
+        this.onComplete = onComplete;
+        this.onError = onError;
     }
 
     @Override
     public void run() {
 
-        noExecutions++;
+        numberOfExecutions++;
 
         try {
             ResponseEntity<BankAccountRequest> account = api.getBankAccountNumbers(publicId);
 
-            log.debug("Response from billecta#getBankAccountNumbers: {},  ",
+            log.debug("Response from billecta#getBankAccountNumbers: {}, {}",
                     account.getStatusCode().toString(),
-                    account.getBody() != null ? account.getBody().getStatus().value() : "");
+                    account.getBody().getStatus());
+                    //account.getBody() != null ? account.getBody().getStatus().value() : "....");
 
             if (account.getStatusCode().is2xxSuccessful() && account.getBody().getStatus() == BankAccountStatusType.SUCCESS) {
-                completeAction.accept(account.getBody());
+                onComplete.accept(account.getBody());
                 return;
+            }else if(account.getStatusCode().is2xxSuccessful() && account.getBody().getStatus() != BankAccountStatusType.WAITING) {
+                onError.accept("Kunde inte hämta bankkonton.");
+                //Stop polling
+                numberOfExecutions = maxExecutions;
             }
         }
         catch(Exception e) {
@@ -52,9 +61,9 @@ public class BankAccountPoller implements Runnable {
         }
 
         try {
-            if (noExecutions < maxExecutions) {
+            if (numberOfExecutions < maxExecutions) {
                 log.debug("Rescheduling bank-account poll for {}", publicId);
-                xecutor.schedule(this, 500, TimeUnit.MILLISECONDS);
+                executor.schedule(this, 500, TimeUnit.MILLISECONDS);
             } else {
                 log.error("Could not retrieve bank-account numbers for {}", publicId);
             }

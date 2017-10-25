@@ -1,4 +1,4 @@
-package com.hedvig.memberservice.web.dto;
+package com.hedvig.memberservice.web.dto.events;
 
 import com.hedvig.external.billectaAPI.api.BankAccount;
 import com.hedvig.external.billectaAPI.api.BankAccountRequest;
@@ -8,14 +8,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Value
-public class BankAccountDetailsList {
+public class BankAccountRetrievalSuccess extends MemberServiceEventPayload {
     private List<BankAccountDetails> accounts;
 
-    public BankAccountDetailsList(List<BankAccountDetails> as) {
+    public BankAccountRetrievalSuccess(List<BankAccountDetails> as) {
         this.accounts = as;
     }
 
-    public BankAccountDetailsList(BankAccountRequest accounts) {
+    public BankAccountRetrievalSuccess(BankAccountRequest accounts) {
         this.accounts = new ArrayList<>();
 
         for (BankAccount acc: accounts.getAccountNumbers().getBankAccount()) {

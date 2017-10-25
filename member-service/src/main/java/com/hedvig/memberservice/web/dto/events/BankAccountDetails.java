@@ -1,4 +1,4 @@
-package com.hedvig.memberservice.web.dto;
+package com.hedvig.memberservice.web.dto.events;
 
 import lombok.Value;
 

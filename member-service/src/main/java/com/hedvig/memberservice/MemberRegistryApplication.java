@@ -43,7 +43,7 @@ public class MemberRegistryApplication {
     @Value("${hedvig.billecta.creditor.id}")
     String billectaCreditorId;
 
-    @Value("${hedvig.billecta.url")
+    @Value("${hedvig.billecta.url}")
     String baseUrl;
 
 	public static void main(String[] args) {

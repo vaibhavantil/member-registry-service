@@ -1,7 +1,7 @@
 package com.hedvig.memberservice.externalApi;
 
-import com.hedvig.botService.web.dto.MemberAuthedEvent;
-import com.hedvig.memberservice.web.dto.BankAccountsRetrievedEvent;
+import com.hedvig.memberservice.web.dto.events.MemberAuthedEvent;
+import com.hedvig.memberservice.web.dto.events.MemberServiceEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -28,7 +28,7 @@ public class BotService {
         sendEventTo(url, event);
     }
 
-    public void sendEvent(BankAccountsRetrievedEvent event) {
+    public void sendEvent(MemberServiceEvent event) {
         String url = "http://" + botServiceLocation + "/event/memberservice/bankaccountsretreived";
         sendEventTo(url, event);
     }

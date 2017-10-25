@@ -1,6 +1,6 @@
 package com.hedvig.memberservice.query;
 
-import com.hedvig.botService.web.dto.MemberAuthedEvent;
+import com.hedvig.memberservice.web.dto.events.MemberAuthedEvent;
 import com.hedvig.memberservice.events.MemberAuthenticatedEvent;
 import com.hedvig.memberservice.externalApi.BotService;
 import com.hedvig.memberservice.web.dto.Member;

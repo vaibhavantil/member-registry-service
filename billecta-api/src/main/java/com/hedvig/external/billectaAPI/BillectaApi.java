@@ -11,6 +11,7 @@ import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import java.io.StringWriter;
+import java.net.URI;
 import java.util.Base64;
 import java.util.Collections;
 import java.util.HashMap;
@@ -60,11 +61,15 @@ public class BillectaApi {
         String ssnOrEmpty = ssn == null ? "": ssn;
 
 
-        UriTemplate uri = new UriTemplate(baseUrl + "bankid/authentication/{creditorId}?ssn={ssn}");
-        System.out.println(uri.expand(new HashMap<String,Object>(){{put("creditorId", creditorId); put("ssn", ssnOrEmpty);}}).toString());
+        UriTemplate uri = new UriTemplate(baseUrl + "/v1/bankid/authentication/{creditorId}?ssn={ssn}");
+        URI expandedURI = uri.expand(new HashMap<String, Object>() {{
+            put("creditorId", creditorId);
+            put("ssn", ssnOrEmpty);
+        }});
+        System.out.println(expandedURI.toString());
 
         ResponseEntity<BankIdAuthenticationStatus> status = restTemplate.exchange(
-                uri.expand(new HashMap<String,Object>(){{put("creditorId", creditorId); put("ssn", ssnOrEmpty);}}),
+                expandedURI,
                 HttpMethod.PUT,
                 entity,
                 BankIdAuthenticationStatus.class
@@ -90,7 +95,7 @@ public class BillectaApi {
         HttpEntity<String> entity = createHeaders();
 
         ResponseEntity<BankIdAuthenticationStatus> status = restTemplate.exchange(
-                baseUrl + "bankid/authentication/{token}",
+                baseUrl + "/v1/bankid/authentication/{token}",
                 HttpMethod.GET,
                 entity,
                 BankIdAuthenticationStatus.class,
@@ -110,13 +115,13 @@ public class BillectaApi {
         this.billectaClient.createDebtor(EncodeTokenHeader(), marshallToXML(debtor));
     }
 
-    public String initBankAccountRetreivals(String ssn) {
+    public String initBankAccountRetreivals(String ssn, String bankId) {
         assert this.billectaClient != null;
         Created c = this.billectaClient.initiateBankAccountRetrieval(
                 new LinkedMultiValueMap<>(),
                 EncodeTokenHeader(),
                 creditorId,
-                "FSPA",
+                bankId,
                 ssn);
         return c.getPublicId();
     }
@@ -127,9 +132,13 @@ public class BillectaApi {
         return this.billectaClient.getBankAccountNumbers(EncodeTokenHeader(), publicId);
     }
 
-    public void retrieveBankAccountNumbers(String ssn, Consumer<BankAccountRequest> callback) {
-        String publicId = this.initBankAccountRetreivals(ssn);
-        BankAccountPoller poller = new BankAccountPoller(publicId, this, executorService, callback);
+    public void retrieveBankAccountNumbers(
+            String ssn,
+            String bankId,
+            Consumer<BankAccountRequest> onComplete,
+            Consumer<String> onError) {
+        String publicId = this.initBankAccountRetreivals(ssn, bankId);
+        BankAccountPoller poller = new BankAccountPoller(publicId, this, executorService, onComplete, onError);
         poller.run();
     }
 

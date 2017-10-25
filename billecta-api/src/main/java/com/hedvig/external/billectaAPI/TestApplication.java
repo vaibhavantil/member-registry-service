@@ -50,8 +50,11 @@ public class TestApplication implements CommandLineRunner{
         String bankAccountSuccessId = "198001139297";
         String bankAccountFailId = "197001239297";
 
-        String a = api.initBankAccountRetreivals(bankAccountFailId);
-        BankAccountPoller poller = new BankAccountPoller(a, api, executorService, (x) -> System.out.println(x.toString()));
+        String a = api.initBankAccountRetreivals(bankAccountFailId, "FSPA");
+        BankAccountPoller poller = new BankAccountPoller(a,
+                api,
+                executorService, (x) -> System.out.println(x.toString()),
+                System.out::println);
         poller.run();
         //CreateDebtor(api);
 
