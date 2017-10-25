@@ -31,13 +31,13 @@ import static org.springframework.test.web.client.response.MockRestResponseCreat
 @SpringBootConfiguration
 @RunWith(SpringRunner.class)
 @TestPropertySource(properties = {
-        "hedvig.billecta.url=https://apitest.billecta.com/v1/"
+        "hedvig.billecta.url=https://apitest.billecta.com"
 })
 public class BankIdTest {
 
     private String apiKey = "apiKey";
     private String creditorId = "123";
-    private String baseUrl = "https://apitest.billecta.com/v1/";
+    private String baseUrl = "https://apitest.billecta.com";
 
     private String marshallToXML(BankIdAuthenticationStatus bankIdAuthenticationStatus) throws JAXBException {
         JAXBContext jaxbContext = JAXBContext.newInstance(BankIdAuthenticationStatus.class);
