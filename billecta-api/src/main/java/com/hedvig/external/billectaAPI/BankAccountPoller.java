@@ -51,6 +51,7 @@ public class BankAccountPoller implements Runnable {
                 onComplete.accept(account.getBody());
                 return;
             }else if(account.getStatusCode().is2xxSuccessful() && account.getBody().getStatus() != BankAccountStatusType.WAITING) {
+                log.error("Konstigt state: {}", account.getBody().getStatus());
                 onError.accept("Kunde inte hämta bankkonton.");
                 //Stop polling
                 numberOfExecutions = maxExecutions;
