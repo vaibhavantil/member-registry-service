@@ -59,9 +59,10 @@ public class MemberAggregate {
     @CommandHandler
     void authAttempt(AuthenticationAttemptCommand command) {
 
+        /*
         if(authedReferenceTokens.contains(command.getBankIdAuthResponse().getReferenceToken())) {
             throw new BankIdReferenceUsedException("BankId reference token already used.");
-        }
+        }*/
 
         ApplyMore applyChain = null;
 
