@@ -1,6 +1,8 @@
 package com.hedvig.external.billectaAPI;
 
 import com.hedvig.external.billectaAPI.api.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.*;
 import org.springframework.stereotype.Component;
 import org.springframework.util.LinkedMultiValueMap;
@@ -21,6 +23,8 @@ import java.util.function.Consumer;
 public class BillectaApi {
 
     private RestTemplate restTemplate;
+
+    private Logger logger = LoggerFactory.getLogger(BillectaApi.class);
 
     private String baseUrl; //"https://api.billecta.com/v1/"
 
@@ -116,6 +120,7 @@ public class BillectaApi {
     }
 
     public String initBankAccountRetreivals(String ssn, String bankId) {
+        logger.info("Init account Retreivals [{},{},{}]", creditorId,bankId,ssn);
         assert this.billectaClient != null;
         Created c = this.billectaClient.initiateBankAccountRetrieval(
                 new LinkedMultiValueMap<>(),
