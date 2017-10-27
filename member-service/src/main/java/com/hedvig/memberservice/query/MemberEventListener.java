@@ -55,6 +55,7 @@ public class MemberEventListener {
             member.setEntrance(address.getEntrance());
             member.setPostalCode(address.getPostalCode());
             member.setCity(address.getCity());
+            member.setApartment(address.getApartment());
         });
 
         List<Telephone> phoneList = personInformation.getPhoneList();

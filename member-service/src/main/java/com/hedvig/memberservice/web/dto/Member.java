@@ -27,6 +27,7 @@ public class Member {
     private final String country;
 
     private final LocalDate birthDate;
+    private final String apartment;
 
     public Member(MemberEntity memberEntity) {
         this.firstName = memberEntity.getFirstName();
@@ -35,6 +36,7 @@ public class Member {
         this.street = String.format("%s %s%s", memberEntity.getStreetName(), memberEntity.getStreetNumber(), Objects.toString(memberEntity.getEntrance(), ""));
         this.zipCode = memberEntity.getPostalCode();
         this.city = memberEntity.getCity();
+        this.apartment = memberEntity.getApartment();
         this.email = "";
         this.phoneNumber = memberEntity.getPhoneNumber();
         this.country = "SE";

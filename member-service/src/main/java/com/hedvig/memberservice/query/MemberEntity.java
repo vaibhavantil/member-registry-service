@@ -16,6 +16,10 @@ public class MemberEntity {
 
     @Getter
     @Setter
+    private String apartment;
+
+    @Getter
+    @Setter
     private String status;
 
     @Getter
