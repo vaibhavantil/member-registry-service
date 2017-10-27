@@ -18,6 +18,7 @@ import java.util.Base64;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
 public class BillectaApi {
@@ -144,7 +145,7 @@ public class BillectaApi {
             Consumer<String> onError) {
         String publicId = this.initBankAccountRetreivals(ssn, bankId);
         BankAccountPoller poller = new BankAccountPoller(publicId, this, executorService, onComplete, onError);
-        poller.run();
+        executorService.schedule(poller,3, TimeUnit.SECONDS);
     }
 
     private String marshallToXML(Debtor bankIdAuthenticationStatus) throws JAXBException {

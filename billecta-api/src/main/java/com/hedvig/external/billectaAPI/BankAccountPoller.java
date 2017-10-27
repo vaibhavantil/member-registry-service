@@ -20,7 +20,7 @@ public class BankAccountPoller implements Runnable {
     private final Consumer<String> onError;
 
     private int numberOfExecutions = 0;
-    private int maxExecutions = 30;
+    private int maxExecutions = 200;
 
     public BankAccountPoller(String publicId,
                              BillectaApi api,
@@ -64,7 +64,7 @@ public class BankAccountPoller implements Runnable {
         try {
             if (numberOfExecutions < maxExecutions) {
                 log.debug("Rescheduling bank-account poll for {}", publicId);
-                executor.schedule(this, 500, TimeUnit.MILLISECONDS);
+                executor.schedule(this, 1000, TimeUnit.MILLISECONDS);
             } else {
                 log.error("Could not retrieve bank-account numbers for {}", publicId);
             }
