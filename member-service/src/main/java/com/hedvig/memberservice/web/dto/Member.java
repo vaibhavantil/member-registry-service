@@ -32,7 +32,7 @@ public class Member {
         this.firstName = memberEntity.getFirstName();
         this.lastName = memberEntity.getLastName();
         this.memberId = memberEntity.getId();
-        this.street = String.format("%s %s%s", memberEntity.getStreetName(), memberEntity.getStreetNumber(), Objects.toString(memberEntity.getEntrance()));
+        this.street = String.format("%s %s%s", memberEntity.getStreetName(), memberEntity.getStreetNumber(), Objects.toString(memberEntity.getEntrance(), ""));
         this.zipCode = memberEntity.getPostalCode();
         this.city = memberEntity.getCity();
         this.email = "";
