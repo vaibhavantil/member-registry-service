@@ -1,13 +1,13 @@
 package com.hedvig.memberservice.externalEvents;
 
-import com.hedvig.generic.event.UserEvent_v1;
+//import com.hedvig.generic.event.UserEvent_v1;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.springframework.stereotype.Component;
 
 @Component
 public class KafkaPublisher {
 
-    KafkaProducer<String, UserEvent_v1> producer;
+    //KafkaProducer<String, UserEvent_v1> producer;
 
  /*   @Autowired
     public KafkaPublisher(KafkaProperties properties) {
