@@ -12,6 +12,7 @@ import java.util.Objects;
 public class Member {
 
     private final Long memberId;
+    private final String ssn;
 
     private final String firstName;
     private final String lastName;
@@ -33,6 +34,7 @@ public class Member {
         this.firstName = memberEntity.getFirstName();
         this.lastName = memberEntity.getLastName();
         this.memberId = memberEntity.getId();
+        this.ssn = memberEntity.getSsn();
         this.street = String.format("%s %s%s", memberEntity.getStreetName(), memberEntity.getStreetNumber(), Objects.toString(memberEntity.getEntrance(), ""));
         this.zipCode = memberEntity.getPostalCode();
         this.city = memberEntity.getCity();
