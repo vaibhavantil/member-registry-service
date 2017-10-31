@@ -1,9 +1,12 @@
 package com.hedvig.memberservice.query;
 
+import com.hedvig.memberservice.events.MemberSignedEvent;
 import com.hedvig.memberservice.web.dto.events.MemberAuthedEvent;
 import com.hedvig.memberservice.events.MemberAuthenticatedEvent;
 import com.hedvig.memberservice.externalApi.BotService;
 import com.hedvig.memberservice.web.dto.Member;
+import com.hedvig.memberservice.web.dto.events.MemberServiceEvent;
+import com.hedvig.memberservice.web.dto.events.MemberSigned;
 import org.axonframework.config.ProcessingGroup;
 import org.axonframework.eventhandling.EventHandler;
 import org.axonframework.eventhandling.EventMessage;
@@ -50,5 +53,14 @@ public class StaticEventSender {
         botService.sendEvent(externalEvent);
 
         logger.debug("Completed handling event: {}", eventMessage.getIdentifier());
+    }
+
+    @EventHandler
+    public void on(MemberSignedEvent e, EventMessage<MemberSignedEvent> eventMessage) {
+
+        MemberSigned externalEventPayload = new MemberSigned(e.getReferenceId());
+        MemberServiceEvent externalEvent = new MemberServiceEvent(e.getId(), eventMessage.getTimestamp(), externalEventPayload);
+
+        botService.sendEvent(externalEvent);
     }
 }

@@ -32,5 +32,15 @@ public interface BillectaClient {
     @RequestMapping(value = "/v1/bank/accounts/{id}", method = RequestMethod.GET, produces = "application/xml")
     ResponseEntity<BankAccountRequest> getBankAccountNumbers(@RequestHeader("Authorization") String token, @PathVariable("id") String publicId);
 
+    @RequestMapping(value = "/v1/bankid/sign/{id}", method = RequestMethod.PUT, produces = "application/xml")
+    ResponseEntity<BankIdSignStatus> bankIdSign(
+            @RequestBody MultiValueMap<String, String> m,
+            @RequestHeader("Authorization") String token,
+            @PathVariable("id") String creditorId,
+            @RequestParam("ssn") String ssn,
+            @RequestParam("usermessage") String usermessage
+    );
 
+    @RequestMapping(value = "/v1/bankid/sign/{id}", method = RequestMethod.GET, produces = "application/xml")
+    ResponseEntity<BankIdSignStatus> bankIdSignCollect(@RequestHeader("Authorization") String token, @PathVariable("id") String referenceToken);
 }

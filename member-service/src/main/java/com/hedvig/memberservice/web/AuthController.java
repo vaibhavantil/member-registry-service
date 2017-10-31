@@ -2,15 +2,21 @@ package com.hedvig.memberservice.web;
 
 import com.hedvig.external.billectaAPI.BillectaApi;
 import com.hedvig.external.billectaAPI.api.BankIdAuthenticationStatus;
+import com.hedvig.external.billectaAPI.api.BankIdSignStatus;
 import com.hedvig.external.billectaAPI.api.BankIdStatusType;
 import com.hedvig.external.bisnodeBCI.BisnodeClient;
 import com.hedvig.memberservice.aggregates.exceptions.BankIdReferenceUsedException;
 import com.hedvig.memberservice.commands.AuthenticationAttemptCommand;
+import com.hedvig.memberservice.commands.BankIdSignCommand;
 import com.hedvig.memberservice.commands.InactivateMemberCommand;
+import com.hedvig.memberservice.query.CollectRepository;
+import com.hedvig.memberservice.query.CollectType;
 import com.hedvig.memberservice.query.MemberEntity;
 import com.hedvig.memberservice.query.MemberRepository;
 import com.hedvig.memberservice.web.dto.BankIdAuthRequest;
 import com.hedvig.memberservice.web.dto.BankIdAuthResponse;
+import com.hedvig.memberservice.web.dto.BankIdSignRequest;
+import com.hedvig.memberservice.web.dto.BankIdSignResponse;
 import org.axonframework.commandhandling.CommandBus;
 import org.axonframework.commandhandling.gateway.CommandGateway;
 import org.axonframework.commandhandling.gateway.DefaultCommandGateway;
@@ -32,6 +38,7 @@ public class AuthController {
     private final MemberRepository memberRepo;
     private final BisnodeClient bisnodeClient;
     private final RestTemplate restTemplate;
+    private final CollectRepository collectRepo;
     private static Logger log = LoggerFactory.getLogger(AuthController.class);
 
     @Autowired
@@ -39,12 +46,14 @@ public class AuthController {
                           BillectaApi billectaApi,
                           MemberRepository memberRepo,
                           BisnodeClient bisnodeClient,
-                          RestTemplate restTemplate) {
+                          RestTemplate restTemplate,
+                          CollectRepository collectRepo) {
         this.commandBus = new DefaultCommandGateway(commandBus);
         this.billectaApi = billectaApi;
         this.memberRepo = memberRepo;
         this.bisnodeClient = bisnodeClient;
         this.restTemplate = restTemplate;
+        this.collectRepo = collectRepo;
     }
 
     @PostMapping(path = "auth")
@@ -59,38 +68,74 @@ public class AuthController {
             response = new BankIdAuthResponse(status.getStatus(), status.getAutoStartToken(), status.getReferenceToken());
         }
 
+        trackReferenceToken(response.getReferenceToken(), CollectType.BankIdRequestType.AUTH);
+
         return ResponseEntity.ok(response);
+    }
+
+    @PostMapping(path ="sign")
+    public ResponseEntity<BankIdSignResponse> sign(@RequestBody(required = true) BankIdSignRequest request) {
+        BankIdSignStatus status = billectaApi.BankIdSign(request.getSsn(), request.getUserMessage());
+        BankIdSignResponse response = new BankIdSignResponse(status.getAutoStartToken(), status.getReferenceToken(), status.getStatus().value());
+
+        trackReferenceToken(response.getReferenceToken(), CollectType.BankIdRequestType.SIGN);
+
+        return ResponseEntity.ok(response);
+    }
+
+    private void trackReferenceToken(String referenceToken, CollectType.BankIdRequestType sign) {
+        CollectType ct = new CollectType();
+        ct.referenceToken = referenceToken;
+        ct.type = sign;
+        collectRepo.save(ct);
     }
 
     @PostMapping(path = "collect")
     public ResponseEntity<?> collect(@RequestParam String referenceToken, @RequestHeader(value = "hedvig.token", required = false) Long hid) {
 
-        BankIdAuthenticationStatus status = billectaApi.BankIdCollect(referenceToken);
-        BankIdAuthResponse response = new BankIdAuthResponse(status.getStatus(), status.getAutoStartToken(), status.getReferenceToken());
+        CollectType type = collectRepo.findOne(referenceToken);
+        BankIdAuthResponse response;
+        if(type.type.equals(CollectType.BankIdRequestType.AUTH)) {
+            BankIdAuthenticationStatus status = billectaApi.BankIdCollect(referenceToken);
+             response = new BankIdAuthResponse(status.getStatus(), status.getAutoStartToken(), status.getReferenceToken());
 
-        if (status.getStatus() == BankIdStatusType.COMPLETE) {
-            String ssn = status.getSSN();
+            if (status.getStatus() == BankIdStatusType.COMPLETE) {
+                String ssn = status.getSSN();
 
-            Optional<MemberEntity> member = memberRepo.findBySsn(ssn);
+                Optional<MemberEntity> member = memberRepo.findBySsn(ssn);
 
-            Long currentMemberId = hid;
-            if(member.isPresent()) {
-                MemberEntity m = member.get();
-                if(!m.getId().equals(hid)) {
-                    this.commandBus.sendAndWait(new InactivateMemberCommand(hid));
+                Long currentMemberId = hid;
+                if (member.isPresent()) {
+                    MemberEntity m = member.get();
+                    if (!m.getId().equals(hid)) {
+                        this.commandBus.sendAndWait(new InactivateMemberCommand(hid));
+                    }
+                    currentMemberId = m.getId();
                 }
-                currentMemberId = m.getId();
+
+                try {
+                    this.commandBus.sendAndWait(new AuthenticationAttemptCommand(currentMemberId, status));
+                } catch (BankIdReferenceUsedException e) {
+                    log.info("Old reference token used: ", e);
+                    return ResponseEntity.badRequest().body("{\"message\":\"" + e.getMessage() + "\"}");
+                }
+                return ResponseEntity.ok().header("Hedvig.Id", currentMemberId.toString()).body(response);
             }
 
-            try {
-                this.commandBus.sendAndWait(new AuthenticationAttemptCommand(currentMemberId, status));
-            }catch (BankIdReferenceUsedException e) {
-                log.info("Old reference token used: ", e);
-                return ResponseEntity.badRequest().body("{\"message\":\"" + e.getMessage() + "\"}");
+            return ResponseEntity.ok(response);
+
+        } else {
+
+            BankIdSignStatus status = billectaApi.bankIdSignCollect(referenceToken);
+            if(status.getStatus() == BankIdStatusType.COMPLETE) {
+                Optional<MemberEntity> memberEntity = memberRepo.findBySsn(status.getSSN());
+                if (memberEntity.isPresent()) {
+                    //if (memberEntity.get().getId().equals(hid)) {
+                        this.commandBus.sendAndWait(new BankIdSignCommand(hid, status.getReferenceToken()));
+                    //}
+                }
             }
-            return ResponseEntity.ok().header("Hedvig.Id", currentMemberId.toString()).body(response);
+            return ResponseEntity.ok(new BankIdAuthResponse(status.getStatus(), status.getAutoStartToken(), status.getReferenceToken()));
         }
-
-        return  ResponseEntity.ok(response);
     }
 }

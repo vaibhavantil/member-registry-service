@@ -157,4 +157,20 @@ public class BillectaApi {
         return strWr.toString();
     }
 
+    public BankIdSignStatus BankIdSign(String ssn, String usermessage) {
+        ResponseEntity<BankIdSignStatus> status = this.billectaClient.bankIdSign(new LinkedMultiValueMap<>(), EncodeTokenHeader(), creditorId, ssn, usermessage);
+        if(status.getStatusCode().is2xxSuccessful()) {
+            return status.getBody();
+        }
+
+        throw new RuntimeException("Could not sign document: " + status.getStatusCode().toString());
+    }
+
+    public BankIdSignStatus bankIdSignCollect(String referenceToken) {
+        ResponseEntity<BankIdSignStatus> status = this.billectaClient.bankIdSignCollect(EncodeTokenHeader(), referenceToken);
+        if(status.getStatusCode().is2xxSuccessful()) {
+            return status.getBody();
+        }
+        throw new RuntimeException("Could retrieve sign status: " + status.getStatusCode().toString());
+    }
 }

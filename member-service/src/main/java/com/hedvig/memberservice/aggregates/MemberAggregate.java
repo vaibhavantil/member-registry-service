@@ -5,12 +5,10 @@ import com.hedvig.external.bisnodeBCI.dto.Person;
 import com.hedvig.external.bisnodeBCI.dto.PersonSearchResult;
 import com.hedvig.memberservice.aggregates.exceptions.BankIdReferenceUsedException;
 import com.hedvig.memberservice.commands.AuthenticationAttemptCommand;
+import com.hedvig.memberservice.commands.BankIdSignCommand;
 import com.hedvig.memberservice.commands.CreateMemberCommand;
 import com.hedvig.memberservice.commands.InactivateMemberCommand;
-import com.hedvig.memberservice.events.MemberAuthenticatedEvent;
-import com.hedvig.memberservice.events.MemberCreatedEvent;
-import com.hedvig.memberservice.events.MemberInactivatedEvent;
-import com.hedvig.memberservice.events.MemberStartedOnBoardingEvent;
+import com.hedvig.memberservice.events.*;
 import org.axonframework.commandhandling.CommandHandler;
 import org.axonframework.commandhandling.model.AggregateIdentifier;
 import org.axonframework.commandhandling.model.ApplyMore;
@@ -106,6 +104,11 @@ public class MemberAggregate {
             String str = String.format("Cannot INACTIAVTE member %s in status: %s", this.id, this.status.name());
             throw new RuntimeException(str);
         }
+    }
+
+    @CommandHandler
+    void bankIdSignHandler(BankIdSignCommand cmd) {
+        apply(new MemberSignedEvent(this.id, cmd.getReferenceId()));
     }
 
     @EventSourcingHandler
