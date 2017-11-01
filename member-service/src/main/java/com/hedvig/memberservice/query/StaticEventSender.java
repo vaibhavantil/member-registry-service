@@ -1,6 +1,7 @@
 package com.hedvig.memberservice.query;
 
 import com.hedvig.memberservice.events.MemberSignedEvent;
+import com.hedvig.memberservice.externalApi.prouctsPricing.ProductApi;
 import com.hedvig.memberservice.web.dto.events.MemberAuthedEvent;
 import com.hedvig.memberservice.events.MemberAuthenticatedEvent;
 import com.hedvig.memberservice.externalApi.BotService;
@@ -21,17 +22,17 @@ import org.springframework.web.client.RestTemplate;
 public class StaticEventSender {
 
     private final BotService botService;
+    private final ProductApi productApi;
     private Logger logger = LoggerFactory.getLogger(StaticEventSender.class);
 
-    private RestTemplate restTemplate;
     private final MemberRepository memberRepo;
 
     @Autowired
-    public StaticEventSender(RestTemplate template, MemberRepository memberRepo, BotService botService)
+    public StaticEventSender(MemberRepository memberRepo, BotService botService, ProductApi productApi)
     {
-        this.restTemplate = template;
         this.memberRepo = memberRepo;
         this.botService = botService;
+        this.productApi = productApi;
     }
 
     @EventHandler
@@ -62,5 +63,6 @@ public class StaticEventSender {
         MemberServiceEvent externalEvent = new MemberServiceEvent(e.getId(), eventMessage.getTimestamp(), externalEventPayload);
 
         botService.sendEvent(externalEvent);
+        productApi.contractSinged(e.getId(), e.getReferenceId());
     }
 }

@@ -1,14 +1,18 @@
 package com.hedvig.memberservice.query;
 
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.Id;
 
 @Entity
 public class CollectType {
 
-    public enum BankIdRequestType {AUTH,SIGN};
+    public enum RequestType {AUTH, RETRIEVE_ACCOUNTS, SIGN}
 
     @Id
-    public String referenceToken;
-    public BankIdRequestType type;
+    public String token;
+
+    @Enumerated(EnumType.STRING)
+    public RequestType type;
 }

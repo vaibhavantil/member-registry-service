@@ -68,7 +68,7 @@ public class AuthController {
             response = new BankIdAuthResponse(status.getStatus(), status.getAutoStartToken(), status.getReferenceToken());
         }
 
-        trackReferenceToken(response.getReferenceToken(), CollectType.BankIdRequestType.AUTH);
+        trackReferenceToken(response.getReferenceToken(), CollectType.RequestType.AUTH);
 
         return ResponseEntity.ok(response);
     }
@@ -78,14 +78,14 @@ public class AuthController {
         BankIdSignStatus status = billectaApi.BankIdSign(request.getSsn(), request.getUserMessage());
         BankIdSignResponse response = new BankIdSignResponse(status.getAutoStartToken(), status.getReferenceToken(), status.getStatus().value());
 
-        trackReferenceToken(response.getReferenceToken(), CollectType.BankIdRequestType.SIGN);
+        trackReferenceToken(response.getReferenceToken(), CollectType.RequestType.SIGN);
 
         return ResponseEntity.ok(response);
     }
 
-    private void trackReferenceToken(String referenceToken, CollectType.BankIdRequestType sign) {
+    private void trackReferenceToken(String referenceToken, CollectType.RequestType sign) {
         CollectType ct = new CollectType();
-        ct.referenceToken = referenceToken;
+        ct.token = referenceToken;
         ct.type = sign;
         collectRepo.save(ct);
     }
@@ -93,9 +93,9 @@ public class AuthController {
     @PostMapping(path = "collect")
     public ResponseEntity<?> collect(@RequestParam String referenceToken, @RequestHeader(value = "hedvig.token", required = false) Long hid) {
 
-        CollectType type = collectRepo.findOne(referenceToken);
+        CollectType collectType = collectRepo.findOne(referenceToken);
         BankIdAuthResponse response;
-        if(type.type.equals(CollectType.BankIdRequestType.AUTH)) {
+        if(collectType.type.equals(CollectType.RequestType.AUTH)) {
             BankIdAuthenticationStatus status = billectaApi.BankIdCollect(referenceToken);
              response = new BankIdAuthResponse(status.getStatus(), status.getAutoStartToken(), status.getReferenceToken());
 
@@ -124,8 +124,7 @@ public class AuthController {
 
             return ResponseEntity.ok(response);
 
-        } else {
-
+        } else if (collectType.type.equals(CollectType.RequestType.SIGN)) {
             BankIdSignStatus status = billectaApi.bankIdSignCollect(referenceToken);
             if(status.getStatus() == BankIdStatusType.COMPLETE) {
                 Optional<MemberEntity> memberEntity = memberRepo.findBySsn(status.getSSN());
@@ -136,6 +135,9 @@ public class AuthController {
                 }
             }
             return ResponseEntity.ok(new BankIdAuthResponse(status.getStatus(), status.getAutoStartToken(), status.getReferenceToken()));
+        } else {
+
+            return ResponseEntity.noContent().build();
         }
     }
 }

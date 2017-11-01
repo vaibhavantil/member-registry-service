@@ -22,8 +22,8 @@ public class BankAccountRetrievalSuccess extends MemberServiceEventPayload {
 
             BankAccountDetails bad = new BankAccountDetails(
                     acc.getType(),
-                    acc.getNumber().split(",")[0],
-                    formatAccount(acc.getNumber().split(",")[1]),
+                    "",//acc.getNumber().split(",")[0],
+                    acc.getNumber(),
                     acc.getBalance().getValue());
 
             this.accounts.add(bad);

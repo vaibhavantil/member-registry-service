@@ -2,6 +2,8 @@ package com.hedvig.memberservice.web;
 
 import com.hedvig.external.billectaAPI.BillectaApi;
 import com.hedvig.memberservice.externalApi.BotService;
+import com.hedvig.memberservice.query.CollectRepository;
+import com.hedvig.memberservice.query.CollectType;
 import com.hedvig.memberservice.query.MemberEntity;
 import com.hedvig.memberservice.query.MemberRepository;
 import com.hedvig.memberservice.web.dto.events.BankAccountRetrievalFailed;
@@ -22,15 +24,18 @@ public class InternalMemberController {
     private final BillectaApi billectaApi;
     private final MemberRepository memberRepository;
     private final BotService botSerivce;
+    private final CollectRepository collectRepository;
 
     public InternalMemberController(CommandBus commandBus,
                                     BillectaApi billectaApi,
                                     MemberRepository memberRepository,
-                                    BotService botSerivce) {
+                                    BotService botSerivce,
+                                    CollectRepository collectRepository) {
 
         this.billectaApi = billectaApi;
         this.memberRepository = memberRepository;
         this.botSerivce = botSerivce;
+        this.collectRepository = collectRepository;
     }
 
 
@@ -38,7 +43,7 @@ public class InternalMemberController {
     public ResponseEntity<String> startBankAccountRetrieval(@PathVariable Long memberId,@PathVariable String bankId) {
         MemberEntity me = memberRepository.findOne(memberId);
 
-        billectaApi.retrieveBankAccountNumbers(
+        String publicId = billectaApi.retrieveBankAccountNumbers(
                 me.getSsn(),
                 bankId,
                 accounts -> {
@@ -57,7 +62,12 @@ public class InternalMemberController {
                 }
                 );
 
-        return ResponseEntity.noContent().build();
+        CollectType ct = new CollectType();
+        ct.token = publicId;
+        ct.type = CollectType.RequestType.RETRIEVE_ACCOUNTS;
+        this.collectRepository.save(ct);
+
+        return ResponseEntity.ok("{\"id\":\"" + publicId +"\"}");
     }
 
 

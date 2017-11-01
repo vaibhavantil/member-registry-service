@@ -138,7 +138,7 @@ public class BillectaApi {
         return this.billectaClient.getBankAccountNumbers(EncodeTokenHeader(), publicId);
     }
 
-    public void retrieveBankAccountNumbers(
+    public String retrieveBankAccountNumbers(
             String ssn,
             String bankId,
             Consumer<BankAccountRequest> onComplete,
@@ -146,6 +146,8 @@ public class BillectaApi {
         String publicId = this.initBankAccountRetreivals(ssn, bankId);
         BankAccountPoller poller = new BankAccountPoller(publicId, this, executorService, onComplete, onError);
         executorService.schedule(poller,3, TimeUnit.SECONDS);
+
+        return publicId;
     }
 
     private String marshallToXML(Debtor bankIdAuthenticationStatus) throws JAXBException {
