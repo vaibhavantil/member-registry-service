@@ -1,6 +1,6 @@
 package com.hedvig.memberservice.externalApi.prouctsPricing;
 
-import com.hedvig.memberservice.externalApi.prouctsPricing.dto.ContractSingedRequest;
+import com.hedvig.memberservice.externalApi.prouctsPricing.dto.ContractSignedRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -17,6 +17,6 @@ public class ProductApi {
     }
 
     public void contractSinged(long memberId, String referenceToken) {
-        this.client.contractSinged(new ContractSingedRequest(Objects.toString(memberId), referenceToken));
+        this.client.contractSinged(new ContractSignedRequest(Objects.toString(memberId), referenceToken));
     }
 }
