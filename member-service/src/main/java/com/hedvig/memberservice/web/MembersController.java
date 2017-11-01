@@ -82,17 +82,19 @@ public class MembersController {
 
     @RequestMapping("/me")
     public ResponseEntity<?> me(@RequestHeader(value = "hedvig.token", required = false) Long hid){
-        MemberEntity me = repo.findOne(hid);
-        if(me == null) {
+        Optional<MemberEntity> m = repo.findById(hid);
+        if(!m.isPresent()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("{\"message:\":\"Member not found.\"");
         }
 
+        MemberEntity me = m.get();
+        
         Profile p = new Profile(
                 String.format("%s %s", me.getFirstName(), me.getLastName()),
                 me.getFirstName(),
                 me.getLastName(),
                 new ArrayList<>(),
-                me.getBirthDate().until(LocalDate.now()).getYears(),
+                me.getBirthDate()==null?null:me.getBirthDate().until(LocalDate.now()).getYears(),
                 "anakkin@skywalk.er",
                 me.getLongAddress(),
                 0,
