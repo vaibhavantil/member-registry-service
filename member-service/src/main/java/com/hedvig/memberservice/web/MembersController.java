@@ -13,10 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.retry.support.RetryTemplate;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
@@ -84,18 +81,26 @@ public class MembersController {
     }
 
     @RequestMapping("/me")
-    public ResponseEntity<Profile> me(){
+    public ResponseEntity<?> me(@RequestHeader(value = "hedvig.token", required = false) Long hid){
+        MemberEntity me = repo.findOne(hid);
+        if(me == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("{\"message:\":\"Member not found.\"");
+        }
+
         Profile p = new Profile(
-                "Anakin Skywalker",
-                "Anakin",
-                "Skywalker",
-                new ArrayList<String>(){{add("Padmé Amidala"); add("Luke Skywalker");}},
-                26,
+                String.format("%s %s", me.getFirstName(), me.getLastName()),
+                me.getFirstName(),
+                me.getLastName(),
+                new ArrayList<>(),
+                me.getBirthDate().until(LocalDate.now()).getYears(),
                 "anakkin@skywalk.er",
-                "Krukmakargatan 5",
-                48,
+                me.getLongAddress(),
+                0,
                 "XXXX XXXX 1234",
-                "Rädda Barnen");
+                "Rädda Barnen",
+                "ACTIVE",
+                LocalDate.now().withDayOfMonth(25),
+                String.format("\"Tack kära %s för att du bidrar till att rädda livet på fler cancerdrabbade barn\"", me.getFirstName()));
 
         return ResponseEntity.ok(p);
     }

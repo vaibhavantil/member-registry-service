@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 import lombok.Value;
 
+import java.time.LocalDate;
 import java.util.List;
 
 
@@ -24,6 +25,11 @@ public class Profile {
     private Integer livingAreaSqm;
     private String maskedBankAccountNumber;
     private String selectedCashback;
+
+    private String paymentStatus;
+    private LocalDate nextPaymentDate;
+
+    private String selectedCashbackSignature;
 
 
 }
