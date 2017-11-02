@@ -3,11 +3,7 @@ package com.hedvig.memberservice.aggregates;
 import com.hedvig.external.bisnodeBCI.BisnodeClient;
 import com.hedvig.external.bisnodeBCI.dto.Person;
 import com.hedvig.external.bisnodeBCI.dto.PersonSearchResult;
-import com.hedvig.memberservice.aggregates.exceptions.BankIdReferenceUsedException;
-import com.hedvig.memberservice.commands.AuthenticationAttemptCommand;
-import com.hedvig.memberservice.commands.BankIdSignCommand;
-import com.hedvig.memberservice.commands.CreateMemberCommand;
-import com.hedvig.memberservice.commands.InactivateMemberCommand;
+import com.hedvig.memberservice.commands.*;
 import com.hedvig.memberservice.events.*;
 import org.axonframework.commandhandling.CommandHandler;
 import org.axonframework.commandhandling.model.AggregateIdentifier;
@@ -18,10 +14,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import static org.axonframework.commandhandling.model.AggregateLifecycle.apply;
 
@@ -40,9 +33,9 @@ public class MemberAggregate {
 
     private MemberStatus status;
 
-    private PersonInformation personInformation;
+    private Member member;
 
-    private Set<String> authedReferenceTokens = new HashSet<>();
+    private BisnodeInformation latestBisnodeInformation;
 
     @Autowired
     public MemberAggregate(BisnodeClient bisnodeClient) {
@@ -57,11 +50,6 @@ public class MemberAggregate {
     @CommandHandler
     void authAttempt(AuthenticationAttemptCommand command) {
 
-        /*
-        if(authedReferenceTokens.contains(command.getBankIdAuthResponse().getReferenceToken())) {
-            throw new BankIdReferenceUsedException("BankId reference token already used.");
-        }*/
-
         ApplyMore applyChain = null;
 
         if(this.status == MemberStatus.INITIATED) {
@@ -75,13 +63,17 @@ public class MemberAggregate {
 
             Person person = personList.get(0).getPerson();
 
-            PersonInformation pi = new PersonInformation(ssn, person);
+            applyChain = apply(new NameUpdatedEvent(this.id, person.getPreferredFirstName(), person.getFamilyName()));
+            applyChain = applyChain.andThenApply(() -> new SSNUpdatedEvent(this.id, person.getLegalId()));
 
+            BisnodeInformation pi = new BisnodeInformation(ssn, person);
+            if(pi.getAddress().isPresent()) {
+                 applyChain = applyChain.andThenApply(() -> new LivingAddressUpdatedEvent(this.id, pi.getAddress().get()));
+            }
 
-            applyChain = apply(new MemberStartedOnBoardingEvent(
+            applyChain = applyChain.andThenApply(() -> new PersonInformationFromBisnodeEvent(this.id, pi)).andThenApply(() -> new MemberStartedOnBoardingEvent(
                     this.id,
-                    MemberStatus.ONBOARDING,
-                    pi));
+                    MemberStatus.ONBOARDING));
         }
 
         MemberAuthenticatedEvent authenticatedEvent = new MemberAuthenticatedEvent(this.id, command.getBankIdAuthResponse().getReferenceToken());
@@ -111,21 +103,46 @@ public class MemberAggregate {
         apply(new MemberSignedEvent(this.id, cmd.getReferenceId()));
     }
 
+    @CommandHandler
+    void finalizeOnBoarding(FinalizeOnBoardingCommand cmd) {
+        apply(new EmailUpdatedEvent(this.id, cmd.getEmail()));
+        apply(new LivingAddressUpdatedEvent(this.id, cmd.getStreet(), cmd.getCity(), cmd.getZipCode(), cmd.getApartmentNo()));
+        apply(new NameUpdatedEvent(this.id, cmd.getFirstName(), cmd.getLastName()));
+        apply(new SSNUpdatedEvent(this.id, cmd.getSsn()));
+    }
+
     @EventSourcingHandler
     public void on(MemberCreatedEvent e) {
         this.id = e.getId();
         this.status = e.getStatus();
+        this.member = new Member();
     }
 
     @EventSourcingHandler
     public void on(MemberStartedOnBoardingEvent e){
-        this.personInformation = e.getPersonInformation();
         this.status = e.getNewStatus();
     }
 
     @EventSourcingHandler
-    public void on(MemberAuthenticatedEvent e) {
-        this.authedReferenceTokens.add(e.getBankIdReferenceToken());
+    public void on(PersonInformationFromBisnodeEvent e) {
+        this.latestBisnodeInformation = e.getInformation();
+    }
+
+    @EventSourcingHandler
+    public void on(EmailUpdatedEvent e) {
+        this.member.setEmail(e.getEmail());
+    }
+
+    @EventSourcingHandler
+    public void on(LivingAddressUpdatedEvent e) {
+
+        LivingAddress address = new LivingAddress(e.getStreet(), e.getCity(), e.getZipCode());
+        this.member.setLivingAddress(address);
+    }
+
+    @EventSourcingHandler
+    public  void on(SSNUpdatedEvent e) {
+        this.member.setSsn(e.getSsn());
     }
 }
 

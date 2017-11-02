@@ -1,19 +1,19 @@
 package com.hedvig.memberservice.web;
 
 import com.hedvig.external.billectaAPI.BillectaApi;
+import com.hedvig.memberservice.commands.FinalizeOnBoardingCommand;
 import com.hedvig.memberservice.externalApi.BotService;
 import com.hedvig.memberservice.query.CollectRepository;
 import com.hedvig.memberservice.query.CollectType;
 import com.hedvig.memberservice.query.MemberEntity;
 import com.hedvig.memberservice.query.MemberRepository;
+import com.hedvig.memberservice.web.dto.FinalizeOnBoardingRequest;
 import com.hedvig.memberservice.web.dto.events.BankAccountRetrievalFailed;
 import com.hedvig.memberservice.web.dto.events.BankAccountRetrievalSuccess;
 import com.hedvig.memberservice.web.dto.events.MemberServiceEvent;
 import org.axonframework.commandhandling.CommandBus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.time.Instant;
 
@@ -68,6 +68,14 @@ public class InternalMemberController {
         this.collectRepository.save(ct);
 
         return ResponseEntity.ok("{\"id\":\"" + publicId +"\"}");
+    }
+
+    @RequestMapping(value = "/{memberId}/finalizeOnboarding", method = RequestMethod.POST)
+    public ResponseEntity<?> finalizeOnboarding(@PathVariable Long memberId, @RequestBody FinalizeOnBoardingRequest body) {
+
+        new FinalizeOnBoardingCommand(memberId, body);
+
+        return ResponseEntity.noContent().build();
     }
 
 

@@ -5,7 +5,7 @@ import lombok.Value;
 import java.util.List;
 
 @Value
-public class Address {
+public class BisnodeAddress {
     private String type;
     private String careOf;
     private String streetName;

@@ -13,7 +13,7 @@ import java.util.stream.Collectors;
 
 @Getter
 @Setter
-public class PersonInformation {
+public class BisnodeInformation {
     private String ssn;
     private String bisnodeGEDI;
     private String preferredFirstName;
@@ -26,13 +26,13 @@ public class PersonInformation {
     private String dateOfDeath;
     private Boolean directMarketingRestriction;
 
-    private List<Address> addressList;
+    private List<BisnodeAddress> addressList;
 
     private List<Telephone> phoneList;
 
-    public PersonInformation(){};
+    public BisnodeInformation(){};
 
-    public PersonInformation(String ssn, Person bisnodePerson) {
+    public BisnodeInformation(String ssn, Person bisnodePerson) {
         this.ssn = ssn;
         this.bisnodeGEDI = bisnodePerson.getGedi();
         this.preferredFirstName = bisnodePerson.getPreferredFirstName();
@@ -48,7 +48,7 @@ public class PersonInformation {
         this.dateOfDeath = bisnodePerson.getDateOfDeath();
         this.directMarketingRestriction = bisnodePerson.getDirectMarketingRestriction();
 
-        addressList = bisnodePerson.getAddressList().stream().map(a -> new Address(
+        addressList = bisnodePerson.getAddressList().stream().map(a -> new BisnodeAddress(
                 a.getType(),
                 a.getCareOf(),
                 a.getStreetName(),
@@ -77,7 +77,7 @@ public class PersonInformation {
                 Optional.of(familyName).orElse(""));
     }
 
-    public Optional<Address> getAddress(){
+    public Optional<BisnodeAddress> getAddress(){
         if(addressList.size() < 1) {
             return Optional.empty();
         }

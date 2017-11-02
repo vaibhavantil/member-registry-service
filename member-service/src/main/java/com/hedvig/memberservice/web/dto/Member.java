@@ -35,11 +35,11 @@ public class Member {
         this.lastName = memberEntity.getLastName();
         this.memberId = memberEntity.getId();
         this.ssn = memberEntity.getSsn();
-        this.street = String.format("%s %s%s", memberEntity.getStreetName(), memberEntity.getStreetNumber(), Objects.toString(memberEntity.getEntrance(), ""));
-        this.zipCode = memberEntity.getPostalCode();
+        this.street = memberEntity.getStreet();
+        this.zipCode = memberEntity.getZipCode();
         this.city = memberEntity.getCity();
         this.apartment = memberEntity.getApartment();
-        this.email = "";
+        this.email = memberEntity.getEmail();
         this.phoneNumber = memberEntity.getPhoneNumber();
         this.country = "SE";
         this.birthDate = memberEntity.getBirthDate();

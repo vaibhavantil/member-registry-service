@@ -43,18 +43,11 @@ public class MemberEntity {
 
     @Getter
     @Setter
-    private String streetName;
+    private String street;
+
 
     @Getter
-    @Setter
-    private String streetNumber;
-
-    @Getter
-    @Setter
-    private String entrance;
-
-    @Getter
-    @Setter String postalCode;
+    @Setter String zipCode;
 
     @Getter
     @Setter
@@ -64,7 +57,7 @@ public class MemberEntity {
     @Setter
     private String phoneNumber;
 
-    public String getLongAddress() {
-        return String.format("%s %s%s", getStreetName(), getStreetNumber(), Objects.toString(getEntrance(), ""));
-    }
+    @Getter
+    @Setter
+    private String email;
 }
