@@ -64,7 +64,7 @@ public class MemberAggregate {
             Person person = personList.get(0).getPerson();
 
             applyChain = apply(new NameUpdatedEvent(this.id, person.getPreferredFirstName(), person.getFamilyName()));
-            applyChain = applyChain.andThenApply(() -> new SSNUpdatedEvent(this.id, person.getLegalId()));
+            applyChain = applyChain.andThenApply(() -> new SSNUpdatedEvent(this.id, ssn));
 
             BisnodeInformation pi = new BisnodeInformation(ssn, person);
             if(pi.getAddress().isPresent()) {
