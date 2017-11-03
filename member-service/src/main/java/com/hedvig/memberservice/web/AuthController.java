@@ -23,6 +23,7 @@ import org.axonframework.commandhandling.gateway.DefaultCommandGateway;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
@@ -95,6 +96,12 @@ public class AuthController {
 
         CollectType collectType = collectRepo.findOne(referenceToken);
         BankIdAuthResponse response;
+        
+        if(collectType==null){
+        	log.error("ERROR: Oh no! Collect type is null!");
+        	return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+        
         if(collectType.type.equals(CollectType.RequestType.AUTH)) {
             BankIdAuthenticationStatus status = billectaApi.BankIdCollect(referenceToken);
              response = new BankIdAuthResponse(status.getStatus(), status.getAutoStartToken(), status.getReferenceToken());
