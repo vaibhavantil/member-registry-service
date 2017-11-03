@@ -103,8 +103,8 @@ public class MembersController {
                 "Rädda Barnen",
                 "ACTIVE",
                 LocalDate.now().withDayOfMonth(25),
-                String.format("\"Tack kära %s för att du bidrar till att rädda livet på fler cancerdrabbade barn\"", me.getFirstName()),
                 "Isabelle Ducellier, Generaldirektör",
+                String.format("\"Tack kära %s för att du bidrar till att rädda livet på fler cancerdrabbade barn\"", me.getFirstName()),
                 productApi.getSafetyIncreasers(hid)
                 );
 
