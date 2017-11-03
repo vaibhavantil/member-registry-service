@@ -92,7 +92,7 @@ public class AuthController {
     }
 
     @PostMapping(path = "collect")
-    public ResponseEntity<?> collect(@RequestParam String referenceToken, @RequestHeader(value = "hedvig.token", required = false) Long hid) {
+    public ResponseEntity<?> collect(@RequestParam String referenceToken, @RequestHeader(value = "hedvig.token", required = false) Long hid) throws InterruptedException {
 
         CollectType collectType = collectRepo.findOne(referenceToken);
         BankIdAuthResponse response;
@@ -122,6 +122,7 @@ public class AuthController {
 
                 try {
                     this.commandBus.sendAndWait(new AuthenticationAttemptCommand(currentMemberId, status));
+                    Thread.sleep(1000l);
                 } catch (BankIdReferenceUsedException e) {
                     log.info("Old reference token used: ", e);
                     return ResponseEntity.badRequest().body("{\"message\":\"" + e.getMessage() + "\"}");
