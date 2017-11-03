@@ -32,7 +32,7 @@ public class ProductApi {
         try {
             ResponseEntity<SafetyIncreasersDTO> response = this.client.getSafetyIncreasers(memberId);
             return response.getBody().getItems();
-        }catch (FeignException ex) {
+        }catch (Exception ex) {
             log.error("Error from products-pricing", ex);
         }
         return new ArrayList<>();
