@@ -104,6 +104,7 @@ public class MembersController {
                 "ACTIVE",
                 LocalDate.now().withDayOfMonth(25),
                 String.format("\"Tack kära %s för att du bidrar till att rädda livet på fler cancerdrabbade barn\"", me.getFirstName()),
+                "Isabelle Ducellier, Generaldirektör",
                 productApi.getSafetyIncreasers(hid)
                 );
 

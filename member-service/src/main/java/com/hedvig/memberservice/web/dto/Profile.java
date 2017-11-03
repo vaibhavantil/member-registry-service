@@ -30,6 +30,7 @@ public class Profile {
     private LocalDate nextPaymentDate;
 
     private String selectedCashbackSignature;
+    private String selectedCashbackParagraph;
 
     private List<String> safetyIncreasers;
 }
