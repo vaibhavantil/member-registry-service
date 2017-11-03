@@ -2,6 +2,7 @@ package com.hedvig.memberservice.externalApi.prouctsPricing;
 
 import com.hedvig.memberservice.externalApi.prouctsPricing.dto.ContractSignedRequest;
 import com.hedvig.memberservice.externalApi.prouctsPricing.dto.SafetyIncreasersDTO;
+import feign.FeignException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -31,7 +32,7 @@ public class ProductApi {
         try {
             ResponseEntity<SafetyIncreasersDTO> response = this.client.getSafetyIncreasers(memberId);
             return response.getBody().getItems();
-        }catch (RestClientResponseException ex) {
+        }catch (FeignException ex) {
             log.error("Error from products-pricing", ex);
         }
         return new ArrayList<>();
