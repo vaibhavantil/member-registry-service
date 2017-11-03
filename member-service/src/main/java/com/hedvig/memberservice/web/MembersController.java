@@ -2,6 +2,7 @@ package com.hedvig.memberservice.web;
 
 import com.hedvig.memberservice.commands.ConvertAfterBankIdAuthCommand;
 import com.hedvig.memberservice.commands.CreateMemberCommand;
+import com.hedvig.memberservice.externalApi.prouctsPricing.ProductApi;
 import com.hedvig.memberservice.query.MemberEntity;
 import com.hedvig.memberservice.query.MemberRepository;
 import com.hedvig.memberservice.web.dto.Member;
@@ -24,8 +25,6 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
-import java.util.List;
-
 @RestController()
 @RequestMapping("/member/")
 public class MembersController {
@@ -34,15 +33,17 @@ public class MembersController {
     private final CommandGateway commandGateway;
     private final RetryTemplate retryTemplate;
     private final SecureRandom randomGenerator;
+    private final ProductApi productApi;
     private final Logger log = LoggerFactory.getLogger(this.getClass());
 
     @Autowired
     public MembersController(MemberRepository repo,
                              CommandGateway commandGateway,
-                             RetryTemplate retryTemplate) throws NoSuchAlgorithmException {
+                             RetryTemplate retryTemplate, ProductApi productApi) throws NoSuchAlgorithmException {
         this.repo = repo;
         this.commandGateway = commandGateway;
         this.retryTemplate = retryTemplate;
+        this.productApi = productApi;
         this.randomGenerator = SecureRandom.getInstance("SHA1PRNG");
     }
 
@@ -102,7 +103,9 @@ public class MembersController {
                 "Rädda Barnen",
                 "ACTIVE",
                 LocalDate.now().withDayOfMonth(25),
-                String.format("\"Tack kära %s för att du bidrar till att rädda livet på fler cancerdrabbade barn\"", me.getFirstName()));
+                String.format("\"Tack kära %s för att du bidrar till att rädda livet på fler cancerdrabbade barn\"", me.getFirstName()),
+                productApi.getSafetyIncreasers(hid)
+                );
 
         return ResponseEntity.ok(p);
     }

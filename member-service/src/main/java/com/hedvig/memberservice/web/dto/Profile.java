@@ -31,5 +31,5 @@ public class Profile {
 
     private String selectedCashbackSignature;
 
-
+    private List<String> safetyIncreasers;
 }
