@@ -81,8 +81,8 @@ public class MemberRegistryApplication {
 
     @Bean
     public BillectaApi buildBillectaApi(BillectaClient billectaClient, ScheduledExecutorService executorService){
-        return new BillectaApiFake();
-        //return new BillectaApiImpl(billectaCreditorId, billectaSecureToken, new RestTemplate(), baseUrl, billectaClient, executorService);
+        //return new BillectaApiFake();
+        return new BillectaApiImpl(billectaCreditorId, billectaSecureToken, new RestTemplate(), baseUrl, billectaClient, executorService);
     }
 
     @Bean
