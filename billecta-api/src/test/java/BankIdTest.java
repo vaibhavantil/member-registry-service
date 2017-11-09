@@ -1,6 +1,7 @@
 package com.hedvig;
 
 import com.hedvig.external.billectaAPI.BillectaApi;
+import com.hedvig.external.billectaAPI.BillectaApiImpl;
 import com.hedvig.external.billectaAPI.api.BankIdAuthenticationStatus;
 import com.hedvig.external.billectaAPI.api.BankIdStatusType;
 import com.hedvig.external.billectaAPI.api.ObjectFactory;
@@ -9,7 +10,6 @@ import org.junit.runner.RunWith;
 import org.springframework.boot.SpringBootConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -24,7 +24,6 @@ import java.io.StringWriter;
 import java.util.Base64;
 
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.*;
-import static org.springframework.test.web.client.response.MockRestResponseCreators.withStatus;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
 
 @SpringBootTest
@@ -52,7 +51,7 @@ public class BankIdTest {
     public void PassBase64EncodedApiKey() {
         RestTemplate restTemplate = new RestTemplate();
         MockRestServiceServer serverMock = MockRestServiceServer.bindTo(restTemplate).build();
-        BillectaApi api = new BillectaApi(creditorId, apiKey, restTemplate, baseUrl, null, null);
+        BillectaApi api = new BillectaApiImpl(creditorId, apiKey, restTemplate, baseUrl, null, null);
 
         String encodedToken = Base64.getEncoder().encodeToString(apiKey.getBytes());
         serverMock.expect(ExpectedCount.manyTimes(), requestTo("https://apitest.billecta.com/v1/bankid/authentication/ada")).
@@ -66,7 +65,7 @@ public class BankIdTest {
     public void VerifyCollect() throws JAXBException {
         RestTemplate restTemplate = new RestTemplate();
         MockRestServiceServer serverMock = MockRestServiceServer.bindTo(restTemplate).build();
-        BillectaApi api = new BillectaApi(creditorId, apiKey, restTemplate, baseUrl, null, null);
+        BillectaApi api = new BillectaApiImpl(creditorId, apiKey, restTemplate, baseUrl, null, null);
 
         BankIdAuthenticationStatus status = new BankIdAuthenticationStatus();
         status.setStatus(BankIdStatusType.COMPLETE);
@@ -83,7 +82,7 @@ public class BankIdTest {
     public void StartAuthWithoutSSN() throws JAXBException {
         RestTemplate restTemplate = new RestTemplate();
         MockRestServiceServer serverMock = MockRestServiceServer.bindTo(restTemplate).build();
-        BillectaApi api = new BillectaApi(creditorId, apiKey, restTemplate, baseUrl, null, null);
+        BillectaApi api = new BillectaApiImpl(creditorId, apiKey, restTemplate, baseUrl, null, null);
 
         BankIdAuthenticationStatus status = new BankIdAuthenticationStatus();
         status.setStatus(BankIdStatusType.STARTED);
@@ -100,7 +99,7 @@ public class BankIdTest {
     public void StartAuthWithSSN() throws JAXBException {
         RestTemplate restTemplate = new RestTemplate();
         MockRestServiceServer serverMock = MockRestServiceServer.bindTo(restTemplate).build();
-        BillectaApi api = new BillectaApi(creditorId, apiKey, restTemplate, baseUrl, null, null);
+        BillectaApi api = new BillectaApiImpl(creditorId, apiKey, restTemplate, baseUrl, null, null);
 
         BankIdAuthenticationStatus status = new BankIdAuthenticationStatus();
         status.setStatus(BankIdStatusType.STARTED);
