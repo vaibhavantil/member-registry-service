@@ -28,6 +28,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
 
+import java.util.Objects;
 import java.util.Optional;
 
 @RestController()
@@ -61,12 +62,16 @@ public class AuthController {
     public ResponseEntity<BankIdAuthResponse> auth(@RequestBody(required = true) BankIdAuthRequest request) {
 
         BankIdAuthenticationStatus status = billectaApi.BankIdAuth(request.getSsn());
-
+        log.info("Started bankId AUTH memberId:{}, autostart:{}, reference:{}, ssn:{}",
+                status.getStatus().value(),
+                status.getAutoStartToken(),
+                status.getReferenceToken(),
+                status.getSSN());
         BankIdAuthResponse response = null;
         if (status.getStatus() == BankIdStatusType.STARTED) {
-            response = new BankIdAuthResponse(status.getStatus(), status.getAutoStartToken(), status.getReferenceToken());
+            response = new BankIdAuthResponse(status.getStatus(), status.getAutoStartToken(), status.getReferenceToken(), null);
         } else {
-            response = new BankIdAuthResponse(status.getStatus(), status.getAutoStartToken(), status.getReferenceToken());
+            response = new BankIdAuthResponse(status.getStatus(), status.getAutoStartToken(), status.getReferenceToken(), null);
         }
 
         trackReferenceToken(response.getReferenceToken(), CollectType.RequestType.AUTH);
@@ -92,7 +97,7 @@ public class AuthController {
     }
 
     @PostMapping(path = "collect")
-    public ResponseEntity<?> collect(@RequestParam String referenceToken, @RequestHeader(value = "hedvig.token", required = false) Long hid) throws InterruptedException {
+    public ResponseEntity<?> collect(@RequestParam String referenceToken, @RequestHeader(value = "hedvig.token") Long hid) throws InterruptedException {
 
         CollectType collectType = collectRepo.findOne(referenceToken);
         BankIdAuthResponse response;
@@ -104,7 +109,7 @@ public class AuthController {
         
         if(collectType.type.equals(CollectType.RequestType.AUTH)) {
             BankIdAuthenticationStatus status = billectaApi.BankIdCollect(referenceToken);
-             response = new BankIdAuthResponse(status.getStatus(), status.getAutoStartToken(), status.getReferenceToken());
+
 
             if (status.getStatus() == BankIdStatusType.COMPLETE) {
                 String ssn = status.getSSN();
@@ -127,10 +132,13 @@ public class AuthController {
                     log.info("Old reference token used: ", e);
                     return ResponseEntity.badRequest().body("{\"message\":\"" + e.getMessage() + "\"}");
                 }
+
+                response = new BankIdAuthResponse(status.getStatus(), status.getAutoStartToken(), status.getReferenceToken(), Objects.toString(currentMemberId));
+
                 return ResponseEntity.ok().header("Hedvig.Id", currentMemberId.toString()).body(response);
             }
 
-            return ResponseEntity.ok(response);
+            return ResponseEntity.ok(new BankIdAuthResponse(status.getStatus(), status.getAutoStartToken(), status.getReferenceToken(), hid.toString()));
 
         } else if (collectType.type.equals(CollectType.RequestType.SIGN)) {
             BankIdSignStatus status = billectaApi.bankIdSignCollect(referenceToken);
@@ -142,7 +150,7 @@ public class AuthController {
                     //}
                 }
             }
-            return ResponseEntity.ok(new BankIdAuthResponse(status.getStatus(), status.getAutoStartToken(), status.getReferenceToken()));
+            return ResponseEntity.ok(new BankIdAuthResponse(status.getStatus(), status.getAutoStartToken(), status.getReferenceToken(), hid.toString()));
         } else {
 
             return ResponseEntity.noContent().build();

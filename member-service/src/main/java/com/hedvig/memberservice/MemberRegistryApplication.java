@@ -1,6 +1,8 @@
 package com.hedvig.memberservice;
 
 import com.hedvig.external.billectaAPI.BillectaApi;
+import com.hedvig.external.billectaAPI.BillectaApiFake;
+import com.hedvig.external.billectaAPI.BillectaApiImpl;
 import com.hedvig.external.billectaAPI.BillectaClient;
 import com.hedvig.external.bisnodeBCI.BisnodeClient;
 import com.hedvig.memberservice.aggregates.MemberAggregate;
@@ -79,7 +81,8 @@ public class MemberRegistryApplication {
 
     @Bean
     public BillectaApi buildBillectaApi(BillectaClient billectaClient, ScheduledExecutorService executorService){
-        return new BillectaApi(billectaCreditorId, billectaSecureToken, new RestTemplate(), baseUrl, billectaClient, executorService);
+        return new BillectaApiFake();
+        //return new BillectaApiImpl(billectaCreditorId, billectaSecureToken, new RestTemplate(), baseUrl, billectaClient, executorService);
     }
 
     @Bean

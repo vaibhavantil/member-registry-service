@@ -1,12 +1,6 @@
 package com.hedvig.external.billectaAPI;
 
-import com.hedvig.external.billectaAPI.api.Creditors;
-import com.hedvig.external.billectaAPI.api.Debtor;
-import com.hedvig.external.billectaAPI.api.DebtorAutogiro;
-import com.hedvig.external.billectaAPI.api.DebtorType;
-import feign.Feign;
-import feign.jaxb.JAXBContextFactory;
-import feign.jaxb.JAXBDecoder;
+import com.hedvig.external.billectaAPI.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
@@ -39,8 +33,8 @@ public class TestApplication implements CommandLineRunner{
 
       //  client = Feign.builder().decoder(new JAXBDecoder( new JAXBContextFactory.Builder().build())).target(BillectaClient.class, "https://apitest.billecta.com");
 
-        BillectaApi api = new BillectaApi("3ac96b99-58c7-4b41-a697-02a6f52818f2", "T15j6zjECMEsu3jQ7g4lTnEau7CzStpb/kRVLX9IRS2rSWp6H9FnaCukdPbaOQWEAIjrN0CF3rhpziId5BQwig==", client);
-        //api.BankIdAuth(null);
+        BillectaApi api = new BillectaApiImpl("ce24a223-7d39-49ac-b20a-34b61cf48ef3", "+fv7fzW9SG4uwvcnRwB2/anjsf+snZakt6RcPma8w4d6e5pjiyk4dxklLg1qZD/W87eE59RwmRbiC5bOZb1+WQ==", client);
+        api.BankIdAuth(null);
 
         //Creditors creditors = api.getAllCreditors();
         //System.out.println(creditors.toString());
@@ -61,7 +55,7 @@ public class TestApplication implements CommandLineRunner{
     }
 
 
-    private void CreateDebtor(BillectaApi api) throws JAXBException {
+    private void CreateDebtor(BillectaApiImpl api) throws JAXBException {
 
         Debtor deb = new Debtor();
         deb.setDebtorExternalId("23445");
