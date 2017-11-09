@@ -3,6 +3,7 @@ package com.hedvig.external.billectaAPI;
 import com.hedvig.external.billectaAPI.api.*;
 import org.springframework.http.ResponseEntity;
 
+import java.util.UUID;
 import java.util.function.Consumer;
 
 public class BillectaApiFake implements BillectaApi {
@@ -15,8 +16,8 @@ public class BillectaApiFake implements BillectaApi {
         BankIdAuthenticationStatus bankIdAuthenticationStatus = new BankIdAuthenticationStatus();
         bankIdAuthenticationStatus.setStatus(BankIdStatusType.STARTED);
         bankIdAuthenticationStatus.setSSN(SSN);
-        bankIdAuthenticationStatus.setAutoStartToken("dskjlksadfjklfaj-autostart");
-        bankIdAuthenticationStatus.setReferenceToken("dskjlksadfjklfaj-reference");
+        bankIdAuthenticationStatus.setAutoStartToken(UUID.randomUUID().toString());
+        bankIdAuthenticationStatus.setReferenceToken(UUID.randomUUID().toString());
         return bankIdAuthenticationStatus;
     }
 
@@ -25,8 +26,8 @@ public class BillectaApiFake implements BillectaApi {
         BankIdAuthenticationStatus bankIdAuthenticationStatus = new BankIdAuthenticationStatus();
         bankIdAuthenticationStatus.setStatus(BankIdStatusType.COMPLETE);
         bankIdAuthenticationStatus.setSSN(SSN);
-        bankIdAuthenticationStatus.setAutoStartToken("dskjlksadfjklfaj-autostart");
-        bankIdAuthenticationStatus.setReferenceToken("dskjlksadfjklfaj-reference");
+        bankIdAuthenticationStatus.setAutoStartToken(UUID.randomUUID().toString());
+        bankIdAuthenticationStatus.setReferenceToken(token);
         return bankIdAuthenticationStatus;
     }
 
@@ -66,8 +67,8 @@ public class BillectaApiFake implements BillectaApi {
     @Override
     public BankIdSignStatus BankIdSign(String ssn, String usermessage) {
         BankIdSignStatus bs = new BankIdSignStatus();
-        bs.setAutoStartToken("dskjlksadfjklfaj-autostart");
-        bs.setReferenceToken("dskjlksadfjklfaj-reference");
+        bs.setAutoStartToken(UUID.randomUUID().toString());
+        bs.setReferenceToken(UUID.randomUUID().toString());
         bs.setStatus(BankIdStatusType.STARTED);
         return bs;
     }
@@ -75,8 +76,8 @@ public class BillectaApiFake implements BillectaApi {
     @Override
     public BankIdSignStatus bankIdSignCollect(String referenceToken) {
         BankIdSignStatus bs = new BankIdSignStatus();
-        bs.setAutoStartToken("dskjlksadfjklfaj-autostart");
-        bs.setReferenceToken("dskjlksadfjklfaj-reference");
+        bs.setAutoStartToken(UUID.randomUUID().toString());
+        bs.setReferenceToken(referenceToken);
         bs.setStatus(BankIdStatusType.STARTED);
         return bs;
     }
