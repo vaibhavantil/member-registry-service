@@ -4,6 +4,8 @@ import com.hedvig.external.billectaAPI.api.*;
 import org.springframework.http.ResponseEntity;
 
 import java.util.UUID;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
 public class BillectaApiFake implements BillectaApi {
@@ -62,7 +64,11 @@ public class BillectaApiFake implements BillectaApi {
 
     @Override
     public String retrieveBankAccountNumbers(String ssn, String bankId, Consumer<BankAccountRequest> onComplete, Consumer<String> onError) {
-        return BANKD_ACCOUNT_GUID;
+        String publicId = this.initBankAccountRetreivals(ssn, bankId);
+        BankAccountPoller poller = new BankAccountPoller(publicId, this, new ScheduledThreadPoolExecutor(1), onComplete, onError);
+        poller.run();
+
+        return publicId;
     }
     @Override
     public BankIdSignStatus BankIdSign(String ssn, String usermessage) {
