@@ -142,7 +142,7 @@ public class AuthController {
 
         } else if (collectType.type.equals(CollectType.RequestType.SIGN)) {
             BankIdSignStatus status = billectaApi.bankIdSignCollect(referenceToken);
-            if(status.getStatus() == BankIdStatusType.COMPLETE) {
+            if(status.getStatus() == BankIdStatusType.COMPLETE || status.getStatus() == BankIdStatusType.ERROR) {
                 Optional<MemberEntity> memberEntity = memberRepo.findBySsn(status.getSSN());
                 if (memberEntity.isPresent()) {
                     //if (memberEntity.get().getId().equals(hid)) {
