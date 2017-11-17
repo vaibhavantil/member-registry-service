@@ -31,6 +31,7 @@ public class Profile {
 
     private String selectedCashbackSignature;
     private String selectedCashbackParagraph;
+    private String selectedCashbackImageUrl;
 
     private List<String> safetyIncreasers;
 }

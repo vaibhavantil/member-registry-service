@@ -117,6 +117,7 @@ public class MembersController {
                 LocalDate.now().withDayOfMonth(25),
                 "Isabelle Ducellier, Generaldirektör",
                 String.format("\"Tack kära %s för att du bidrar till att rädda livet på fler cancerdrabbade barn\"", me.getFirstName()),
+                "http://ljus.barncancerfonden.se/images/barncancerfonden.png",
                 productApi.getSafetyIncreasers(hid)
                 );
 
