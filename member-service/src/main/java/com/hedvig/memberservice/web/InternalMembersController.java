@@ -19,18 +19,18 @@ import java.time.Instant;
 
 @RestController
 @RequestMapping("/i/member")
-public class InternalMemberController {
+public class InternalMembersController {
 
     private final BillectaApi billectaApi;
     private final MemberRepository memberRepository;
     private final BotService botSerivce;
     private final CollectRepository collectRepository;
 
-    public InternalMemberController(CommandBus commandBus,
-                                    BillectaApi billectaApi,
-                                    MemberRepository memberRepository,
-                                    BotService botSerivce,
-                                    CollectRepository collectRepository) {
+    public InternalMembersController(CommandBus commandBus,
+                                     BillectaApi billectaApi,
+                                     MemberRepository memberRepository,
+                                     BotService botSerivce,
+                                     CollectRepository collectRepository) {
 
         this.billectaApi = billectaApi;
         this.memberRepository = memberRepository;
@@ -77,7 +77,5 @@ public class InternalMemberController {
 
         return ResponseEntity.noContent().build();
     }
-
-
 
 }
