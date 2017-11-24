@@ -78,8 +78,10 @@ public class InternalMembersControllerTests {
 
     @Test
     public void TestStartOnboardingWithSSN() throws Exception {
-        StartOnboardingWithSSNRequest request = new StartOnboardingWithSSNRequest("190304059999");
+        final String ssn = "190304059999";
+        StartOnboardingWithSSNRequest request = new StartOnboardingWithSSNRequest(ssn);
 
+        when(memberRepo.findBySsn(ssn)).thenReturn(Optional.empty());
 
         ObjectMapper jsonMapper = new ObjectMapper();
 
