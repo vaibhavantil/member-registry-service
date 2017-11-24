@@ -101,5 +101,6 @@ public class MemberEventListener {
     void on(MemberInactivatedEvent e){
         MemberEntity m = userRepo.findOne(e.getId());
         m.setStatus(MemberStatus.INACTIVATED.name());
+        userRepo.save(m);
     }
 }

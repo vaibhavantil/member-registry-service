@@ -2,6 +2,8 @@ package com.hedvig.memberservice.aggregates;
 
 import lombok.Value;
 
+import java.util.Objects;
+
 @Value
 public class LivingAddress {
 
@@ -11,5 +13,12 @@ public class LivingAddress {
     String street;
     String city;
     String zip;
+    String apartmentNo;
 
+    public boolean needsUpdate(String street, String city, String zipCode, String apartmentNo) {
+        return  !Objects.equals(this.street, street) ||
+                !Objects.equals(this.city, city) ||
+                !Objects.equals(this.zip, zipCode) ||
+                !Objects.equals(this.apartmentNo, apartmentNo);
+    }
 }

@@ -1,36 +1,42 @@
 package com.hedvig.memberservice.web;
 
 import com.hedvig.external.billectaAPI.BillectaApi;
-import com.hedvig.memberservice.commands.FinalizeOnBoardingCommand;
+import com.hedvig.memberservice.commands.MemberUpdateContactInformationCommand;
+import com.hedvig.memberservice.commands.StartOnboardingWithSSNCommand;
 import com.hedvig.memberservice.externalApi.BotService;
 import com.hedvig.memberservice.query.CollectRepository;
 import com.hedvig.memberservice.query.CollectType;
 import com.hedvig.memberservice.query.MemberEntity;
 import com.hedvig.memberservice.query.MemberRepository;
-import com.hedvig.memberservice.web.dto.FinalizeOnBoardingRequest;
+import com.hedvig.memberservice.web.dto.StartOnboardingWithSSNRequest;
+import com.hedvig.memberservice.web.dto.UpdateContactInformationRequest;
 import com.hedvig.memberservice.web.dto.events.BankAccountRetrievalFailed;
 import com.hedvig.memberservice.web.dto.events.BankAccountRetrievalSuccess;
 import com.hedvig.memberservice.web.dto.events.MemberServiceEvent;
-import org.axonframework.commandhandling.CommandBus;
+import org.axonframework.commandhandling.gateway.CommandGateway;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.Instant;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/i/member")
 public class InternalMembersController {
 
+    private final CommandGateway commandBus;
     private final BillectaApi billectaApi;
     private final MemberRepository memberRepository;
     private final BotService botSerivce;
     private final CollectRepository collectRepository;
 
-    public InternalMembersController(CommandBus commandBus,
+    public InternalMembersController(CommandGateway commandBus,
                                      BillectaApi billectaApi,
                                      MemberRepository memberRepository,
                                      BotService botSerivce,
                                      CollectRepository collectRepository) {
+        this.commandBus = commandBus;
 
         this.billectaApi = billectaApi;
         this.memberRepository = memberRepository;
@@ -71,9 +77,33 @@ public class InternalMembersController {
     }
 
     @RequestMapping(value = "/{memberId}/finalizeOnboarding", method = RequestMethod.POST)
-    public ResponseEntity<?> finalizeOnboarding(@PathVariable Long memberId, @RequestBody FinalizeOnBoardingRequest body) {
+    public ResponseEntity<?> finalizeOnboarding(@PathVariable Long memberId, @RequestBody UpdateContactInformationRequest body) {
 
-        new FinalizeOnBoardingCommand(memberId, body);
+        MemberUpdateContactInformationCommand finalizeOnBoardingCommand = new MemberUpdateContactInformationCommand(memberId, body);
+
+        commandBus.sendAndWait(finalizeOnBoardingCommand);
+
+        return ResponseEntity.noContent().build();
+    }
+
+    @RequestMapping(value = "/{memberId}/startOnboardingWithSSN", method = RequestMethod.POST)
+    public ResponseEntity<?> startOnboardingWithSSN(@PathVariable Long memberId, @RequestBody StartOnboardingWithSSNRequest request) {
+
+
+        Optional<MemberEntity> member = memberRepository.findBySsn(request.getSsn());
+        if(member.isPresent()) {
+            return ResponseEntity.status(HttpStatus.ALREADY_REPORTED).body(member.get().getId().toString());
+        }
+
+        commandBus.sendAndWait(new StartOnboardingWithSSNCommand(memberId, request));
+
+        return ResponseEntity.noContent().build();
+    }
+
+
+    @RequestMapping(value = "/{memberId}/updateContactInformationRequest", method = RequestMethod.POST)
+    public ResponseEntity<?> startOnBoarding(@PathVariable Long memberId, @RequestBody UpdateContactInformationRequest request) {
+        commandBus.sendAndWait(new MemberUpdateContactInformationCommand(memberId, request));
 
         return ResponseEntity.noContent().build();
     }

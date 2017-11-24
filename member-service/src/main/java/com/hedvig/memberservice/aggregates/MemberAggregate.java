@@ -15,6 +15,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
+import java.util.Objects;
 
 import static org.axonframework.commandhandling.model.AggregateLifecycle.apply;
 
@@ -71,9 +72,9 @@ public class MemberAggregate {
                  applyChain = applyChain.andThenApply(() -> new LivingAddressUpdatedEvent(this.id, pi.getAddress().get()));
             }
 
-            applyChain = applyChain.andThenApply(() -> new PersonInformationFromBisnodeEvent(this.id, pi)).andThenApply(() -> new MemberStartedOnBoardingEvent(
-                    this.id,
-                    MemberStatus.ONBOARDING));
+            applyChain = applyChain.
+                    andThenApply(() -> new PersonInformationFromBisnodeEvent(this.id, pi)).
+                    andThenApply(() -> new MemberStartedOnBoardingEvent(this.id, MemberStatus.ONBOARDING));
         }
 
         MemberAuthenticatedEvent authenticatedEvent = new MemberAuthenticatedEvent(this.id, command.getBankIdAuthResponse().getReferenceToken());
@@ -99,17 +100,38 @@ public class MemberAggregate {
     }
 
     @CommandHandler
+    void startOnboardingWithSSNCommand(StartOnboardingWithSSNCommand comand) {
+        apply(new OnboardingStartedWithSSNEvent(this.id, comand.getSsn()));
+        apply(new MemberStartedOnBoardingEvent(this.id, MemberStatus.ONBOARDING));
+    }
+
+    @CommandHandler
+    void updatePersonalInformation(MemberUpdateContactInformationCommand cmd) {
+
+        if(!Objects.equals(this.member.getFirstName(),cmd.getFirstName()) ||
+                !Objects.equals(this.member.getLastName(), cmd.getLastName())) {
+            apply(new NameUpdatedEvent(this.id, cmd.getFirstName(), cmd.getLastName()));
+        }
+
+        LivingAddress address = this.member.getLivingAddress();
+        if(address == null || address.needsUpdate(cmd.getStreet(), cmd.getCity(), cmd.getZipCode(), cmd.getApartmentNo())) {
+            apply(new LivingAddressUpdatedEvent(this.id, cmd.getStreet(), cmd.getCity(), cmd.getZipCode(), cmd.getApartmentNo()));
+        }
+    }
+
+    @CommandHandler
     void bankIdSignHandler(BankIdSignCommand cmd) {
         apply(new MemberSignedEvent(this.id, cmd.getReferenceId()));
     }
 
+    /*
     @CommandHandler
-    void finalizeOnBoarding(FinalizeOnBoardingCommand cmd) {
+    void finalizeOnBoarding(MemberUpdateContactInformationCommand cmd) {
         apply(new EmailUpdatedEvent(this.id, cmd.getEmail()));
         apply(new LivingAddressUpdatedEvent(this.id, cmd.getStreet(), cmd.getCity(), cmd.getZipCode(), cmd.getApartmentNo()));
         apply(new NameUpdatedEvent(this.id, cmd.getFirstName(), cmd.getLastName()));
         apply(new SSNUpdatedEvent(this.id, cmd.getSsn()));
-    }
+    }*/
 
     @EventSourcingHandler
     public void on(MemberCreatedEvent e) {
@@ -136,12 +158,12 @@ public class MemberAggregate {
     @EventSourcingHandler
     public void on(LivingAddressUpdatedEvent e) {
 
-        LivingAddress address = new LivingAddress(e.getStreet(), e.getCity(), e.getZipCode());
+        LivingAddress address = new LivingAddress(e.getStreet(), e.getCity(), e.getZipCode(), e.getApartmentNo());
         this.member.setLivingAddress(address);
     }
 
     @EventSourcingHandler
-    public  void on(SSNUpdatedEvent e) {
+    public  void on(OnboardingStartedWithSSNEvent e) {
         this.member.setSsn(e.getSsn());
     }
 }
