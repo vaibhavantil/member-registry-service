@@ -124,6 +124,11 @@ public class MemberAggregate {
         apply(new MemberSignedEvent(this.id, cmd.getReferenceId()));
     }
 
+    @CommandHandler
+    void selectNewCashback(SelectNewCashbackCommand cmd) {
+        apply(new NewCashbackSelectedEvent(this.id, cmd.getOptionId().toString()));
+    }
+
     /*
     @CommandHandler
     void finalizeOnBoarding(MemberUpdateContactInformationCommand cmd) {
@@ -166,5 +171,6 @@ public class MemberAggregate {
     public  void on(OnboardingStartedWithSSNEvent e) {
         this.member.setSsn(e.getSsn());
     }
+
 }
 

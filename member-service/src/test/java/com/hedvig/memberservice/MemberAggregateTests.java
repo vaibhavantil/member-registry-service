@@ -4,6 +4,7 @@ import com.hedvig.external.bisnodeBCI.BisnodeClient;
 import com.hedvig.memberservice.aggregates.MemberAggregate;
 import com.hedvig.memberservice.aggregates.MemberStatus;
 import com.hedvig.memberservice.commands.MemberUpdateContactInformationCommand;
+import com.hedvig.memberservice.commands.SelectNewCashbackCommand;
 import com.hedvig.memberservice.commands.StartOnboardingWithSSNCommand;
 import com.hedvig.memberservice.events.*;
 import com.hedvig.memberservice.web.dto.Address;
@@ -18,6 +19,8 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.junit4.SpringRunner;
+
+import java.util.UUID;
 
 @RunWith(SpringRunner.class)
 public class MemberAggregateTests {
@@ -87,6 +90,18 @@ public class MemberAggregateTests {
 				expectSuccessfulHandlerExecution().expectEvents(
 				new OnboardingStartedWithSSNEvent(memberId, ssn),
 				new MemberStartedOnBoardingEvent(memberId, MemberStatus.ONBOARDING));
+	}
+
+	@Test
+	public void SelectNewCashbackCommand() {
+		Long memberId = 1234l;
+		String cashbackId = "328354a4-d119-11e7-ac68-139bd471ea9a";
+
+		fixture.given(new MemberCreatedEvent(memberId, MemberStatus.INITIATED)).
+				when(new SelectNewCashbackCommand(memberId, UUID.fromString(cashbackId))).
+				expectSuccessfulHandlerExecution().
+				expectEvents(new NewCashbackSelectedEvent(memberId, cashbackId));
+
 	}
 
 }

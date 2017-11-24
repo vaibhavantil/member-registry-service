@@ -103,4 +103,13 @@ public class MemberEventListener {
         m.setStatus(MemberStatus.INACTIVATED.name());
         userRepo.save(m);
     }
+
+    @EventHandler
+    void on(NewCashbackSelectedEvent e){
+        MemberEntity m = userRepo.findOne(e.getMemberId());
+        m.setCashbackId(e.getCashbackId());
+        userRepo.save(m);
+    }
+
+
 }
