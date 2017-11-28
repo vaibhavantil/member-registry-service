@@ -20,6 +20,8 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
+import static net.logstash.logback.argument.StructuredArguments.value;
+
 public class BillectaApiImpl implements BillectaApi {
 
     private RestTemplate restTemplate;
@@ -106,6 +108,9 @@ public class BillectaApiImpl implements BillectaApi {
                 entity,
                 BankIdAuthenticationStatus.class,
                 token);
+
+
+        logger.info("Collect response from billecta with referenceId: {}, body: {}", value("referenceId", token),  value("responseBody", status));
 
         return status.getBody();
     }
