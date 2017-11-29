@@ -21,6 +21,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
 import static net.logstash.logback.argument.StructuredArguments.value;
+import static net.logstash.logback.marker.Markers.append;
 
 public class BillectaApiImpl implements BillectaApi {
 
@@ -110,8 +111,10 @@ public class BillectaApiImpl implements BillectaApi {
                 token);
 
 
-        logger.info("Collect response from billecta with referenceId: {}, body: {}", value("referenceId", token),  value("responseBody", status));
-
+        if(logger.isInfoEnabled()) {
+            String body = status.getBody() != null ? status.getBody().getStatus().name() : "No response body";
+            logger.info(append("responseBody", status), "Collect response from billecta with referenceId: {}, httpStatusCode:{}, body: {}", value("referenceId", token), status.getStatusCode(), body);
+        }
         return status.getBody();
     }
 
