@@ -1,8 +1,6 @@
 package com.hedvig.memberservice.query;
 
 import com.hedvig.memberservice.aggregates.MemberStatus;
-import com.hedvig.memberservice.aggregates.BisnodeInformation;
-import com.hedvig.memberservice.aggregates.Telephone;
 import com.hedvig.memberservice.events.*;
 import org.axonframework.eventhandling.EventHandler;
 import org.axonframework.eventhandling.EventMessage;
@@ -14,17 +12,18 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
-import java.util.List;
 
 @Component
 public class MemberEventListener {
 
     private final Logger logger = LoggerFactory.getLogger(MemberEventListener.class);
     private final MemberRepository userRepo;
+    private final SignedMemberRepository signedMemberRepository;
 
     @Autowired
-    public MemberEventListener(MemberRepository userRepo) {
+    public MemberEventListener(MemberRepository userRepo, SignedMemberRepository signedMemberRepository) {
         this.userRepo = userRepo;
+        this.signedMemberRepository = signedMemberRepository;
     }
 
     @EventHandler
@@ -109,6 +108,19 @@ public class MemberEventListener {
         MemberEntity m = userRepo.findOne(e.getMemberId());
         m.setCashbackId(e.getCashbackId());
         userRepo.save(m);
+    }
+
+    @EventHandler
+    void on(MemberSignedEvent e){
+        MemberEntity m = userRepo.findOne(e.getId());
+        m.setStatus(MemberStatus.SIGNED.name());
+
+        SignedMemberEntity sme = new SignedMemberEntity();
+        sme.setId(e.getId());
+        sme.setSsn(m.getSsn());
+
+        userRepo.save(m);
+        signedMemberRepository.save(sme);
     }
 
 

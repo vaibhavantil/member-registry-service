@@ -6,5 +6,6 @@ import lombok.Value;
 public class BankIdAuthRequest {
 
     private String ssn;
+    private String memberId;
 
 }
