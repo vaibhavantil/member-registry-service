@@ -55,8 +55,7 @@ public class MemberRegistryApplication {
 
     @Autowired
     public void configure(EventHandlingConfiguration config) {
-
-	    config.usingTrackingProcessors();
+	    //config.usingTrackingProcessors();
     }
 
     @Bean
