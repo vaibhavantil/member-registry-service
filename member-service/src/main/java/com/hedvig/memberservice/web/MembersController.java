@@ -5,6 +5,8 @@ import com.hedvig.memberservice.commands.CreateMemberCommand;
 import com.hedvig.memberservice.externalApi.prouctsPricing.ProductApi;
 import com.hedvig.memberservice.query.MemberEntity;
 import com.hedvig.memberservice.query.MemberRepository;
+import com.hedvig.memberservice.services.CashbackService;
+import com.hedvig.memberservice.web.dto.CashbackOption;
 import com.hedvig.memberservice.web.dto.Member;
 import com.hedvig.memberservice.web.dto.Profile;
 import org.axonframework.commandhandling.gateway.CommandGateway;
@@ -21,6 +23,7 @@ import java.security.SecureRandom;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
@@ -34,16 +37,18 @@ public class MembersController {
     private final RetryTemplate retryTemplate;
     private final SecureRandom randomGenerator;
     private final ProductApi productApi;
+    private final CashbackService cashbackService;
     private final Logger log = LoggerFactory.getLogger(this.getClass());
 
     @Autowired
     public MembersController(MemberRepository repo,
                              CommandGateway commandGateway,
-                             RetryTemplate retryTemplate, ProductApi productApi) throws NoSuchAlgorithmException {
+                             RetryTemplate retryTemplate, ProductApi productApi, CashbackService cashbackService) throws NoSuchAlgorithmException {
         this.repo = repo;
         this.commandGateway = commandGateway;
         this.retryTemplate = retryTemplate;
         this.productApi = productApi;
+        this.cashbackService = cashbackService;
         this.randomGenerator = SecureRandom.getInstance("SHA1PRNG");
     }
 
@@ -99,8 +104,13 @@ public class MembersController {
             m2.setStatus("");
             m2.setSsn("");
             m2.setEmail("");
+            m2.setCashbackId(cashbackService.getDefaultId().toString());
             return m2;
         });
+
+
+        UUID selectedCashbackId = me.getCashbackId() == null? cashbackService.getDefaultId() : UUID.fromString(me.getCashbackId());
+        CashbackOption cashbackOption = cashbackService.getCashbackOption(selectedCashbackId).orElseGet(cashbackService::getDefaultCashback);
         
         Profile p = new Profile(
                 String.format("%s %s", me.getFirstName(), me.getLastName()),
@@ -112,12 +122,12 @@ public class MembersController {
                 me.getStreet(),
                 0,
                 "XXXX XXXX 1234",
-                "Rädda Barnen",
+                cashbackOption.title,
                 "ACTIVE",
                 LocalDate.now().withDayOfMonth(25),
-                "Isabelle Ducellier, Generaldirektör",
-                String.format("\"Tack kära %s för att du bidrar till att rädda livet på fler cancerdrabbade barn\"", me.getFirstName()),
-                "http://ljus.barncancerfonden.se/images/barncancerfonden.png",
+                cashbackOption.signature,
+                String.format(cashbackOption.paragraph, me.getFirstName()),
+                cashbackOption.selectedUrl,
                 productApi.getSafetyIncreasers(hid)
                 );
 

@@ -59,10 +59,7 @@ public class StaticEventSender {
     @EventHandler
     public void on(MemberSignedEvent e, EventMessage<MemberSignedEvent> eventMessage) {
 
-        MemberSigned externalEventPayload = new MemberSigned(e.getReferenceId());
-        MemberServiceEvent externalEvent = new MemberServiceEvent(e.getId(), eventMessage.getTimestamp(), externalEventPayload);
-
-        botService.sendEvent(externalEvent);
+        
         productApi.contractSinged(e.getId(), e.getReferenceId());
     }
 }

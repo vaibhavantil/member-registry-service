@@ -7,5 +7,6 @@ public class BankIdSignRequest {
 
     private String ssn;
     private String userMessage;
+    private String memberId;
 
 }

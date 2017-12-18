@@ -4,15 +4,11 @@ import com.hedvig.external.billectaAPI.BillectaApi;
 import com.hedvig.external.billectaAPI.api.BankIdAuthenticationStatus;
 import com.hedvig.external.billectaAPI.api.BankIdSignStatus;
 import com.hedvig.external.billectaAPI.api.BankIdStatusType;
-import com.hedvig.external.bisnodeBCI.BisnodeClient;
 import com.hedvig.memberservice.aggregates.exceptions.BankIdReferenceUsedException;
 import com.hedvig.memberservice.commands.AuthenticationAttemptCommand;
 import com.hedvig.memberservice.commands.BankIdSignCommand;
 import com.hedvig.memberservice.commands.InactivateMemberCommand;
-import com.hedvig.memberservice.query.CollectRepository;
-import com.hedvig.memberservice.query.CollectType;
-import com.hedvig.memberservice.query.MemberEntity;
-import com.hedvig.memberservice.query.MemberRepository;
+import com.hedvig.memberservice.query.*;
 import com.hedvig.memberservice.web.dto.BankIdAuthRequest;
 import com.hedvig.memberservice.web.dto.BankIdAuthResponse;
 import com.hedvig.memberservice.web.dto.BankIdSignRequest;
@@ -25,8 +21,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.client.RestTemplate;
 
 import java.util.Objects;
 import java.util.Optional;
@@ -38,8 +34,7 @@ public class AuthController {
     private final CommandGateway commandBus;
     private final BillectaApi billectaApi;
     private final MemberRepository memberRepo;
-    private final BisnodeClient bisnodeClient;
-    private final RestTemplate restTemplate;
+    private final SignedMemberRepository signedMemberRepository;
     private final CollectRepository collectRepo;
     private static Logger log = LoggerFactory.getLogger(AuthController.class);
 
@@ -47,19 +42,18 @@ public class AuthController {
     public AuthController(CommandBus commandBus,
                           BillectaApi billectaApi,
                           MemberRepository memberRepo,
-                          BisnodeClient bisnodeClient,
-                          RestTemplate restTemplate,
-                          CollectRepository collectRepo) {
+                          SignedMemberRepository signedMemberRepository, CollectRepository collectRepo) {
         this.commandBus = new DefaultCommandGateway(commandBus);
         this.billectaApi = billectaApi;
         this.memberRepo = memberRepo;
-        this.bisnodeClient = bisnodeClient;
-        this.restTemplate = restTemplate;
+        this.signedMemberRepository = signedMemberRepository;
         this.collectRepo = collectRepo;
     }
 
     @PostMapping(path = "auth")
     public ResponseEntity<BankIdAuthResponse> auth(@RequestBody(required = true) BankIdAuthRequest request) {
+
+        long memberId = convertMemberId(request.getMemberId());
 
         BankIdAuthenticationStatus status = billectaApi.BankIdAuth(request.getSsn());
         log.info("Started bankId AUTH memberId:{}, autostart:{}, reference:{}, ssn:{}",
@@ -74,25 +68,44 @@ public class AuthController {
             response = new BankIdAuthResponse(status.getStatus(), status.getAutoStartToken(), status.getReferenceToken(), null);
         }
 
-        trackReferenceToken(response.getReferenceToken(), CollectType.RequestType.AUTH);
+        trackAuthToken(response.getReferenceToken(), memberId);
 
         return ResponseEntity.ok(response);
     }
 
     @PostMapping(path ="sign")
     public ResponseEntity<BankIdSignResponse> sign(@RequestBody(required = true) BankIdSignRequest request) {
+        long memberId = convertMemberId(request.getMemberId());
+
         BankIdSignStatus status = billectaApi.BankIdSign(request.getSsn(), request.getUserMessage());
         BankIdSignResponse response = new BankIdSignResponse(status.getAutoStartToken(), status.getReferenceToken(), status.getStatus().value());
 
-        trackReferenceToken(response.getReferenceToken(), CollectType.RequestType.SIGN);
+        trackSignToken(response.getReferenceToken(), memberId);
 
         return ResponseEntity.ok(response);
     }
 
-    private void trackReferenceToken(String referenceToken, CollectType.RequestType sign) {
+    private long convertMemberId(String memberId) {
+        try {
+            return Long.parseLong(memberId);
+        }catch(Exception e) {
+            throw new HttpMessageNotReadableException("Could not parse memberId");
+        }
+    }
+
+    private void trackSignToken(String referenceToken, Long memberId) {
+        trackReferenceToken(referenceToken, CollectType.RequestType.SIGN, memberId);
+    }
+
+    private void trackAuthToken(String referenceToken, Long memberId) {
+        trackReferenceToken(referenceToken, CollectType.RequestType.AUTH, memberId);
+    }
+
+    private void trackReferenceToken(String referenceToken, CollectType.RequestType sign, Long memberId) {
         CollectType ct = new CollectType();
         ct.token = referenceToken;
         ct.type = sign;
+        ct.memberId = memberId;
         collectRepo.save(ct);
     }
 
@@ -114,11 +127,11 @@ public class AuthController {
             if (status.getStatus() == BankIdStatusType.COMPLETE) {
                 String ssn = status.getSSN();
 
-                Optional<MemberEntity> member = memberRepo.findBySsn(ssn);
+                Optional<SignedMemberEntity> member = signedMemberRepository.findBySsn(ssn);
 
                 Long currentMemberId = hid;
                 if (member.isPresent()) {
-                    MemberEntity m = member.get();
+                    SignedMemberEntity m = member.get();
                     if (!m.getId().equals(hid)) {
                         this.commandBus.sendAndWait(new InactivateMemberCommand(hid));
                     }
@@ -143,7 +156,7 @@ public class AuthController {
         } else if (collectType.type.equals(CollectType.RequestType.SIGN)) {
             BankIdSignStatus status = billectaApi.bankIdSignCollect(referenceToken);
             if(status.getStatus() == BankIdStatusType.COMPLETE || status.getStatus() == BankIdStatusType.ERROR) {
-                Optional<MemberEntity> memberEntity = memberRepo.findBySsn(status.getSSN());
+                Optional<MemberEntity> memberEntity = memberRepo.findById(hid);
                 if (memberEntity.isPresent()) {
                     //if (memberEntity.get().getId().equals(hid)) {
                         this.commandBus.sendAndWait(new BankIdSignCommand(hid, status.getReferenceToken()));

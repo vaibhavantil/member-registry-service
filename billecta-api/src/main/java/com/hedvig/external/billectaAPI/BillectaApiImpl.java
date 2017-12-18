@@ -23,6 +23,9 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
+import static net.logstash.logback.argument.StructuredArguments.value;
+import static net.logstash.logback.marker.Markers.append;
+
 public class BillectaApiImpl implements BillectaApi {
 
     private RestTemplate restTemplate;
@@ -113,6 +116,11 @@ public class BillectaApiImpl implements BillectaApi {
                 BankIdAuthenticationStatus.class,
                 token);
 
+
+        if(logger.isInfoEnabled()) {
+            String body = status.getBody() != null ? status.getBody().getStatus().name() : "No response body";
+            logger.info(append("responseBody", status), "Collect response from billecta with referenceId: {}, httpStatusCode:{}, body: {}", value("referenceId", token), status.getStatusCode(), body);
+        }
         return status.getBody();
     }
 

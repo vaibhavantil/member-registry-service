@@ -8,6 +8,10 @@ import java.time.LocalDate;
 import java.util.Objects;
 
 @Entity
+@Table(name="member_entity", indexes={
+        @Index(columnList = "ssn", name="ix_member_entity_ssn")
+})
+
 public class MemberEntity {
 
     @Id
@@ -25,7 +29,6 @@ public class MemberEntity {
 
     @Getter
     @Setter
-    @Column(unique = true)
     private String ssn;
 
     @Getter
@@ -60,4 +63,8 @@ public class MemberEntity {
     @Getter
     @Setter
     private String email;
+
+    @Getter
+    @Setter
+    private String cashbackId;
 }

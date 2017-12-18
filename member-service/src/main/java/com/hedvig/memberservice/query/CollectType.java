@@ -15,4 +15,6 @@ public class CollectType {
 
     @Enumerated(EnumType.STRING)
     public RequestType type;
+
+    public Long memberId;
 }
