@@ -11,6 +11,9 @@ import org.springframework.web.util.UriTemplate;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
+
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.log;
+
 import java.io.StringWriter;
 import java.net.URI;
 import java.util.Base64;
@@ -61,17 +64,18 @@ public class BillectaApiImpl implements BillectaApi {
 
     @Override
     public BankIdAuthenticationStatus BankIdAuth(String ssn) {
+    	logger.info("BankIdAuth for ssn: " + ssn);
         HttpEntity<String> entity = createHeaders();
 
         String ssnOrEmpty = ssn == null ? "": ssn;
-
 
         UriTemplate uri = new UriTemplate(baseUrl + "/v1/bankid/authentication/{creditorId}?ssn={ssn}");
         URI expandedURI = uri.expand(new HashMap<String, Object>() {{
             put("creditorId", creditorId);
             put("ssn", ssnOrEmpty);
         }});
-        System.out.println(expandedURI.toString());
+        logger.debug("expandedURI:" + expandedURI.toString());
+        //System.out.println(expandedURI.toString());
 
         ResponseEntity<BankIdAuthenticationStatus> status = restTemplate.exchange(
                 expandedURI,
@@ -80,6 +84,7 @@ public class BillectaApiImpl implements BillectaApi {
                 BankIdAuthenticationStatus.class
                 );
 
+        logger.debug("status.getBody():" + status.getBody().toString());
         return status.getBody();
     }
 
@@ -92,12 +97,13 @@ public class BillectaApiImpl implements BillectaApi {
     }
 
     private String EncodeTokenHeader() {
+    	assert this.secureToken != null;
         return "SecureToken " + Base64.getEncoder().encodeToString(secureToken.getBytes());
     }
 
-
     @Override
     public BankIdAuthenticationStatus BankIdCollect(String token) {
+    	logger.info("BankIdCollect for token:" + token);
         HttpEntity<String> entity = createHeaders();
 
         ResponseEntity<BankIdAuthenticationStatus> status = restTemplate.exchange(
@@ -117,7 +123,7 @@ public class BillectaApiImpl implements BillectaApi {
 
     public void createDebtor(Debtor debtor) throws JAXBException {
         assert this.billectaClient != null;
-
+        assert debtor != null;
         this.billectaClient.createDebtor(EncodeTokenHeader(), marshallToXML(debtor));
     }
 
@@ -137,7 +143,7 @@ public class BillectaApiImpl implements BillectaApi {
     @Override
     public ResponseEntity<BankAccountRequest> getBankAccountNumbers(String publicId) {
         assert this.billectaClient != null;
-
+        assert publicId != null;
         return this.billectaClient.getBankAccountNumbers(EncodeTokenHeader(), publicId);
     }
 
@@ -147,6 +153,8 @@ public class BillectaApiImpl implements BillectaApi {
             String bankId,
             Consumer<BankAccountRequest> onComplete,
             Consumer<String> onError) {
+    	
+    	logger.info("retrieveBankAccountNumbers: (ssn:" + ssn +")(bankId:" + bankId + ")");
         String publicId = this.initBankAccountRetreivals(ssn, bankId);
         BankAccountPoller poller = new BankAccountPoller(publicId, this, executorService, onComplete, onError);
         executorService.schedule(poller,3, TimeUnit.SECONDS);
@@ -156,15 +164,22 @@ public class BillectaApiImpl implements BillectaApi {
 
     private String marshallToXML(Debtor bankIdAuthenticationStatus) throws JAXBException {
         JAXBContext jaxbContext = JAXBContext.newInstance(Debtor.class);
+       	assert jaxbContext != null;
+       	
         Marshaller marshaller = jaxbContext.createMarshaller();
         StringWriter strWr = new StringWriter();
         ObjectFactory factory = new ObjectFactory();
         marshaller.marshal(factory.createDebtor(bankIdAuthenticationStatus), strWr);
+        assert strWr != null;
+        
         return strWr.toString();
     }
 
     @Override
     public BankIdSignStatus BankIdSign(String ssn, String usermessage) {
+    	
+    	logger.info("BankIdSign: (ssn:" + ssn +")(usermessage:" + usermessage + ")");
+    	assert this.billectaClient != null;
         ResponseEntity<BankIdSignStatus> status = this.billectaClient.bankIdSign(new LinkedMultiValueMap<>(), EncodeTokenHeader(), creditorId, ssn, usermessage);
         if(status.getStatusCode().is2xxSuccessful()) {
             return status.getBody();
@@ -175,6 +190,9 @@ public class BillectaApiImpl implements BillectaApi {
 
     @Override
     public BankIdSignStatus bankIdSignCollect(String referenceToken) {
+    	logger.info("bankIdSignCollect: (referenceToken:" + referenceToken +")");
+    	assert this.billectaClient != null;
+    	
         ResponseEntity<BankIdSignStatus> status = this.billectaClient.bankIdSignCollect(EncodeTokenHeader(), referenceToken);
         if(status.getStatusCode().is2xxSuccessful()) {
             return status.getBody();
