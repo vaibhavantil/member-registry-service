@@ -22,6 +22,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
@@ -52,6 +53,17 @@ public class MembersController {
         this.randomGenerator = SecureRandom.getInstance("SHA1PRNG");
     }
 
+    @RequestMapping("/members")
+    public List<Member> getAsset(@RequestBody String email) {
+    	ArrayList<Member> members = new ArrayList<Member>();
+    	
+		for(MemberEntity m : repo.findAll()){
+			members.add(new Member(m));
+		}
+		return members;
+    }
+    
+    
     @RequestMapping("/{memberId}")
     public ResponseEntity<Member> index(@PathVariable Long memberId) {
 
