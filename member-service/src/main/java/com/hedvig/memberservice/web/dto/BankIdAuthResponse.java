@@ -8,5 +8,4 @@ public class BankIdAuthResponse {
     private BankIdStatusType bankIdStatus;
     private String autoStartToken;
     private String referenceToken;
-    private String newMemberId;
 }

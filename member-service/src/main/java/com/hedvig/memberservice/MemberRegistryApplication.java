@@ -7,6 +7,8 @@ import com.hedvig.external.billectaAPI.BillectaClient;
 import com.hedvig.external.bisnodeBCI.BisnodeClient;
 import com.hedvig.memberservice.aggregates.MemberAggregate;
 import com.hedvig.memberservice.externalEvents.KafkaProperties;
+import com.hedvig.memberservice.services.bankid.BankIdAdapter;
+import com.hedvig.memberservice.services.bankid.BankIdApi;
 import org.axonframework.config.EventHandlingConfiguration;
 import org.axonframework.eventsourcing.AggregateFactory;
 import org.axonframework.spring.eventsourcing.SpringPrototypeAggregateFactory;
@@ -19,6 +21,7 @@ import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.cloud.netflix.feign.EnableFeignClients;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.Primary;
 import org.springframework.context.annotation.Scope;
 import org.springframework.retry.backoff.FixedBackOffPolicy;
 import org.springframework.retry.policy.SimpleRetryPolicy;
@@ -28,7 +31,7 @@ import org.springframework.web.client.RestTemplate;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 
-@SpringBootApplication
+@SpringBootApplication()
 @EnableConfigurationProperties(KafkaProperties.class)
 @EnableFeignClients({"com.hedvig.external.billectaAPI", "com.hedvig.memberservice.externalApi.prouctsPricing"})
 public class MemberRegistryApplication {
@@ -56,6 +59,12 @@ public class MemberRegistryApplication {
     @Autowired
     public void configure(EventHandlingConfiguration config) {
 	    //config.usingTrackingProcessors();
+    }
+
+    @Bean("bankId")
+    @Primary
+    BankIdApi bankIdApi(com.hedvig.external.bankID.BankIdApi impl) {
+	    return new BankIdAdapter(impl);
     }
 
     @Bean

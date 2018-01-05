@@ -183,6 +183,11 @@
 			<artifactId>logstash-logback-encoder</artifactId>
 			<version>4.9</version>
 		</dependency>
+        <dependency>
+            <groupId>com.hedvig.external.bank-id</groupId>
+            <artifactId>bank-id</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
+        </dependency>
 
     </dependencies>
 
