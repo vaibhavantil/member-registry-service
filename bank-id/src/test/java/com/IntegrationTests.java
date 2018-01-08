@@ -11,32 +11,20 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.ws.client.WebServiceIOException;
 import org.springframework.ws.client.core.WebServiceTemplate;
-import org.springframework.ws.soap.client.SoapFaultClientException;
 
-import javax.xml.soap.DetailEntry;
-import javax.xml.soap.SOAPElement;
-import javax.xml.soap.SOAPMessage;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
 
 @SpringBootTest()
 @ContextConfiguration(classes = {com.hedvig.external.bankID.Configuration.class})
 @RunWith(SpringRunner.class)
-public class Tests {
+public class IntegrationTests {
 
     public final static String emoji_closed_lock_with_key = new String(new byte[]{(byte)0xF0, (byte)0x9F, (byte)0x94, (byte)0x90}, Charset.forName("UTF-8"));
 
     @Autowired
     WebServiceTemplate webServiceTemplate;
 
-    @Test
-    public void authWithoutSSN() {
-        BankIdClient bic = new BankIdClient(webServiceTemplate);//new BankIdClient();
-
-        OrderResponseType response = bic.auth("196507272356");
-        System.out.println(response.getOrderRef());
-        System.out.println(response.getAutoStartToken());
-    }
 
     @Test
     public void signWithSSN() throws UnsupportedEncodingException {
@@ -67,10 +55,12 @@ public class Tests {
         }
     }
 
+    /*
     @Test public void collectWithOrderRef() {
         BankIdClient bankIdClient = new BankIdClient(webServiceTemplate);
 
-        bankid.CollectResponseType  collectResponseType = bankIdClient.collect("416a78ae-cea3-4dce-b84e-50cf07d938c1");
+        OrderResponseType response = bankIdClient.auth("196507272356");
+        bankid.CollectResponseType  collectResponseType = bankIdClient.collect(response.getOrderRef());
         System.out.println(collectResponseType.getProgressStatus().value());
-    }
+    }*/
 }

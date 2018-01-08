@@ -1,10 +1,14 @@
 package com.hedvig.external.bankID.exceptions;
 
 import bankid.RpFaultType;
+import com.sun.istack.internal.NotNull;
+import lombok.ToString;
 
+@ToString
 public class BankIDError extends RuntimeException {
 
-    public BankIDError(RpFaultType errorMessages) {
+
+    public BankIDError(@NotNull RpFaultType errorMessages) {
         this.errorType = ErrorType.valueOf(errorMessages.getFaultStatus().value());
         this.detail = errorMessages.getDetailedDescription();
     }
@@ -29,5 +33,4 @@ public class BankIDError extends RuntimeException {
 
     public ErrorType errorType;
     public String detail;
-
 }

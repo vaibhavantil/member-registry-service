@@ -1,11 +1,9 @@
 package com.hedvig.external.bankID;
 
 import bankid.*;
-import com.hedvig.external.bankID.exceptions.BankIDError;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Base64Utils;
 import org.springframework.ws.client.core.WebServiceTemplate;
-import org.springframework.ws.soap.client.SoapFaultClientException;
 
 import javax.xml.bind.JAXBElement;
 import java.io.UnsupportedEncodingException;
@@ -28,7 +26,7 @@ public class BankIdClient {
         JAXBElement<AuthenticateRequestType> authenticateRequest = factory.createAuthenticateRequest(t);
         //WebServiceTemplate webServiceTemplate = this.getWebServiceTemplate();
 
-        JAXBElement<OrderResponseType> type = (JAXBElement<OrderResponseType>) webServiceTemplate.marshalSendAndReceive("https://appapi2.bankid.com/rp/v4", authenticateRequest);
+        JAXBElement<OrderResponseType> type = (JAXBElement<OrderResponseType>) webServiceTemplate.marshalSendAndReceive(authenticateRequest);
 
         return type.getValue();
     }
@@ -57,14 +55,9 @@ public class BankIdClient {
 
 
         ObjectFactory factory = new ObjectFactory();
-        try {
-            JAXBElement<CollectResponseType> type = (JAXBElement<CollectResponseType>) webServiceTemplate.marshalSendAndReceive(factory.createOrderRef(referenceToken));
 
-            return type.getValue();
+        JAXBElement<CollectResponseType> type = (JAXBElement<CollectResponseType>) webServiceTemplate.marshalSendAndReceive(factory.createOrderRef(referenceToken));
 
-        }catch (SoapFaultClientException ex) {
-            System.out.println(ex.getFaultStringOrReason());
-            throw new BankIDError(null);
-        }
+        return type.getValue();
     }
 }

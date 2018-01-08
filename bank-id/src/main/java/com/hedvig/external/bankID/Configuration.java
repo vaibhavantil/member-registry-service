@@ -6,7 +6,6 @@ import org.apache.http.impl.client.HttpClients;
 import org.apache.http.ssl.SSLContextBuilder;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
-import org.springframework.core.io.Resource;
 import org.springframework.oxm.jaxb.Jaxb2Marshaller;
 import org.springframework.ws.client.core.FaultMessageResolver;
 import org.springframework.ws.client.core.WebServiceTemplate;
@@ -15,7 +14,6 @@ import org.springframework.ws.transport.http.HttpComponentsMessageSender;
 import javax.net.ssl.SSLContext;
 import java.io.File;
 import java.io.IOException;
-import java.net.URL;
 import java.security.KeyManagementException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
@@ -24,6 +22,9 @@ import java.security.cert.CertificateException;
 
 @org.springframework.context.annotation.Configuration
 public class Configuration {
+
+    @Value("${hedvig.external.bankid.url")
+    private String bankIDUrl;
     @Value("${http.client.ssl.trust-store}")
     private File trustStore;
     @Value("${http.client.ssl.trust-store-password}")
@@ -74,7 +75,7 @@ public class Configuration {
         webServiceTemplate.setMessageSender(httpComponentsMessageSender);
         webServiceTemplate.setMarshaller(jaxb2Marshaller());
         webServiceTemplate.setUnmarshaller(jaxb2Marshaller());
-        webServiceTemplate.setDefaultUri("https://appapi2.bankid.com/rp/v4");
+        webServiceTemplate.setDefaultUri(bankIDUrl);
         webServiceTemplate.setFaultMessageResolver(faultMessageResolver);
 
         return webServiceTemplate;

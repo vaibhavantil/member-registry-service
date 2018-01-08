@@ -1,9 +1,11 @@
 package com.hedvig.memberservice.web;
 
+import bankid.FaultStatusType;
+import bankid.RpFaultType;
 import com.hedvig.external.bankID.bankidTypes.CollectResponse;
 import com.hedvig.external.bankID.bankidTypes.ProgressStatus;
 import com.hedvig.external.bankID.bankidTypes.UserInfo;
-import com.hedvig.external.billectaAPI.BillectaApi;
+import com.hedvig.external.bankID.exceptions.BankIDError;
 import com.hedvig.external.billectaAPI.api.BankIdAuthenticationStatus;
 import com.hedvig.memberservice.TestApplication;
 import com.hedvig.memberservice.commands.AuthenticationAttemptCommand;
@@ -160,6 +162,43 @@ public class AuthControllerTest {
                 andExpect(jsonPath("$.newMemberId", is(existingMemberId.toString())));
 
     }
+
+
+    @Test
+    public void collect_Auth_BankIDError() throws Exception {
+
+        final Long memberId = 1337L;
+        final String someReferenceValue = "someReferenceValue";
+
+        CollectType collectType = new CollectType();
+        collectType.type = CollectType.RequestType.AUTH;
+        collectType.token = someReferenceValue;
+        collectType.memberId = memberId;
+
+        when(collectRepo.findOne(someReferenceValue)).thenReturn(collectType);
+
+
+        RpFaultType faultType = new RpFaultType();
+        faultType.setFaultStatus(FaultStatusType.EXPIRED_TRANSACTION);
+        faultType.setDetailedDescription("Some description");
+        BankIDError error = new BankIDError(faultType);
+
+        when(bankIdService.authCollect(someReferenceValue)).thenThrow(error);
+
+        mockMvc.
+                perform(
+                        post("/member/bankid/collect", "").
+                                param("referenceToken", someReferenceValue).
+                                header("hedvig.token", memberId.toString())
+                ).
+                andExpect(
+                        status().is4xxClientError()).
+                andExpect(jsonPath("$.apiError").exists()).
+                andExpect(jsonPath("$.apiError.code").value("EXPIRED_TRANSACTION")).
+                andExpect(jsonPath("$.apiError.message").value("Some description"));
+    }
+
+
 
     @Test
     public void collect_Auth_status_STARTED() throws Exception {
