@@ -23,7 +23,7 @@ import java.security.cert.CertificateException;
 @org.springframework.context.annotation.Configuration
 public class Configuration {
 
-    @Value("${hedvig.external.bankid.url")
+    @Value("${hedvig.external.bankid.url}")
     private String bankIDUrl;
     @Value("${http.client.ssl.trust-store}")
     private File trustStore;

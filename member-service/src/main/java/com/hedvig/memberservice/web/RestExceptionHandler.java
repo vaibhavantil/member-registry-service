@@ -16,21 +16,10 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler(BankIDError.class)
     protected ResponseEntity<?> handleBankIDError(BankIDError error) {
-        HttpStatus code = getStatusCode(error);
+        HttpStatus code = HttpStatus.INTERNAL_SERVER_ERROR;
         APIErrorDTO apiError = new APIErrorDTO(code, error.errorType.name(), error.detail);
         return ResponseEntity.status(code).body(apiError);
     }
 
-
-    private HttpStatus getStatusCode(BankIDError error) {
-        switch (error.errorType) {
-            case EXPIRED_TRANSACTION:
-                return HttpStatus.BAD_REQUEST;
-            case RETRY:
-                return HttpStatus.BAD_REQUEST;
-            default:
-                return HttpStatus.INTERNAL_SERVER_ERROR;
-        }
-    }
 
 }

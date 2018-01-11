@@ -4,7 +4,6 @@ import com.hedvig.external.bankID.bankidTypes.CollectResponse;
 import com.hedvig.external.bankID.bankidTypes.OrderResponse;
 import com.hedvig.external.bankID.bankidTypes.ProgressStatus;
 import com.hedvig.external.billectaAPI.api.BankIdAuthenticationStatus;
-import com.hedvig.external.billectaAPI.api.BankIdStatusType;
 import com.hedvig.memberservice.aggregates.exceptions.BankIdReferenceUsedException;
 import com.hedvig.memberservice.commands.AuthenticationAttemptCommand;
 import com.hedvig.memberservice.commands.BankIdSignCommand;
@@ -55,7 +54,7 @@ public class AuthController {
         long memberId = convertMemberId(request.getMemberId());
 
         OrderResponse status = bankIdService.auth(request.getSsn(), memberId);
-        BankIdAuthResponse response = new BankIdAuthResponse(BankIdStatusType.STARTED, status.getAutoStartToken(), status.getOrderRef());
+        BankIdAuthResponse response = new BankIdAuthResponse(status.getAutoStartToken(), status.getOrderRef());
 
 
         return ResponseEntity.ok(response);
@@ -66,7 +65,7 @@ public class AuthController {
         long memberId = convertMemberId(request.getMemberId());
 
         OrderResponse status = bankIdService.sign(request.getSsn(), request.getUserMessage(), memberId);
-        BankIdSignResponse response = new BankIdSignResponse(status.getAutoStartToken(), status.getOrderRef(), "Started");
+        BankIdSignResponse response = new BankIdSignResponse(status.getAutoStartToken(), status.getOrderRef());
 
         return ResponseEntity.ok(response);
     }
@@ -121,12 +120,12 @@ public class AuthController {
                     return ResponseEntity.badRequest().body("{\"message\":\"" + e.getMessage() + "\"}");
                 }
 
-                response = new BankIdCollectResponse(status.getProgressStatus(), "", referenceToken, Objects.toString(currentMemberId));
+                response = new BankIdCollectResponse(BankIdProgressStatus.valueOf(status.getProgressStatus().name()), referenceToken, Objects.toString(currentMemberId));
 
                 return ResponseEntity.ok().header("Hedvig.Id", currentMemberId.toString()).body(response);
             }
 
-            return ResponseEntity.ok(new BankIdCollectResponse(status.getProgressStatus(), "", referenceToken, hid.toString()));
+            return ResponseEntity.ok(new BankIdCollectResponse(BankIdProgressStatus.valueOf(status.getProgressStatus().name()),  referenceToken, hid.toString()));
 
         } else if (collectType.type.equals(CollectType.RequestType.SIGN)) {
             CollectResponse status = bankIdService.signCollect(referenceToken);
@@ -137,9 +136,8 @@ public class AuthController {
                 }
             }
 
-            return ResponseEntity.ok(new BankIdCollectResponse(status.getProgressStatus(), "", referenceToken, hid.toString()));
+            return ResponseEntity.ok(new BankIdCollectResponse(BankIdProgressStatus.valueOf(status.getProgressStatus().name()),  referenceToken, hid.toString()));
         } else {
-
             return ResponseEntity.noContent().build();
         }
     }

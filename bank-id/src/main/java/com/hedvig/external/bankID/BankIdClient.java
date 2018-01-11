@@ -38,9 +38,6 @@ public class BankIdClient {
         t.setPersonalNumber(ssn);
         String encodedMessage = Base64Utils.encodeToString(message.getBytes("UTF-8"));
         System.out.println(encodedMessage.length());
-        //if(encodedMessage.length() > 40000) {
-        //    throw new RuntimeException("User visible sign message is to long!");
-        //}
 
         t.setUserVisibleData(encodedMessage);
         JAXBElement<SignRequestType> authenticateRequest = factory.createSignRequest(t);
@@ -52,8 +49,6 @@ public class BankIdClient {
 
 
     public CollectResponseType collect(String referenceToken) {
-
-
         ObjectFactory factory = new ObjectFactory();
 
         JAXBElement<CollectResponseType> type = (JAXBElement<CollectResponseType>) webServiceTemplate.marshalSendAndReceive(factory.createOrderRef(referenceToken));

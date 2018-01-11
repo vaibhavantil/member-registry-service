@@ -34,10 +34,15 @@ public class BankIdApi {
     public CollectResponse collect(String orderReference) {
         CollectResponseType responseType = bankIdClient.collect(orderReference);
 
+        UserInfo userInfo = null;
+        if(responseType.getUserInfo() != null) {
+            userInfo = new UserInfo(responseType.getUserInfo());
+        }
+
         return new CollectResponse(
                 ProgressStatus.valueOf(responseType.getProgressStatus().name()),
                 responseType.getSignature(),
-                new UserInfo(responseType.getUserInfo()),
+                userInfo,
                 responseType.getOcspResponse());
     }
 }

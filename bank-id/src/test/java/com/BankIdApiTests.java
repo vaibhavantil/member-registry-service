@@ -86,7 +86,7 @@ public class BankIdApiTests {
         when(bankIdClient.sign(ssn, message)).thenThrow(new BankIDError(rpFaultType));
 
         BankIdApi api = new BankIdApi(bankIdClient);
-        OrderResponse response = api.sign(ssn, message);
+        api.sign(ssn, message);
     }
 
     @Test
@@ -115,6 +115,24 @@ public class BankIdApiTests {
 
         assertThat(response).isNotNull();
         assertThat(response.getProgressStatus()).isEqualTo(ProgressStatus.COMPLETE);
+
+    }
+
+    @Test
+    public void Collect_BankIdSession_Pending() throws DatatypeConfigurationException {
+        final String orderReference = "orderReference";
+
+        CollectResponseType crt = new CollectResponseType();
+        crt.setProgressStatus(ProgressStatusType.OUTSTANDING_TRANSACTION);
+
+
+        when(bankIdClient.collect(orderReference)).thenReturn(crt);
+
+        BankIdApi api = new BankIdApi(bankIdClient);
+        CollectResponse response = api.collect(orderReference);
+
+        assertThat(response).isNotNull();
+        assertThat(response.getProgressStatus()).isEqualTo(ProgressStatus.OUTSTANDING_TRANSACTION);
 
     }
 

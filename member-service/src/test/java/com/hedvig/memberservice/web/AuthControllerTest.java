@@ -107,7 +107,6 @@ public class AuthControllerTest {
                 andExpect(
                         status().is2xxSuccessful()).
                 andExpect(jsonPath("$.bankIdStatus", is("COMPLETE"))).
-                andExpect(jsonPath("$.autoStartToken", is(""))).
                 andExpect(jsonPath("$.referenceToken", is(someReferenceValue))).
                 andExpect(jsonPath("$.newMemberId", is(memberId.toString())));
 
@@ -192,7 +191,7 @@ public class AuthControllerTest {
                                 header("hedvig.token", memberId.toString())
                 ).
                 andExpect(
-                        status().is4xxClientError()).
+                        status().is5xxServerError()).
                 andExpect(jsonPath("$.apiError").exists()).
                 andExpect(jsonPath("$.apiError.code").value("EXPIRED_TRANSACTION")).
                 andExpect(jsonPath("$.apiError.message").value("Some description"));
