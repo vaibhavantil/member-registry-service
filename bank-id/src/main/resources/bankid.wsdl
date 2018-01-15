@@ -1,0 +1,143 @@
+<?xml version='1.0' encoding='UTF-8'?><wsdl:definitions xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:wsu="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd" xmlns:wsp="http://schemas.xmlsoap.org/ws/2004/09/policy" xmlns:wsoma="http://schemas.xmlsoap.org/ws/2004/09/policy/optimizedmimeserialization" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:tns="http://bankid.com/RpService/v4.0.0/" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:rp="http://bankid.com/RpService/v4.0.0/types/" name="RpService" targetNamespace="http://bankid.com/RpService/v4.0.0/">
+<wsdl:documentation>
+		BankID BUS RP interface
+		Version: 4.0.0
+	</wsdl:documentation>
+  <wsdl:types>
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:wsu="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd" xmlns:wsp="http://schemas.xmlsoap.org/ws/2004/09/policy" xmlns:wsoma="http://schemas.xmlsoap.org/ws/2004/09/policy/optimizedmimeserialization" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:tns="http://bankid.com/RpService/v4.0.0/" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:rp="http://bankid.com/RpService/v4.0.0/types/">
+		 	
+  <xsd:import namespace="http://bankid.com/RpService/v4.0.0/types/" schemaLocation="https://api2.test.bankid.com/rp/v4?xsd=RpService_v4.xsd"/>
+		
+</xsd:schema>
+  </wsdl:types>
+  <wsdl:message name="RpServicePortType_Sign">
+    <wsdl:part element="rp:SignRequest" name="SignRequest">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="RpServicePortType_Collect">
+    <wsdl:part element="rp:orderRef" name="orderRef">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="RpServicePortType_FileSignResponse">
+    <wsdl:part element="rp:FileSignResponse" name="FileSignResponse">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="RpServicePortType_AuthenticateResponse">
+    <wsdl:part element="rp:AuthResponse" name="AuthResponse">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="RpServicePortType_CollectResponse">
+    <wsdl:part element="rp:CollectResponse" name="CollectResponse">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="RpFault">
+    <wsdl:part element="rp:RpFault" name="RpFault">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="RpServicePortType_SignResponse">
+    <wsdl:part element="rp:SignResponse" name="SignResponse">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="RpServicePortType_Authenticate">
+    <wsdl:part element="rp:AuthenticateRequest" name="AuthenticateRequest">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="RpServicePortType_FileSign">
+    <wsdl:part element="rp:FileSignRequest" name="FileSignRequest">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:portType name="RpServicePortType">
+    <wsdl:operation name="Authenticate">
+      <wsdl:input message="tns:RpServicePortType_Authenticate">
+    </wsdl:input>
+      <wsdl:output message="tns:RpServicePortType_AuthenticateResponse">
+    </wsdl:output>
+      <wsdl:fault message="tns:RpFault" name="RpFault">
+    </wsdl:fault>
+    </wsdl:operation>
+    <wsdl:operation name="Sign">
+      <wsdl:input message="tns:RpServicePortType_Sign">
+    </wsdl:input>
+      <wsdl:output message="tns:RpServicePortType_SignResponse">
+    </wsdl:output>
+      <wsdl:fault message="tns:RpFault" name="RpFault">
+    </wsdl:fault>
+    </wsdl:operation>
+    <wsdl:operation name="FileSign">
+      <wsdl:input message="tns:RpServicePortType_FileSign">
+    </wsdl:input>
+      <wsdl:output message="tns:RpServicePortType_FileSignResponse">
+    </wsdl:output>
+      <wsdl:fault message="tns:RpFault" name="RpFault">
+    </wsdl:fault>
+    </wsdl:operation>
+    <wsdl:operation name="Collect">
+      <wsdl:input message="tns:RpServicePortType_Collect">
+    </wsdl:input>
+      <wsdl:output message="tns:RpServicePortType_CollectResponse">
+    </wsdl:output>
+      <wsdl:fault message="tns:RpFault" name="RpFault">
+    </wsdl:fault>
+    </wsdl:operation>
+  </wsdl:portType>
+  <wsdl:binding name="RpServiceSoapBinding" type="tns:RpServicePortType">
+    <soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+    <wsdl:operation name="Authenticate">
+      <soap:operation soapAction=""/>
+      <wsdl:input>
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal"/>
+      </wsdl:output>
+      <wsdl:fault name="RpFault">
+        <soap:fault name="RpFault" use="literal"/>
+      </wsdl:fault>
+    </wsdl:operation>
+    <wsdl:operation name="Sign">
+      <soap:operation soapAction=""/>
+      <wsdl:input>
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal"/>
+      </wsdl:output>
+      <wsdl:fault name="RpFault">
+        <soap:fault name="RpFault" use="literal"/>
+      </wsdl:fault>
+    </wsdl:operation>
+    <wsdl:operation name="FileSign">
+    <wsp:PolicyReference URI="#ForceMTOM" wsdl:required="false"/>
+      <soap:operation soapAction=""/>
+      <wsdl:input>
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal"/>
+      </wsdl:output>
+      <wsdl:fault name="RpFault">
+        <soap:fault name="RpFault" use="literal"/>
+      </wsdl:fault>
+    </wsdl:operation>
+    <wsdl:operation name="Collect">
+      <soap:operation soapAction=""/>
+      <wsdl:input>
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal"/>
+      </wsdl:output>
+      <wsdl:fault name="RpFault">
+        <soap:fault name="RpFault" use="literal"/>
+      </wsdl:fault>
+    </wsdl:operation>
+  </wsdl:binding>
+  <wsdl:service name="RpService">
+    <wsdl:port binding="tns:RpServiceSoapBinding" name="RpServiceSoapPort">
+      <soap:address location="https://appapi2.bankid.com/rp/v4"/>
+    </wsdl:port>
+  </wsdl:service>
+    <wsp:Policy wsu:Id="ForceMTOM">
+        <wsoma:OptimizedMimeSerialization/>
+    </wsp:Policy>
+</wsdl:definitions>
