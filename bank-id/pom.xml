@@ -108,6 +108,10 @@
                                     <value>${basedir}/trustStore</value>
                                 </property>
                                 <property>
+                                    <name>javax.net.ssl.trustStoreType</name>
+                                    <value>jks</value>
+                                </property>
+                                <property>
                                     <name>javax.net.ssl.trustStorePassword</name>
                                     <value>abc123</value>
                                 </property>
