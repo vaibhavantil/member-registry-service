@@ -93,7 +93,7 @@
                             <properties>
                                 <property>
                                     <name>javax.net.ssl.keyStore</name>
-                                    <value>keyStore.jks</value>
+                                    <value>${project.basedir}/keyStore.jks</value>
                                 </property>
                                 <property>
                                     <name>javax.net.ssl.keyStoreType</name>
@@ -105,7 +105,7 @@
                                 </property>
                                 <property>
                                     <name>javax.net.ssl.trustStore</name>
-                                    <value>trustStore</value>
+                                    <value>${project.basedir}/trustStore</value>
                                 </property>
                                 <property>
                                     <name>javax.net.ssl.trustStorePassword</name>
