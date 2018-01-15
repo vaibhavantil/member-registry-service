@@ -24,6 +24,8 @@ import java.io.UnsupportedEncodingException;
 import java.util.Objects;
 import java.util.Optional;
 
+import static net.logstash.logback.argument.StructuredArguments.value;
+
 @RestController()
 @RequestMapping("/member/bankid/")
 public class AuthController {
@@ -51,6 +53,8 @@ public class AuthController {
     @PostMapping(path = "auth")
     public ResponseEntity<BankIdAuthResponse> auth(@RequestBody BankIdAuthRequest request) {
 
+        log.info("Auth request for with: {}", request.getSsn(), value("memberId", request.getMemberId()));
+
         long memberId = convertMemberId(request.getMemberId());
 
         OrderResponse status = bankIdService.auth(request.getSsn(), memberId);
@@ -63,6 +67,8 @@ public class AuthController {
     @PostMapping(path ="sign")
     public ResponseEntity<BankIdSignResponse> sign(@RequestBody BankIdSignRequest request) throws UnsupportedEncodingException {
         long memberId = convertMemberId(request.getMemberId());
+
+        log.info("Sign request for ssn: {}", request.getSsn(), value("memberId", request.getMemberId()));
 
         OrderResponse status = bankIdService.sign(request.getSsn(), request.getUserMessage(), memberId);
         BankIdSignResponse response = new BankIdSignResponse(status.getAutoStartToken(), status.getOrderRef());
@@ -82,6 +88,8 @@ public class AuthController {
 
     @PostMapping(path = "collect")
     public ResponseEntity<?> collect(@RequestParam String referenceToken, @RequestHeader(value = "hedvig.token") Long hid) throws InterruptedException {
+
+        log.info("Start collect");
 
         CollectType collectType = collectRepo.findOne(referenceToken);
         BankIdCollectResponse response;
