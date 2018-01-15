@@ -72,54 +72,9 @@
                 <configuration>
                     <schemaLanguage>WSDL</schemaLanguage>
                     <generatePackage>bankid</generatePackage>
-                    <schemas>
-                        <schema>
-                            <url>https://appapi2.test.bankid.com/rp/v4?wsdl</url>
-                        </schema>
-                    </schemas>
                 </configuration>
             </plugin>
             <!-- end::wsdl[] -->
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>properties-maven-plugin</artifactId>
-                <version>1.0.0</version>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>set-system-properties</goal>
-                        </goals>
-                        <configuration>
-                            <properties>
-                                <property>
-                                    <name>javax.net.ssl.keyStore</name>
-                                    <value>${basedir}/keyStore.jks</value>
-                                </property>
-                                <property>
-                                    <name>javax.net.ssl.keyStoreType</name>
-                                    <value>jks</value>
-                                </property>
-                                <property>
-                                    <name>javax.net.ssl.keyStorePassword</name>
-                                    <value>qwerty123</value>
-                                </property>
-                                <property>
-                                    <name>javax.net.ssl.trustStore</name>
-                                    <value>${basedir}/trustStore</value>
-                                </property>
-                                <property>
-                                    <name>javax.net.ssl.trustStoreType</name>
-                                    <value>jks</value>
-                                </property>
-                                <property>
-                                    <name>javax.net.ssl.trustStorePassword</name>
-                                    <value>abc123</value>
-                                </property>
-                            </properties>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
         </plugins>
     </build>
 
