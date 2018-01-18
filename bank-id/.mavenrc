@@ -1,0 +1,1 @@
+export MAVEN_OPTS="-Xmx512m -Djavax.net.ssl.keyStore=keyStore.jks -Djavax.net.ssl.keyStoreType=JKS -Djavax.net.ssl.keyStorePassword=qwerty123 -Djavax.net.ssl.trustStore=trustStore -Djavax.net.ssl.trustStorePassword=abc123"

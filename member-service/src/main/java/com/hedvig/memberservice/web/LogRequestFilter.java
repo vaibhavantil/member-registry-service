@@ -33,7 +33,7 @@ public class LogRequestFilter implements Filter {
         } finally {
             // Tear down MDC data:
             // ( Important! Cleans up the ThreadLocal data again )
-            MDC.clear();
+            MDC.remove("memberId");
         }
     }
 

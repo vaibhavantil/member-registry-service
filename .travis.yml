@@ -8,3 +8,4 @@ after_success:
 cache:
   directories:
   - $HOME/.m2
+jdk: openjdk8

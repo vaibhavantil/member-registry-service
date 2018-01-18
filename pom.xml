@@ -12,6 +12,7 @@
         <module>member-service</module>
         <module>billecta-api</module>
 		<module>bisnode-bci</module>
+		<module>bank-id</module>
     </modules>
 
 

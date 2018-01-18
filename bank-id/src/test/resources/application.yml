@@ -1,0 +1,5 @@
+http.client.ssl.trust-store-password: abc123
+http.client.ssl.trust-store: trustStore
+http.client.ssl.key-store-password: qwerty123
+http.client.ssl.key-store: keyStore.jks
+hedvig.external.bankid.url: https://appapi2.test.bankid.com/rp/v4
