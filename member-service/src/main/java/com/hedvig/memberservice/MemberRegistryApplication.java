@@ -9,6 +9,7 @@ import com.hedvig.memberservice.aggregates.MemberAggregate;
 import com.hedvig.memberservice.externalEvents.KafkaProperties;
 import com.hedvig.memberservice.services.bankid.BankIdAdapter;
 import com.hedvig.memberservice.services.bankid.BankIdApi;
+import com.hedvig.memberservice.services.CashbackService;
 import org.axonframework.config.EventHandlingConfiguration;
 import org.axonframework.eventsourcing.AggregateFactory;
 import org.axonframework.spring.eventsourcing.SpringPrototypeAggregateFactory;
@@ -105,8 +106,8 @@ public class MemberRegistryApplication {
 
     @Bean
     @Scope("prototype")
-    public MemberAggregate memberAggregate(BisnodeClient bisnodeClient) {
-        return new MemberAggregate(bisnodeClient);
+    public MemberAggregate memberAggregate(BisnodeClient bisnodeClient, CashbackService cashbackService) {
+        return new MemberAggregate(bisnodeClient, cashbackService);
     }
 
     @Bean

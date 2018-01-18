@@ -9,7 +9,6 @@ import java.util.function.Supplier;
 @Component
 public class CashbackService {
     Map<UUID, CashbackOption> options = new HashMap<>();
-    private CashbackOption defaultCashback;
 
     public CashbackService() {
 
@@ -29,7 +28,7 @@ public class CashbackService {
                 UUID.fromString("d24c427e-d110-11e7-a47e-0b4e39412e98"),
                 "Bancancerfonden",
                 "Barncancerfonden arbetar för att bekämpa barncancer och se till att drabbade och deras familjer får den vård och stöd de behöver.",
-                true,
+                false,
                 true,
                 "http://ljus.barncancerfonden.se/images/barncancerfonden.png",
                 "http://ljus.barncancerfonden.se/images/barncancerfonden.png",

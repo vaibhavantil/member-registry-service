@@ -5,6 +5,8 @@ import com.hedvig.external.bisnodeBCI.dto.Person;
 import com.hedvig.external.bisnodeBCI.dto.PersonSearchResult;
 import com.hedvig.memberservice.commands.*;
 import com.hedvig.memberservice.events.*;
+import com.hedvig.memberservice.services.CashbackService;
+import com.hedvig.memberservice.web.dto.CashbackOption;
 import org.axonframework.commandhandling.CommandHandler;
 import org.axonframework.commandhandling.model.AggregateIdentifier;
 import org.axonframework.commandhandling.model.ApplyMore;
@@ -38,9 +40,12 @@ public class MemberAggregate {
 
     private BisnodeInformation latestBisnodeInformation;
 
+    private CashbackService cashbackService;
+
     @Autowired
-    public MemberAggregate(BisnodeClient bisnodeClient) {
+    public MemberAggregate(BisnodeClient bisnodeClient, CashbackService cashbackService) {
         this.bisnodeClient = bisnodeClient;
+        this.cashbackService = cashbackService;
     }
 
     @CommandHandler
@@ -121,6 +126,7 @@ public class MemberAggregate {
 
     @CommandHandler
     void bankIdSignHandler(BankIdSignCommand cmd) {
+        apply(new NewCashbackSelectedEvent(this.id, cashbackService.getDefaultId().toString()));
         apply(new MemberSignedEvent(this.id, cmd.getReferenceId()));
     }
 
