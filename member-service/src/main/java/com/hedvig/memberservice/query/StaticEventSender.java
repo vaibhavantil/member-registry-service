@@ -60,6 +60,6 @@ public class StaticEventSender {
     public void on(MemberSignedEvent e, EventMessage<MemberSignedEvent> eventMessage) {
 
         
-        productApi.contractSinged(e.getId(), e.getReferenceId());
+        productApi.contractSinged(e.getId(), e.getReferenceId(), e.getSignature(), e.getOscpResponse());
     }
 }

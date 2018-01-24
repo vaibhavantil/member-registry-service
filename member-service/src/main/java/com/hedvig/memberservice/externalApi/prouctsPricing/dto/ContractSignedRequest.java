@@ -6,4 +6,6 @@ import lombok.Value;
 public class ContractSignedRequest {
     String memberId;
     String referenceToken;
+    String signature;
+    String oscpResponse;
 }

@@ -10,12 +10,14 @@ import com.hedvig.memberservice.services.CashbackService;
 import org.axonframework.commandhandling.CommandHandler;
 import org.axonframework.commandhandling.model.AggregateIdentifier;
 import org.axonframework.commandhandling.model.ApplyMore;
+import org.axonframework.common.io.IOUtils;
 import org.axonframework.eventsourcing.EventSourcingHandler;
 import org.axonframework.spring.stereotype.Aggregate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.util.Base64;
 import java.util.List;
 import java.util.Objects;
 
@@ -143,7 +145,7 @@ public class MemberAggregate {
     @CommandHandler
     void bankIdSignHandler(BankIdSignCommand cmd) {
         apply(new NewCashbackSelectedEvent(this.id, cashbackService.getDefaultId().toString()));
-        apply(new MemberSignedEvent(this.id, cmd.getReferenceId()));
+        apply(new MemberSignedEvent(this.id, cmd.getReferenceId(), cmd.getSignature(), cmd.getOscpResponse()));
     }
 
     @CommandHandler
