@@ -1,12 +1,12 @@
 package com.hedvig.memberservice.aggregates;
 
+import com.hedvig.external.billectaAPI.api.BankIdAuthenticationStatus;
 import com.hedvig.external.bisnodeBCI.BisnodeClient;
 import com.hedvig.external.bisnodeBCI.dto.Person;
 import com.hedvig.external.bisnodeBCI.dto.PersonSearchResult;
 import com.hedvig.memberservice.commands.*;
 import com.hedvig.memberservice.events.*;
 import com.hedvig.memberservice.services.CashbackService;
-import com.hedvig.memberservice.web.dto.CashbackOption;
 import org.axonframework.commandhandling.CommandHandler;
 import org.axonframework.commandhandling.model.AggregateIdentifier;
 import org.axonframework.commandhandling.model.ApplyMore;
@@ -58,31 +58,25 @@ public class MemberAggregate {
 
         ApplyMore applyChain = null;
 
+        BankIdAuthenticationStatus bankIdAuthResponse = command.getBankIdAuthResponse();
         if(this.status == MemberStatus.INITIATED) {
             //Trigger fetching of bisnode data.
-            String ssn = command.getBankIdAuthResponse().getSSN();
-            List<PersonSearchResult> personList = bisnodeClient.match(ssn).getPersons();
-            if (personList.size() != 1) {
-                log.error("Could not find person based on personnumer!");
-                throw new RuntimeException("Could not find person at bisnode.");
-            }
+            String ssn = bankIdAuthResponse.getSSN();
+            applyChain = apply(new SSNUpdatedEvent(this.id, ssn));
 
-            Person person = personList.get(0).getPerson();
-
-            applyChain = apply(new NameUpdatedEvent(this.id, person.getPreferredFirstName(), person.getFamilyName()));
-            applyChain = applyChain.andThenApply(() -> new SSNUpdatedEvent(this.id, ssn));
-
-            BisnodeInformation pi = new BisnodeInformation(ssn, person);
-            if(pi.getAddress().isPresent()) {
-                 applyChain = applyChain.andThenApply(() -> new LivingAddressUpdatedEvent(this.id, pi.getAddress().get()));
+            try {
+                applyChain = getPersonInformationFromBisnode(applyChain, ssn);
+            }catch(RuntimeException ex) {
+                log.error("Caught exception calling bisnode for personalInformation", ex);
+                applyChain = applyChain.andThenApply(() ->
+                        new NameUpdatedEvent(this.id, formatName(bankIdAuthResponse.getGivenName()), formatName(bankIdAuthResponse.getSurname())));
             }
 
             applyChain = applyChain.
-                    andThenApply(() -> new PersonInformationFromBisnodeEvent(this.id, pi)).
                     andThenApply(() -> new MemberStartedOnBoardingEvent(this.id, MemberStatus.ONBOARDING));
         }
 
-        MemberAuthenticatedEvent authenticatedEvent = new MemberAuthenticatedEvent(this.id, command.getBankIdAuthResponse().getReferenceToken());
+        MemberAuthenticatedEvent authenticatedEvent = new MemberAuthenticatedEvent(this.id, bankIdAuthResponse.getReferenceToken());
 
         if(applyChain != null)
         {
@@ -91,7 +85,29 @@ public class MemberAggregate {
         else {
             apply(authenticatedEvent);
         }
+    }
 
+    private String formatName(String name) {
+        String lowercase = name.toLowerCase();
+        return  Character.toUpperCase(lowercase.charAt(0)) + lowercase.substring(1);
+    }
+
+    private ApplyMore getPersonInformationFromBisnode(ApplyMore applyChain, String ssn) throws RuntimeException {
+        log.info("Calling bisnode for person information for {}", ssn);
+        List<PersonSearchResult> personList = bisnodeClient.match(ssn).getPersons();
+        Person person = personList.get(0).getPerson();
+        if (personList.size() != 1) {
+            throw new RuntimeException("Could not find person at bisnode.");
+        }
+
+        applyChain = applyChain.andThenApply(() -> new NameUpdatedEvent(this.id, person.getPreferredFirstName(), person.getFamilyName()));
+
+        BisnodeInformation pi = new BisnodeInformation(ssn, person);
+        if(pi.getAddress().isPresent()) {
+            applyChain = applyChain.andThenApply(() -> new LivingAddressUpdatedEvent(this.id, pi.getAddress().get()));
+        }
+        applyChain.andThenApply(() -> new PersonInformationFromBisnodeEvent(this.id, pi));
+        return applyChain;
     }
 
     @CommandHandler

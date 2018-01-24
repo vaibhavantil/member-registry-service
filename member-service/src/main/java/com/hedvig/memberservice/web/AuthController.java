@@ -120,6 +120,8 @@ public class AuthController {
                 try {
                     BankIdAuthenticationStatus authStatus = new BankIdAuthenticationStatus();
                     authStatus.setSSN(status.getUserInfo().getPersonalNumber());
+                    authStatus.setGivenName(status.getUserInfo().getGivenName());
+                    authStatus.setSurname(status.getUserInfo().getSurname());
                     authStatus.setReferenceToken(referenceToken);
                     this.commandGateway.sendAndWait(new AuthenticationAttemptCommand(currentMemberId, authStatus));
                     Thread.sleep(1000L);

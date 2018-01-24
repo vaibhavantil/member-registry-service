@@ -1,17 +1,16 @@
 package com.hedvig.memberservice;
 
+import com.hedvig.external.billectaAPI.api.BankIdAuthenticationStatus;
 import com.hedvig.external.bisnodeBCI.BisnodeClient;
 import com.hedvig.memberservice.aggregates.MemberAggregate;
 import com.hedvig.memberservice.aggregates.MemberStatus;
-import com.hedvig.memberservice.commands.BankIdSignCommand;
-import com.hedvig.memberservice.commands.MemberUpdateContactInformationCommand;
-import com.hedvig.memberservice.commands.SelectNewCashbackCommand;
-import com.hedvig.memberservice.commands.StartOnboardingWithSSNCommand;
+import com.hedvig.memberservice.commands.*;
 import com.hedvig.memberservice.events.*;
 import com.hedvig.memberservice.services.CashbackService;
 import com.hedvig.memberservice.web.dto.Address;
 import com.hedvig.memberservice.web.dto.StartOnboardingWithSSNRequest;
 import com.hedvig.memberservice.web.dto.UpdateContactInformationRequest;
+import org.assertj.core.api.exception.RuntimeIOException;
 import org.axonframework.eventsourcing.AbstractAggregateFactory;
 import org.axonframework.eventsourcing.DomainEventMessage;
 import org.axonframework.test.aggregate.AggregateTestFixture;
@@ -21,9 +20,12 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.web.client.RestClientException;
 
+import java.io.IOException;
 import java.util.UUID;
 
+import static org.mockito.Matchers.notNull;
 import static org.mockito.Mockito.when;
 
 @RunWith(SpringRunner.class)
@@ -61,6 +63,34 @@ public class MemberAggregateTests {
 	public void contextLoads() {
 		Long memberId = 123L;
 		fixture.given(new MemberCreatedEvent(memberId, MemberStatus.INITIATED));
+	}
+
+	@Test
+	public void authenticatedAttemptCommand(){
+		Long memberId = 1234L;
+		final String ssn = "191212121212";
+		final String referenceTokenValue = "referenceTokenValue";
+		final String firstName = "TOLVAN";
+		final String lastName = "TOLVANSSON";
+
+		when(bisnodeClient.match(ssn)).thenThrow(new RestClientException("Something went wrong!"));
+
+		BankIdAuthenticationStatus authStatus = new BankIdAuthenticationStatus();
+		authStatus.setSSN(ssn);
+		authStatus.setReferenceToken(referenceTokenValue);
+		authStatus.setSurname(lastName);
+		authStatus.setGivenName(firstName);
+
+		AuthenticationAttemptCommand cmd = new AuthenticationAttemptCommand(memberId, authStatus);
+
+		fixture.given(new MemberCreatedEvent(memberId, MemberStatus.INITIATED)).
+				when(cmd).
+				expectSuccessfulHandlerExecution().expectEvents(
+						new SSNUpdatedEvent(memberId, ssn),
+						new NameUpdatedEvent(memberId, "Tolvan", "Tolvansson"),
+						new MemberStartedOnBoardingEvent(memberId, MemberStatus.ONBOARDING),
+						new MemberAuthenticatedEvent(memberId, referenceTokenValue)
+		);
 	}
 
 	@Test
