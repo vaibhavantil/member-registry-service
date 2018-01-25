@@ -31,8 +31,10 @@ public class ProductApi {
         try {
             ResponseEntity<SafetyIncreasersDTO> response = this.client.getSafetyIncreasers(memberId);
             return response.getBody().getItems();
-        }catch (Exception ex) {
-            log.error("Error from products-pricing", ex);
+        }catch (FeignException ex) {
+            if(ex.status() != 404) {
+                log.error("Error from products-pricing", ex);
+            }
         }
         return new ArrayList<>();
     }
