@@ -25,7 +25,7 @@ public class MailControler {
 
     private String signupMail;
 
-    public MailControler(JavaMailSender mailSender){
+    public MailControler(JavaMailSender mailSender) throws IOException {
         this.mailSender = mailSender;
         ClassPathResource resource = new ClassPathResource("mail/waitlist.html");
         signupMail = IOUtils.toString(resource.getInputStream(), "UTF-8");
@@ -43,7 +43,7 @@ public class MailControler {
         helper.setTo(request.email);
 
 
-        helper.setText(signupMail, true);
+        helper.setText(signupMail.replace("{TOKEN}", request.token.toString()), true);
         this.mailSender.send(message);
 
         return "";
