@@ -61,7 +61,7 @@ public class MemberAggregate {
         ApplyMore applyChain = null;
 
         BankIdAuthenticationStatus bankIdAuthResponse = command.getBankIdAuthResponse();
-        if(this.status == MemberStatus.INITIATED) {
+        if(this.status == MemberStatus.INITIATED || this.status == MemberStatus.ONBOARDING) {
             //Trigger fetching of bisnode data.
             String ssn = bankIdAuthResponse.getSSN();
             applyChain = apply(new SSNUpdatedEvent(this.id, ssn));
@@ -74,8 +74,10 @@ public class MemberAggregate {
                         new NameUpdatedEvent(this.id, formatName(bankIdAuthResponse.getGivenName()), formatName(bankIdAuthResponse.getSurname())));
             }
 
-            applyChain = applyChain.
-                    andThenApply(() -> new MemberStartedOnBoardingEvent(this.id, MemberStatus.ONBOARDING));
+            if(this.status == MemberStatus.INITIATED ){
+	            applyChain = applyChain.
+	                    andThenApply(() -> new MemberStartedOnBoardingEvent(this.id, MemberStatus.ONBOARDING));
+            }
         }
 
         MemberAuthenticatedEvent authenticatedEvent = new MemberAuthenticatedEvent(this.id, bankIdAuthResponse.getReferenceToken());
