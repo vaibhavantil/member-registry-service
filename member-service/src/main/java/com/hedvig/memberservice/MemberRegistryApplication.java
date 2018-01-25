@@ -1,5 +1,6 @@
 package com.hedvig.memberservice;
 
+import com.amazonaws.services.simpleemail.AmazonSimpleEmailService;
 import com.hedvig.external.billectaAPI.BillectaApi;
 import com.hedvig.external.billectaAPI.BillectaApiFake;
 import com.hedvig.external.billectaAPI.BillectaApiImpl;
@@ -24,6 +25,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Primary;
 import org.springframework.context.annotation.Scope;
+import org.springframework.mail.MailSender;
 import org.springframework.retry.backoff.FixedBackOffPolicy;
 import org.springframework.retry.policy.SimpleRetryPolicy;
 import org.springframework.retry.support.RetryTemplate;
@@ -56,6 +58,12 @@ public class MemberRegistryApplication {
 
 	    SpringApplication.run(MemberRegistryApplication.class, args);
 	}
+
+    @Autowired
+    MailSender mailSender;
+
+    @Autowired
+    AmazonSimpleEmailService ses;
 
     @Autowired
     public void configure(EventHandlingConfiguration config) {
