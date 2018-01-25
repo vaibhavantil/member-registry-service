@@ -9,6 +9,8 @@ public class BankIdSignCommand {
     private Long id;
 
     private String referenceId;
+    private String signature;
+    private String oscpResponse;
 
 
 }
