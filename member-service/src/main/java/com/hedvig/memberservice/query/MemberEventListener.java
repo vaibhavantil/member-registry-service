@@ -71,6 +71,7 @@ public class MemberEventListener {
         m.setCity(e.getCity());
         m.setStreet(e.getStreet());
         m.setZipCode(e.getZipCode());
+        m.setApartment(e.getApartmentNo());
 
         userRepo.save(m);
     }
