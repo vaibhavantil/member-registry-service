@@ -21,6 +21,7 @@ public class Member {
     private final String street;
     private final String city;
     private final String zipCode;
+    private final Integer floor;
 
 
     private final String email;
@@ -37,6 +38,7 @@ public class Member {
         this.ssn = memberEntity.getSsn();
         this.street = memberEntity.getStreet();
         this.zipCode = memberEntity.getZipCode();
+        this.floor = memberEntity.getFloor() == null ? 0: memberEntity.getFloor();
         this.city = memberEntity.getCity();
         this.apartment = memberEntity.getApartment();
         this.email = memberEntity.getEmail();

@@ -19,6 +19,7 @@ public class MemberUpdateContactInformationCommand {
     String city;
     String zipCode;
     String apartmentNo;
+    Integer floor;
 
 
     public MemberUpdateContactInformationCommand(Long memberId, UpdateContactInformationRequest body) {
@@ -33,6 +34,7 @@ public class MemberUpdateContactInformationCommand {
         this.city = body.getAddress().getCity();
         this.zipCode = body.getAddress().getZipCode();
         this.apartmentNo = body.getAddress().getApartmentNo();
+        this.floor = body.getAddress().getFloor();
 
     }
 }

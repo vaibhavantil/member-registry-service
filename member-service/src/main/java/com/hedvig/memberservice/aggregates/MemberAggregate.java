@@ -139,8 +139,8 @@ public class MemberAggregate {
         }
 
         LivingAddress address = this.member.getLivingAddress();
-        if(address == null || address.needsUpdate(cmd.getStreet(), cmd.getCity(), cmd.getZipCode(), cmd.getApartmentNo())) {
-            apply(new LivingAddressUpdatedEvent(this.id, cmd.getStreet(), cmd.getCity(), cmd.getZipCode(), cmd.getApartmentNo()));
+        if(address == null || address.needsUpdate(cmd.getStreet(), cmd.getCity(), cmd.getZipCode(), cmd.getApartmentNo(), cmd.getFloor())) {
+            apply(new LivingAddressUpdatedEvent(this.id, cmd.getStreet(), cmd.getCity(), cmd.getZipCode(), cmd.getApartmentNo(), cmd.getFloor()));
         }
     }
 
@@ -189,7 +189,7 @@ public class MemberAggregate {
     @EventSourcingHandler
     public void on(LivingAddressUpdatedEvent e) {
 
-        LivingAddress address = new LivingAddress(e.getStreet(), e.getCity(), e.getZipCode(), e.getApartmentNo());
+        LivingAddress address = new LivingAddress(e.getStreet(), e.getCity(), e.getZipCode(), e.getApartmentNo(), e.getFloor());
         this.member.setLivingAddress(address);
     }
 

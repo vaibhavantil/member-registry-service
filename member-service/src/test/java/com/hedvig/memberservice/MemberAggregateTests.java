@@ -105,6 +105,7 @@ public class MemberAggregateTests {
 		address.setCity("Spånga");
 		address.setApartmentNo("1104");
 		address.setZipCode("55748");
+		address.setFloor(0);
 		request.setAddress(address);
 
 		fixture.
@@ -112,7 +113,7 @@ public class MemberAggregateTests {
 				when(new MemberUpdateContactInformationCommand(memberId, request)).
 				expectSuccessfulHandlerExecution().expectEvents(
 						new NameUpdatedEvent(memberId, request.getFirstName(), request.getLastName()),
-						new LivingAddressUpdatedEvent(memberId, address.getStreet(), address.getCity(), address.getZipCode(), address.getApartmentNo())
+						new LivingAddressUpdatedEvent(memberId, address.getStreet(), address.getCity(), address.getZipCode(), address.getApartmentNo(), 0)
 		);
 	}
 

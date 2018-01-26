@@ -67,4 +67,9 @@ public class MemberEntity {
     @Getter
     @Setter
     private String cashbackId;
+
+    @Getter
+    @Setter
+    private Integer floor;
+
 }
