@@ -20,8 +20,8 @@ public class CashbackService {
                 true,
                 "https://s3.eu-central-1.amazonaws.com/com-hedvig-web-content/sos.png",
                 "https://s3.eu-central-1.amazonaws.com/com-hedvig-web-content/sos.png",
-                "Lucas Carlsén, VD Hedvig AB",
-                "\"Tack %s! Ditt stöd gör stor skillnad\""
+                "",
+                "När Hedvig har betalat årets alla skador går din andel av överskottet till att ge utsatta barn en trygg uppväxt"
         );
 
         CashbackOption option2 = new CashbackOption(
@@ -32,8 +32,8 @@ public class CashbackService {
                 true,
                 "https://s3.eu-central-1.amazonaws.com/com-hedvig-web-content/cancerfonden.png",
                 "https://s3.eu-central-1.amazonaws.com/com-hedvig-web-content/cancerfonden.png",
-                "John Ardelius, CTO Hedvig AB",
-                "\"Tack %s! Jag tycker att Cancerfonden gör ett bra arbete!\""
+                "",
+                "När Hedvig har betalat årets alla skador går din andel av överskottet till hjälpa till att besegra cancer"
         );
 
         options.put(option3.id, option3);
