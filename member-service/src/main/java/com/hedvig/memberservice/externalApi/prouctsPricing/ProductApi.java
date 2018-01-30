@@ -1,6 +1,7 @@
 package com.hedvig.memberservice.externalApi.prouctsPricing;
 
 import com.hedvig.memberservice.externalApi.prouctsPricing.dto.ContractSignedRequest;
+import com.hedvig.memberservice.externalApi.prouctsPricing.dto.InsuranceStatusDTO;
 import com.hedvig.memberservice.externalApi.prouctsPricing.dto.SafetyIncreasersDTO;
 import feign.FeignException;
 import lombok.extern.slf4j.Slf4j;
@@ -37,5 +38,18 @@ public class ProductApi {
             }
         }
         return new ArrayList<>();
+    }
+
+    public InsuranceStatusDTO getInsuranceStatus(long memberId) {
+        try{
+            ResponseEntity<InsuranceStatusDTO> response = this.client.getInsuranceStatus(memberId);
+            return response.getBody();
+        }catch (FeignException ex) {
+            if(ex.status() != 404) {
+                log.error("Error getting insurance status from products-pricing", ex);
+            }
+        }
+
+        return new InsuranceStatusDTO(new ArrayList<>(), "PENDING");
     }
 }

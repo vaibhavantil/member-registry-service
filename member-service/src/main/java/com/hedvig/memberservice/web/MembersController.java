@@ -3,6 +3,7 @@ package com.hedvig.memberservice.web;
 import com.hedvig.memberservice.commands.ConvertAfterBankIdAuthCommand;
 import com.hedvig.memberservice.commands.CreateMemberCommand;
 import com.hedvig.memberservice.externalApi.prouctsPricing.ProductApi;
+import com.hedvig.memberservice.externalApi.prouctsPricing.dto.InsuranceStatusDTO;
 import com.hedvig.memberservice.query.MemberEntity;
 import com.hedvig.memberservice.query.MemberRepository;
 import com.hedvig.memberservice.services.CashbackService;
@@ -123,7 +124,9 @@ public class MembersController {
 
         UUID selectedCashbackId = me.getCashbackId() == null? cashbackService.getDefaultId() : UUID.fromString(me.getCashbackId());
         CashbackOption cashbackOption = cashbackService.getCashbackOption(selectedCashbackId).orElseGet(cashbackService::getDefaultCashback);
-        
+
+        InsuranceStatusDTO insuranceStatus = this.productApi.getInsuranceStatus(hid);
+
         Profile p = new Profile(
                 String.format("%s %s", me.getFirstName(), me.getLastName()),
                 me.getFirstName(),
@@ -133,14 +136,14 @@ public class MembersController {
                 me.getEmail(),
                 me.getStreet(),
                 0,
-                "XXXX XXXX 1234",
+                insuranceStatus.getInsuranceStatus().equals("ACTIVE") ? "" : "Betalning sätts upp när försäkringen aktiveras", //""XXXX XXXX 1234",
                 cashbackOption.title,
-                "ACTIVE",
-                LocalDate.now().withDayOfMonth(25),
+                insuranceStatus.getInsuranceStatus(),
+                insuranceStatus.getInsuranceStatus().equals("ACTIVE") ? LocalDate.now().withDayOfMonth(25) : null,
                 cashbackOption.signature,
                 String.format(cashbackOption.paragraph, me.getFirstName()),
                 cashbackOption.selectedUrl,
-                productApi.getSafetyIncreasers(hid)
+                insuranceStatus.getSafetyIncreasers()
                 );
 
         return ResponseEntity.ok(p);
