@@ -16,7 +16,7 @@ public class CashbackService {
                 UUID.fromString("97b2d1d8-af4a-11e7-9b2b-bbc138162bb2"),
                 "SOS Barnbyar",
                 "Ge utsatta barn en trygg uppväxt.",
-                true,
+                false,
                 true,
                 "https://s3.eu-central-1.amazonaws.com/com-hedvig-web-content/sos.png",
                 "https://s3.eu-central-1.amazonaws.com/com-hedvig-web-content/sos.png",
