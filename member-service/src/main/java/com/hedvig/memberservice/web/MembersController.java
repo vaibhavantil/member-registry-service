@@ -136,7 +136,7 @@ public class MembersController {
                 me.getEmail(),
                 me.getStreet(),
                 0,
-                insuranceStatus.getInsuranceStatus().equals("ACTIVE") ? "" : "Betalning sätts upp när försäkringen aktiveras", //""XXXX XXXX 1234",
+                insuranceStatus.getInsuranceStatus()    .equals("ACTIVE") ? "Betalas med faktura" : "Betalning sätts upp när försäkringen aktiveras", //""XXXX XXXX 1234",
                 cashbackOption.title,
                 insuranceStatus.getInsuranceStatus(),
                 insuranceStatus.getInsuranceStatus().equals("ACTIVE") ? LocalDate.now().withDayOfMonth(25) : null,
