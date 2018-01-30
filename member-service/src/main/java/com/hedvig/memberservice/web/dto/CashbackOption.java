@@ -26,6 +26,7 @@ import java.util.UUID;
 @Wither
 public class CashbackOption {
     public UUID id;
+    public String name;
     public String title;
     public String description;
     public Boolean selected;
