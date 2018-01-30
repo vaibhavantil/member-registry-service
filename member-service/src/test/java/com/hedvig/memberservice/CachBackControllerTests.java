@@ -55,7 +55,7 @@ public class CachBackControllerTests {
     CashbackService cashbackService;
 
     private CashbackOption createCashbackOption(UUID newOptionId) {
-        return new CashbackOption(newOptionId, "", "", false, true, "", "", "", "");
+        return new CashbackOption(newOptionId, "", "", "", false, true, "", "", "", "");
     }
 
 
