@@ -14,8 +14,8 @@ public class CashbackService {
 
         CashbackOption option3 = new CashbackOption(
                 UUID.fromString("97b2d1d8-af4a-11e7-9b2b-bbc138162bb2"),
-                "SOS Barnbyar",
-                "Ge utsatta barn en trygg uppväxt.",
+                "Ge utsatta barn en trygg uppväxt",
+                "SOS Barnbyar gör ett fantastiskt arbete för att hjälpa barn som förlorat allt. Hos SOS Barnbyar får barnen en familj och en uppväxt i ett tryggt hem och möjlighet att gå i skolan med ambitionen att ta sig ur fattigdomen.",
                 false,
                 true,
                 "https://s3.eu-central-1.amazonaws.com/com-hedvig-web-content/sos.png",
@@ -26,8 +26,8 @@ public class CashbackService {
 
         CashbackOption option2 = new CashbackOption(
                 UUID.fromString("11143ee0-af4b-11e7-a359-4f8b8d55e69f"),
-                "Cancerfonden",
-                "Hjälp till att besegra cancer.",
+                "Hjälp till att besegra cancer",
+                "Cancerfonden arbetar för att besegra cancer. Målet är att fler ska överleva och färre drabbas. Organisationen arbetar också för att vården ska vara så bra som möjligt för dem som insjuknar och att deras närstående för stöd och hjälp. För att nå dit arbetar organisationen bland annat med forskningsfinansiering.",
                 false,
                 true,
                 "https://s3.eu-central-1.amazonaws.com/com-hedvig-web-content/cancerfonden.png",
