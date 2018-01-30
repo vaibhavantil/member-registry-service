@@ -42,7 +42,7 @@ public class LivingAddressUpdatedEvent {
 
     private int parseFloorFromApartment(String apartmentNo) {
         final Pattern compile = Pattern.compile("\\d\\d\\d\\d");
-        final Matcher matcher = compile.matcher(apartmentNo);
+        final Matcher matcher = compile.matcher(apartmentNo == null ? "": apartmentNo);
         if(matcher.matches()){
             try {
                 return 10 - Integer.parseInt(apartmentNo.substring(0, 2));
