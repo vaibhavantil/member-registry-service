@@ -38,7 +38,7 @@ public class MailControler {
 
         MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
         helper.setSubject("Välkommen till hedvig!");
-        helper.setFrom("hedvig@hedvig.com");
+        helper.setFrom("\"Hedvig\" <hedvig@hedvig.com>");
 
         helper.setTo(request.email);
 
