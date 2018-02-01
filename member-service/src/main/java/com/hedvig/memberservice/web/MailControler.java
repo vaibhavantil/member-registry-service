@@ -4,6 +4,7 @@ package com.hedvig.memberservice.web;
 import com.hedvig.memberservice.web.dto.SendSignupRequest;
 import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
@@ -22,11 +23,13 @@ public class MailControler {
 
     @Autowired
     JavaMailSender mailSender;
+    private final String webSiteBaseUrl;
 
     private String signupMail;
 
-    public MailControler(JavaMailSender mailSender) throws IOException {
+    public MailControler(JavaMailSender mailSender, @Value("${hedvig.websiteBaseUrl:https://www.hedvig.com}") String webSiteBaseUrl) throws IOException {
         this.mailSender = mailSender;
+        this.webSiteBaseUrl = webSiteBaseUrl;
         ClassPathResource resource = new ClassPathResource("mail/waitlist.html");
         signupMail = IOUtils.toString(resource.getInputStream(), "UTF-8");
     }
@@ -37,13 +40,13 @@ public class MailControler {
         MimeMessage message = mailSender.createMimeMessage();
 
         MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
-        helper.setSubject("Välkommen till hedvig!");
+        helper.setSubject("Välkommen till Hedvig!");
         helper.setFrom("\"Hedvig\" <hedvig@hedvig.com>");
 
         helper.setTo(request.email);
 
 
-        helper.setText(signupMail.replace("{TOKEN}", request.token.toString()), true);
+        helper.setText(signupMail.replace("{TOKEN}", request.token.toString()).replace("{BASE_URL}", webSiteBaseUrl), true);
         this.mailSender.send(message);
 
         return "";
