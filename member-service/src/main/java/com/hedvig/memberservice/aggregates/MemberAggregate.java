@@ -117,7 +117,7 @@ public class MemberAggregate {
 
     private String getFirstName(Person person) throws RuntimeException {
         if(person.getPreferredFirstName() == null) {
-            if(person.getFirstNames() == null || person.getFirstNames().size() > 0) {
+            if(person.getFirstNames() == null || person.getFirstNames().size() == 0) {
                 throw new RuntimeException("Could not find firstname in bisnode response, prefferedFirstName and firstNames are null");
             }
             return person.getFirstNames().get(0);
