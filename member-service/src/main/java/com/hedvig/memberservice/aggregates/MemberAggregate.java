@@ -105,7 +105,7 @@ public class MemberAggregate {
         }
 
 
-        applyChain = applyChain.andThenApply(() -> new NameUpdatedEvent(this.id, getFirstName(person);, person.getFamilyName()));
+        applyChain = applyChain.andThenApply(() -> new NameUpdatedEvent(this.id, getFirstName(person), person.getFamilyName()));
 
         BisnodeInformation pi = new BisnodeInformation(ssn, person);
         if(pi.getAddress().isPresent()) {
