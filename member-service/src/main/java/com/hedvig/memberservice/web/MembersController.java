@@ -54,17 +54,6 @@ public class MembersController {
         this.randomGenerator = SecureRandom.getInstance("SHA1PRNG");
     }
 
-    @RequestMapping("/members")
-    public List<Member> getAsset(@RequestBody String email) {
-    	ArrayList<Member> members = new ArrayList<Member>();
-    	
-		for(MemberEntity m : repo.findAll()){
-			members.add(new Member(m));
-		}
-		return members;
-    }
-    
-    
     @RequestMapping("/{memberId}")
     public ResponseEntity<Member> index(@PathVariable Long memberId) {
 
