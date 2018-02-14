@@ -8,18 +8,23 @@ import com.hedvig.memberservice.query.CollectRepository;
 import com.hedvig.memberservice.query.CollectType;
 import com.hedvig.memberservice.query.MemberEntity;
 import com.hedvig.memberservice.query.MemberRepository;
+import com.hedvig.memberservice.web.dto.InternalMember;
 import com.hedvig.memberservice.web.dto.StartOnboardingWithSSNRequest;
 import com.hedvig.memberservice.web.dto.UpdateContactInformationRequest;
 import com.hedvig.memberservice.web.dto.events.BankAccountRetrievalFailed;
 import com.hedvig.memberservice.web.dto.events.BankAccountRetrievalSuccess;
 import com.hedvig.memberservice.web.dto.events.MemberServiceEvent;
+import lombok.val;
 import org.axonframework.commandhandling.gateway.CommandGateway;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.Instant;
+import java.util.Iterator;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 @RestController
 @RequestMapping("/i/member")
@@ -31,13 +36,13 @@ public class InternalMembersController {
     private final BotService botSerivce;
     private final CollectRepository collectRepository;
 
-    public InternalMembersController(CommandGateway commandBus,
-                                     BillectaApi billectaApi,
-                                     MemberRepository memberRepository,
-                                     BotService botSerivce,
-                                     CollectRepository collectRepository) {
+    public InternalMembersController(
+            CommandGateway commandBus,
+            BillectaApi billectaApi,
+            MemberRepository memberRepository,
+            BotService botSerivce,
+            CollectRepository collectRepository) {
         this.commandBus = commandBus;
-
         this.billectaApi = billectaApi;
         this.memberRepository = memberRepository;
         this.botSerivce = botSerivce;
@@ -46,7 +51,7 @@ public class InternalMembersController {
 
 
     @RequestMapping("/{memberId}/startBankAccountRetrieval/{bankId}")
-    public ResponseEntity<String> startBankAccountRetrieval(@PathVariable Long memberId,@PathVariable String bankId) {
+    public ResponseEntity<String> startBankAccountRetrieval(@PathVariable Long memberId, @PathVariable String bankId) {
         MemberEntity me = memberRepository.findOne(memberId);
 
         String publicId = billectaApi.retrieveBankAccountNumbers(
@@ -66,14 +71,14 @@ public class InternalMembersController {
                     MemberServiceEvent e = new MemberServiceEvent(me.getId(), Instant.now(), payload);
                     botSerivce.sendEvent(e);
                 }
-                );
+        );
 
         CollectType ct = new CollectType();
         ct.token = publicId;
         ct.type = CollectType.RequestType.RETRIEVE_ACCOUNTS;
         this.collectRepository.save(ct);
 
-        return ResponseEntity.ok("{\"id\":\"" + publicId +"\"}");
+        return ResponseEntity.ok("{\"id\":\"" + publicId + "\"}");
     }
 
     @RequestMapping(value = "/{memberId}/finalizeOnboarding", method = RequestMethod.POST)
@@ -91,7 +96,7 @@ public class InternalMembersController {
 
 
         Optional<MemberEntity> member = memberRepository.findBySsn(request.getSsn());
-        if(member.isPresent()) {
+        if (member.isPresent()) {
             return ResponseEntity.status(HttpStatus.ALREADY_REPORTED).body(member.get().getId().toString());
         }
 
@@ -108,4 +113,34 @@ public class InternalMembersController {
         return ResponseEntity.noContent().build();
     }
 
+    @RequestMapping(value = "/search", method = RequestMethod.GET)
+    @Transactional
+    public Iterator<InternalMember> searchMembers(
+            @RequestParam(name = "status", defaultValue = "", required = false) String status,
+            @RequestParam(name = "query", defaultValue = "", required = false) String query) {
+
+        status = status.trim();
+        query = query.trim();
+        if (!query.equals("")) {
+            query = "%" + query + "%";
+        }
+        try (val stream = search(status, query)) {
+            return stream
+                    .map(InternalMember::fromEnity)
+                    .iterator();
+        }
+    }
+
+    private Stream<MemberEntity> search(String status, String query) {
+        if (status.equals("") && query.equals("")) {
+            return memberRepository.searchAll();
+        }
+        if (!status.equals("")) {
+            return memberRepository.searchByStatus(status);
+        }
+        if (!query.equals("")) {
+            return memberRepository.searchByQuery(query);
+        }
+        return memberRepository.searchByStatusAndQuery(status, query);
+    }
 }
