@@ -24,6 +24,7 @@ import org.springframework.web.bind.annotation.*;
 import java.time.Instant;
 import java.util.Iterator;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @RestController
@@ -127,6 +128,7 @@ public class InternalMembersController {
         try (val stream = search(status, query)) {
             return stream
                     .map(InternalMember::fromEnity)
+                    .collect(Collectors.toList())
                     .iterator();
         }
     }
