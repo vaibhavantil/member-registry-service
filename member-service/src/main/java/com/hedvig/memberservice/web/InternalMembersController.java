@@ -134,8 +134,8 @@ public class InternalMembersController {
     }
 
     private Stream<MemberEntity> search(String status, String query) {
-        if (status.equals("") && query.equals("")) {
-            return memberRepository.searchAll();
+        if (!status.equals("") && !query.equals("")) {
+            return memberRepository.searchByStatusAndQuery(status, query);
         }
         if (!status.equals("")) {
             return memberRepository.searchByStatus(status);
@@ -143,6 +143,6 @@ public class InternalMembersController {
         if (!query.equals("")) {
             return memberRepository.searchByQuery(query);
         }
-        return memberRepository.searchByStatusAndQuery(status, query);
+        return memberRepository.searchAll();
     }
 }
