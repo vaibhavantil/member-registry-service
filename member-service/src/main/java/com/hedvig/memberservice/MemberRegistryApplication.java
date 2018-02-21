@@ -63,9 +63,6 @@ public class MemberRegistryApplication {
     MailSender mailSender;
 
     @Autowired
-    AmazonSimpleEmailService ses;
-
-    @Autowired
     public void configure(EventHandlingConfiguration config) {
 	    //config.usingTrackingProcessors();
     }
