@@ -98,6 +98,7 @@ public class MailControler {
             .replace("{PROXY_LINK}", request.getProxyLink());
         helper.setText(templatedMail);
 
+        mailSender.send(message);
         return "";
     }
 
@@ -112,6 +113,7 @@ public class MailControler {
             .replace("{NAME}", request.getName());
         helper.setText(templatedMail);
 
+        mailSender.send(message);
         return "";
     }
 
@@ -126,6 +128,7 @@ public class MailControler {
             .replace("{NAME}", request.getName());
         helper.setText(templatedMail);
 
+        mailSender.send(message);
         return "";
     }
 }
