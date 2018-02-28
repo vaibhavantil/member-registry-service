@@ -121,7 +121,7 @@ public class MailControler {
     public String sendWaitIsOverMail(@RequestBody SendWaitIsOverRequest request) throws MessagingException {
         val message = mailSender.createMimeMessage();
         val helper = new MimeMessageHelper(message, true, "UTF-8");
-        helper.setSubject("Här kommer din aktiveringskod! ��");
+        helper.setSubject("Här kommer din aktiveringskod!");
         helper.setFrom("\"Hedvig\" <hedvig@hedvig.com>");
         helper.setTo(request.getEmail());
         val templatedMail = waitIsOverMail
