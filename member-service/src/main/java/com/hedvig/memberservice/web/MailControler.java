@@ -73,7 +73,7 @@ public class MailControler {
     public String sendOnboardedActiveTodayMail(@RequestBody SendOnboardedActiveTodayRequest request) throws MessagingException {
         val message = mailSender.createMimeMessage();
         val helper = new MimeMessageHelper(message, true, "UTF-8");
-        helper.setSubject("TODO");
+        helper.setSubject("Välkommen till Hedvig! 🙌🏻");
         helper.setFrom("\"Hedvig\" <hedvig@hedvig.com>");
         helper.setTo(request.getEmail());
         
@@ -90,7 +90,7 @@ public class MailControler {
     public String sendOnboardedActiveLaterMail(@RequestBody SendOnboardedActiveLaterRequest request) throws MessagingException {
         val message = mailSender.createMimeMessage();
         val helper = new MimeMessageHelper(message, true, "UTF-8");
-        helper.setSubject("TODO");
+        helper.setSubject("Välkommen till Hedvig! 🙌🏻");
         helper.setFrom("\"Hedvig\" <hedvig@hedvig.com>");
         helper.setTo(request.getEmail());
         val templatedMail = onboardedLaterMail
@@ -106,7 +106,7 @@ public class MailControler {
     public String sendActivated(@RequestBody SendActivatedRequest request) throws MessagingException {
         val message = mailSender.createMimeMessage();
         val helper = new MimeMessageHelper(message, true, "UTF-8");
-        helper.setSubject("TODO");
+        helper.setSubject("Din försäkring har aktiverats ✔️");
         helper.setFrom("\"Hedvig\" <hedvig@hedvig.com>");
         helper.setTo(request.getEmail());
         val templatedMail = activatedMail
@@ -121,7 +121,7 @@ public class MailControler {
     public String sendWaitIsOverMail(@RequestBody SendWaitIsOverRequest request) throws MessagingException {
         val message = mailSender.createMimeMessage();
         val helper = new MimeMessageHelper(message, true, "UTF-8");
-        helper.setSubject("TODO");
+        helper.setSubject("Här kommer din aktiveringskod! ��");
         helper.setFrom("\"Hedvig\" <hedvig@hedvig.com>");
         helper.setTo(request.getEmail());
         val templatedMail = waitIsOverMail

@@ -4,7 +4,6 @@ import com.hedvig.memberservice.web.dto.CashbackOption;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
-import java.util.function.Supplier;
 
 @Component
 public class CashbackService {
@@ -20,26 +19,26 @@ public class CashbackService {
                 false,
                 true,
                 "https://s3.eu-central-1.amazonaws.com/com-hedvig-web-content/sos.png",
-                "https://s3.eu-central-1.amazonaws.com/com-hedvig-web-content/sos-profile.png",
+                "https://s3.eu-central-1.amazonaws.com/com-hedvig-web-content/sos-barnbyar.jpg",
                 "",
                 "När Hedvig har betalat årets alla skador går din andel av överskottet till att ge utsatta barn en trygg uppväxt"
         );
 
-        CashbackOption option2 = new CashbackOption(
-                UUID.fromString("11143ee0-af4b-11e7-a359-4f8b8d55e69f"),
-                "Cancerfonden",
-                "Hjälp till att besegra cancer",
-                "Cancerfonden arbetar för att besegra cancer. Målet är att fler ska överleva och färre drabbas. Organisationen arbetar också för att vården ska vara så bra som möjligt för dem som insjuknar och att deras närstående för stöd och hjälp. För att nå dit arbetar organisationen bland annat med forskningsfinansiering.",
-                false,
-                true,
-                "https://s3.eu-central-1.amazonaws.com/com-hedvig-web-content/cancerfonden.png",
-                "https://s3.eu-central-1.amazonaws.com/com-hedvig-web-content/cancerfonden-profile.png",
-                "",
-                "När Hedvig har betalat årets alla skador går din andel av överskottet till hjälpa till att besegra cancer"
-        );
+        // CashbackOption option2 = new CashbackOption(
+        //         UUID.fromString("11143ee0-af4b-11e7-a359-4f8b8d55e69f"),
+        //         "Cancerfonden",
+        //         "Hjälp till att besegra cancer",
+        //         "Cancerfonden arbetar för att besegra cancer. Målet är att fler ska överleva och färre drabbas. Organisationen arbetar också för att vården ska vara så bra som möjligt för dem som insjuknar och att deras närstående för stöd och hjälp. För att nå dit arbetar organisationen bland annat med forskningsfinansiering.",
+        //         false,
+        //         true,
+        //         "https://s3.eu-central-1.amazonaws.com/com-hedvig-web-content/cancerfonden.png",
+        //         "https://s3.eu-central-1.amazonaws.com/com-hedvig-web-content/cancerfonden-profile.png",
+        //         "",
+        //         "När Hedvig har betalat årets alla skador går din andel av överskottet till hjälpa till att besegra cancer"
+        // );
 
         options.put(option3.id, option3);
-        options.put(option2.id, option2);
+        // options.put(option2.id, option2);
     }
 
     public Optional<CashbackOption> getCashbackOption(UUID cashbackId) {
