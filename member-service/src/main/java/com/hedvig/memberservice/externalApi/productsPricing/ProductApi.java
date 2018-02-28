@@ -1,10 +1,9 @@
-package com.hedvig.memberservice.externalApi.prouctsPricing;
+package com.hedvig.memberservice.externalApi.productsPricing;
 
-import com.hedvig.memberservice.externalApi.prouctsPricing.dto.ContractSignedRequest;
-import com.hedvig.memberservice.externalApi.prouctsPricing.dto.InsuranceStatusDTO;
-import com.hedvig.memberservice.externalApi.prouctsPricing.dto.SafetyIncreasersDTO;
+import com.hedvig.memberservice.externalApi.productsPricing.dto.ContractSignedRequest;
+import com.hedvig.memberservice.externalApi.productsPricing.dto.InsuranceStatusDTO;
+import com.hedvig.memberservice.externalApi.productsPricing.dto.SafetyIncreasersDTO;
 import feign.FeignException;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
@@ -51,5 +50,10 @@ public class ProductApi {
         }
 
         return new InsuranceStatusDTO(new ArrayList<>(), "PENDING");
+    }
+
+    public byte[] getContract(String contractId) {
+        ResponseEntity<byte[]> response = this.client.getContract(contractId);
+        return response.getBody();
     }
 }

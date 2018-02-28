@@ -2,8 +2,8 @@ package com.hedvig.memberservice.web;
 
 import com.hedvig.memberservice.commands.ConvertAfterBankIdAuthCommand;
 import com.hedvig.memberservice.commands.CreateMemberCommand;
-import com.hedvig.memberservice.externalApi.prouctsPricing.ProductApi;
-import com.hedvig.memberservice.externalApi.prouctsPricing.dto.InsuranceStatusDTO;
+import com.hedvig.memberservice.externalApi.productsPricing.ProductApi;
+import com.hedvig.memberservice.externalApi.productsPricing.dto.InsuranceStatusDTO;
 import com.hedvig.memberservice.query.MemberEntity;
 import com.hedvig.memberservice.query.MemberRepository;
 import com.hedvig.memberservice.services.CashbackService;
@@ -23,7 +23,6 @@ import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;

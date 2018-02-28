@@ -36,7 +36,7 @@ import java.util.concurrent.ScheduledThreadPoolExecutor;
 
 @SpringBootApplication()
 @EnableConfigurationProperties(KafkaProperties.class)
-@EnableFeignClients({"com.hedvig.external.billectaAPI", "com.hedvig.memberservice.externalApi.prouctsPricing"})
+@EnableFeignClients({"com.hedvig.external.billectaAPI", "com.hedvig.memberservice.externalApi.productsPricing"})
 public class MemberRegistryApplication {
 
     @Value("${hedvig.bisnode.client.id}")

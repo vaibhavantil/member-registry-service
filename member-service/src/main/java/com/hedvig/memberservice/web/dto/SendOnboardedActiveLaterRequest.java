@@ -7,4 +7,5 @@ public class SendOnboardedActiveLaterRequest {
     public String email;
     public String name;
     public String proxyLink;
+    public String memberId;
 }

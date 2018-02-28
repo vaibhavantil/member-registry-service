@@ -1,13 +1,11 @@
 package com.hedvig.memberservice.query;
 
 import com.hedvig.memberservice.events.MemberSignedEvent;
-import com.hedvig.memberservice.externalApi.prouctsPricing.ProductApi;
+import com.hedvig.memberservice.externalApi.productsPricing.ProductApi;
 import com.hedvig.memberservice.web.dto.events.MemberAuthedEvent;
 import com.hedvig.memberservice.events.MemberAuthenticatedEvent;
 import com.hedvig.memberservice.externalApi.BotService;
 import com.hedvig.memberservice.web.dto.Member;
-import com.hedvig.memberservice.web.dto.events.MemberServiceEvent;
-import com.hedvig.memberservice.web.dto.events.MemberSigned;
 import org.axonframework.config.ProcessingGroup;
 import org.axonframework.eventhandling.EventHandler;
 import org.axonframework.eventhandling.EventMessage;
@@ -15,7 +13,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.web.client.RestTemplate;
 
 @Component
 @ProcessingGroup("com.hedvig.memberservice.query")

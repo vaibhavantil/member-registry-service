@@ -1,6 +1,7 @@
 package com.hedvig.memberservice.web;
 
 
+import com.hedvig.memberservice.externalApi.productsPricing.ProductApi;
 import com.hedvig.memberservice.web.dto.SendActivatedRequest;
 import com.hedvig.memberservice.web.dto.SendOnboardedActiveLaterRequest;
 import com.hedvig.memberservice.web.dto.SendOnboardedActiveTodayRequest;
@@ -9,6 +10,7 @@ import com.hedvig.memberservice.web.dto.SendWaitIsOverRequest;
 import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
@@ -20,6 +22,8 @@ import org.springframework.web.bind.annotation.RestController;
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
 import lombok.val;
+
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 
 @RestController
@@ -35,6 +39,7 @@ public class MailControler {
     private String onboardedLaterMail;
     private String activatedMail;
     private String waitIsOverMail;
+    private ProductApi productApi;
 
     public MailControler(JavaMailSender mailSender, @Value("${hedvig.websiteBaseUrl:https://www.hedvig.com}") String webSiteBaseUrl) throws IOException {
         this.mailSender = mailSender;
@@ -93,10 +98,13 @@ public class MailControler {
         helper.setSubject("Välkommen till Hedvig! 🙌🏻");
         helper.setFrom("\"Hedvig\" <hedvig@hedvig.com>");
         helper.setTo(request.getEmail());
+        val pdf = productApi.getContract(request.memberId);
+
         val templatedMail = onboardedLaterMail
-            .replace("{NAME}", request.getName())
-            .replace("{PROXY_LINK}", request.getProxyLink());
+            .replace("{NAME}", request.getName());
+
         helper.setText(templatedMail);
+        helper.addAttachment("fullmakt.pdf", new ByteArrayResource(pdf));
 
         mailSender.send(message);
         return "";

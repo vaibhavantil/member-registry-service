@@ -1,8 +1,8 @@
-package com.hedvig.memberservice.externalApi.prouctsPricing;
+package com.hedvig.memberservice.externalApi.productsPricing;
 
-import com.hedvig.memberservice.externalApi.prouctsPricing.dto.ContractSignedRequest;
-import com.hedvig.memberservice.externalApi.prouctsPricing.dto.InsuranceStatusDTO;
-import com.hedvig.memberservice.externalApi.prouctsPricing.dto.SafetyIncreasersDTO;
+import com.hedvig.memberservice.externalApi.productsPricing.dto.ContractSignedRequest;
+import com.hedvig.memberservice.externalApi.productsPricing.dto.InsuranceStatusDTO;
+import com.hedvig.memberservice.externalApi.productsPricing.dto.SafetyIncreasersDTO;
 import org.springframework.cloud.netflix.feign.FeignClient;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -21,5 +21,8 @@ public interface ProductClient {
 
     @RequestMapping(value = "/_/insurance/{memberId}/insurance")
     ResponseEntity<InsuranceStatusDTO> getInsuranceStatus(@PathVariable("memberId") long memberId);
+
+    @RequestMapping(value = "/_insurance/contract/{contractId}")
+    ResponseEntity<byte[]> getContract(@PathVariable("contractId") String contractId);
 
 }

@@ -1,4 +1,4 @@
-package com.hedvig.memberservice.externalApi.prouctsPricing.dto;
+package com.hedvig.memberservice.externalApi.productsPricing.dto;
 
 import lombok.Value;
 
