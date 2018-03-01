@@ -52,8 +52,8 @@ public class ProductApi {
         return new InsuranceStatusDTO(new ArrayList<>(), "PENDING");
     }
 
-    public byte[] getContract(String contractId) {
-        ResponseEntity<byte[]> response = this.client.getContract(contractId);
+    public byte[] getContract(String memberId) {
+        ResponseEntity<byte[]> response = this.client.getContract(memberId);
         return response.getBody();
     }
 }
