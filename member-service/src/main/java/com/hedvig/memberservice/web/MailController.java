@@ -38,6 +38,7 @@ public class MailController {
     private String onboardedLaterMail;
     private String activatedMail;
     private String waitIsOverMail;
+    private ClassPathResource signatureImage;
     private ProductApi productApi;
 
     public MailController(JavaMailSender mailSender, @Value("${hedvig.websiteBaseUrl:https://www.hedvig.com}") String webSiteBaseUrl) throws IOException {
@@ -48,6 +49,7 @@ public class MailController {
         val onboardedLaterMailResource = new ClassPathResource("mail/onboarded_later.html");
         val activatedMailResource = new ClassPathResource("mail/activated.html");
         val waitIsOverResource = new ClassPathResource("mail/wait_is_over.txt");
+        signatureImage = new ClassPathResource("mail/wordmark_mail.jpg");
         signupMail = IOUtils.toString(signupMailResource.getInputStream(), "UTF-8");
         onboardedTodayMail = IOUtils.toString(onboardedTodayMailResource.getInputStream(), "UTF-8");
         onboardedLaterMail = IOUtils.toString(onboardedLaterMailResource.getInputStream(), "UTF-8");
@@ -84,6 +86,7 @@ public class MailController {
         val templatedMail = onboardedTodayMail
             .replace("{NAME}", request.getName());
         helper.setText(templatedMail, true);
+        helper.addInline("image002.jpg", signatureImage);
 
         mailSender.send(message);
 
