@@ -23,12 +23,11 @@ import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
 import lombok.val;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 
 @RestController
 @RequestMapping("/_/mail")
-public class MailControler {
+public class MailController {
 
     @Autowired
     JavaMailSender mailSender;
@@ -41,13 +40,13 @@ public class MailControler {
     private String waitIsOverMail;
     private ProductApi productApi;
 
-    public MailControler(JavaMailSender mailSender, @Value("${hedvig.websiteBaseUrl:https://www.hedvig.com}") String webSiteBaseUrl) throws IOException {
+    public MailController(JavaMailSender mailSender, @Value("${hedvig.websiteBaseUrl:https://www.hedvig.com}") String webSiteBaseUrl) throws IOException {
         this.mailSender = mailSender;
         this.webSiteBaseUrl = webSiteBaseUrl;
         ClassPathResource signupMailResource = new ClassPathResource("mail/waitlist.html");
-        val onboardedTodayMailResource = new ClassPathResource("mail/onboarded_today.txt");
-        val onboardedLaterMailResource = new ClassPathResource("mail/onboarded_later.txt");
-        val activatedMailResource = new ClassPathResource("mail/activated.txt");
+        val onboardedTodayMailResource = new ClassPathResource("mail/onboarded_today.html");
+        val onboardedLaterMailResource = new ClassPathResource("mail/onboarded_later.html");
+        val activatedMailResource = new ClassPathResource("mail/activated.html");
         val waitIsOverResource = new ClassPathResource("mail/wait_is_over.txt");
         signupMail = IOUtils.toString(signupMailResource.getInputStream(), "UTF-8");
         onboardedTodayMail = IOUtils.toString(onboardedTodayMailResource.getInputStream(), "UTF-8");
@@ -84,7 +83,7 @@ public class MailControler {
         
         val templatedMail = onboardedTodayMail
             .replace("{NAME}", request.getName());
-        helper.setText(templatedMail);
+        helper.setText(templatedMail, true);
 
         mailSender.send(message);
 
@@ -103,7 +102,7 @@ public class MailControler {
         val templatedMail = onboardedLaterMail
             .replace("{NAME}", request.getName());
 
-        helper.setText(templatedMail);
+        helper.setText(templatedMail, true);
         helper.addAttachment("fullmakt.pdf", new ByteArrayResource(pdf));
 
         mailSender.send(message);
@@ -119,7 +118,7 @@ public class MailControler {
         helper.setTo(request.getEmail());
         val templatedMail = activatedMail
             .replace("{NAME}", request.getName());
-        helper.setText(templatedMail);
+        helper.setText(templatedMail, true);
 
         mailSender.send(message);
         return "";
