@@ -41,9 +41,10 @@ public class MailController {
     private ClassPathResource signatureImage;
     private ProductApi productApi;
 
-    public MailController(JavaMailSender mailSender, @Value("${hedvig.websiteBaseUrl:https://www.hedvig.com}") String webSiteBaseUrl) throws IOException {
+    public MailController(JavaMailSender mailSender, @Value("${hedvig.websiteBaseUrl:https://www.hedvig.com}") String webSiteBaseUrl, ProductApi productApi) throws IOException {
         this.mailSender = mailSender;
         this.webSiteBaseUrl = webSiteBaseUrl;
+        this.productApi = productApi;
         ClassPathResource signupMailResource = new ClassPathResource("mail/waitlist.html");
         val onboardedTodayMailResource = new ClassPathResource("mail/onboarded_today.html");
         val onboardedLaterMailResource = new ClassPathResource("mail/onboarded_later.html");
