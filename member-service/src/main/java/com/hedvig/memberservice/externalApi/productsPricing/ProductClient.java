@@ -22,7 +22,7 @@ public interface ProductClient {
     @RequestMapping(value = "/_/insurance/{memberId}/insurance")
     ResponseEntity<InsuranceStatusDTO> getInsuranceStatus(@PathVariable("memberId") long memberId);
 
-    @RequestMapping(value = "/_insurance/contract/{memberId}")
+    @RequestMapping(value = "/_/insurance/contract/{memberId}")
     ResponseEntity<byte[]> getContract(@PathVariable("memberId") String contractId);
 
 }
