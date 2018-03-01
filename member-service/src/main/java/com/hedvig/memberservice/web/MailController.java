@@ -48,7 +48,7 @@ public class MailController {
         val onboardedTodayMailResource = new ClassPathResource("mail/onboarded_today.html");
         val onboardedLaterMailResource = new ClassPathResource("mail/onboarded_later.html");
         val activatedMailResource = new ClassPathResource("mail/activated.html");
-        val waitIsOverResource = new ClassPathResource("mail/wait_is_over.txt");
+        val waitIsOverResource = new ClassPathResource("mail/wait_is_over.html");
         signatureImage = new ClassPathResource("mail/wordmark_mail.jpg");
         signupMail = IOUtils.toString(signupMailResource.getInputStream(), "UTF-8");
         onboardedTodayMail = IOUtils.toString(onboardedTodayMailResource.getInputStream(), "UTF-8");
@@ -107,6 +107,7 @@ public class MailController {
 
         helper.setText(templatedMail, true);
         helper.addAttachment("fullmakt.pdf", new ByteArrayResource(pdf));
+        helper.addInline("image002.jpg", signatureImage);
 
         mailSender.send(message);
         return "";
@@ -122,6 +123,7 @@ public class MailController {
         val templatedMail = activatedMail
             .replace("{NAME}", request.getName());
         helper.setText(templatedMail, true);
+        helper.addInline("image002.jpg", signatureImage);
 
         mailSender.send(message);
         return "";
@@ -135,8 +137,10 @@ public class MailController {
         helper.setFrom("\"Hedvig\" <hedvig@hedvig.com>");
         helper.setTo(request.getEmail());
         val templatedMail = waitIsOverMail
-            .replace("{NAME}", request.getName());
+            .replace("{NAME}", request.getName())
+            .replace("{CODE}", request.getCode());
         helper.setText(templatedMail);
+        helper.addInline("image002.jpg", signatureImage);
 
         mailSender.send(message);
         return "";
