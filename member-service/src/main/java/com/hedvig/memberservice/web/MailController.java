@@ -79,7 +79,7 @@ public class MailController {
     public String sendOnboardedActiveTodayMail(@RequestBody SendOnboardedActiveTodayRequest request) throws MessagingException {
         val message = mailSender.createMimeMessage();
         val helper = new MimeMessageHelper(message, true, "UTF-8");
-        helper.setSubject("Välkommen till Hedvig! 🙌🏻");
+        helper.setSubject("Välkommen till Hedvig! 🙌");
         helper.setFrom("\"Hedvig\" <hedvig@hedvig.com>");
         helper.setTo(request.getEmail());
         
@@ -97,7 +97,7 @@ public class MailController {
     public String sendOnboardedActiveLaterMail(@RequestBody SendOnboardedActiveLaterRequest request) throws MessagingException {
         val message = mailSender.createMimeMessage();
         val helper = new MimeMessageHelper(message, true, "UTF-8");
-        helper.setSubject("Välkommen till Hedvig! 🙌🏻");
+        helper.setSubject("Välkommen till Hedvig! 🙌");
         helper.setFrom("\"Hedvig\" <hedvig@hedvig.com>");
         helper.setTo(request.getEmail());
         val pdf = productApi.getContract(request.memberId);
