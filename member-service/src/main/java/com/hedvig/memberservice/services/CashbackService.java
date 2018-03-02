@@ -19,7 +19,7 @@ public class CashbackService {
                 false,
                 true,
                 "https://s3.eu-central-1.amazonaws.com/com-hedvig-web-content/sos.png",
-                "https://s3.eu-central-1.amazonaws.com/com-hedvig-web-content/sos-barnbyar.jpg",
+                "https://s3.eu-central-1.amazonaws.com/com-hedvig-web-content/sos-barnbyar-logo.png",
                 "",
                 "När Hedvig har betalat årets alla skador går din andel av överskottet till att ge utsatta barn en trygg uppväxt"
         );
