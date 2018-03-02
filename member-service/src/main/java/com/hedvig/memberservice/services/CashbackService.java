@@ -42,7 +42,7 @@ public class CashbackService {
     }
 
     public Optional<CashbackOption> getCashbackOption(UUID cashbackId) {
-        return Optional.of(options.get(cashbackId));
+        return Optional.ofNullable(options.get(cashbackId));
     }
 
     public List<CashbackOption> getOptions() {
