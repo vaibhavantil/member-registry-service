@@ -140,7 +140,7 @@ public class MailController {
         val templatedMail = waitIsOverMail
             .replace("{NAME}", request.getName())
             .replace("{URL}", String.format("https://www.hedvig.com/waitlist/%s", request.getWaitlistId()));
-        helper.setText(templatedMail);
+        helper.setText(templatedMail, true);
         helper.addInline("image002.jpg", signatureImage);
 
         mailSender.send(message);
