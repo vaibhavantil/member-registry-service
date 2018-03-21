@@ -24,21 +24,21 @@ public class CashbackService {
                 "När Hedvig har betalat årets alla skador går din andel av överskottet till att ge utsatta barn en trygg uppväxt"
         );
 
-        // CashbackOption option2 = new CashbackOption(
-        //         UUID.fromString("11143ee0-af4b-11e7-a359-4f8b8d55e69f"),
-        //         "Cancerfonden",
-        //         "Hjälp till att besegra cancer",
-        //         "Cancerfonden arbetar för att besegra cancer. Målet är att fler ska överleva och färre drabbas. Organisationen arbetar också för att vården ska vara så bra som möjligt för dem som insjuknar och att deras närstående för stöd och hjälp. För att nå dit arbetar organisationen bland annat med forskningsfinansiering.",
-        //         false,
-        //         true,
-        //         "https://s3.eu-central-1.amazonaws.com/com-hedvig-web-content/cancerfonden.png",
-        //         "https://s3.eu-central-1.amazonaws.com/com-hedvig-web-content/cancerfonden-profile.png",
-        //         "",
-        //         "När Hedvig har betalat årets alla skador går din andel av överskottet till hjälpa till att besegra cancer"
-        // );
+        CashbackOption option2 = new CashbackOption(
+                UUID.fromString("11143ee0-af4b-11e7-a359-4f8b8d55e69f"),
+                "Barncancerfonden",
+                "Var med i kampen mot barncancer",
+                "Barncancerfonden arbetar för att bekämpa barncancer och se till att drabbade och deras familjer får den vård och stöd de behöver. Pengarna går till forskning och stöd till de cirka 300 familjer som varje år drabbas av ett cancerbesked.",
+                false,
+                true,
+                "https://s3.eu-central-1.amazonaws.com/com-hedvig-web-content/barncancerfonden.png",
+                "https://s3.eu-central-1.amazonaws.com/com-hedvig-web-content/barncancerfonden-profile.png",
+                "",
+                "När Hedvig har betalat årets alla skador går din andel av överskottet till att stödja kampen mot barncancer"
+        );
 
         options.put(option3.id, option3);
-        // options.put(option2.id, option2);
+        options.put(option2.id, option2);
     }
 
     public Optional<CashbackOption> getCashbackOption(UUID cashbackId) {

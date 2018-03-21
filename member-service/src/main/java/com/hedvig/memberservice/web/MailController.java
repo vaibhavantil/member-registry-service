@@ -134,13 +134,12 @@ public class MailController {
     public String sendWaitIsOverMail(@RequestBody SendWaitIsOverRequest request) throws MessagingException {
         val message = mailSender.createMimeMessage();
         val helper = new MimeMessageHelper(message, true, "UTF-8");
-        helper.setSubject("Här kommer din aktiveringskod! \uD83D\uDD10");
+
+        helper.setSubject("Ditt Hedvigkonto har öppnats upp! ⚡");
         helper.setFrom("\"Hedvig\" <hedvig@hedvig.com>");
         helper.setTo(request.getEmail());
-        val templatedMail = waitIsOverMail
-            .replace("{NAME}", request.getName())
-            .replace("{URL}", String.format("https://www.hedvig.com/waitlist/%s", request.getWaitlistId()));
-        helper.setText(templatedMail, true);
+
+        helper.setText(waitIsOverMail, true);
         helper.addInline("image002.jpg", signatureImage);
 
         mailSender.send(message);
