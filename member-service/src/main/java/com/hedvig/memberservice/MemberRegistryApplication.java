@@ -108,7 +108,7 @@ public class MemberRegistryApplication {
 
     @Bean
     public RestTemplate restTemplate(RestTemplateBuilder builder, CustomClientHttpRequestInterceptor customClientHttpRequestInterceptor) {
-        RestTemplate restTemplate = new BufferingClientHttpRequestFactory(new SimpleClientHttpRequestFactory())
+        RestTemplate restTemplate = new RestTemplate(new BufferingClientHttpRequestFactory(new SimpleClientHttpRequestFactory()));
         List<ClientHttpRequestInterceptor> interceptors = Collections.singletonList(customClientHttpRequestInterceptor);
         restTemplate.setInterceptors(interceptors);
         return restTemplate;
