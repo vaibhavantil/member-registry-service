@@ -62,6 +62,7 @@ public class BisnodeClient {
 
         HttpHeaders headers = new HttpHeaders();
         headers.add("Authorization", "Bearer " + accessToken);
+        headers.setContentType(MediaType.APPLICATION_JSON);
         return headers;
     }
 
