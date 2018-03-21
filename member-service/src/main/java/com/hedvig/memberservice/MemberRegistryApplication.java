@@ -22,7 +22,9 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.cloud.netflix.feign.EnableFeignClients;
 import org.springframework.context.annotation.*;
+import org.springframework.http.client.BufferingClientHttpRequestFactory;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
+import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.mail.MailSender;
 import org.springframework.retry.backoff.FixedBackOffPolicy;
 import org.springframework.retry.policy.SimpleRetryPolicy;
@@ -106,7 +108,7 @@ public class MemberRegistryApplication {
 
     @Bean
     public RestTemplate restTemplate(RestTemplateBuilder builder, CustomClientHttpRequestInterceptor customClientHttpRequestInterceptor) {
-        RestTemplate restTemplate = builder.build();
+        RestTemplate restTemplate = new RestTemplate(new BufferingClientHttpRequestFactory(new SimpleClientHttpRequestFactory()));
         List<ClientHttpRequestInterceptor> interceptors = Collections.singletonList(customClientHttpRequestInterceptor);
         restTemplate.setInterceptors(interceptors);
         return restTemplate;
