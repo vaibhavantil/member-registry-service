@@ -29,3 +29,7 @@ hs_err_pid*
 
 # vscode
 .project
+.vscode
+.classpath
+.settings
+.sts4-cache
