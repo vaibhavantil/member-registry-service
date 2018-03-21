@@ -100,8 +100,8 @@ public class MemberRegistryApplication {
     }
 
     @Bean
-    public BisnodeClient bisnodeClient(){
-        return new BisnodeClient(bisnodeClientId, bisnodeClientKey, new RestTemplate());
+    public BisnodeClient bisnodeClient(RestTemplate restTemplate){
+        return new BisnodeClient(bisnodeClientId, bisnodeClientKey, restTemplate);
     }
 
     @Bean
