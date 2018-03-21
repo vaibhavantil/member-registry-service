@@ -105,8 +105,11 @@ public class MemberRegistryApplication {
     }
 
     @Bean
-    public RestTemplate restTemplate(RestTemplateBuilder builder) {
-        return builder.build();
+    public RestTemplate restTemplate(RestTemplateBuilder builder, CustomClientHttpRequestInterceptor customClientHttpRequestInterceptor) {
+        RestTemplate restTemplate = builder.build();
+        List<ClientHttpRequestInterceptor> interceptors = Collections.singletonList(customClientHttpRequestInterceptor);
+        restTemplate.setInterceptors(interceptors);
+        return restTemplate;
     }
 
     @Bean
@@ -121,16 +124,6 @@ public class MemberRegistryApplication {
         springPrototypeAggregateFactory.setPrototypeBeanName("memberAggregate");
 
         return springPrototypeAggregateFactory;
-    }
-
-
-
-    @Bean
-    public RestTemplate restTemplate(CustomClientHttpRequestInterceptor customClientHttpRequestInterceptor) {
-        RestTemplate restTemplate = new RestTemplate();
-        List<ClientHttpRequestInterceptor> interceptors = Collections.singletonList(customClientHttpRequestInterceptor);
-        restTemplate.setInterceptors(interceptors);
-        return restTemplate;
     }
 
 }
