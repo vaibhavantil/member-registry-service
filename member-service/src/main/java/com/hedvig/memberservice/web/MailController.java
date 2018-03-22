@@ -83,7 +83,7 @@ public class MailController {
         helper.setSubject("Välkommen till Hedvig! 🙌");
         helper.setFrom("\"Hedvig\" <hedvig@hedvig.com>");
         helper.setTo(request.getEmail());
-        
+
         val templatedMail = onboardedTodayMail
             .replace("{NAME}", request.getName());
         helper.setText(templatedMail, true);
@@ -135,7 +135,7 @@ public class MailController {
         val message = mailSender.createMimeMessage();
         val helper = new MimeMessageHelper(message, true, "UTF-8");
 
-        helper.setSubject("Ditt Hedvigkonto har öppnats upp! ⚡");
+        helper.setSubject("Hedvig är här - försäkring omdesignat från grunden ⚡️");
         helper.setFrom("\"Hedvig\" <hedvig@hedvig.com>");
         helper.setTo(request.getEmail());
 
