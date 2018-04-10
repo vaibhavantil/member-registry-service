@@ -135,7 +135,7 @@ public class MailController {
         val message = mailSender.createMimeMessage();
         val helper = new MimeMessageHelper(message, true, "UTF-8");
 
-        helper.setSubject("Hedvig är här - försäkring omdesignat från grunden ⚡️");
+        helper.setSubject("Väntan är över - nu kan du aktivera din försäkring ⚡️");
         helper.setFrom("\"Hedvig\" <hedvig@hedvig.com>");
         helper.setTo(request.getEmail());
 
