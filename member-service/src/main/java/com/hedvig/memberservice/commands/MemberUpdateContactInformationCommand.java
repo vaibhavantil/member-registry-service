@@ -12,8 +12,7 @@ public class MemberUpdateContactInformationCommand {
 
     String firstName;
     String lastName;
-    //String ssn;
-    //String email;
+    String email;
 
     String street;
     String city;
@@ -27,8 +26,7 @@ public class MemberUpdateContactInformationCommand {
 
         this.firstName = body.getFirstName();
         this.lastName = body.getLastName();
-        //this.ssn = body.getSsn();
-        //this.email = body.getEmail();
+        this.email = body.getEmail();
 
         this.street = body.getAddress().getStreet();
         this.city = body.getAddress().getCity();

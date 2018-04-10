@@ -143,12 +143,17 @@ public class MemberAggregate {
     }
 
     @CommandHandler
-    void updatePersonalInformation(MemberUpdateContactInformationCommand cmd) {
+    void memberUpdateContactInformation(MemberUpdateContactInformationCommand cmd) {
 
         if(!Objects.equals(this.member.getFirstName(),cmd.getFirstName()) ||
                 !Objects.equals(this.member.getLastName(), cmd.getLastName())) {
             apply(new NameUpdatedEvent(this.id, cmd.getFirstName(), cmd.getLastName()));
         }
+
+        if(Objects.equals(member.getEmail(), cmd.getEmail()) == false) {
+            apply(new EmailUpdatedEvent(this.id, cmd.getEmail()));
+        }
+
 
         LivingAddress address = this.member.getLivingAddress();
         if(address == null || address.needsUpdate(cmd.getStreet(), cmd.getCity(), cmd.getZipCode(), cmd.getApartmentNo(), cmd.getFloor())) {

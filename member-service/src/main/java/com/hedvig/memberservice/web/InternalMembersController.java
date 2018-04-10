@@ -106,14 +106,6 @@ public class InternalMembersController {
         return ResponseEntity.noContent().build();
     }
 
-
-    @RequestMapping(value = "/{memberId}/updateContactInformationRequest", method = RequestMethod.POST)
-    public ResponseEntity<?> startOnBoarding(@PathVariable Long memberId, @RequestBody UpdateContactInformationRequest request) {
-        commandBus.sendAndWait(new MemberUpdateContactInformationCommand(memberId, request));
-
-        return ResponseEntity.noContent().build();
-    }
-
     @RequestMapping(value = "/search", method = RequestMethod.GET)
     @Transactional
     public Iterator<InternalMember> searchMembers(

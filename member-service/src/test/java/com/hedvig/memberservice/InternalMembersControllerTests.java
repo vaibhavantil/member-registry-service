@@ -69,7 +69,7 @@ public class InternalMembersControllerTests {
         ObjectMapper jsonMapper = new ObjectMapper();
 
         mockMvc.perform(
-                post("/i/member/{memberId}/updateContactInformationRequest", "1337").
+                post("/i/member/{memberId}/finalizeOnboarding", "1337").
                 contentType(MediaType.APPLICATION_JSON_UTF8).
                 content(jsonMapper.writeValueAsBytes(request))).andExpect(status().is2xxSuccessful());
 

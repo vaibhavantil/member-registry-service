@@ -100,6 +100,7 @@ public class MemberAggregateTests {
 		UpdateContactInformationRequest request = new UpdateContactInformationRequest();
 		request.setFirstName("Arn");
 		request.setLastName("Magnusson");
+		request.setEmail("email@hedvig.com");
 		Address address = new Address();
 		address.setStreet("Spånga bro");
 		address.setCity("Spånga");
@@ -113,6 +114,7 @@ public class MemberAggregateTests {
 				when(new MemberUpdateContactInformationCommand(memberId, request)).
 				expectSuccessfulHandlerExecution().expectEvents(
 						new NameUpdatedEvent(memberId, request.getFirstName(), request.getLastName()),
+						new EmailUpdatedEvent(memberId, "email@hedvig.com"),
 						new LivingAddressUpdatedEvent(memberId, address.getStreet(), address.getCity(), address.getZipCode(), address.getApartmentNo(), 0)
 		);
 	}
