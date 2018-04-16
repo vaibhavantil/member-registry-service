@@ -2,7 +2,6 @@ package com.hedvig.memberservice;
 
 import com.hedvig.external.bisnodeBCI.BisnodeClient;
 import com.hedvig.memberservice.aggregates.MemberAggregate;
-import com.hedvig.memberservice.externalEvents.KafkaProperties;
 import com.hedvig.memberservice.services.CashbackService;
 import com.hedvig.memberservice.services.bankid.BankIdAdapter;
 import com.hedvig.memberservice.services.bankid.BankIdApi;
@@ -13,7 +12,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.cloud.netflix.feign.EnableFeignClients;
 import org.springframework.context.annotation.Bean;
@@ -34,8 +32,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 
 @SpringBootApplication()
-@EnableConfigurationProperties(KafkaProperties.class)
-@EnableFeignClients({"com.hedvig.external.billectaAPI", "com.hedvig.memberservice.externalApi.productsPricing"})
+@EnableFeignClients({"com.hedvig.memberservice.externalApi.productsPricing"})
 public class MemberRegistryApplication {
 
     @Value("${hedvig.bisnode.client.id}")
@@ -43,15 +40,6 @@ public class MemberRegistryApplication {
 
     @Value("${hedvig.bisnode.client.key}")
     String bisnodeClientKey = "";
-
-    @Value("${hedvig.billecta.secure.token}")
-    String billectaSecureToken;
-
-    @Value("${hedvig.billecta.creditor.id}")
-    String billectaCreditorId;
-
-    @Value("${hedvig.billecta.url}")
-    String baseUrl;
 
 	public static void main(String[] args) {
 
