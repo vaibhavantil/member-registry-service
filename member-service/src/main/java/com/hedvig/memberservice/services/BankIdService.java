@@ -11,7 +11,7 @@ import org.springframework.stereotype.Service;
 
 import java.io.UnsupportedEncodingException;
 
-import static com.hedvig.memberservice.query.CollectType.*;
+import static com.hedvig.memberservice.query.CollectType.RequestType;
 
 @Service
 public class BankIdService {

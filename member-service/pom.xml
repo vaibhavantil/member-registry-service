@@ -154,11 +154,6 @@
 			<artifactId>spring-boot-configuration-processor</artifactId>
 			<optional>true</optional>
 		</dependency>
-		<dependency>
-			<groupId>com.hedvig.external.billectaAPI</groupId>
-			<artifactId>billecta-api</artifactId>
-			<version>0.0.1-SNAPSHOT</version>
-		</dependency>
         <dependency>
             <groupId>com.hedvig.external.bisnodeBCI</groupId>
             <artifactId>bisnode-bci</artifactId>
@@ -183,6 +178,11 @@
 		<dependency>
 			<groupId>org.springframework.cloud</groupId>
 			<artifactId>spring-cloud-starter-sleuth</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.cloud</groupId>
+			<artifactId>spring-cloud-starter-feign</artifactId>
+			<version>RELEASE</version>
 		</dependency>
 		<dependency>
 			<groupId>net.logstash.logback</groupId>
@@ -235,6 +235,11 @@
 			<groupId>io.sentry</groupId>
 			<artifactId>sentry-spring</artifactId>
 			<version>1.6.7</version>
+		</dependency>
+		<dependency>
+			<groupId>io.github.openfeign</groupId>
+			<artifactId>feign-core</artifactId>
+			<version>9.5.1</version>
 		</dependency>
 
 	</dependencies>

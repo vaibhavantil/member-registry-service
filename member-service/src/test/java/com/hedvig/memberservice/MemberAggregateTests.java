@@ -1,6 +1,5 @@
 package com.hedvig.memberservice;
 
-import com.hedvig.external.billectaAPI.api.BankIdAuthenticationStatus;
 import com.hedvig.external.bisnodeBCI.BisnodeClient;
 import com.hedvig.memberservice.aggregates.MemberAggregate;
 import com.hedvig.memberservice.aggregates.MemberStatus;
@@ -10,7 +9,6 @@ import com.hedvig.memberservice.services.CashbackService;
 import com.hedvig.memberservice.web.dto.Address;
 import com.hedvig.memberservice.web.dto.StartOnboardingWithSSNRequest;
 import com.hedvig.memberservice.web.dto.UpdateContactInformationRequest;
-import org.assertj.core.api.exception.RuntimeIOException;
 import org.axonframework.eventsourcing.AbstractAggregateFactory;
 import org.axonframework.eventsourcing.DomainEventMessage;
 import org.axonframework.test.aggregate.AggregateTestFixture;
@@ -22,10 +20,8 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.web.client.RestClientException;
 
-import java.io.IOException;
 import java.util.UUID;
 
-import static org.mockito.Matchers.notNull;
 import static org.mockito.Mockito.when;
 
 @RunWith(SpringRunner.class)

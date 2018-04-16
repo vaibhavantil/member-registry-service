@@ -1,6 +1,5 @@
 package com.hedvig.memberservice.aggregates;
 
-import com.hedvig.external.billectaAPI.api.BankIdAuthenticationStatus;
 import com.hedvig.external.bisnodeBCI.BisnodeClient;
 import com.hedvig.external.bisnodeBCI.dto.Person;
 import com.hedvig.external.bisnodeBCI.dto.PersonSearchResult;
@@ -10,14 +9,12 @@ import com.hedvig.memberservice.services.CashbackService;
 import org.axonframework.commandhandling.CommandHandler;
 import org.axonframework.commandhandling.model.AggregateIdentifier;
 import org.axonframework.commandhandling.model.ApplyMore;
-import org.axonframework.common.io.IOUtils;
 import org.axonframework.eventsourcing.EventSourcingHandler;
 import org.axonframework.spring.stereotype.Aggregate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.util.Base64;
 import java.util.List;
 import java.util.Objects;
 

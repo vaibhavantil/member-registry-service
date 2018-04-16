@@ -1,21 +1,12 @@
 package com.hedvig.memberservice;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.hedvig.external.billectaAPI.BillectaApi;
-import com.hedvig.memberservice.commands.MemberUpdateContactInformationCommand;
 import com.hedvig.memberservice.commands.SelectNewCashbackCommand;
-import com.hedvig.memberservice.commands.StartOnboardingWithSSNCommand;
-import com.hedvig.memberservice.externalApi.BotService;
-import com.hedvig.memberservice.query.CollectRepository;
 import com.hedvig.memberservice.query.MemberEntity;
 import com.hedvig.memberservice.query.MemberRepository;
 import com.hedvig.memberservice.services.CashbackService;
 import com.hedvig.memberservice.web.CashbackController;
-import com.hedvig.memberservice.web.InternalMembersController;
-import com.hedvig.memberservice.web.dto.Address;
 import com.hedvig.memberservice.web.dto.CashbackOption;
 import com.hedvig.memberservice.web.dto.StartOnboardingWithSSNRequest;
-import com.hedvig.memberservice.web.dto.UpdateContactInformationRequest;
 import org.axonframework.commandhandling.gateway.CommandGateway;
 import org.axonframework.spring.config.EnableAxon;
 import org.junit.Test;
@@ -23,12 +14,10 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.http.MediaType;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 
-import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 

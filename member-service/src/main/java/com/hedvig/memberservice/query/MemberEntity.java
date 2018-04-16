@@ -3,9 +3,11 @@ package com.hedvig.memberservice.query;
 import lombok.Getter;
 import lombok.Setter;
 
-import javax.persistence.*;
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.Index;
+import javax.persistence.Table;
 import java.time.LocalDate;
-import java.util.Objects;
 
 @Entity
 @Table(name="member_entity", indexes={

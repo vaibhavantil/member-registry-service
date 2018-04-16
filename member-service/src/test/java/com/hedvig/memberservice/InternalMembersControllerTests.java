@@ -1,11 +1,8 @@
 package com.hedvig.memberservice;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.hedvig.external.billectaAPI.BillectaApi;
 import com.hedvig.memberservice.commands.MemberUpdateContactInformationCommand;
 import com.hedvig.memberservice.commands.StartOnboardingWithSSNCommand;
-import com.hedvig.memberservice.externalApi.BotService;
-import com.hedvig.memberservice.query.CollectRepository;
 import com.hedvig.memberservice.query.MemberEntity;
 import com.hedvig.memberservice.query.MemberRepository;
 import com.hedvig.memberservice.web.InternalMembersController;
@@ -40,19 +37,10 @@ public class InternalMembersControllerTests {
     private MockMvc mockMvc;
 
     @MockBean
-    BillectaApi billectaApi;
+    private MemberRepository memberRepo;
 
     @MockBean
-    BotService botService;
-
-    @MockBean
-    CollectRepository collectRepo;
-
-    @MockBean
-    MemberRepository memberRepo;
-
-    @MockBean
-    CommandGateway commandGateway;
+    private CommandGateway commandGateway;
 
     @Test
     public void TestUpdateContactInformation() throws Exception {

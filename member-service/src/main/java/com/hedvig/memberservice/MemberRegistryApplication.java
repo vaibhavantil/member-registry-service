@@ -1,16 +1,11 @@
 package com.hedvig.memberservice;
 
-import com.amazonaws.services.simpleemail.AmazonSimpleEmailService;
-import com.hedvig.external.billectaAPI.BillectaApi;
-import com.hedvig.external.billectaAPI.BillectaApiFake;
-import com.hedvig.external.billectaAPI.BillectaApiImpl;
-import com.hedvig.external.billectaAPI.BillectaClient;
 import com.hedvig.external.bisnodeBCI.BisnodeClient;
 import com.hedvig.memberservice.aggregates.MemberAggregate;
 import com.hedvig.memberservice.externalEvents.KafkaProperties;
+import com.hedvig.memberservice.services.CashbackService;
 import com.hedvig.memberservice.services.bankid.BankIdAdapter;
 import com.hedvig.memberservice.services.bankid.BankIdApi;
-import com.hedvig.memberservice.services.CashbackService;
 import org.axonframework.config.EventHandlingConfiguration;
 import org.axonframework.eventsourcing.AggregateFactory;
 import org.axonframework.spring.eventsourcing.SpringPrototypeAggregateFactory;
@@ -21,7 +16,9 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.cloud.netflix.feign.EnableFeignClients;
-import org.springframework.context.annotation.*;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Primary;
+import org.springframework.context.annotation.Scope;
 import org.springframework.http.client.BufferingClientHttpRequestFactory;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
@@ -93,12 +90,6 @@ public class MemberRegistryApplication {
     @Bean
     public  ScheduledExecutorService executorService() {
         return new ScheduledThreadPoolExecutor(5);
-    }
-
-    @Bean
-    public BillectaApi buildBillectaApi(BillectaClient billectaClient, ScheduledExecutorService executorService){
-        //return new BillectaApiFake();
-        return new BillectaApiImpl(billectaCreditorId, billectaSecureToken, new RestTemplate(), baseUrl, billectaClient, executorService);
     }
 
     @Bean
