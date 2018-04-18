@@ -66,9 +66,6 @@ public class InternalMembersController {
 
         status = status.trim();
         query = query.trim();
-        if (!query.equals("")) {
-            query = "%" + query + "%";
-        }
         try (val stream = search(status, query)) {
             return stream
                     .map(InternalMember::fromEnity)
@@ -78,6 +75,17 @@ public class InternalMembersController {
     }
 
     private Stream<MemberEntity> search(String status, String query) {
+        if (!query.equals("")) {
+            Long memberId = parseMemberId(query);
+            if (memberId != null) {
+                if (!status.equals("")) {
+                    return memberRepository.searchByIdAndStatus(memberId, status);
+                } else {
+                    return memberRepository.searchById(memberId);
+                }
+            }
+        }
+
         if (!status.equals("") && !query.equals("")) {
             return memberRepository.searchByStatusAndQuery(status, query);
         }
@@ -88,5 +96,13 @@ public class InternalMembersController {
             return memberRepository.searchByQuery(query);
         }
         return memberRepository.searchAll();
+    }
+
+    private Long parseMemberId(String query) {
+        try {
+            return Long.parseLong(query);
+        } catch (NumberFormatException e) {
+            return null;
+        }
     }
 }
