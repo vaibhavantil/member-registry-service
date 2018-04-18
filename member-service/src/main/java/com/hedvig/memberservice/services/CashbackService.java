@@ -32,7 +32,7 @@ public class CashbackService {
                 false,
                 true,
                 "https://s3.eu-central-1.amazonaws.com/com-hedvig-web-content/barncancerfonden.png",
-                "https://s3.eu-central-1.amazonaws.com/com-hedvig-web-content/barncancerfonden-profile.png",
+                "https://www.barncancerfonden.se/contentassets/7a2c1f9232344929903730483e9257f5/jag-stodjer_bcf.png",
                 "",
                 "När Hedvig har betalat årets alla skador går din andel av överskottet till att stödja kampen mot barncancer"
         );
