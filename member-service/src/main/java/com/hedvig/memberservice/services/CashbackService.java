@@ -14,14 +14,14 @@ public class CashbackService {
         CashbackOption option3 = new CashbackOption(
                 UUID.fromString("97b2d1d8-af4a-11e7-9b2b-bbc138162bb2"),
                 "SOS Barnbyar",
-                "Ge utsatta barn en trygg uppväxt",
+                "Ge fler barn en trygg uppväxt",
                 "SOS Barnbyar gör ett fantastiskt arbete för att hjälpa barn som förlorat allt. Hos SOS Barnbyar får barnen en familj och en uppväxt i ett tryggt hem och möjlighet att gå i skolan med ambitionen att ta sig ur fattigdomen.",
                 false,
                 true,
                 "https://s3.eu-central-1.amazonaws.com/com-hedvig-web-content/sos.png",
                 "https://s3.eu-central-1.amazonaws.com/com-hedvig-web-content/sos-barnbyar-logo.png",
                 "",
-                "När Hedvig har betalat årets alla skador går din andel av överskottet till att ge utsatta barn en trygg uppväxt"
+                "När Hedvig har betalat årets alla skador går din andel av överskottet till att ge fler barn en trygg uppväxt"
         );
 
         CashbackOption option2 = new CashbackOption(
