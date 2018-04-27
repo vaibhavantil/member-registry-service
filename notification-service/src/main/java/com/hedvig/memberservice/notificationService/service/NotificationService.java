@@ -10,6 +10,7 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
 
+import javax.mail.MessagingException;
 import java.io.IOException;
 import java.util.Objects;
 import java.util.UUID;
@@ -36,11 +37,15 @@ public class NotificationService {
         //Send email to member
         //Send push-notice to member
 
-        jobPoster.startJob(
-                new SendCancellationEmailRequest(
-                    UUID.randomUUID().toString(),
-                    Objects.toString(memberId),
-                    insurer.getInsurer()));
+        try {
+            jobPoster.startJob(
+                    new SendCancellationEmailRequest(
+                        UUID.randomUUID().toString(),
+                        Objects.toString(memberId),
+                        insurer.getInsurer()));
+        } catch (MessagingException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     private String LoadEmail(final String s) throws IOException {
