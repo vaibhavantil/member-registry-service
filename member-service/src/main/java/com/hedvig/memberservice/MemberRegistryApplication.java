@@ -15,6 +15,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.cloud.netflix.feign.EnableFeignClients;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Primary;
 import org.springframework.context.annotation.Scope;
 import org.springframework.http.client.BufferingClientHttpRequestFactory;
@@ -32,7 +33,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 
 @SpringBootApplication()
-@EnableFeignClients({"com.hedvig.memberservice.externalApi.productsPricing"})
+@EnableFeignClients({"com.hedvig.memberservice"})
 public class MemberRegistryApplication {
 
     @Value("${hedvig.bisnode.client.id}")

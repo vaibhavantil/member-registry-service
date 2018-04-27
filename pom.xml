@@ -12,7 +12,8 @@
         <module>member-service</module>
 		<module>bisnode-bci</module>
 		<module>bank-id</module>
-    </modules>
+		<module>notification-service</module>
+	</modules>
 
 
 </project>
