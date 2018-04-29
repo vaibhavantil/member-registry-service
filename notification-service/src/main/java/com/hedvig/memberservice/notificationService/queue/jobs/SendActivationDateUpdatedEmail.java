@@ -1,6 +1,6 @@
 package com.hedvig.memberservice.notificationService.queue.jobs;
 
-import com.hedvig.memberservice.notificationService.queue.requests.SendOldInsuranceCancellationEmailRequest;
+import com.hedvig.memberservice.notificationService.queue.requests.SendActivationDateUpdatedRequest;
 import com.hedvig.memberservice.notificationService.serviceIntegration.expo.ExpoNotificationService;
 import com.hedvig.memberservice.notificationService.serviceIntegration.memberService.MemberServiceClient;
 import com.hedvig.memberservice.notificationService.serviceIntegration.memberService.dto.Member;
@@ -16,12 +16,15 @@ import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
+import java.util.Locale;
 import java.util.Objects;
 
 @Component
-public class SendCancellationEmail {
+public class SendActivationDateUpdatedEmail {
 
-    private final Logger log = LoggerFactory.getLogger(SendCancellationEmail.class);
+    private final Logger log = LoggerFactory.getLogger(SendActivationDateUpdatedEmail.class);
 
     private final JavaMailSender mailSender;
     private final MemberServiceClient memberServiceClient;
@@ -29,56 +32,59 @@ public class SendCancellationEmail {
 
     private final String mandateSentNotification;
     private final ClassPathResource signatureImage;
-    private static final String PUSH_MESSAGE = "Hej %s! Tänkte bara meddela att vi har skickat en uppsägning till ditt gamla försäkringsbolag %s nu! Jag återkommer till dig när de har bekräftat ditt uppsägningsdatum. Hej så länge! 👋";
+    private static final String PUSH_MESSAGE = "Hej %s! Bra nyheter! %s har bekräftat ditt uppsägningsdatum - det är %s. Samma dag aktiveras din Hedvigförsäkring. Jag hör av mig då! 🙌";
 
-    public SendCancellationEmail(
+    public SendActivationDateUpdatedEmail(
             JavaMailSender mailSender,
             MemberServiceClient memberServiceClient,
-            ExpoNotificationService expoNotificationService) throws IOException {
+            ExpoNotificationService expoNotificationService)
+            throws IOException {
         this.mailSender = mailSender;
         this.memberServiceClient = memberServiceClient;
         this.expoNotificationService = expoNotificationService;
 
 
-        mandateSentNotification = LoadEmail("notifications/insurance_mandate_sent_to_insurer.html");
+        mandateSentNotification = LoadEmail("notifications/insurance_activation_date_updated.html");
         signatureImage = new ClassPathResource("mail/wordmark_mail.jpg");
     }
 
 
-    public void run(SendOldInsuranceCancellationEmailRequest request) {
+    public void run(SendActivationDateUpdatedRequest request) {
 
-        ResponseEntity<Member> profile = memberServiceClient.profile(request.getMemberId());
+            ResponseEntity<Member> profile = memberServiceClient.profile(request.getMemberId());
+            Member body = profile.getBody();
 
-        Member body = profile.getBody();
+            val format = DateTimeFormatter.ofPattern("d MMMM yyyy").withLocale(new Locale("se"));
+            val localDate = request.getActivationDate().atZone(ZoneId.of("Europe/Stockholm"));
 
-        if(body.getEmail() != null) {
-            sendEmail(body.getEmail(), body.getFirstName(), request.getInsurer());
-        } else {
-            Sentry.capture(String.format("Could not find email on user with id: %s", request.getMemberId()));
-        }
+            if(body.getEmail() != null) {
+                sendEmail(body.getEmail(), body.getFirstName(), request.getInsurer(), localDate.format(format));
+            }else{
+                Sentry.capture(String.format("Could not find email on user with id: %s", request.getMemberId()));
+            }
 
-        sendPush(body.getMemberId(), body.getFirstName(), request.getInsurer());
+            sendPush(body.getMemberId(), body.getFirstName(), request.getInsurer(), localDate.format(format));
     }
 
-    private void sendPush(Long memberId, String firstName, String insurer) {
+    private void sendPush(Long memberId, String firstName, String insurer, String date) {
 
-        String message = String.format(PUSH_MESSAGE, firstName, insurer);
+        String message = String.format(PUSH_MESSAGE, firstName, insurer, date);
         expoNotificationService.sendNotification(Objects.toString(memberId), message);
-
     }
 
-    private void sendEmail(final String email, final String firstName, final String insurer) {
+    private void sendEmail(final String email, final String firstName, final String insurer, final String date) {
         try {
             val message = mailSender.createMimeMessage();
             val helper = new MimeMessageHelper(message, true, "UTF-8");
 
-            helper.setSubject("Flytten har startat 🚝");
+            helper.setSubject("Goda nyheter 🚝");
             helper.setFrom("\"Hedvig\" <hedvig@hedvig.com>");
             helper.setTo(email);
 
             val finalEmail = mandateSentNotification
                     .replace("{FIRST_NAME}", firstName)
-                    .replace("{INSURER}", insurer);
+                    .replace("{INSURER}", insurer)
+                    .replace("{DATE}", date);
 
             helper.setText(finalEmail, true);
             helper.addInline("image002.jpg", signatureImage);

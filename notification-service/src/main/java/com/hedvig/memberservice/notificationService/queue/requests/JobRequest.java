@@ -12,7 +12,7 @@ import lombok.experimental.NonFinal;
         include = JsonTypeInfo.As.PROPERTY,
         property = "type")
 @JsonSubTypes({
-        @JsonSubTypes.Type(value = SendCancellationEmailRequest.class, name = "sendCancellationEmailRequest")
+        @JsonSubTypes.Type(value = SendOldInsuranceCancellationEmailRequest.class, name = "sendCancellationEmailRequest")
 })
 public class JobRequest {
     String requestId;

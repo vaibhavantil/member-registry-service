@@ -1,6 +1,8 @@
 package com.hedvig.memberservice.web;
 
+import com.hedvig.memberservice.notificationService.dto.InsuranceActivationDateUpdatedRequest;
 import com.hedvig.memberservice.notificationService.dto.CancellationEmailSentToInsurerRequest;
+import com.hedvig.memberservice.notificationService.dto.InsuranceActivatedRequest;
 import com.hedvig.memberservice.notificationService.service.NotificationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,6 +30,33 @@ public class NotificationController {
         MDC.put("memberId", Objects.toString(memberId));
         try{
             notificationService.cancellationEmailSentToInsurer(memberId, body);
+        }catch (MailException  e) {
+            log.error("Could not send email to member", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+
+        return ResponseEntity.noContent().build();
+    }
+
+
+    @PostMapping("insuranceActivated")
+    public ResponseEntity<?> insuranceActivated(@PathVariable Long memberId, @RequestBody InsuranceActivatedRequest body) {
+        MDC.put("memberId", Objects.toString(memberId));
+        try{
+            notificationService.insuranceActivated(memberId, body);
+        }catch (MailException  e) {
+            log.error("Could not send email to member", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+
+        return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("insuranceActivationDateUpdated")
+    public ResponseEntity<?> insuranceActivationDateUpdated(@PathVariable Long memberId, @RequestBody InsuranceActivationDateUpdatedRequest body) {
+        MDC.put("memberId", Objects.toString(memberId));
+        try{
+            notificationService.insuranceActivationDateUpdated(memberId, body);
         }catch (MailException  e) {
             log.error("Could not send email to member", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();

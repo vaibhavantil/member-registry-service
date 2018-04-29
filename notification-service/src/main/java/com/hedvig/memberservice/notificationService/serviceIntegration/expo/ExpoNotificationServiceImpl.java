@@ -23,6 +23,11 @@ public class ExpoNotificationServiceImpl implements ExpoNotificationService {
     public void sendNotification(String hid, String message) {
         try {
             val expoId = botService.pushTokenId(hid, "");
+            if(expoId == null) {
+                logger.info("Can not send push notification to member: {}, no pushtoken found", hid);
+                return;
+            }
+
             val dto = new ExpoPushDTO(
                 expoId,
                 "Hedvig",
