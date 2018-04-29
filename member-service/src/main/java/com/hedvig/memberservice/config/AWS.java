@@ -1,5 +1,7 @@
 package com.hedvig.memberservice.config;
 
+import com.amazonaws.auth.AWSCredentialsProvider;
+import com.amazonaws.auth.DefaultAWSCredentialsProviderChain;
 import com.amazonaws.services.sqs.AmazonSQSAsync;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,5 +19,12 @@ public class AWS {
     public QueueMessagingTemplate queueMessagingTemplate(AmazonSQSAsync amazonSqs) {
         return new QueueMessagingTemplate(amazonSqs);
     }
+
+
+    @Bean
+    AWSCredentialsProvider credentialsProvider() {
+        return new DefaultAWSCredentialsProviderChain();
+    }
+
 
 }
