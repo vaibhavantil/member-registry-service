@@ -6,8 +6,8 @@ import org.springframework.context.annotation.Bean;
 
 public class FeignConfiguration {
 
-    @Bean
-    ErrorDecoder errorDecoder(ObjectMapper objectMapper){
-        return new MemberServiceErrorDecoder(objectMapper);
-    }
+    //@Bean
+    //ErrorDecoder errorDecoder(ObjectMapper objectMapper){
+    //    return new MemberServiceErrorDecoder(objectMapper);
+    //}
 }

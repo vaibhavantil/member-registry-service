@@ -54,7 +54,7 @@ public class SendActivationDateUpdatedEmail {
             ResponseEntity<Member> profile = memberServiceClient.profile(request.getMemberId());
             Member body = profile.getBody();
 
-            val format = DateTimeFormatter.ofPattern("d MMMM yyyy").withLocale(new Locale("se"));
+            val format = DateTimeFormatter.ofPattern("d MMMM yyyy").withLocale(new Locale("sv","SE"));
             val localDate = request.getActivationDate().atZone(ZoneId.of("Europe/Stockholm"));
 
             if(body.getEmail() != null) {
