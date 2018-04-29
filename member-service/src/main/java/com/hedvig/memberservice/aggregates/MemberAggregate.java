@@ -169,6 +169,11 @@ public class MemberAggregate {
         apply(new NewCashbackSelectedEvent(this.id, cmd.getOptionId().toString()));
     }
 
+    @CommandHandler
+    void updateEmail(UpdateEmailCommand cmd) {
+        apply(new EmailUpdatedEvent(this.id, cmd.getEmail()));
+    }
+
     /*
     @CommandHandler
     void finalizeOnBoarding(MemberUpdateContactInformationCommand cmd) {

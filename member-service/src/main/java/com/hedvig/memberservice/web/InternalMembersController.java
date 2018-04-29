@@ -2,11 +2,13 @@ package com.hedvig.memberservice.web;
 
 import com.hedvig.memberservice.commands.MemberUpdateContactInformationCommand;
 import com.hedvig.memberservice.commands.StartOnboardingWithSSNCommand;
+import com.hedvig.memberservice.commands.UpdateEmailCommand;
 import com.hedvig.memberservice.query.MemberEntity;
 import com.hedvig.memberservice.query.MemberRepository;
 import com.hedvig.memberservice.web.dto.InternalMember;
 import com.hedvig.memberservice.web.dto.StartOnboardingWithSSNRequest;
 import com.hedvig.memberservice.web.dto.UpdateContactInformationRequest;
+import com.hedvig.memberservice.web.dto.UpdateEmailRequest;
 import lombok.val;
 import org.axonframework.commandhandling.gateway.CommandGateway;
 import org.springframework.http.HttpStatus;
@@ -57,6 +59,16 @@ public class InternalMembersController {
 
         return ResponseEntity.noContent().build();
     }
+
+    @RequestMapping(value = "/{memberId}/updateEmail", method = RequestMethod.POST)
+    public ResponseEntity<?> updateEmail(@PathVariable Long memberId, @RequestBody UpdateEmailRequest request) {
+
+
+        commandBus.sendAndWait(new UpdateEmailCommand(memberId, request.getEmail()));
+
+        return ResponseEntity.noContent().build();
+    }
+
 
     @RequestMapping(value = "/search", method = RequestMethod.GET)
     @Transactional
