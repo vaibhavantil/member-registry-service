@@ -27,26 +27,27 @@ public class NotificationService {
     }
 
     public void cancellationEmailSentToInsurer(final long memberId, final CancellationEmailSentToInsurerRequest insurer)  {
-        jobPoster.startJob(
-                new SendOldInsuranceCancellationEmailRequest(
-                    UUID.randomUUID().toString(),
-                    Objects.toString(memberId),
-                    insurer.getInsurer()));
+        SendOldInsuranceCancellationEmailRequest request = new SendOldInsuranceCancellationEmailRequest();
+        request.setRequestId(UUID.randomUUID().toString());
+        request.setMemberId(Objects.toString(memberId));
+        request.setInsurer(insurer.getInsurer());
+
+        jobPoster.startJob(request);
     }
 
     public void insuranceActivationDateUpdated(final long memberId, final InsuranceActivationDateUpdatedRequest request) {
-        jobPoster.startJob(
-                new SendActivationDateUpdatedRequest(
-                        UUID.randomUUID().toString(),
-                        Objects.toString(memberId),
-                        request.getCurrentInsurer(),
-                        request.getActivationDate()));
+        SendActivationDateUpdatedRequest request2 = new SendActivationDateUpdatedRequest();
+                request2.setRequestId(UUID.randomUUID().toString());
+                request2.setMemberId(Objects.toString(memberId));
+                request2.setInsurer(request.getCurrentInsurer());
+                request2.setActivationDate(request.getActivationDate());
+        jobPoster.startJob(request2);
     }
 
-    public void insuranceActivated(final long memberId, final InsuranceActivatedRequest request) {
-        jobPoster.startJob(
-                new SendActivationEmailRequest(
-                        UUID.randomUUID().toString(),
-                        Objects.toString(memberId)));
+    public void insuranceActivated(final long memberId, final InsuranceActivatedRequest r) {
+        SendActivationEmailRequest request = new SendActivationEmailRequest();
+        request.setRequestId(UUID.randomUUID().toString());
+        request.setMemberId(Objects.toString(memberId));
+        jobPoster.startJob(request);
     }
 }
