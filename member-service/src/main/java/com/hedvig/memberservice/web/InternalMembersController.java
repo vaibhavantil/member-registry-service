@@ -1,14 +1,9 @@
 package com.hedvig.memberservice.web;
 
-import com.hedvig.memberservice.commands.MemberUpdateContactInformationCommand;
-import com.hedvig.memberservice.commands.StartOnboardingWithSSNCommand;
-import com.hedvig.memberservice.commands.UpdateEmailCommand;
+import com.hedvig.memberservice.commands.*;
 import com.hedvig.memberservice.query.MemberEntity;
 import com.hedvig.memberservice.query.MemberRepository;
-import com.hedvig.memberservice.web.dto.InternalMember;
-import com.hedvig.memberservice.web.dto.StartOnboardingWithSSNRequest;
-import com.hedvig.memberservice.web.dto.UpdateContactInformationRequest;
-import com.hedvig.memberservice.web.dto.UpdateEmailRequest;
+import com.hedvig.memberservice.web.dto.*;
 import lombok.val;
 import org.axonframework.commandhandling.gateway.CommandGateway;
 import org.springframework.http.HttpStatus;
@@ -84,6 +79,12 @@ public class InternalMembersController {
                     .collect(Collectors.toList())
                     .iterator();
         }
+    }
+
+    @RequestMapping(value = "/{memberId}/memberCancelInsurace", method = RequestMethod.POST)
+    public ResponseEntity<?> memberCancelInsurace(@PathVariable Long memberId, @RequestBody InactivateMemberRequest body) {
+        commandBus.sendAndWait(new MemberCancelInsuranceCommand(memberId, body.getInactivationDate()));
+        return ResponseEntity.accepted().build();
     }
 
     private Stream<MemberEntity> search(String status, String query) {

@@ -4,5 +4,6 @@ public enum MemberStatus {
     INITIATED,
     ONBOARDING,
     SIGNED,
-    INACTIVATED
+    INACTIVATED,
+    TERMINATED
 }

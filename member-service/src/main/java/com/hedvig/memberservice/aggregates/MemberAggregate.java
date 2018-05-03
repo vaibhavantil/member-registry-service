@@ -88,6 +88,13 @@ public class MemberAggregate {
         }
     }
 
+    @CommandHandler
+    public void on(MemberCancelInsuranceCommand memberCommand) {
+        if(this.status != MemberStatus.TERMINATED) {
+            apply(new MemberCancellationEvent(memberCommand.getMemberId(), memberCommand.getInactivationDate()));
+        }
+    }
+
     private String formatName(String name) {
         String lowercase = name.toLowerCase();
         return  Character.toUpperCase(lowercase.charAt(0)) + lowercase.substring(1);
@@ -217,5 +224,9 @@ public class MemberAggregate {
         this.member.setSsn(e.getSsn());
     }
 
+    @EventSourcingHandler
+    public void on(MemberCancellationEvent e) {
+        this.status = MemberStatus.TERMINATED;
+    }
 }
 

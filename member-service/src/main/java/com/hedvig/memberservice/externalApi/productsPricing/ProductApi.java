@@ -1,13 +1,16 @@
 package com.hedvig.memberservice.externalApi.productsPricing;
 
+import com.hedvig.memberservice.externalApi.productsPricing.dto.SetCancellationDateRequest;
 import com.hedvig.memberservice.externalApi.productsPricing.dto.ContractSignedRequest;
 import com.hedvig.memberservice.externalApi.productsPricing.dto.InsuranceStatusDTO;
 import com.hedvig.memberservice.externalApi.productsPricing.dto.SafetyIncreasersDTO;
 import feign.FeignException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -55,5 +58,14 @@ public class ProductApi {
     public byte[] getContract(String memberId) {
         ResponseEntity<byte[]> response = this.client.getContract(memberId);
         return response.getBody();
+    }
+
+    public void memberCancelledInsurance(Long memberId, ZonedDateTime inactivationDate) {
+        SetCancellationDateRequest setCancellationDateRequest = new SetCancellationDateRequest(inactivationDate);
+        ResponseEntity<String> responseEntity = this.client.setCancellationDate(memberId, setCancellationDateRequest);
+        if(responseEntity.getStatusCode() != HttpStatus.ACCEPTED) {
+            String message = String.format("Got error response (%s) from product-pricing with body: %s", responseEntity.getStatusCode(), responseEntity.getBody());
+            throw new RuntimeException(message);
+        }
     }
 }

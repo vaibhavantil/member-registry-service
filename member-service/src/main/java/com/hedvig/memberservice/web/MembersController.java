@@ -10,12 +10,16 @@ import com.hedvig.memberservice.services.CashbackService;
 import com.hedvig.memberservice.web.dto.CashbackOption;
 import com.hedvig.memberservice.web.dto.Member;
 import com.hedvig.memberservice.web.dto.Profile;
+import lombok.val;
 import org.axonframework.commandhandling.gateway.CommandGateway;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cloud.aws.messaging.core.QueueMessagingTemplate;
+import org.springframework.cloud.aws.messaging.core.SqsMessageHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.retry.support.RetryTemplate;
 import org.springframework.web.bind.annotation.*;
 
@@ -23,11 +27,14 @@ import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
+
+import static org.springframework.cloud.aws.messaging.core.SqsMessageHeaders.SQS_DELAY_HEADER;
 
 @RestController()
 @RequestMapping("/member/")
@@ -40,16 +47,18 @@ public class MembersController {
     private final ProductApi productApi;
     private final CashbackService cashbackService;
     private final Logger log = LoggerFactory.getLogger(this.getClass());
+    private final QueueMessagingTemplate queueMessagingTemplate;
 
     @Autowired
     public MembersController(MemberRepository repo,
                              CommandGateway commandGateway,
-                             RetryTemplate retryTemplate, ProductApi productApi, CashbackService cashbackService) throws NoSuchAlgorithmException {
+                             RetryTemplate retryTemplate, ProductApi productApi, CashbackService cashbackService, QueueMessagingTemplate queueMessagingTemplate) throws NoSuchAlgorithmException {
         this.repo = repo;
         this.commandGateway = commandGateway;
         this.retryTemplate = retryTemplate;
         this.productApi = productApi;
         this.cashbackService = cashbackService;
+        this.queueMessagingTemplate = queueMessagingTemplate;
         this.randomGenerator = SecureRandom.getInstance("SHA1PRNG");
     }
 
@@ -153,5 +162,15 @@ public class MembersController {
         f.get();
         return ResponseEntity.ok("");
     }
+
+    /*
+    @RequestMapping("/test")
+    public ResponseEntity<?> testSqs(@RequestParam Integer delay){
+        val headers = new HashMap<String, Object>();
+        headers.put(SQS_DELAY_HEADER, delay);
+        SqsMessageHeaders sqsMessageHeaders = new SqsMessageHeaders(headers);
+        queueMessagingTemplate.convertAndSend("member-service-signup-email", MessageBuilder.createMessage(new SignupEmail("12345", "Johan", "tjelldén"), new SqsMessageHeaders(headers)), sqsMessageHeaders);
+        return ResponseEntity.ok("ok");
+    }*/
 
 }

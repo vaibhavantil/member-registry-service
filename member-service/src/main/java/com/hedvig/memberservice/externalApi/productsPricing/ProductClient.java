@@ -1,5 +1,6 @@
 package com.hedvig.memberservice.externalApi.productsPricing;
 
+import com.hedvig.memberservice.externalApi.productsPricing.dto.SetCancellationDateRequest;
 import com.hedvig.memberservice.externalApi.productsPricing.dto.ContractSignedRequest;
 import com.hedvig.memberservice.externalApi.productsPricing.dto.InsuranceStatusDTO;
 import com.hedvig.memberservice.externalApi.productsPricing.dto.SafetyIncreasersDTO;
@@ -25,4 +26,6 @@ public interface ProductClient {
     @RequestMapping(value = "/_/insurance/contract/{memberId}")
     ResponseEntity<byte[]> getContract(@PathVariable("memberId") String contractId);
 
+    @RequestMapping(value = "/_/insurance/{memberId}/setCancellationDate")
+    ResponseEntity<String> setCancellationDate(@PathVariable("memberId")  Long memberId, SetCancellationDateRequest body);
 }
