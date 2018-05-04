@@ -58,7 +58,7 @@ public class MailController {
         waitIsOverMail = IOUtils.toString(waitIsOverResource.getInputStream(), "UTF-8");
     }
 
-    @RequestMapping("/sendSignup")
+    @RequestMapping(value = "/sendSignup", method = RequestMethod.POST)
     public String sendMail(@RequestBody SendSignupRequest request) throws MessagingException, IOException {
 
         MimeMessage message = mailSender.createMimeMessage();

@@ -1,6 +1,5 @@
 package com.hedvig.memberservice.web;
 
-import com.hedvig.memberservice.commands.ConvertAfterBankIdAuthCommand;
 import com.hedvig.memberservice.commands.CreateMemberCommand;
 import com.hedvig.memberservice.externalApi.productsPricing.ProductApi;
 import com.hedvig.memberservice.externalApi.productsPricing.dto.InsuranceStatusDTO;
@@ -10,16 +9,12 @@ import com.hedvig.memberservice.services.CashbackService;
 import com.hedvig.memberservice.web.dto.CashbackOption;
 import com.hedvig.memberservice.web.dto.Member;
 import com.hedvig.memberservice.web.dto.Profile;
-import lombok.val;
 import org.axonframework.commandhandling.gateway.CommandGateway;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.aws.messaging.core.QueueMessagingTemplate;
-import org.springframework.cloud.aws.messaging.core.SqsMessageHeaders;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.retry.support.RetryTemplate;
 import org.springframework.web.bind.annotation.*;
 
@@ -27,14 +22,9 @@ import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
-
-import static org.springframework.cloud.aws.messaging.core.SqsMessageHeaders.SQS_DELAY_HEADER;
 
 @RestController()
 @RequestMapping("/member/")
@@ -62,7 +52,7 @@ public class MembersController {
         this.randomGenerator = SecureRandom.getInstance("SHA1PRNG");
     }
 
-    @RequestMapping("/{memberId}")
+    @GetMapping("/{memberId}")
     public ResponseEntity<Member> index(@PathVariable Long memberId) {
 
         Optional<MemberEntity> member = repo.findById(memberId);
@@ -74,8 +64,8 @@ public class MembersController {
         return ResponseEntity.notFound().build();
     }
 
-    @RequestMapping("/helloHedvig")
-    public ResponseEntity<String> start() throws Exception {
+    @PostMapping("/helloHedvig")
+    public ResponseEntity<String> helloHedvig() throws Exception {
 
 
         Long id = retryTemplate.execute(arg -> {
@@ -96,7 +86,7 @@ public class MembersController {
         return ResponseEntity.ok("{\"memberId\":" + id + "}");
     }
 
-    @RequestMapping("/me")
+    @GetMapping("/me")
     public ResponseEntity<?> me(@RequestHeader(value = "hedvig.token", required = false) Long hid){
         Optional<MemberEntity> m = repo.findById(hid);
         //if(!m.isPresent()) {
@@ -144,23 +134,6 @@ public class MembersController {
                 );
 
         return ResponseEntity.ok(p);
-    }
-
-    @RequestMapping("/convert")
-    public ResponseEntity<String> convert(@RequestParam String personalIdentificationNumber,
-                                          @RequestParam Long memberId,
-                                          @RequestParam String givenName,
-                                          @RequestParam String surName,
-                                          @RequestParam String name
-    ) throws ExecutionException, InterruptedException {
-        Optional<MemberEntity> member = repo.findBySsn(personalIdentificationNumber);
-        if(member.isPresent()) {
-            return ResponseEntity.status(HttpStatus.ALREADY_REPORTED).body(member.get().getId().toString());
-        }
-
-        Future f = commandGateway.send(new ConvertAfterBankIdAuthCommand(memberId, personalIdentificationNumber, givenName, surName, name));
-        f.get();
-        return ResponseEntity.ok("");
     }
 
     /*
