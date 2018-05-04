@@ -1,0 +1,20 @@
+server.port: 4084
+spring.jpa.generate-ddl: true
+spring.jpa.properties.hibernate.dialect: com.hedvig.memberservice.PostgresDialect
+spring.jpa.properties.javax.persistence.schema-generation.create-source: metadata
+spring.jpa.properties.javax.persistence.schema-generation.scripts.action: create
+spring.jpa.properties.javax.persistence.schema-generation.scripts.create-target: create.sql
+spring.jpa.hibernate.ddl-auto: update
+spring.jackson.serialization.write_dates_as_timestamps: false
+
+management.security.enabled: false
+
+hedvig.member-service.url: http://localhost:4084
+hedvig.bot-service.url: http://localhost:4081
+hedvig.external.bankid.url: https://appapi2.bankid.com/rp/v4
+hedvig.productsPricing.url: http://localhost:4085
+
+
+logging.level.com.hedvig: DEBUG
+
+
