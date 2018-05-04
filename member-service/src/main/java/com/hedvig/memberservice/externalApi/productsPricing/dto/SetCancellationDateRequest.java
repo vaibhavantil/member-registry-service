@@ -2,9 +2,9 @@ package com.hedvig.memberservice.externalApi.productsPricing.dto;
 
 import lombok.Value;
 
-import java.time.ZonedDateTime;
+import java.time.Instant;
 
 @Value
 public class SetCancellationDateRequest {
-    ZonedDateTime inactivationDate;
+    Instant inactivationDate;
 }

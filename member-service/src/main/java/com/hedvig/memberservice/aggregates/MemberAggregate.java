@@ -6,6 +6,7 @@ import com.hedvig.external.bisnodeBCI.dto.PersonSearchResult;
 import com.hedvig.memberservice.commands.*;
 import com.hedvig.memberservice.events.*;
 import com.hedvig.memberservice.services.CashbackService;
+import lombok.val;
 import org.axonframework.commandhandling.CommandHandler;
 import org.axonframework.commandhandling.model.AggregateIdentifier;
 import org.axonframework.commandhandling.model.ApplyMore;
@@ -15,6 +16,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.time.ZoneId;
 import java.util.List;
 import java.util.Objects;
 
@@ -91,7 +93,8 @@ public class MemberAggregate {
     @CommandHandler
     public void on(MemberCancelInsuranceCommand memberCommand) {
         if(this.status != MemberStatus.TERMINATED) {
-            apply(new MemberCancellationEvent(memberCommand.getMemberId(), memberCommand.getInactivationDate()));
+            val localCancelationDate = memberCommand.getInactivationDate().atStartOfDay(ZoneId.of("Europe/Stockholm"));
+            apply(new MemberCancellationEvent(memberCommand.getMemberId(), localCancelationDate.toInstant()));
         }
     }
 

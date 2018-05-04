@@ -2,10 +2,10 @@ package com.hedvig.memberservice.events;
 
 import lombok.Value;
 
-import java.time.ZonedDateTime;
+import java.time.Instant;
 
 @Value
 public class MemberCancellationEvent {
     Long memberId;
-    ZonedDateTime inactivationDate;
+    Instant inactivationDate;
 }

@@ -81,9 +81,9 @@ public class InternalMembersController {
         }
     }
 
-    @RequestMapping(value = "/{memberId}/memberCancelInsurace", method = RequestMethod.POST)
-    public ResponseEntity<?> memberCancelInsurace(@PathVariable Long memberId, @RequestBody InactivateMemberRequest body) {
-        commandBus.sendAndWait(new MemberCancelInsuranceCommand(memberId, body.getInactivationDate()));
+    @RequestMapping(value = "/{memberId}/memberCancelInsurance", method = RequestMethod.POST)
+    public ResponseEntity<?> memberCancelInsurance(@PathVariable Long memberId, @RequestBody MemberCancelInsurance body) {
+        commandBus.sendAndWait(new MemberCancelInsuranceCommand(memberId, body.getCancellationDate()));
         return ResponseEntity.accepted().build();
     }
 
