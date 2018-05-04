@@ -33,6 +33,17 @@ public class InternalMembersController {
         this.memberRepository = memberRepository;
     }
 
+    @GetMapping("/{memberId}")
+    public ResponseEntity<Member> index(@PathVariable Long memberId) {
+
+        Optional<MemberEntity> member = memberRepository.findById(memberId);
+        if(member.isPresent()){
+
+            return ResponseEntity.ok(new Member(member.get()));
+        }
+
+        return ResponseEntity.notFound().build();
+    }
 
     @RequestMapping(value = "/{memberId}/finalizeOnboarding", method = RequestMethod.POST)
     public ResponseEntity<?> finalizeOnboarding(@PathVariable Long memberId, @RequestBody UpdateContactInformationRequest body) {
