@@ -93,8 +93,11 @@ public class MemberAggregate {
     @CommandHandler
     public void on(MemberCancelInsuranceCommand memberCommand) {
         if(this.status != MemberStatus.TERMINATED) {
-            val localCancelationDate = memberCommand.getInactivationDate().atStartOfDay(ZoneId.of("Europe/Stockholm"));
-            apply(new MemberCancellationEvent(memberCommand.getMemberId(), localCancelationDate.toInstant()));
+            val localCancellationDate = memberCommand.getInactivationDate().atStartOfDay(ZoneId.of("Europe/Stockholm"));
+            log.info("Applying MemberCancellationEvent {}, {}", memberCommand.getMemberId(), localCancellationDate.toInstant());
+            apply(new MemberCancellationEvent(memberCommand.getMemberId(), localCancellationDate.toInstant()));
+        } else {
+            log.info("Will not cancel member insurance member has status: {}", this.status);
         }
     }
 

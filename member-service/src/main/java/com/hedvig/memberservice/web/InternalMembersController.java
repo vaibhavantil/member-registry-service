@@ -6,6 +6,8 @@ import com.hedvig.memberservice.query.MemberRepository;
 import com.hedvig.memberservice.web.dto.*;
 import lombok.val;
 import org.axonframework.commandhandling.gateway.CommandGateway;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,6 +22,7 @@ import java.util.stream.Stream;
 @RequestMapping("/i/member")
 public class InternalMembersController {
 
+    private final Logger log = LoggerFactory.getLogger(InternalMembersController.class);
     private final CommandGateway commandBus;
     private final MemberRepository memberRepository;
 
@@ -83,6 +86,7 @@ public class InternalMembersController {
 
     @RequestMapping(value = "/{memberId}/memberCancelInsurance", method = RequestMethod.POST)
     public ResponseEntity<?> memberCancelInsurance(@PathVariable Long memberId, @RequestBody MemberCancelInsurance body) {
+        log.info("Dispatching MemberCancelInsuranceCommand for member ({})", memberId);
         commandBus.sendAndWait(new MemberCancelInsuranceCommand(memberId, body.getCancellationDate()));
         return ResponseEntity.accepted().build();
     }
