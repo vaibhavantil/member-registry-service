@@ -12,6 +12,7 @@ import com.hedvig.memberservice.notificationService.queue.requests.SendOldInsura
 import lombok.val;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.aws.messaging.core.QueueMessagingTemplate;
 import org.springframework.cloud.aws.messaging.core.SqsMessageHeaders;
 import org.springframework.cloud.aws.messaging.listener.annotation.SqsListener;
@@ -31,17 +32,21 @@ public class JobPoster {
     private final SendActivationEmail sendActivationEmail;
     private final QueueMessagingTemplate queueMessagingTemplate;
     private final ObjectMapper objectMapper;
+    private final String queueName;
 
     public JobPoster(
             SendCancellationEmail sendCancellationEmail,
             SendActivationDateUpdatedEmail sendActivationDateUpdatedEmail,
             SendActivationEmail sendActivationEmail,
-            QueueMessagingTemplate queueMessagingTemplate, ObjectMapper objectMapper) {
+            QueueMessagingTemplate queueMessagingTemplate,
+            ObjectMapper objectMapper,
+            @Value("${hedvig.notification-service.queueTasklist}") String queueName) {
         this.sendCancellationEmail = sendCancellationEmail;
         this.sendActivationDateUpdatedEmail = sendActivationDateUpdatedEmail;
         this.sendActivationEmail = sendActivationEmail;
         this.queueMessagingTemplate = queueMessagingTemplate;
         this.objectMapper = objectMapper;
+        this.queueName = queueName;
     }
 
     public void startJob(JobRequest request) {
@@ -54,7 +59,7 @@ public class JobPoster {
         }catch (JsonProcessingException ex) {
             log.error("Could not convert request to json: {}", request, ex);
         }
-        this.queueMessagingTemplate.convertAndSend("member-service-notification-service-tasklist", request, sqsMessageHeaders);
+        this.queueMessagingTemplate.convertAndSend(queueName, request, sqsMessageHeaders);
     }
 
     @SqsListener("${hedvig.notification-service.queueTasklist}")
