@@ -46,28 +46,36 @@ public class JobPoster {
 
     public void startJob(JobRequest request) {
 
-
         val headers = new HashMap<String, Object>();
         headers.put(SQS_DELAY_HEADER, 600);
         SqsMessageHeaders sqsMessageHeaders = new SqsMessageHeaders(headers);
-
+        try {
+            log.info("Sending jobrequest to sqs queue: {} ", objectMapper.writeValueAsString(request));
+        }catch (JsonProcessingException ex) {
+            log.error("Could not convert request to json: {}", request, ex);
+        }
         this.queueMessagingTemplate.convertAndSend("member-service-notification-service-tasklist", request, sqsMessageHeaders);
     }
 
+    @SqsListener("${hedvig.notification-service.queueTasklist}")
+    public void jobListener(JobRequest request) {
+        try {
 
-    @SqsListener("member-service-notification-service-tasklist")
-    public void jobListener(JobRequest request) throws JsonProcessingException {
-        String requestAsJson = objectMapper.writeValueAsString(request);
-        log.info("Receiving jobrequest from sqs queue: {} ", requestAsJson);
 
-        if(SendOldInsuranceCancellationEmailRequest.class.isInstance(request)) {
-            sendCancellationEmail.run((SendOldInsuranceCancellationEmailRequest) request);
-        } else if(SendActivationDateUpdatedRequest.class.isInstance(request)) {
-            sendActivationDateUpdatedEmail.run((SendActivationDateUpdatedRequest)request);
-        } else if(SendActivationEmailRequest.class.isInstance(request)) {
-            sendActivationEmail.run((SendActivationEmailRequest) request);
-        }else {
-            log.error("Could not start job for message: {}", requestAsJson);
+            String requestAsJson = objectMapper.writeValueAsString(request);
+            log.info("Receiving jobrequest from sqs queue: {} ", requestAsJson);
+
+            if (SendOldInsuranceCancellationEmailRequest.class.isInstance(request)) {
+                sendCancellationEmail.run((SendOldInsuranceCancellationEmailRequest) request);
+            } else if (SendActivationDateUpdatedRequest.class.isInstance(request)) {
+                sendActivationDateUpdatedEmail.run((SendActivationDateUpdatedRequest) request);
+            } else if (SendActivationEmailRequest.class.isInstance(request)) {
+                sendActivationEmail.run((SendActivationEmailRequest) request);
+            } else {
+                log.error("Could not start job for message: {}", requestAsJson);
+            }
+        }catch (Exception e) {
+            log.error("Caught exception, {}", e.getMessage(), e);
         }
     }
 }
