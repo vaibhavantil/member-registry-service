@@ -49,10 +49,12 @@ public class JobPoster {
         this.queueName = queueName;
     }
 
-    public void startJob(JobRequest request) {
+    public void startJob(JobRequest request, boolean delay) {
 
         val headers = new HashMap<String, Object>();
-        headers.put(SQS_DELAY_HEADER, 600);
+        if(delay) {
+            headers.put(SQS_DELAY_HEADER, 600);
+        }
         SqsMessageHeaders sqsMessageHeaders = new SqsMessageHeaders(headers);
         try {
             log.info("Sending jobrequest to sqs queue: {} ", objectMapper.writeValueAsString(request));

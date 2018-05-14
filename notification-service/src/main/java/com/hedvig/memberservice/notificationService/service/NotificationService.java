@@ -32,7 +32,7 @@ public class NotificationService {
         request.setMemberId(Objects.toString(memberId));
         request.setInsurer(insurer.getInsurer());
 
-        jobPoster.startJob(request);
+        jobPoster.startJob(request, true);
     }
 
     public void insuranceActivationDateUpdated(final long memberId, final InsuranceActivationDateUpdatedRequest request) {
@@ -41,13 +41,13 @@ public class NotificationService {
                 request2.setMemberId(Objects.toString(memberId));
                 request2.setInsurer(request.getCurrentInsurer());
                 request2.setActivationDate(request.getActivationDate());
-        jobPoster.startJob(request2);
+        jobPoster.startJob(request2, false);
     }
 
     public void insuranceActivated(final long memberId, final InsuranceActivatedRequest r) {
         SendActivationEmailRequest request = new SendActivationEmailRequest();
         request.setRequestId(UUID.randomUUID().toString());
         request.setMemberId(Objects.toString(memberId));
-        jobPoster.startJob(request);
+        jobPoster.startJob(request, false);
     }
 }
