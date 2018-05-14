@@ -65,11 +65,11 @@ public class JobPoster {
     }
 
     @SqsListener("${hedvig.notification-service.queueTasklist}")
-    public void jobListener(JobRequest request) {
+    public void jobListener(String requestAsJson) {
         try {
 
 
-            String requestAsJson = objectMapper.writeValueAsString(request);
+            JobRequest request = objectMapper. readValue(requestAsJson, JobRequest.class);
             log.info("Receiving jobrequest from sqs queue: {} ", requestAsJson);
 
             if (SendOldInsuranceCancellationEmailRequest.class.isInstance(request)) {
