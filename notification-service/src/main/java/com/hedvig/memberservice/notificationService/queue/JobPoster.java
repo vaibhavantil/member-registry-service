@@ -57,11 +57,13 @@ public class JobPoster {
         }
         SqsMessageHeaders sqsMessageHeaders = new SqsMessageHeaders(headers);
         try {
-            log.info("Sending jobrequest to sqs queue: {} ", objectMapper.writeValueAsString(request));
+            String requestAsJson = objectMapper.writeValueAsString(request);
+            log.info("Sending jobrequest to sqs queue: {} ", requestAsJson);
+            this.queueMessagingTemplate.convertAndSend(queueName, requestAsJson, sqsMessageHeaders);
         }catch (JsonProcessingException ex) {
             log.error("Could not convert request to json: {}", request, ex);
         }
-        this.queueMessagingTemplate.convertAndSend(queueName, request, sqsMessageHeaders);
+
     }
 
     @SqsListener("${hedvig.notification-service.queueTasklist}")
@@ -69,7 +71,7 @@ public class JobPoster {
         try {
 
 
-            JobRequest request = objectMapper. readValue(requestAsJson, JobRequest.class);
+            JobRequest request = objectMapper.readValue(requestAsJson, JobRequest.class);
             log.info("Receiving jobrequest from sqs queue: {} ", requestAsJson);
 
             if (SendOldInsuranceCancellationEmailRequest.class.isInstance(request)) {
