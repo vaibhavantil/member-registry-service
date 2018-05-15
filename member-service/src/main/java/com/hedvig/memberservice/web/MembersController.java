@@ -7,12 +7,15 @@ import com.hedvig.memberservice.query.MemberEntity;
 import com.hedvig.memberservice.query.MemberRepository;
 import com.hedvig.memberservice.services.CashbackService;
 import com.hedvig.memberservice.web.dto.CashbackOption;
+import com.hedvig.memberservice.web.dto.CounterDTO;
 import com.hedvig.memberservice.web.dto.Member;
 import com.hedvig.memberservice.web.dto.Profile;
+
 import org.axonframework.commandhandling.gateway.CommandGateway;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.aws.messaging.core.QueueMessagingTemplate;
 import org.springframework.http.ResponseEntity;
 import org.springframework.retry.support.RetryTemplate;
@@ -39,6 +42,9 @@ public class MembersController {
     private final Logger log = LoggerFactory.getLogger(this.getClass());
     private final QueueMessagingTemplate queueMessagingTemplate;
 
+    @Value("${hedvig.counterkey:123}")
+    public String counterKey;
+    
     @Autowired
     public MembersController(MemberRepository repo,
                              CommandGateway commandGateway,
@@ -52,6 +58,17 @@ public class MembersController {
         this.randomGenerator = SecureRandom.getInstance("SHA1PRNG");
     }
 
+    @RequestMapping(path = "/counter/321432", method = RequestMethod.GET)
+    public ResponseEntity<CounterDTO> getCount(@RequestParam String key){
+    	
+    	CounterDTO count = new CounterDTO();
+    	count.number = 123;
+    	if(key.equals(counterKey)){
+    		count.number = 104321;
+    	}
+    	return ResponseEntity.ok(count);
+    }
+    
     @GetMapping("/{memberId}")
     public ResponseEntity<Member> index(@PathVariable Long memberId) {
 
