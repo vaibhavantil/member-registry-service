@@ -62,9 +62,9 @@ public class MembersController {
     public ResponseEntity<CounterDTO> getCount(@RequestParam String key){
     	
     	CounterDTO count = new CounterDTO();
-    	count.number = 123;
+    	count.number = 123l;
     	if(key.equals(counterKey)){
-    		count.number = 104321;
+    		count.number = repo.countSignedMembers() + 100000l; //Hack to solve the broken Smiirl counter
     	}
     	return ResponseEntity.ok(count);
     }

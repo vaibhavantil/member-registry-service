@@ -12,6 +12,9 @@ public interface MemberRepository extends JpaRepository<MemberEntity, Long> {
 
     Optional<MemberEntity> findBySsn(String s);
 
+    @Query("select count(*) from MemberEntity m where m.status = 'SIGNED'")
+    Long countSignedMembers();
+    
     @Query("SELECT m FROM MemberEntity m")
     Stream<MemberEntity> searchAll();
 
