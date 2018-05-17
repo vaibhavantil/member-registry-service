@@ -148,8 +148,13 @@ public class MemberAggregate {
 
     @CommandHandler
     void startOnboardingWithSSNCommand(StartOnboardingWithSSNCommand comand) {
-        apply(new OnboardingStartedWithSSNEvent(this.id, comand.getSsn()));
-        apply(new MemberStartedOnBoardingEvent(this.id, MemberStatus.ONBOARDING));
+        if(this.status == MemberStatus.INITIATED || this.status == MemberStatus.ONBOARDING) {
+            apply(new OnboardingStartedWithSSNEvent(this.id, comand.getSsn()));
+            apply(new MemberStartedOnBoardingEvent(this.id, MemberStatus.ONBOARDING));
+        }
+        else {
+            throw new RuntimeException(String.format("Cannot start onboarding in state: %s", this.status));
+        }
     }
 
     @CommandHandler
