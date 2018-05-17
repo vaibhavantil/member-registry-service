@@ -124,5 +124,12 @@ public class MemberEventListener {
         signedMemberRepository.save(sme);
     }
 
+    @EventHandler
+    void on(MemberCancellationEvent e){
+        MemberEntity m = userRepo.findOne(e.getMemberId());
+        m.setStatus(MemberStatus.TERMINATED.name());
+
+        userRepo.save(m);
+    }
 
 }
