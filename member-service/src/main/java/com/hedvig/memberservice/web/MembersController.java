@@ -5,6 +5,8 @@ import com.hedvig.memberservice.externalApi.productsPricing.ProductApi;
 import com.hedvig.memberservice.externalApi.productsPricing.dto.InsuranceStatusDTO;
 import com.hedvig.memberservice.query.MemberEntity;
 import com.hedvig.memberservice.query.MemberRepository;
+import com.hedvig.memberservice.query.TrackingIdEntity;
+import com.hedvig.memberservice.query.TrackingIdRepository;
 import com.hedvig.memberservice.services.CashbackService;
 import com.hedvig.memberservice.web.dto.CashbackOption;
 import com.hedvig.memberservice.web.dto.CounterDTO;
@@ -21,6 +23,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.retry.support.RetryTemplate;
 import org.springframework.web.bind.annotation.*;
 
+import java.math.BigInteger;
+import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.time.LocalDate;
@@ -34,6 +38,7 @@ import java.util.concurrent.CompletableFuture;
 public class MembersController {
 
     private final MemberRepository repo;
+    private final TrackingIdRepository trackingRepo;
     private final CommandGateway commandGateway;
     private final RetryTemplate retryTemplate;
     private final SecureRandom randomGenerator;
@@ -48,7 +53,11 @@ public class MembersController {
     @Autowired
     public MembersController(MemberRepository repo,
                              CommandGateway commandGateway,
-                             RetryTemplate retryTemplate, ProductApi productApi, CashbackService cashbackService, QueueMessagingTemplate queueMessagingTemplate) throws NoSuchAlgorithmException {
+                             RetryTemplate retryTemplate, 
+                             ProductApi productApi, 
+                             CashbackService cashbackService, 
+                             QueueMessagingTemplate queueMessagingTemplate,
+                             TrackingIdRepository trackingRepo) throws NoSuchAlgorithmException {
         this.repo = repo;
         this.commandGateway = commandGateway;
         this.retryTemplate = retryTemplate;
@@ -56,6 +65,7 @@ public class MembersController {
         this.cashbackService = cashbackService;
         this.queueMessagingTemplate = queueMessagingTemplate;
         this.randomGenerator = SecureRandom.getInstance("SHA1PRNG");
+        this.trackingRepo = trackingRepo;
     }
 
     @RequestMapping(path = "/counter/321432", method = RequestMethod.GET)
@@ -130,7 +140,8 @@ public class MembersController {
         CashbackOption cashbackOption = cashbackService.getCashbackOption(selectedCashbackId).orElseGet(cashbackService::getDefaultCashback);
 
         InsuranceStatusDTO insuranceStatus = this.productApi.getInsuranceStatus(hid);
-
+        Optional<TrackingIdEntity> tId = trackingRepo.findById(hid);
+        
         Profile p = new Profile(
                 String.format("%s %s", me.getFirstName(), me.getLastName()),
                 me.getFirstName(),
@@ -138,21 +149,22 @@ public class MembersController {
                 new ArrayList<>(),
                 me.getBirthDate()==null?null:me.getBirthDate().until(LocalDate.now()).getYears(),
                 me.getEmail(),
-                me.getStreet(),
+                me.getStreet(),	
                 0,
-                insuranceStatus.getInsuranceStatus()    .equals("ACTIVE") ? "Betalas via autogiro" : "Betalning sätts upp när försäkringen aktiveras", //""XXXX XXXX 1234",
+                insuranceStatus.getInsuranceStatus().equals("ACTIVE") ? "Betalas via autogiro" : "Betalning sätts upp när försäkringen aktiveras", //""XXXX XXXX 1234",
                 cashbackOption.name,
                 insuranceStatus.getInsuranceStatus(),
                 insuranceStatus.getInsuranceStatus().equals("ACTIVE") ? LocalDate.now().withDayOfMonth(25) : null,
                 cashbackOption.signature,
                 String.format(cashbackOption.paragraph, me.getFirstName()),
                 cashbackOption.selectedUrl,
-                insuranceStatus.getSafetyIncreasers()
+                insuranceStatus.getSafetyIncreasers(),
+                tId.isPresent()?tId.get().getTrackingId():null
                 );
 
         return ResponseEntity.ok(p);
     }
-
+    
     /*
     @RequestMapping("/test")
     public ResponseEntity<?> testSqs(@RequestParam Integer delay){

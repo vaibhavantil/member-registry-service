@@ -1,5 +1,6 @@
 package com.hedvig.memberservice;
 
+import com.hedvig.common.UUIDGenerator;
 import com.hedvig.external.bisnodeBCI.BisnodeClient;
 import com.hedvig.memberservice.aggregates.MemberAggregate;
 import com.hedvig.memberservice.aggregates.MemberStatus;
@@ -9,6 +10,7 @@ import com.hedvig.memberservice.services.CashbackService;
 import com.hedvig.memberservice.web.dto.Address;
 import com.hedvig.memberservice.web.dto.StartOnboardingWithSSNRequest;
 import com.hedvig.memberservice.web.dto.UpdateContactInformationRequest;
+import lombok.val;
 import org.axonframework.eventsourcing.AbstractAggregateFactory;
 import org.axonframework.eventsourcing.DomainEventMessage;
 import org.axonframework.test.aggregate.AggregateTestFixture;
@@ -22,6 +24,7 @@ import org.springframework.web.client.RestClientException;
 
 import java.util.UUID;
 
+import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.when;
 
 @RunWith(SpringRunner.class)
@@ -37,6 +40,9 @@ public class MemberAggregateTests {
 	private
 	CashbackService cashbackService;
 
+	@MockBean
+	private UUIDGenerator uuidGenerator;
+
 	private class AggregateFactoryM<T > extends AbstractAggregateFactory<T> {
 
 		AggregateFactoryM(Class<T> aggregateType) {
@@ -45,7 +51,7 @@ public class MemberAggregateTests {
 
 		@Override
 		protected T doCreateAggregate(String aggregateIdentifier, DomainEventMessage firstEvent) {
-			return (T) new MemberAggregate(bisnodeClient, cashbackService);
+			return (T) new MemberAggregate(bisnodeClient, cashbackService, uuidGenerator);
 		}
 	}
 
@@ -71,6 +77,9 @@ public class MemberAggregateTests {
 
 		when(bisnodeClient.match(ssn)).thenThrow(new RestClientException("Something went wrong!"));
 
+		val uuid = UUID.fromString("971b25bc-5db5-11e8-9f7c-039208e9dccf");
+		when(uuidGenerator.generateRandom()).thenReturn(uuid);
+
 		BankIdAuthenticationStatus authStatus = new BankIdAuthenticationStatus();
 		authStatus.setSSN(ssn);
 		authStatus.setReferenceToken(referenceTokenValue);
@@ -83,6 +92,7 @@ public class MemberAggregateTests {
 				when(cmd).
 				expectSuccessfulHandlerExecution().expectEvents(
 						new SSNUpdatedEvent(memberId, ssn),
+						new TrackingIdCreatedEvent(memberId, uuid),
 						new NameUpdatedEvent(memberId, "Tolvan", "Tolvansson"),
 						new MemberStartedOnBoardingEvent(memberId, MemberStatus.ONBOARDING),
 						new MemberAuthenticatedEvent(memberId, referenceTokenValue)
@@ -149,13 +159,17 @@ public class MemberAggregateTests {
 
 		UUID defaultCashback = UUID.fromString("9881f632-fb69-11e7-9238-a39b7922d42d");
 
+		val uuid = UUID.fromString("971b25bc-5db5-11e8-9f7c-039208e9dccf");
+		when(uuidGenerator.generateRandom()).thenReturn(uuid);
+
 		when(cashbackService.getDefaultId()).thenReturn(defaultCashback);
 
 		fixture.given(new MemberCreatedEvent(memberId, MemberStatus.INITIATED)).
 				when(new BankIdSignCommand(memberId, referenceId, "", "")).
 				expectSuccessfulHandlerExecution().
 				expectEvents(new NewCashbackSelectedEvent(memberId, defaultCashback.toString()),
-						new MemberSignedEvent(memberId, referenceId, "", ""));
+						new MemberSignedEvent(memberId, referenceId, "", ""),
+						new TrackingIdCreatedEvent(memberId, uuid));
 
 	}
 

@@ -1,5 +1,6 @@
 package com.hedvig.memberservice.aggregates;
 
+import com.hedvig.common.UUIDGenerator;
 import com.hedvig.external.bisnodeBCI.BisnodeClient;
 import com.hedvig.external.bisnodeBCI.dto.Person;
 import com.hedvig.external.bisnodeBCI.dto.PersonSearchResult;
@@ -10,6 +11,7 @@ import lombok.val;
 import org.axonframework.commandhandling.CommandHandler;
 import org.axonframework.commandhandling.model.AggregateIdentifier;
 import org.axonframework.commandhandling.model.ApplyMore;
+import org.axonframework.eventhandling.EventHandler;
 import org.axonframework.eventsourcing.EventSourcingHandler;
 import org.axonframework.spring.stereotype.Aggregate;
 import org.slf4j.Logger;
@@ -19,6 +21,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.time.ZoneId;
 import java.util.List;
 import java.util.Objects;
+import java.util.UUID;
 
 import static org.axonframework.commandhandling.model.AggregateLifecycle.apply;
 
@@ -43,10 +46,14 @@ public class MemberAggregate {
 
     private CashbackService cashbackService;
 
+    private UUIDGenerator uuidGenerator;
+    private UUID trackingId;
+
     @Autowired
-    public MemberAggregate(BisnodeClient bisnodeClient, CashbackService cashbackService) {
+    public MemberAggregate(BisnodeClient bisnodeClient, CashbackService cashbackService, UUIDGenerator uuidGenerator) {
         this.bisnodeClient = bisnodeClient;
         this.cashbackService = cashbackService;
+        this.uuidGenerator = uuidGenerator;
     }
 
     @CommandHandler
@@ -64,6 +71,8 @@ public class MemberAggregate {
             //Trigger fetching of bisnode data.
             String ssn = bankIdAuthResponse.getSSN();
             applyChain = apply(new SSNUpdatedEvent(this.id, ssn));
+            //-- Tracking id generation for the new member id
+            generateTrackingId();
 
             try {
                 applyChain = getPersonInformationFromBisnode(applyChain, ssn);
@@ -88,6 +97,10 @@ public class MemberAggregate {
         else {
             apply(authenticatedEvent);
         }
+    }
+
+    private void generateTrackingId() {
+        apply(new TrackingIdCreatedEvent(this.id, uuidGenerator.generateRandom()));
     }
 
     @CommandHandler
@@ -180,6 +193,10 @@ public class MemberAggregate {
     void bankIdSignHandler(BankIdSignCommand cmd) {
         apply(new NewCashbackSelectedEvent(this.id, cashbackService.getDefaultId().toString()));
         apply(new MemberSignedEvent(this.id, cmd.getReferenceId(), cmd.getSignature(), cmd.getOscpResponse()));
+
+        if(this.trackingId == null){
+            generateTrackingId();
+        }
     }
 
     @CommandHandler
@@ -200,6 +217,7 @@ public class MemberAggregate {
         apply(new NameUpdatedEvent(this.id, cmd.getFirstName(), cmd.getLastName()));
         apply(new SSNUpdatedEvent(this.id, cmd.getSsn()));
     }*/
+
 
     @EventSourcingHandler
     public void on(MemberCreatedEvent e) {
@@ -238,6 +256,13 @@ public class MemberAggregate {
     @EventSourcingHandler
     public void on(MemberCancellationEvent e) {
         this.status = MemberStatus.TERMINATED;
+    }
+
+    @EventHandler
+    public void on(TrackingIdCreatedEvent e) {
+
+        this.trackingId = e.getTrackingId();
+
     }
 }
 
