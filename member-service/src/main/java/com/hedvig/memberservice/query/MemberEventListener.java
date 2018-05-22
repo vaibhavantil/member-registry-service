@@ -11,6 +11,8 @@ import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.Optional;
+import java.util.UUID;
 
 @Component
 public class MemberEventListener {
@@ -18,11 +20,13 @@ public class MemberEventListener {
     private final Logger logger = LoggerFactory.getLogger(MemberEventListener.class);
     private final MemberRepository userRepo;
     private final SignedMemberRepository signedMemberRepository;
+    private final TrackingIdRepository trackingRepo;
 
     @Autowired
-    public MemberEventListener(MemberRepository userRepo, SignedMemberRepository signedMemberRepository) {
+    public MemberEventListener(MemberRepository userRepo, SignedMemberRepository signedMemberRepository, TrackingIdRepository trackingRepo) {
         this.userRepo = userRepo;
         this.signedMemberRepository = signedMemberRepository;
+        this.trackingRepo = trackingRepo;
     }
 
     @EventHandler
@@ -31,7 +35,7 @@ public class MemberEventListener {
         MemberEntity user = new MemberEntity();
         user.setId( e.getId());
         user.setStatus(e.getStatus().name());
-
+        
         userRepo.save(user);
     }
 
@@ -62,6 +66,18 @@ public class MemberEventListener {
         }
 
         userRepo.save(m);
+    }
+
+    @EventHandler void on(TrackingIdCreatedEvent e) {
+    	
+        // Assign a unique tracking id per SSN
+        TrackingIdEntity c = trackingRepo.findByTrackingId(e.getTrackingId()).orElseGet(() -> {
+        	TrackingIdEntity newCampaign = new TrackingIdEntity();
+        	newCampaign.setMemberId(e.getMemberId());
+        	newCampaign.setTrackingId(e.getTrackingId());
+        	trackingRepo.save(newCampaign);
+            return newCampaign;
+        });;
     }
 
     @EventHandler void on(LivingAddressUpdatedEvent e) {

@@ -19,6 +19,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.time.ZoneId;
 import java.util.List;
 import java.util.Objects;
+import java.util.UUID;
 
 import static org.axonframework.commandhandling.model.AggregateLifecycle.apply;
 
@@ -64,6 +65,8 @@ public class MemberAggregate {
             //Trigger fetching of bisnode data.
             String ssn = bankIdAuthResponse.getSSN();
             applyChain = apply(new SSNUpdatedEvent(this.id, ssn));
+            //-- Tracking id generation for the new member id
+            apply(new TrackingIdCreatedEvent(this.id.toString(), UUID.randomUUID()));
 
             try {
                 applyChain = getPersonInformationFromBisnode(applyChain, ssn);
