@@ -73,7 +73,7 @@ public class MemberEventListener {
         // Assign a unique tracking id per SSN
         TrackingIdEntity c = trackingRepo.findByTrackingId(e.getTrackingId()).orElseGet(() -> {
         	TrackingIdEntity newCampaign = new TrackingIdEntity();
-        	newCampaign.setMemberId(e.getMemberId());
+        	newCampaign.setMemberId(e.getMemberId().toString());
         	newCampaign.setTrackingId(e.getTrackingId());
         	trackingRepo.save(newCampaign);
             return newCampaign;

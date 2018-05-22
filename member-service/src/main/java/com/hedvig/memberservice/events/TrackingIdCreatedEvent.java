@@ -7,10 +7,10 @@ import lombok.experimental.NonFinal;
 
 @Value
 public class TrackingIdCreatedEvent {
-    private final String memberId;
+    private final Long memberId;
     private final UUID trackingId;
 
-    public TrackingIdCreatedEvent(String memberId, UUID trackingId) {
+    public TrackingIdCreatedEvent(Long memberId, UUID trackingId) {
         this.memberId = memberId;
         this.trackingId = trackingId;
     }
