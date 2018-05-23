@@ -8,6 +8,6 @@ import java.util.UUID;
 
 @Repository
 public interface TrackingIdRepository extends JpaRepository<TrackingIdEntity, Long> {
-    Optional<TrackingIdEntity> findByMemberId(long s);
+    Optional<TrackingIdEntity> findByMemberId(Long s);
     Optional<TrackingIdEntity> findByTrackingId(UUID s);
 }
