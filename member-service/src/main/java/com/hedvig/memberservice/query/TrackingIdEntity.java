@@ -14,10 +14,6 @@ public class TrackingIdEntity {
     @Id
     @Getter
     @Setter
-    private Long id;
-
-    @Getter
-    @Setter
     @Column(unique = true)
     private String memberId;
     
