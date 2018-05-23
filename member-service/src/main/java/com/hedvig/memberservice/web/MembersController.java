@@ -140,7 +140,7 @@ public class MembersController {
         CashbackOption cashbackOption = cashbackService.getCashbackOption(selectedCashbackId).orElseGet(cashbackService::getDefaultCashback);
 
         InsuranceStatusDTO insuranceStatus = this.productApi.getInsuranceStatus(hid);
-        Optional<TrackingIdEntity> tId = trackingRepo.findById(hid);
+        Optional<TrackingIdEntity> tId = trackingRepo.findByMemberId(hid);
         
         Profile p = new Profile(
                 String.format("%s %s", me.getFirstName(), me.getLastName()),
