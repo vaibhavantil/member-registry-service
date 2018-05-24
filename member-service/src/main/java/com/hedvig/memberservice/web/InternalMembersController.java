@@ -89,7 +89,7 @@ public class InternalMembersController {
         query = query.trim();
         try (val stream = search(status, query)) {
             return stream
-                    .map(InternalMember::fromEnity)
+                    .map(InternalMember::fromEntity)
                     .collect(Collectors.toList())
                     .iterator();
         }
@@ -100,6 +100,18 @@ public class InternalMembersController {
         log.info("Dispatching MemberCancelInsuranceCommand for member ({})", memberId);
         commandBus.sendAndWait(new MemberCancelInsuranceCommand(memberId, body.getCancellationDate()));
         return ResponseEntity.accepted().build();
+    }
+
+    @PostMapping("{memberId}/edit")
+    public void editMember(@PathVariable("memberId") String memberId,
+                    @RequestBody InternalMember dto,
+                    @RequestHeader("Authorization") String token){
+
+        Optional<MemberEntity> member = memberRepository.findById(Long.parseLong(memberId));
+
+        if(member.isPresent() && !InternalMember.fromEntity(member.get()).equals(dto)) {
+            commandBus.sendAndWait(new EditMemberInformationCommand(memberId, dto));
+        }
     }
 
     private Stream<MemberEntity> search(String status, String query) {

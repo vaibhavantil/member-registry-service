@@ -124,5 +124,13 @@ public class MemberEventListener {
         signedMemberRepository.save(sme);
     }
 
+    @EventHandler
+    void on(PhoneNumberUpdatedEvent e){
+        MemberEntity m = userRepo.findOne(e.getId());
+        m.setPhoneNumber(e.getPhoneNumber());
+
+        userRepo.save(m);
+    }
+
 
 }

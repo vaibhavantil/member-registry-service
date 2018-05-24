@@ -38,7 +38,7 @@ public class InternalMember {
 
     private LocalDate birthDate;
 
-    public static InternalMember fromEnity(MemberEntity entity) {
+    public static InternalMember fromEntity(MemberEntity entity) {
         val dto = new InternalMember();
         dto.setMemberId(entity.getId());
         dto.setStatus(entity.getStatus());
