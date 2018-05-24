@@ -97,9 +97,9 @@ public class InternalMembersControllerTests {
         mockMvc.perform(
                 post("/i/member/{memberId}/startOnboardingWithSSN", Objects.toString(memberId)).
                         contentType(MediaType.APPLICATION_JSON_UTF8).
-                        content(jsonMapper.writeValueAsBytes(request))).andExpect(status().isAlreadyReported());
+                        content(jsonMapper.writeValueAsBytes(request))).andExpect(status().isNoContent());
 
-        verify(commandGateway, times(0)).sendAndWait(new StartOnboardingWithSSNCommand(memberId, request));
+        verify(commandGateway, times(1)).sendAndWait(new StartOnboardingWithSSNCommand(memberId, request));
     }
 
 }

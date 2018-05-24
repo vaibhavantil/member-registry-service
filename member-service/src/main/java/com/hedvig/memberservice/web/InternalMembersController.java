@@ -58,13 +58,11 @@ public class InternalMembersController {
     @RequestMapping(value = "/{memberId}/startOnboardingWithSSN", method = RequestMethod.POST)
     public ResponseEntity<?> startOnboardingWithSSN(@PathVariable Long memberId, @RequestBody StartOnboardingWithSSNRequest request) {
 
-
-        Optional<MemberEntity> member = memberRepository.findBySsn(request.getSsn());
-        if (member.isPresent()) {
-            return ResponseEntity.status(HttpStatus.ALREADY_REPORTED).body(member.get().getId().toString());
+        try {
+            commandBus.sendAndWait(new StartOnboardingWithSSNCommand(memberId, request));
+        }catch (RuntimeException ex) {
+            return ResponseEntity.badRequest().body("{\"message\":\"" + ex.getMessage() +"\"");
         }
-
-        commandBus.sendAndWait(new StartOnboardingWithSSNCommand(memberId, request));
 
         return ResponseEntity.noContent().build();
     }

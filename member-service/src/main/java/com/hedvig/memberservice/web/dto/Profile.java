@@ -6,9 +6,7 @@ import lombok.Value;
 
 import java.time.LocalDate;
 import java.util.List;
-
-
-
+import java.util.UUID;
 
 @Value
 @NoArgsConstructor(force = true)
@@ -28,10 +26,11 @@ public class Profile {
 
     private String paymentStatus;
     private LocalDate nextPaymentDate;
-
+    
     private String selectedCashbackSignature;
     private String selectedCashbackParagraph;
     private String selectedCashbackImageUrl;
 
     private List<String> safetyIncreasers;
+    private UUID trackingId;
 }

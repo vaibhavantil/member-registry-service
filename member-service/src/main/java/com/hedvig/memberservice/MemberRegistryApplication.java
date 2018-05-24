@@ -1,5 +1,7 @@
 package com.hedvig.memberservice;
 
+import com.hedvig.common.UUIDGenerator;
+import com.hedvig.common.UUIDGeneratorImpl;
 import com.hedvig.external.bisnodeBCI.BisnodeClient;
 import com.hedvig.memberservice.aggregates.MemberAggregate;
 import com.hedvig.memberservice.services.CashbackService;
@@ -95,11 +97,9 @@ public class MemberRegistryApplication {
     }
 
     @Bean
-    @Scope("prototype")
-    public MemberAggregate memberAggregate(BisnodeClient bisnodeClient, CashbackService cashbackService) {
-        return new MemberAggregate(bisnodeClient, cashbackService);
+    public UUIDGenerator uuidGenerator() {
+        return new UUIDGeneratorImpl();
     }
-
     @Bean
     public AggregateFactory<MemberAggregate> memberAggregateFactory() {
         SpringPrototypeAggregateFactory<MemberAggregate> springPrototypeAggregateFactory = new SpringPrototypeAggregateFactory<>();
