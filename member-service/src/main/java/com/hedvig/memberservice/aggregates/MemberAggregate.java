@@ -205,6 +205,29 @@ public class MemberAggregate {
         apply(new EmailUpdatedEvent(this.id, cmd.getEmail()));
     }
 
+    @CommandHandler
+    void editMemberInformation(EditMemberInformationCommand cmd){
+        if(!Objects.equals(this.member.getFirstName(),cmd.getMember().getFirstName()) ||
+                !Objects.equals(this.member.getLastName(), cmd.getMember().getLastName())) {
+            apply(new NameUpdatedEvent(this.id, cmd.getMember().getFirstName(), cmd.getMember().getLastName()));
+        }
+
+        if(Objects.equals(member.getEmail(), cmd.getMember().getEmail()) == false) {
+            apply(new EmailUpdatedEvent(this.id, cmd.getMember().getEmail()));
+        }
+
+        LivingAddress address = this.member.getLivingAddress();
+        if(address == null || address.needsUpdate(cmd.getMember().getStreet(), cmd.getMember().getCity(),
+                cmd.getMember().getZipCode(), cmd.getMember().getApartment(), cmd.getMember().getFloor())) {
+            apply(new LivingAddressUpdatedEvent(this.id, cmd.getMember().getStreet(), cmd.getMember().getCity(),
+                    cmd.getMember().getZipCode(), cmd.getMember().getApartment(), cmd.getMember().getFloor()));
+        }
+
+        if (!Objects.equals(this.member.getPhoneNumber(), cmd.getMember().getPhoneNumber())) {
+            apply(new PhoneNumberUpdatedEvent(this.id, cmd.getMember().getPhoneNumber()));
+        }
+    }
+
     /*
     @CommandHandler
     void finalizeOnBoarding(MemberUpdateContactInformationCommand cmd) {
@@ -245,7 +268,7 @@ public class MemberAggregate {
     }
 
     @EventSourcingHandler
-    public  void on(OnboardingStartedWithSSNEvent e) {
+    public void on(OnboardingStartedWithSSNEvent e) {
         this.member.setSsn(e.getSsn());
     }
 
@@ -260,5 +283,8 @@ public class MemberAggregate {
         this.trackingId = e.getTrackingId();
 
     }
+
+    @EventSourcingHandler
+    public void on(PhoneNumberUpdatedEvent e) { this.member.setPhoneNumber(e.getPhoneNumber()); }
 }
 

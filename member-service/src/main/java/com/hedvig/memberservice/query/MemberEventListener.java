@@ -148,4 +148,12 @@ public class MemberEventListener {
         userRepo.save(m);
     }
 
+    @EventHandler
+    void on(PhoneNumberUpdatedEvent e){
+        MemberEntity m = userRepo.findOne(e.getId());
+        m.setPhoneNumber(e.getPhoneNumber());
+
+        userRepo.save(m);
+    }
+
 }
