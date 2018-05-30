@@ -22,6 +22,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.web.client.RestClientException;
 
+import java.time.Instant;
 import java.util.UUID;
 
 import static org.mockito.Matchers.any;
@@ -30,147 +31,147 @@ import static org.mockito.Mockito.when;
 @RunWith(SpringRunner.class)
 public class MemberAggregateTests {
 
-	private FixtureConfiguration<MemberAggregate> fixture;
+    private FixtureConfiguration<MemberAggregate> fixture;
 
-	@MockBean
-	private
-	BisnodeClient bisnodeClient;
+    @MockBean
+    private
+    BisnodeClient bisnodeClient;
 
-	@MockBean
-	private
-	CashbackService cashbackService;
+    @MockBean
+    private
+    CashbackService cashbackService;
 
-	@MockBean
-	private UUIDGenerator uuidGenerator;
+    @MockBean
+    private UUIDGenerator uuidGenerator;
 
-	private class AggregateFactoryM<T > extends AbstractAggregateFactory<T> {
+    private class AggregateFactoryM<T > extends AbstractAggregateFactory<T> {
 
-		AggregateFactoryM(Class<T> aggregateType) {
-			super(aggregateType);
-		}
+        AggregateFactoryM(Class<T> aggregateType) {
+            super(aggregateType);
+        }
 
-		@Override
-		protected T doCreateAggregate(String aggregateIdentifier, DomainEventMessage firstEvent) {
-			return (T) new MemberAggregate(bisnodeClient, cashbackService, uuidGenerator);
-		}
-	}
+        @Override
+        protected T doCreateAggregate(String aggregateIdentifier, DomainEventMessage firstEvent) {
+            return (T) new MemberAggregate(bisnodeClient, cashbackService, uuidGenerator);
+        }
+    }
 
-	@Before
-	public void setUp() {
-		fixture = new AggregateTestFixture<>(MemberAggregate.class);
-		fixture.registerAggregateFactory(new AggregateFactoryM<>(MemberAggregate.class));
-	}
+    @Before
+    public void setUp() {
+        fixture = new AggregateTestFixture<>(MemberAggregate.class);
+        fixture.registerAggregateFactory(new AggregateFactoryM<>(MemberAggregate.class));
+    }
 
-	@Test
-	public void contextLoads() {
-		Long memberId = 123L;
-		fixture.given(new MemberCreatedEvent(memberId, MemberStatus.INITIATED));
-	}
+    @Test
+    public void contextLoads() {
+        Long memberId = 123L;
+        fixture.given(new MemberCreatedEvent(memberId, MemberStatus.INITIATED));
+    }
 
-	@Test
-	public void authenticatedAttemptCommand(){
-		Long memberId = 1234L;
-		final String ssn = "191212121212";
-		final String referenceTokenValue = "referenceTokenValue";
-		final String firstName = "TOLVAN";
-		final String lastName = "TOLVANSSON";
+    @Test
+    public void authenticatedAttemptCommand(){
+        Long memberId = 1234L;
+        final String ssn = "191212121212";
+        final String referenceTokenValue = "referenceTokenValue";
+        final String firstName = "TOLVAN";
+        final String lastName = "TOLVANSSON";
 
-		when(bisnodeClient.match(ssn)).thenThrow(new RestClientException("Something went wrong!"));
+        when(bisnodeClient.match(ssn)).thenThrow(new RestClientException("Something went wrong!"));
 
-		val uuid = UUID.fromString("971b25bc-5db5-11e8-9f7c-039208e9dccf");
-		when(uuidGenerator.generateRandom()).thenReturn(uuid);
+        val uuid = UUID.fromString("971b25bc-5db5-11e8-9f7c-039208e9dccf");
+        when(uuidGenerator.generateRandom()).thenReturn(uuid);
 
-		BankIdAuthenticationStatus authStatus = new BankIdAuthenticationStatus();
-		authStatus.setSSN(ssn);
-		authStatus.setReferenceToken(referenceTokenValue);
-		authStatus.setSurname(lastName);
-		authStatus.setGivenName(firstName);
+        BankIdAuthenticationStatus authStatus = new BankIdAuthenticationStatus();
+        authStatus.setSSN(ssn);
+        authStatus.setReferenceToken(referenceTokenValue);
+        authStatus.setSurname(lastName);
+        authStatus.setGivenName(firstName);
 
-		AuthenticationAttemptCommand cmd = new AuthenticationAttemptCommand(memberId, authStatus);
+        AuthenticationAttemptCommand cmd = new AuthenticationAttemptCommand(memberId, authStatus);
 
-		fixture.given(new MemberCreatedEvent(memberId, MemberStatus.INITIATED)).
-				when(cmd).
-				expectSuccessfulHandlerExecution().expectEvents(
-						new SSNUpdatedEvent(memberId, ssn),
-						new TrackingIdCreatedEvent(memberId, uuid),
-						new NameUpdatedEvent(memberId, "Tolvan", "Tolvansson"),
-						new MemberStartedOnBoardingEvent(memberId, MemberStatus.ONBOARDING),
-						new MemberAuthenticatedEvent(memberId, referenceTokenValue)
-		);
-	}
+        fixture.given(new MemberCreatedEvent(memberId, MemberStatus.INITIATED)).
+                when(cmd).
+                expectSuccessfulHandlerExecution().expectEvents(
+                        new SSNUpdatedEvent(memberId, ssn),
+                        new TrackingIdCreatedEvent(memberId, uuid),
+                        new NameUpdatedEvent(memberId, "Tolvan", "Tolvansson"),
+                        new MemberStartedOnBoardingEvent(memberId, MemberStatus.ONBOARDING),
+                        new MemberAuthenticatedEvent(memberId, referenceTokenValue)
+        );
+    }
 
-	@Test
-	public void MemberUpdatePersonalInformation(){
-		Long memberId = 1234L;
+    @Test
+    public void MemberUpdatePersonalInformation(){
+        Long memberId = 1234L;
 
-		UpdateContactInformationRequest request = new UpdateContactInformationRequest();
-		request.setFirstName("Arn");
-		request.setLastName("Magnusson");
-		request.setEmail("email@hedvig.com");
-		Address address = new Address();
-		address.setStreet("Spånga bro");
-		address.setCity("Spånga");
-		address.setApartmentNo("1104");
-		address.setZipCode("55748");
-		address.setFloor(0);
-		request.setAddress(address);
+        UpdateContactInformationRequest request = new UpdateContactInformationRequest();
+        request.setFirstName("Arn");
+        request.setLastName("Magnusson");
+        request.setEmail("email@hedvig.com");
+        Address address = new Address();
+        address.setStreet("Spånga bro");
+        address.setCity("Spånga");
+        address.setApartmentNo("1104");
+        address.setZipCode("55748");
+        address.setFloor(0);
+        request.setAddress(address);
 
-		fixture.
-				given(new MemberCreatedEvent(memberId, MemberStatus.INITIATED)).
-				when(new MemberUpdateContactInformationCommand(memberId, request)).
-				expectSuccessfulHandlerExecution().expectEvents(
-						new NameUpdatedEvent(memberId, request.getFirstName(), request.getLastName()),
-						new EmailUpdatedEvent(memberId, "email@hedvig.com"),
-						new LivingAddressUpdatedEvent(memberId, address.getStreet(), address.getCity(), address.getZipCode(), address.getApartmentNo(), 0)
-		);
-	}
+        fixture.
+                given(new MemberCreatedEvent(memberId, MemberStatus.INITIATED)).
+                when(new MemberUpdateContactInformationCommand(memberId, request)).
+                expectSuccessfulHandlerExecution().expectEvents(
+                        new NameUpdatedEvent(memberId, request.getFirstName(), request.getLastName()),
+                        new EmailUpdatedEvent(memberId, "email@hedvig.com"),
+                        new LivingAddressUpdatedEvent(memberId, address.getStreet(), address.getCity(), address.getZipCode(), address.getApartmentNo(), 0)
+        );
+    }
 
-	@Test
-	public void StartOnBoardingFromSSN(){
-		Long memberId = 1234L;
+    @Test
+    public void StartOnBoardingFromSSN(){
+        Long memberId = 1234L;
 
-		String ssn = "192005059999";
-		StartOnboardingWithSSNRequest request = new StartOnboardingWithSSNRequest(ssn);
+        String ssn = "192005059999";
+        StartOnboardingWithSSNRequest request = new StartOnboardingWithSSNRequest(ssn);
 
-		fixture.
-				given(new MemberCreatedEvent(memberId, MemberStatus.INITIATED)).
-				when(new StartOnboardingWithSSNCommand(memberId, request)).
-				expectSuccessfulHandlerExecution().expectEvents(
-				new OnboardingStartedWithSSNEvent(memberId, ssn),
-				new MemberStartedOnBoardingEvent(memberId, MemberStatus.ONBOARDING));
-	}
+        fixture.
+                given(new MemberCreatedEvent(memberId, MemberStatus.INITIATED)).
+                when(new StartOnboardingWithSSNCommand(memberId, request)).
+                expectSuccessfulHandlerExecution().expectEvents(
+                new OnboardingStartedWithSSNEvent(memberId, ssn),
+                new MemberStartedOnBoardingEvent(memberId, MemberStatus.ONBOARDING));
+    }
 
-	@Test
-	public void SelectNewCashbackCommand() {
-		Long memberId = 1234L;
-		String cashbackId = "328354a4-d119-11e7-ac68-139bd471ea9a";
+    @Test
+    public void SelectNewCashbackCommand() {
+        Long memberId = 1234L;
+        String cashbackId = "328354a4-d119-11e7-ac68-139bd471ea9a";
 
-		fixture.given(new MemberCreatedEvent(memberId, MemberStatus.INITIATED)).
-				when(new SelectNewCashbackCommand(memberId, UUID.fromString(cashbackId))).
-				expectSuccessfulHandlerExecution().
-				expectEvents(new NewCashbackSelectedEvent(memberId, cashbackId));
+        fixture.given(new MemberCreatedEvent(memberId, MemberStatus.INITIATED)).
+                when(new SelectNewCashbackCommand(memberId, UUID.fromString(cashbackId))).
+                expectSuccessfulHandlerExecution().
+                expectEvents(new NewCashbackSelectedEvent(memberId, cashbackId));
 
-	}
+    }
 
-	@Test
-	public void BankIdSignCommand() {
-		Long memberId = 1234L;
-		String referenceId = "someReferenceId";
+    @Test
+    public void BankIdSignCommand() {
+        Long memberId = 1234L;
+        String referenceId = "someReferenceId";
 
-		UUID defaultCashback = UUID.fromString("9881f632-fb69-11e7-9238-a39b7922d42d");
+        UUID defaultCashback = UUID.fromString("9881f632-fb69-11e7-9238-a39b7922d42d");
 
-		val uuid = UUID.fromString("971b25bc-5db5-11e8-9f7c-039208e9dccf");
-		when(uuidGenerator.generateRandom()).thenReturn(uuid);
+        val uuid = UUID.fromString("971b25bc-5db5-11e8-9f7c-039208e9dccf");
+        when(uuidGenerator.generateRandom()).thenReturn(uuid);
 
-		when(cashbackService.getDefaultId()).thenReturn(defaultCashback);
+        when(cashbackService.getDefaultId()).thenReturn(defaultCashback);
 
-		fixture.given(new MemberCreatedEvent(memberId, MemberStatus.INITIATED)).
-				when(new BankIdSignCommand(memberId, referenceId, "", "")).
-				expectSuccessfulHandlerExecution().
-				expectEvents(new NewCashbackSelectedEvent(memberId, defaultCashback.toString()),
-						new MemberSignedEvent(memberId, referenceId, "", ""),
-						new TrackingIdCreatedEvent(memberId, uuid));
+        fixture.given(new MemberCreatedEvent(memberId, MemberStatus.INITIATED)).
+                when(new BankIdSignCommand(memberId, referenceId, "", "", Instant.now())).
+                expectSuccessfulHandlerExecution().
+                expectEvents(new NewCashbackSelectedEvent(memberId, defaultCashback.toString()),
+                        new MemberSignedEvent(memberId, referenceId, "", "", Instant.now()),
+                        new TrackingIdCreatedEvent(memberId, uuid));
 
-	}
+    }
 
 }
