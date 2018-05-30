@@ -4,7 +4,6 @@ import lombok.Value;
 import org.axonframework.commandhandling.TargetAggregateIdentifier;
 
 import java.time.Instant;
-import java.time.LocalDate;
 
 @Value
 public class BankIdSignCommand {
