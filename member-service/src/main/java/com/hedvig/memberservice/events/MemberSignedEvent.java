@@ -2,6 +2,8 @@ package com.hedvig.memberservice.events;
 
 import lombok.Value;
 
+import java.time.Instant;
+
 @Value
 public class MemberSignedEvent {
 
@@ -9,5 +11,6 @@ public class MemberSignedEvent {
     private final String referenceId;
     private final String signature;
     private final String oscpResponse;
+    private final Instant registeredOn;
 
 }
