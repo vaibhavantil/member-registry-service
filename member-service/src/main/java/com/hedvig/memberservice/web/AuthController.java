@@ -21,6 +21,7 @@ import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.UnsupportedEncodingException;
+import java.time.Instant;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -95,8 +96,8 @@ public class AuthController {
         BankIdCollectResponse response;
         
         if(collectType==null){
-        	log.error("ERROR: Oh no! Collect type is null!");
-        	return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+            log.error("ERROR: Oh no! Collect type is null!");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
         
         if(collectType.type.equals(CollectType.RequestType.AUTH)) {
@@ -142,7 +143,7 @@ public class AuthController {
             if(status.getProgressStatus() == ProgressStatus.COMPLETE) {
                 Optional<MemberEntity> memberEntity = memberRepo.findById(hid);
                 if (memberEntity.isPresent()) {
-                    this.commandGateway.sendAndWait(new BankIdSignCommand(hid, referenceToken, status.getSignature(), status.getOcspResponse()));
+                    this.commandGateway.sendAndWait(new BankIdSignCommand(hid, referenceToken, status.getSignature(), status.getOcspResponse(), Instant.now()));
                 }
             }
 

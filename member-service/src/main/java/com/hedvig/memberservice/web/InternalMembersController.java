@@ -34,12 +34,12 @@ public class InternalMembersController {
     }
 
     @GetMapping("/{memberId}")
-    public ResponseEntity<Member> index(@PathVariable Long memberId) {
+    public ResponseEntity<InternalMember> index(@PathVariable Long memberId) {
 
         Optional<MemberEntity> member = memberRepository.findById(memberId);
         if(member.isPresent()){
 
-            return ResponseEntity.ok(new Member(member.get()));
+            return ResponseEntity.ok(InternalMember.fromEntity(member.get()));
         }
 
         return ResponseEntity.notFound().build();
