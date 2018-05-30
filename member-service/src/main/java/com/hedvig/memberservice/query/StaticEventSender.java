@@ -26,7 +26,7 @@ public class StaticEventSender {
 
     @EventHandler
     public void on(MemberSignedEvent e, EventMessage<MemberSignedEvent> eventMessage) {
-        productApi.contractSinged(e.getId(), e.getReferenceId(), e.getSignature(), e.getOscpResponse());
+        productApi.contractSinged(e.getId(), e.getReferenceId(), e.getSignature(), e.getOscpResponse(), e.getRegisteredOn());
     }
 
     @EventHandler

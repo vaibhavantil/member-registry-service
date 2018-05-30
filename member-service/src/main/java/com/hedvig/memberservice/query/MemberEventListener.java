@@ -131,6 +131,7 @@ public class MemberEventListener {
     void on(MemberSignedEvent e){
         MemberEntity m = userRepo.findOne(e.getId());
         m.setStatus(MemberStatus.SIGNED.name());
+        m.setRegisteredOn(e.getRegisteredOn());
 
         SignedMemberEntity sme = new SignedMemberEntity();
         sme.setId(e.getId());
