@@ -39,7 +39,7 @@ public class InternalMember {
 
     private LocalDate birthDate;
 
-    private Instant registeredOn;
+    private Instant signedOn;
 
     public static InternalMember fromEntity(MemberEntity entity) {
         val dto = new InternalMember();
@@ -57,7 +57,7 @@ public class InternalMember {
         dto.setEmail(entity.getEmail());
         dto.setPhoneNumber(entity.getPhoneNumber());
         dto.setBirthDate(entity.getBirthDate());
-        dto.setRegisteredOn(entity.getRegisteredOn());
+        dto.setSignedOn(entity.getSignedOn());
         return dto;
     }
 }

@@ -166,10 +166,10 @@ public class MemberAggregateTests {
         when(cashbackService.getDefaultId()).thenReturn(defaultCashback);
 
         fixture.given(new MemberCreatedEvent(memberId, MemberStatus.INITIATED)).
-                when(new BankIdSignCommand(memberId, referenceId, "", "", Instant.now())).
+                when(new BankIdSignCommand(memberId, referenceId, "", "")).
                 expectSuccessfulHandlerExecution().
                 expectEvents(new NewCashbackSelectedEvent(memberId, defaultCashback.toString()),
-                        new MemberSignedEvent(memberId, referenceId, "", "", Instant.now()),
+                        new MemberSignedEvent(memberId, referenceId, "", ""),
                         new TrackingIdCreatedEvent(memberId, uuid));
 
     }

@@ -188,7 +188,7 @@ public class MemberAggregate {
     @CommandHandler
     void bankIdSignHandler(BankIdSignCommand cmd) {
         apply(new NewCashbackSelectedEvent(this.id, cashbackService.getDefaultId().toString()));
-        apply(new MemberSignedEvent(this.id, cmd.getReferenceId(), cmd.getSignature(), cmd.getOscpResponse(), cmd.getRegisteredOn()));
+        apply(new MemberSignedEvent(this.id, cmd.getReferenceId(), cmd.getSignature(), cmd.getOscpResponse()));
 
         if(this.trackingId == null){
             generateTrackingId();

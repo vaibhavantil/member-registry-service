@@ -305,7 +305,7 @@ public class AuthControllerTest {
                 andExpect(jsonPath("$.referenceToken", is(someReferenceValue))).
                 andExpect(jsonPath("$.newMemberId", is(memberId.toString())));
 
-        verify(commandGateway).sendAndWait(new BankIdSignCommand(memberId, someReferenceValue, "", "", Instant.now()));
+        verify(commandGateway).sendAndWait(new BankIdSignCommand(memberId, someReferenceValue, "", ""));
 
     }
 

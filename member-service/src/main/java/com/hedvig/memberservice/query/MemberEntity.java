@@ -77,6 +77,6 @@ public class MemberEntity {
 
     @Getter
     @Setter
-    private Instant registeredOn;
+    private Instant signedOn;
 
 }

@@ -4,11 +4,13 @@ import com.hedvig.memberservice.aggregates.MemberStatus;
 import com.hedvig.memberservice.events.*;
 import org.axonframework.eventhandling.EventHandler;
 import org.axonframework.eventhandling.EventMessage;
+import org.axonframework.eventhandling.Timestamp;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.Optional;
@@ -128,10 +130,10 @@ public class MemberEventListener {
     }
 
     @EventHandler
-    void on(MemberSignedEvent e){
+    void on(MemberSignedEvent e, @Timestamp Instant timestamp){
         MemberEntity m = userRepo.findOne(e.getId());
         m.setStatus(MemberStatus.SIGNED.name());
-        m.setRegisteredOn(e.getRegisteredOn());
+        m.setSignedOn(timestamp);
 
         SignedMemberEntity sme = new SignedMemberEntity();
         sme.setId(e.getId());

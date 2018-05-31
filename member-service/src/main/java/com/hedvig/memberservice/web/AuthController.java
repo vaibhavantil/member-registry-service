@@ -143,7 +143,7 @@ public class AuthController {
             if(status.getProgressStatus() == ProgressStatus.COMPLETE) {
                 Optional<MemberEntity> memberEntity = memberRepo.findById(hid);
                 if (memberEntity.isPresent()) {
-                    this.commandGateway.sendAndWait(new BankIdSignCommand(hid, referenceToken, status.getSignature(), status.getOcspResponse(), Instant.now()));
+                    this.commandGateway.sendAndWait(new BankIdSignCommand(hid, referenceToken, status.getSignature(), status.getOcspResponse()));
                 }
             }
 

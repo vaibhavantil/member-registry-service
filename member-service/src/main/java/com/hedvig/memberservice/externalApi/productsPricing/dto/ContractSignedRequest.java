@@ -10,5 +10,5 @@ public class ContractSignedRequest {
     String referenceToken;
     String signature;
     String oscpResponse;
-    Instant registeredOn;
+    Instant signedOn;
 }
