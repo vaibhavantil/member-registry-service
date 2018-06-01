@@ -12,5 +12,4 @@ public class BankIdSignCommand {
     private String signature;
     private String oscpResponse;
 
-
 }

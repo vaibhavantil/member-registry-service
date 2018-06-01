@@ -5,6 +5,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.val;
 
+import java.time.Instant;
 import java.time.LocalDate;
 
 @Data
@@ -38,6 +39,8 @@ public class InternalMember {
 
     private LocalDate birthDate;
 
+    private Instant signedOn;
+
     public static InternalMember fromEntity(MemberEntity entity) {
         val dto = new InternalMember();
         dto.setMemberId(entity.getId());
@@ -54,6 +57,7 @@ public class InternalMember {
         dto.setEmail(entity.getEmail());
         dto.setPhoneNumber(entity.getPhoneNumber());
         dto.setBirthDate(entity.getBirthDate());
+        dto.setSignedOn(entity.getSignedOn());
         return dto;
     }
 }

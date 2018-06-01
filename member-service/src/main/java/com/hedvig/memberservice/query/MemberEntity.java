@@ -7,6 +7,7 @@ import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Index;
 import javax.persistence.Table;
+import java.time.Instant;
 import java.time.LocalDate;
 
 @Entity
@@ -73,5 +74,9 @@ public class MemberEntity {
     @Getter
     @Setter
     private Integer floor;
+
+    @Getter
+    @Setter
+    private Instant signedOn;
 
 }
