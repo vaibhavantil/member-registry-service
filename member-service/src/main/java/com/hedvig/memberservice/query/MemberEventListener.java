@@ -32,11 +32,12 @@ public class MemberEventListener {
     }
 
     @EventHandler
-    public void on(MemberCreatedEvent e){
+    public void on(MemberCreatedEvent e,  @Timestamp Instant timestamp){
         System.out.println("MemberEventListener: " + e);
         MemberEntity user = new MemberEntity();
         user.setId( e.getId());
         user.setStatus(e.getStatus().name());
+        user.setCreatedOn(timestamp);
         
         userRepo.save(user);
     }
@@ -71,7 +72,6 @@ public class MemberEventListener {
     }
 
     @EventHandler void on(TrackingIdCreatedEvent e) {
-    	
         // Assign a unique tracking id per SSN
         TrackingIdEntity c = trackingRepo.findByTrackingId(e.getTrackingId()).orElseGet(() -> {
         	TrackingIdEntity newCampaign = new TrackingIdEntity();
