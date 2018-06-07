@@ -41,6 +41,8 @@ public class InternalMember {
 
     private Instant signedOn;
 
+    private Instant createdOn;
+
     public static InternalMember fromEntity(MemberEntity entity) {
         val dto = new InternalMember();
         dto.setMemberId(entity.getId());
@@ -58,6 +60,7 @@ public class InternalMember {
         dto.setPhoneNumber(entity.getPhoneNumber());
         dto.setBirthDate(entity.getBirthDate());
         dto.setSignedOn(entity.getSignedOn());
+        dto.setCreatedOn(entity.getCreatedOn());
         return dto;
     }
 }

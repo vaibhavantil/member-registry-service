@@ -37,6 +37,7 @@ public class MemberEventListener {
         MemberEntity user = new MemberEntity();
         user.setId( e.getId());
         user.setStatus(e.getStatus().name());
+        user.setCreatedOn(e.getCreatedOn());
         
         userRepo.save(user);
     }
@@ -71,7 +72,6 @@ public class MemberEventListener {
     }
 
     @EventHandler void on(TrackingIdCreatedEvent e) {
-    	
         // Assign a unique tracking id per SSN
         TrackingIdEntity c = trackingRepo.findByTrackingId(e.getTrackingId()).orElseGet(() -> {
         	TrackingIdEntity newCampaign = new TrackingIdEntity();
