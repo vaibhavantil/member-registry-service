@@ -32,12 +32,12 @@ public class MemberEventListener {
     }
 
     @EventHandler
-    public void on(MemberCreatedEvent e,  @Timestamp Instant timestamp){
+    public void on(MemberCreatedEvent e){
         System.out.println("MemberEventListener: " + e);
         MemberEntity user = new MemberEntity();
         user.setId( e.getId());
         user.setStatus(e.getStatus().name());
-        user.setCreatedOn(timestamp);
+        user.setCreatedOn(e.getCreatedOn());
         
         userRepo.save(user);
     }
