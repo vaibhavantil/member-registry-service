@@ -8,6 +8,9 @@ import lombok.val;
 import org.axonframework.commandhandling.gateway.CommandGateway;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort.Direction;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
@@ -20,6 +23,7 @@ import java.util.stream.Collectors;
 @RequestMapping("/i/member")
 public class InternalMembersController {
 
+  private static final String PAGESIZE = "25";
   private final Logger log = LoggerFactory.getLogger(InternalMembersController.class);
   private final CommandGateway commandBus;
   private final MemberService memberService;
@@ -76,16 +80,39 @@ public class InternalMembersController {
   }
 
   @RequestMapping(value = "/search", method = RequestMethod.GET)
-  @Transactional
-  public Iterator<InternalMember> searchMembers(
+  public Page<InternalMember> searchMembers(
       @RequestParam(name = "status", defaultValue = "", required = false) String status,
-      @RequestParam(name = "query", defaultValue = "", required = false) String query) {
+      @RequestParam(name = "query", defaultValue = "", required = false) String query,
+      @RequestParam(name = "pageNumber", defaultValue = "1", required = false) int pageNumber,
+      @RequestParam(name = "pageSize", defaultValue = PAGESIZE, required = false) int pageSize,
+      @RequestParam(name = "direction", defaultValue = "ASC", required = false) String direction,
+      @RequestParam(name = "orderBy", defaultValue = "id", required = false) String orderBy) {
 
-    status = status.trim().;
+    status = status.trim();
     query = query.trim();
-    try (val stream = memberService.search(status, query)) {
-      return stream.map(InternalMember::fromEntity).collect(Collectors.toList()).iterator();
-    }
+    direction = direction.trim();
+    orderBy = orderBy.trim();
+
+    return memberService
+        .search( status, query,
+            new PageRequest(pageNumber - 1, pageSize, Direction.fromString(direction), orderBy))
+        .map(InternalMember::fromEntity);
+  }
+
+  @RequestMapping(value = "/listAll", method = RequestMethod.GET)
+  public Page<InternalMember> listAllMembers(
+      @RequestParam(name = "pageNumber", defaultValue = "1", required = false) int pageNumber,
+      @RequestParam(name = "pageSize", defaultValue = PAGESIZE, required = false) int pageSize,
+      @RequestParam(name = "direction", defaultValue = "ASC", required = false) String direction,
+      @RequestParam(name = "orderBy", defaultValue = "id", required = false) String orderBy) {
+
+    direction.trim();
+    orderBy.trim();
+
+    return memberService
+        .listAllMembers(
+            new PageRequest(pageNumber - 1, pageSize, Direction.fromString(direction), orderBy))
+        .map(InternalMember::fromEntity);
   }
 
   @RequestMapping(value = "/{memberId}/memberCancelInsurance", method = RequestMethod.POST)

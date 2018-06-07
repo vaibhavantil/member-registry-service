@@ -111,7 +111,7 @@ public class MemberEventListener {
         MemberEntity member = userRepo.findOne(e.getMemberId());
         member.setStatus(e.getNewStatus().name());
 
-        userRepo.saveAndFlush(member);
+        userRepo.save(member);
         logger.debug("Completed handling event: {}", eventMessage.getIdentifier());
     }
 
