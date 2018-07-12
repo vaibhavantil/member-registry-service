@@ -20,7 +20,7 @@ public interface ProductClient {
     @RequestMapping(value = "/_/insurance/{memberId}/safetyIncreasers", method = RequestMethod.GET)
     ResponseEntity<SafetyIncreasersDTO> getSafetyIncreasers(@PathVariable("memberId") long memberId);
 
-    @RequestMapping(value = "/_/insurance/{memberId}/insurance")
+    @RequestMapping(value = "/insurance/{memberId}/insuranceStatus")
     ResponseEntity<InsuranceStatusDTO> getInsuranceStatus(@PathVariable("memberId") long memberId);
 
     @RequestMapping(value = "/_/insurance/contract/{memberId}")
