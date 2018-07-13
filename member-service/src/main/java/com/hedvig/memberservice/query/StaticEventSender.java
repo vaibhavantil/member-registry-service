@@ -1,5 +1,6 @@
 package com.hedvig.memberservice.query;
 
+import com.hedvig.memberservice.events.InsuranceCancellationEvent;
 import com.hedvig.memberservice.events.MemberCancellationEvent;
 import com.hedvig.memberservice.events.MemberSignedEvent;
 import com.hedvig.memberservice.externalApi.productsPricing.ProductApi;
@@ -30,10 +31,10 @@ public class StaticEventSender {
     }
 
     @EventHandler
-    public void on(MemberCancellationEvent e) {
+    public void on(InsuranceCancellationEvent e) {
         logger.info("Sending member cancellation command to product-pricing for member: ", e.getMemberId());
         try {
-            productApi.memberCancelledInsurance(e.getMemberId(), e.getInactivationDate());
+            productApi.memberCancelledInsurance(e.getMemberId(), e.getInsuranceId(),  e.getInactivationDate());
         }catch (RuntimeException ex) {
             logger.error("Could not cancel member at product-pricing: {}", ex.getMessage(), ex);
             //TODO Send event to sentry
