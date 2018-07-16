@@ -112,7 +112,8 @@ public class MemberAggregate {
 
     @CommandHandler
     public void on(InsurnaceCancellationCommand cmd) {
-        val localCancellationDate = cmd.getInactivationDate().atStartOfDay(ZoneId.of("Europe/Stockholm"));
+        //FIXME: pass a ZonedDatetime here
+        val localCancellationDate = cmd.getInactivationDate().atStartOfDay(ZoneId.of("Europe/Stockholm")).plusHours(2);
         log.info("Applying InsuranceCancellation {}, {}", cmd.getMemberId(), localCancellationDate.toInstant());
         apply(new InsuranceCancellationEvent(cmd.getMemberId(), cmd.getInsuranceId(), localCancellationDate.toInstant()));
     }
