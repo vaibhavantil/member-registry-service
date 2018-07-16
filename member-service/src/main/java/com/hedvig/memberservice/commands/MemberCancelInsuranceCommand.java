@@ -10,5 +10,6 @@ public class MemberCancelInsuranceCommand {
     @TargetAggregateIdentifier
     Long memberId;
 
+
     LocalDate inactivationDate;
 }

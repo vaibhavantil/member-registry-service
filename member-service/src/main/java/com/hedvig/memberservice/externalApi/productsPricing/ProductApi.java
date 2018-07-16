@@ -5,6 +5,7 @@ import com.hedvig.memberservice.externalApi.productsPricing.dto.InsuranceStatusD
 import com.hedvig.memberservice.externalApi.productsPricing.dto.SafetyIncreasersDTO;
 import com.hedvig.memberservice.externalApi.productsPricing.dto.SetCancellationDateRequest;
 import feign.FeignException;
+import java.util.UUID;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -60,8 +61,8 @@ public class ProductApi {
         return response.getBody();
     }
 
-    public void memberCancelledInsurance(Long memberId, Instant inactivationDate) {
-        SetCancellationDateRequest setCancellationDateRequest = new SetCancellationDateRequest(inactivationDate);
+    public void memberCancelledInsurance(Long memberId, UUID insuranceId, Instant inactivationDate) {
+        SetCancellationDateRequest setCancellationDateRequest = new SetCancellationDateRequest(insuranceId, inactivationDate);
         ResponseEntity<String> responseEntity = this.client.setCancellationDate(memberId, setCancellationDateRequest);
         if(responseEntity.getStatusCode() != HttpStatus.ACCEPTED) {
             String message = String.format("Got error response (%s) from product-pricing with body: %s", responseEntity.getStatusCode(), responseEntity.getBody());

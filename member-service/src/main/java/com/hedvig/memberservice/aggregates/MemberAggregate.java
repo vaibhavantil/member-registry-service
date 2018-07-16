@@ -110,6 +110,14 @@ public class MemberAggregate {
         apply(new MemberCancellationEvent(memberCommand.getMemberId(), localCancellationDate.toInstant()));
     }
 
+    @CommandHandler
+    public void on(InsurnaceCancellationCommand cmd) {
+        //FIXME: pass a ZonedDatetime here
+        val localCancellationDate = cmd.getInactivationDate().atStartOfDay(ZoneId.of("Europe/Stockholm")).plusHours(2);
+        log.info("Applying InsuranceCancellation {}, {}", cmd.getMemberId(), localCancellationDate.toInstant());
+        apply(new InsuranceCancellationEvent(cmd.getMemberId(), cmd.getInsuranceId(), localCancellationDate.toInstant()));
+    }
+
     private String formatName(String name) {
         String lowercase = name.toLowerCase();
         return  Character.toUpperCase(lowercase.charAt(0)) + lowercase.substring(1);
@@ -275,6 +283,12 @@ public class MemberAggregate {
     @EventSourcingHandler
     public void on(MemberCancellationEvent e) {
         this.status = MemberStatus.TERMINATED;
+    }
+
+
+    @EventSourcingHandler
+    public void on(InsuranceCancellationEvent e) {
+        log.info("Cancel insurance with id {} for member {}", e.getInsuranceId(), e.getMemberId());
     }
 
     @EventHandler
