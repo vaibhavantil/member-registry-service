@@ -27,9 +27,12 @@ hs_err_pid*
 **/target
 **.iml
 
+application-development.yml
+
 # vscode
 .project
 .vscode
 .classpath
 .settings
 .sts4-cache
+.factorypath

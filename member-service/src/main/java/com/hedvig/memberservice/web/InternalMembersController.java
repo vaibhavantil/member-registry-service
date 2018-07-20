@@ -8,12 +8,12 @@ import lombok.val;
 import org.axonframework.commandhandling.gateway.CommandGateway;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Iterator;
+import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -117,6 +117,22 @@ public class InternalMembersController {
         if(member.isPresent() && !InternalMember.fromEntity(member.get()).equals(dto)) {
             commandBus.sendAndWait(new EditMemberInformationCommand(memberId, dto));
         }
+    }
+
+    @GetMapping("/many/[{memberIds}]")
+    public ResponseEntity<List<InternalMember>> getMembers(@PathVariable("memberIds") List<Long> memberIds) {
+        val members = memberRepository
+            .findAllByIdIn(memberIds)
+            .stream()
+            .map(m -> InternalMember.fromEntity(m))
+            .collect(Collectors.toList());
+
+        if (memberIds.size() != members.size()) {
+            log.error("Length mismatch of supplied members and found members: wanted {}, found {}", memberIds.size(), members.size());
+            return ResponseEntity.notFound().build();
+        }
+
+        return ResponseEntity.ok(members);
     }
 
     private Stream<MemberEntity> search(String status, String query) {

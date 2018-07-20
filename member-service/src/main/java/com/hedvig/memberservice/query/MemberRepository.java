@@ -4,6 +4,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
 
@@ -11,6 +12,8 @@ public interface MemberRepository extends JpaRepository<MemberEntity, Long> {
     Optional<MemberEntity> findById(long s);
 
     Optional<MemberEntity> findBySsn(String s);
+
+    List<MemberEntity> findAllByIdIn(List<Long> ids);
 
     @Query("select count(*) from MemberEntity m where m.status = 'SIGNED'")
     Long countSignedMembers();
