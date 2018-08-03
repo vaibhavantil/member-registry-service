@@ -19,7 +19,7 @@ public class ForgetMeAggregate {
   @AggregateIdentifier
   private String memberId;
 
-  public ForgetMeAggregate(String memberId) {
+  public ForgetMeAggregate() {
     log.info("Constructing ForgerMeAggregate");
   }
 
