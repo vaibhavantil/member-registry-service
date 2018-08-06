@@ -4,6 +4,6 @@ import lombok.Value;
 
 @Value
 public class MemberAuthenticatedEvent {
-    private Long memberId;
-    private String bankIdReferenceToken;
+  private Long memberId;
+  private String bankIdReferenceToken;
 }

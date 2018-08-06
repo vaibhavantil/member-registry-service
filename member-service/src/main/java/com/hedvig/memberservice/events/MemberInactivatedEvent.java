@@ -4,9 +4,9 @@ import lombok.Value;
 
 @Value
 public class MemberInactivatedEvent {
-    private final Long id;
+  private final Long id;
 
-    public MemberInactivatedEvent(Long id) {
-        this.id = id;
-    }
+  public MemberInactivatedEvent(Long id) {
+    this.id = id;
+  }
 }

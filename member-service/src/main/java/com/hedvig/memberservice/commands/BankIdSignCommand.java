@@ -5,11 +5,9 @@ import org.axonframework.commandhandling.TargetAggregateIdentifier;
 
 @Value
 public class BankIdSignCommand {
-    @TargetAggregateIdentifier
-    private Long id;
+  @TargetAggregateIdentifier private Long id;
 
-    private String referenceId;
-    private String signature;
-    private String oscpResponse;
-
+  private String referenceId;
+  private String signature;
+  private String oscpResponse;
 }

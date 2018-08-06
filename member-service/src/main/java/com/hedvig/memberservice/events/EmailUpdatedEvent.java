@@ -4,7 +4,6 @@ import lombok.Value;
 
 @Value
 public class EmailUpdatedEvent {
-    private final Long id;
-    private final String email;
-
+  private final Long id;
+  private final String email;
 }

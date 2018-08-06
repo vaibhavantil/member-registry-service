@@ -6,9 +6,7 @@ import org.axonframework.commandhandling.TargetAggregateIdentifier;
 @Value
 public class AuthenticationAttemptCommand {
 
-    @TargetAggregateIdentifier
-    private Long id;
+  @TargetAggregateIdentifier private Long id;
 
-    private BankIdAuthenticationStatus bankIdAuthResponse;
-
+  private BankIdAuthenticationStatus bankIdAuthResponse;
 }

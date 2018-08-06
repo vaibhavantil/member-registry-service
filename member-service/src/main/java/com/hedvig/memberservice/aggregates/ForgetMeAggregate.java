@@ -1,5 +1,7 @@
 package com.hedvig.memberservice.aggregates;
 
+import static org.axonframework.commandhandling.model.AggregateLifecycle.apply;
+
 import com.hedvig.memberservice.commands.ForgetMeCommand;
 import com.hedvig.memberservice.events.ForgetMeEvent;
 import org.axonframework.commandhandling.CommandHandler;
@@ -9,15 +11,12 @@ import org.axonframework.spring.stereotype.Aggregate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static org.axonframework.commandhandling.model.AggregateLifecycle.apply;
-
 @Aggregate
 public class ForgetMeAggregate {
 
   private static Logger log = LoggerFactory.getLogger(ForgetMeAggregate.class);
 
-  @AggregateIdentifier
-  private String memberId;
+  @AggregateIdentifier private String memberId;
 
   public ForgetMeAggregate() {
     log.info("Constructing ForgerMeAggregate");

@@ -7,7 +7,7 @@ import lombok.Value;
 @EqualsAndHashCode(callSuper = true)
 public class OnboardingStartedWithSSNEvent extends SSNUpdatedEvent {
 
-    public OnboardingStartedWithSSNEvent(Long memberId, String ssn) {
-        super(memberId, ssn);
-    }
+  public OnboardingStartedWithSSNEvent(Long memberId, String ssn) {
+    super(memberId, ssn);
+  }
 }

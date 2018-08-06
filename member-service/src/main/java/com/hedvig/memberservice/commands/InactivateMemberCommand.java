@@ -6,11 +6,10 @@ import org.axonframework.commandhandling.TargetAggregateIdentifier;
 @Value
 public class InactivateMemberCommand {
 
-    @TargetAggregateIdentifier
-    private final Long id;
+  @TargetAggregateIdentifier private final Long id;
 
-    public InactivateMemberCommand(Long id) {
+  public InactivateMemberCommand(Long id) {
 
-        this.id = id;
-    }
+    this.id = id;
+  }
 }
