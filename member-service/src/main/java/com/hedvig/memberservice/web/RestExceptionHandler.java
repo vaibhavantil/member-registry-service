@@ -14,12 +14,10 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 @ControllerAdvice
 public class RestExceptionHandler extends ResponseEntityExceptionHandler {
 
-    @ExceptionHandler(BankIDError.class)
-    protected ResponseEntity<?> handleBankIDError(BankIDError error) {
-        HttpStatus code = HttpStatus.INTERNAL_SERVER_ERROR;
-        APIErrorDTO apiError = new APIErrorDTO(code, error.errorType.name(), error.detail);
-        return ResponseEntity.status(code).body(apiError);
-    }
-
-
+  @ExceptionHandler(BankIDError.class)
+  protected ResponseEntity<?> handleBankIDError(BankIDError error) {
+    HttpStatus code = HttpStatus.INTERNAL_SERVER_ERROR;
+    APIErrorDTO apiError = new APIErrorDTO(code, error.errorType.name(), error.detail);
+    return ResponseEntity.status(code).body(apiError);
+  }
 }

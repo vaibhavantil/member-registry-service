@@ -1,14 +1,29 @@
-<?xml version='1.0' encoding='UTF-8'?><wsdl:definitions xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:wsu="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd" xmlns:wsp="http://schemas.xmlsoap.org/ws/2004/09/policy" xmlns:wsoma="http://schemas.xmlsoap.org/ws/2004/09/policy/optimizedmimeserialization" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:tns="http://bankid.com/RpService/v4.0.0/" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:rp="http://bankid.com/RpService/v4.0.0/types/" name="RpService" targetNamespace="http://bankid.com/RpService/v4.0.0/">
-<wsdl:documentation>
-		BankID BUS RP interface
-		Version: 4.0.0
-	</wsdl:documentation>
+<?xml version='1.0' encoding='UTF-8'?>
+<wsdl:definitions xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+  xmlns:wsu="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd"
+  xmlns:wsp="http://schemas.xmlsoap.org/ws/2004/09/policy"
+  xmlns:wsoma="http://schemas.xmlsoap.org/ws/2004/09/policy/optimizedmimeserialization"
+  xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:tns="http://bankid.com/RpService/v4.0.0/"
+  xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
+  xmlns:rp="http://bankid.com/RpService/v4.0.0/types/" name="RpService"
+  targetNamespace="http://bankid.com/RpService/v4.0.0/">
+  <wsdl:documentation>
+    BankID BUS RP interface
+    Version: 4.0.0
+  </wsdl:documentation>
   <wsdl:types>
-<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:wsu="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd" xmlns:wsp="http://schemas.xmlsoap.org/ws/2004/09/policy" xmlns:wsoma="http://schemas.xmlsoap.org/ws/2004/09/policy/optimizedmimeserialization" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:tns="http://bankid.com/RpService/v4.0.0/" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:rp="http://bankid.com/RpService/v4.0.0/types/">
-		 	
-  <xsd:import namespace="http://bankid.com/RpService/v4.0.0/types/" schemaLocation="https://api2.test.bankid.com/rp/v4?xsd=RpService_v4.xsd"/>
-		
-</xsd:schema>
+    <xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+      xmlns:wsu="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd"
+      xmlns:wsp="http://schemas.xmlsoap.org/ws/2004/09/policy"
+      xmlns:wsoma="http://schemas.xmlsoap.org/ws/2004/09/policy/optimizedmimeserialization"
+      xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:tns="http://bankid.com/RpService/v4.0.0/"
+      xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
+      xmlns:rp="http://bankid.com/RpService/v4.0.0/types/">
+
+      <xsd:import namespace="http://bankid.com/RpService/v4.0.0/types/"
+        schemaLocation="https://api2.test.bankid.com/rp/v4?xsd=RpService_v4.xsd"/>
+
+    </xsd:schema>
   </wsdl:types>
   <wsdl:message name="RpServicePortType_Sign">
     <wsdl:part element="rp:SignRequest" name="SignRequest">
@@ -49,35 +64,35 @@
   <wsdl:portType name="RpServicePortType">
     <wsdl:operation name="Authenticate">
       <wsdl:input message="tns:RpServicePortType_Authenticate">
-    </wsdl:input>
+      </wsdl:input>
       <wsdl:output message="tns:RpServicePortType_AuthenticateResponse">
-    </wsdl:output>
+      </wsdl:output>
       <wsdl:fault message="tns:RpFault" name="RpFault">
-    </wsdl:fault>
+      </wsdl:fault>
     </wsdl:operation>
     <wsdl:operation name="Sign">
       <wsdl:input message="tns:RpServicePortType_Sign">
-    </wsdl:input>
+      </wsdl:input>
       <wsdl:output message="tns:RpServicePortType_SignResponse">
-    </wsdl:output>
+      </wsdl:output>
       <wsdl:fault message="tns:RpFault" name="RpFault">
-    </wsdl:fault>
+      </wsdl:fault>
     </wsdl:operation>
     <wsdl:operation name="FileSign">
       <wsdl:input message="tns:RpServicePortType_FileSign">
-    </wsdl:input>
+      </wsdl:input>
       <wsdl:output message="tns:RpServicePortType_FileSignResponse">
-    </wsdl:output>
+      </wsdl:output>
       <wsdl:fault message="tns:RpFault" name="RpFault">
-    </wsdl:fault>
+      </wsdl:fault>
     </wsdl:operation>
     <wsdl:operation name="Collect">
       <wsdl:input message="tns:RpServicePortType_Collect">
-    </wsdl:input>
+      </wsdl:input>
       <wsdl:output message="tns:RpServicePortType_CollectResponse">
-    </wsdl:output>
+      </wsdl:output>
       <wsdl:fault message="tns:RpFault" name="RpFault">
-    </wsdl:fault>
+      </wsdl:fault>
     </wsdl:operation>
   </wsdl:portType>
   <wsdl:binding name="RpServiceSoapBinding" type="tns:RpServicePortType">
@@ -107,7 +122,7 @@
       </wsdl:fault>
     </wsdl:operation>
     <wsdl:operation name="FileSign">
-    <wsp:PolicyReference URI="#ForceMTOM" wsdl:required="false"/>
+      <wsp:PolicyReference URI="#ForceMTOM" wsdl:required="false"/>
       <soap:operation soapAction=""/>
       <wsdl:input>
         <soap:body use="literal"/>
@@ -137,7 +152,7 @@
       <soap:address location="https://appapi2.bankid.com/rp/v4"/>
     </wsdl:port>
   </wsdl:service>
-    <wsp:Policy wsu:Id="ForceMTOM">
-        <wsoma:OptimizedMimeSerialization/>
-    </wsp:Policy>
+  <wsp:Policy wsu:Id="ForceMTOM">
+    <wsoma:OptimizedMimeSerialization/>
+  </wsp:Policy>
 </wsdl:definitions>

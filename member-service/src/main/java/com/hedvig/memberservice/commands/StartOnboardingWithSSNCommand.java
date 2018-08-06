@@ -6,12 +6,11 @@ import org.axonframework.commandhandling.TargetAggregateIdentifier;
 
 @Value
 public class StartOnboardingWithSSNCommand {
-    @TargetAggregateIdentifier
-    long memberId;
-    String ssn;
+  @TargetAggregateIdentifier long memberId;
+  String ssn;
 
-    public StartOnboardingWithSSNCommand(long memberId, StartOnboardingWithSSNRequest requestData) {
-        this.memberId = memberId;
-        this.ssn = requestData.getSsn();
-    }
+  public StartOnboardingWithSSNCommand(long memberId, StartOnboardingWithSSNRequest requestData) {
+    this.memberId = memberId;
+    this.ssn = requestData.getSsn();
+  }
 }

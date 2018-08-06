@@ -11,13 +11,13 @@ import org.springframework.web.servlet.HandlerExceptionResolver;
 @Configuration
 @Profile("production")
 public class SentryConfig {
-    @Bean
-    public HandlerExceptionResolver sentryExceptionResolver() {
-        return new SentryExceptionResolver();
-    }
+  @Bean
+  public HandlerExceptionResolver sentryExceptionResolver() {
+    return new SentryExceptionResolver();
+  }
 
-    @Bean
-    public ServletContextInitializer sentryServletContextInitializer() {
-        return new SentryServletContextInitializer();
-    }
+  @Bean
+  public ServletContextInitializer sentryServletContextInitializer() {
+    return new SentryServletContextInitializer();
+  }
 }

@@ -5,7 +5,6 @@ import org.axonframework.commandhandling.TargetAggregateIdentifier;
 
 @Value
 public class UpdateEmailCommand {
-    @TargetAggregateIdentifier
-    Long id;
-    String email;
+  @TargetAggregateIdentifier Long id;
+  String email;
 }
