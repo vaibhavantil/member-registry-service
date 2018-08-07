@@ -1,11 +1,9 @@
 package com.hedvig.memberservice.notificationService.serviceIntegration.botService.messages.dto;
 
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 
 @Data
-@NoArgsConstructor
 public class BackOfficeResponseDTO {
 
     public String memberId;

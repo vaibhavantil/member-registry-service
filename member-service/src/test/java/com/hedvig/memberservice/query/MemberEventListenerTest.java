@@ -1,18 +1,16 @@
 package com.hedvig.memberservice.query;
 
+import static org.mockito.Mockito.when;
+
 import com.hedvig.memberservice.events.SSNUpdatedEvent;
+import java.time.LocalDate;
+import java.util.Optional;
 import org.assertj.core.api.Assertions;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
-
-
-import java.time.LocalDate;
-
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class MemberEventListenerTest {
@@ -33,10 +31,10 @@ public class MemberEventListenerTest {
     @Test
     public void givenSSNUpdatedEvent_SetBirthDate() {
         MemberEntity me = new MemberEntity();
-        when(memberRepository.findOne(12l)).thenReturn(me);
+        when(memberRepository.findById(12l)).thenReturn(Optional.of(me));
 
         eventListener.on(new SSNUpdatedEvent(12l, "199510010101"));
 
-        Assertions.assertThat(me.getBirthDate()).isEqualByComparingTo(LocalDate.of(1995, 10, 01));
+        Assertions.assertThat(me.getBirthDate()).isEqualTo(LocalDate.of(1995, 10, 01));
     }
 }

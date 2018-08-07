@@ -1,5 +1,5 @@
 package com.hedvig.memberservice.query;
 
-import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.repository.CrudRepository;
 
-public interface CollectRepository extends JpaRepository<CollectType, String> {}
+public interface CollectRepository extends CrudRepository<CollectType, String> {}

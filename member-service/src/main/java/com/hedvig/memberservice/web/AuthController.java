@@ -110,7 +110,7 @@ public class AuthController {
 
     log.info("Start collect");
 
-    CollectType collectType = collectRepo.findOne(referenceToken);
+    CollectType collectType = collectRepo.findById(referenceToken).orElseGet(null);
     BankIdCollectResponse response;
 
     if (collectType == null) {

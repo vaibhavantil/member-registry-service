@@ -15,7 +15,7 @@
   <parent>
     <groupId>org.springframework.boot</groupId>
     <artifactId>spring-boot-starter-parent</artifactId>
-    <version>1.5.6.RELEASE</version>
+    <version>2.0.4.RELEASE</version>
     <relativePath/> <!-- lookup parent from repository -->
   </parent>
 
@@ -37,15 +37,6 @@
         <enabled>false</enabled>
       </snapshots>
     </repository>
-    <repository>
-      <id>confluent</id>
-      <url>http://packages.confluent.io/maven/</url>
-    </repository>
-    <repository>
-      <id>aws-release</id>
-      <name>AWS Release Repository</name>
-      <url>s3://repo.elasticspring.org/</url>
-    </repository>
   </repositories>
 
   <dependencyManagement>
@@ -53,7 +44,7 @@
       <dependency>
         <groupId>org.springframework.cloud</groupId>
         <artifactId>spring-cloud-dependencies</artifactId>
-        <version>Edgware.SR3</version>
+        <version>Finchley.SR1</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>
@@ -87,6 +78,7 @@
       <groupId>org.projectlombok</groupId>
       <artifactId>lombok</artifactId>
       <optional>true</optional>
+      <version>1.16.22</version>
     </dependency>
     <dependency>
       <groupId>org.springframework.boot</groupId>
@@ -125,32 +117,6 @@
       <version>${hibernate.version}</version>
     </dependency>
     <dependency>
-      <groupId>org.apache.avro</groupId>
-      <artifactId>avro</artifactId>
-      <version>1.8.2</version>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.avro</groupId>
-      <artifactId>avro-maven-plugin</artifactId>
-      <version>1.8.2</version>
-    </dependency>
-    <dependency>
-      <groupId>io.confluent</groupId>
-      <artifactId>kafka-avro-serializer</artifactId>
-      <version>3.3.0</version>
-      <exclusions>
-        <exclusion>
-          <artifactId>slf4j-log4j12</artifactId>
-          <groupId>org.slf4j</groupId>
-        </exclusion>
-      </exclusions>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.kafka</groupId>
-      <artifactId>kafka-clients</artifactId>
-      <version>0.11.0.0</version>
-    </dependency>
-    <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-configuration-processor</artifactId>
       <optional>true</optional>
@@ -164,17 +130,17 @@
     <dependency>
       <groupId>org.springframework.cloud</groupId>
       <artifactId>spring-cloud-starter-kubernetes</artifactId>
-      <version>0.2.0.RELEASE</version>
+      <version>0.3.0.RELEASE</version>
     </dependency>
     <dependency>
       <groupId>org.springframework.cloud</groupId>
       <artifactId>spring-cloud-kubernetes-config</artifactId>
-      <version>0.2.0.RELEASE</version>
+      <version>0.3.0.RELEASE</version>
     </dependency>
     <dependency>
       <groupId>org.springframework.cloud</groupId>
       <artifactId>spring-cloud-kubernetes-ribbon</artifactId>
-      <version>0.2.0.RELEASE</version>
+      <version>0.3.0.RELEASE</version>
     </dependency>
     <dependency>
       <groupId>org.springframework.cloud</groupId>
@@ -183,7 +149,6 @@
     <dependency>
       <groupId>org.springframework.cloud</groupId>
       <artifactId>spring-cloud-starter-feign</artifactId>
-      <version>RELEASE</version>
     </dependency>
     <dependency>
       <groupId>net.logstash.logback</groupId>
@@ -225,12 +190,12 @@
     <dependency>
       <groupId>com.amazonaws</groupId>
       <artifactId>aws-java-sdk-ses</artifactId>
-      <version>1.11.228</version>
+      <version>1.11.336</version>
     </dependency>
     <dependency>
       <groupId>com.amazonaws</groupId>
       <artifactId>aws-java-sdk-sts</artifactId>
-      <version>1.11.228</version>
+      <version>1.11.336</version>
     </dependency>
     <dependency>
       <groupId>commons-io</groupId>
@@ -262,7 +227,6 @@
       <artifactId>notification-service</artifactId>
       <version>0.0.1-SNAPSHOT</version>
     </dependency>
-
   </dependencies>
 
   <build>
