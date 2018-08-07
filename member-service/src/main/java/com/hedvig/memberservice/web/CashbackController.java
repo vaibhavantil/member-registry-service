@@ -23,10 +23,9 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/cashback")
 public class CashbackController {
 
+  final MemberRepository memberRepository;
   private final CashbackService cashbackService;
   CommandGateway commandGateway;
-
-  final MemberRepository memberRepository;
 
   @Autowired
   public CashbackController(

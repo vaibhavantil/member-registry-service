@@ -26,9 +26,8 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/_/mail")
 public class MailController {
 
-  @Autowired JavaMailSender mailSender;
   private final String webSiteBaseUrl;
-
+  @Autowired JavaMailSender mailSender;
   private String signupMail;
   private String onboardedTodayMail;
   private String onboardedLaterMail;

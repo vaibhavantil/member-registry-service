@@ -14,20 +14,20 @@ import org.springframework.stereotype.Component;
 @Profile("production")
 public class SNSPublisher {
 
-    private final Logger log = LoggerFactory.getLogger(SNSPublisher.class);
-    private final NotificationMessagingTemplate snsTemplate;
+  private final Logger log = LoggerFactory.getLogger(SNSPublisher.class);
+  private final NotificationMessagingTemplate snsTemplate;
 
-    @Autowired
-    public SNSPublisher(AmazonSNS amazonSNS) {
-        snsTemplate = new NotificationMessagingTemplate(amazonSNS);
-    }
+  @Autowired
+  public SNSPublisher(AmazonSNS amazonSNS) {
+    snsTemplate = new NotificationMessagingTemplate(amazonSNS);
+  }
 
-    @EventHandler
-    public void on(MemberSignedEvent e) {
-        try {
-            snsTemplate.sendNotification("newMembers", "Ny medlem signerad!", "Ny medlem");
-        }catch(Exception ex) {
-            log.error("Could not send SNS-notification", ex);
-        }
+  @EventHandler
+  public void on(MemberSignedEvent e) {
+    try {
+      snsTemplate.sendNotification("newMembers", "Ny medlem signerad!", "Ny medlem");
+    } catch (Exception ex) {
+      log.error("Could not send SNS-notification", ex);
     }
+  }
 }

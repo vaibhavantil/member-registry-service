@@ -44,12 +44,12 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/member/bankid/")
 public class AuthController {
 
+  private static Logger log = LoggerFactory.getLogger(AuthController.class);
   private final CommandGateway commandGateway;
   private final MemberRepository memberRepo;
   private final SignedMemberRepository signedMemberRepository;
   private final CollectRepository collectRepo;
   private final BankIdService bankIdService;
-  private static Logger log = LoggerFactory.getLogger(AuthController.class);
 
   @Autowired
   public AuthController(
