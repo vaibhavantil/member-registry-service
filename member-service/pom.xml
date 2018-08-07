@@ -88,12 +88,12 @@
     <dependency>
       <groupId>org.axonframework</groupId>
       <artifactId>axon-spring-boot-starter</artifactId>
-      <version>3.0.4</version>
+      <version>3.3.3</version>
     </dependency>
     <dependency>
       <groupId>org.axonframework</groupId>
       <artifactId>axon-test</artifactId>
-      <version>3.0.4</version>
+      <version>3.3.3</version>
     </dependency>
     <dependency>
       <groupId>com.h2database</groupId>
@@ -145,10 +145,6 @@
     <dependency>
       <groupId>org.springframework.cloud</groupId>
       <artifactId>spring-cloud-starter-sleuth</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.springframework.cloud</groupId>
-      <artifactId>spring-cloud-starter-feign</artifactId>
     </dependency>
     <dependency>
       <groupId>net.logstash.logback</groupId>
