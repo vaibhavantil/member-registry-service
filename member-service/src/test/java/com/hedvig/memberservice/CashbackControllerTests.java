@@ -30,7 +30,7 @@ import org.springframework.test.web.servlet.MockMvc;
 @ContextConfiguration(classes = TestApplication.class)
 @WebMvcTest(controllers = CashbackController.class)
 @EnableAxon
-public class CachBackControllerTests {
+public class CashbackControllerTests {
   @Autowired private MockMvc mockMvc;
 
   @MockBean MemberRepository memberRepo;
@@ -44,8 +44,8 @@ public class CachBackControllerTests {
   }
 
   @Test
-  public void PostCachbackOption() throws Exception {
-    final long memberId = 1337l;
+  public void PostCashbackOption() throws Exception {
+    final long memberId = 1337L;
 
     MemberEntity member = new MemberEntity();
     member.setId(memberId);
@@ -68,7 +68,7 @@ public class CachBackControllerTests {
   }
 
   @Test
-  public void PostCachbackOption_WHEN_OptionId_IsnotFound() throws Exception {
+  public void PostCashbackOption_WHEN_OptionId_IsnotFound() throws Exception {
     final long memberId = 1337l;
     final StartOnboardingWithSSNRequest request = new StartOnboardingWithSSNRequest("");
     final UUID newOptionId = UUID.fromString("d24c427e-d110-11e7-a47e-0b4e39412e99");
@@ -91,7 +91,7 @@ public class CachBackControllerTests {
   }
 
   @Test
-  public void PostCachbackOption_WHEN_member_IsnotFound() throws Exception {
+  public void PostCashbackOption_WHEN_member_IsNotFound() throws Exception {
     final long memberId = 1337l;
     final UUID newOptionId = UUID.fromString("d24c427e-d110-11e7-a47e-0b4e39412e98");
 
