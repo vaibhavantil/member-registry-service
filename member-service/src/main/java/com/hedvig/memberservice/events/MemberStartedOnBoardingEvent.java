@@ -5,6 +5,6 @@ import lombok.Value;
 
 @Value
 public class MemberStartedOnBoardingEvent {
-    private Long memberId;
-    private MemberStatus newStatus;
+  private Long memberId;
+  private MemberStatus newStatus;
 }

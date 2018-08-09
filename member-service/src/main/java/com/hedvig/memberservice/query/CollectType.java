@@ -8,13 +8,16 @@ import javax.persistence.Id;
 @Entity
 public class CollectType {
 
-    public enum RequestType {AUTH, RETRIEVE_ACCOUNTS, SIGN}
+  public enum RequestType {
+    AUTH,
+    RETRIEVE_ACCOUNTS,
+    SIGN
+  }
 
-    @Id
-    public String token;
+  @Id public String token;
 
-    @Enumerated(EnumType.STRING)
-    public RequestType type;
+  @Enumerated(EnumType.STRING)
+  public RequestType type;
 
-    public Long memberId;
+  public Long memberId;
 }

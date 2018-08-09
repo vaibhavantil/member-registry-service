@@ -13,7 +13,7 @@ public class MemberCreatedEvent {
 
   private Instant createdOn;
 
-  public MemberCreatedEvent(Long id,  MemberStatus status){
+  public MemberCreatedEvent(Long id, MemberStatus status) {
     this.id = id;
     this.status = status;
     this.createdOn = Instant.now();
