@@ -48,7 +48,6 @@ public class MembersController {
   private final ProductApi productApi;
   private final CashbackService cashbackService;
   private final Logger log = LoggerFactory.getLogger(this.getClass());
-  private final QueueMessagingTemplate queueMessagingTemplate;
 
   @Value("${hedvig.counterkey:123}")
   public String counterKey;
@@ -68,7 +67,6 @@ public class MembersController {
     this.retryTemplate = retryTemplate;
     this.productApi = productApi;
     this.cashbackService = cashbackService;
-    this.queueMessagingTemplate = queueMessagingTemplate;
     this.randomGenerator = SecureRandom.getInstance("SHA1PRNG");
     this.trackingRepo = trackingRepo;
   }
