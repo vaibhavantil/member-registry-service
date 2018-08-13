@@ -9,7 +9,4 @@ public class OnboardingStartedWithSSNEvent extends SSNUpdatedEvent {
     super(memberId, ssn);
   }
 
-  public String toString() {
-    return "OnboardingStartedWithSSNEvent()";
-  }
 }

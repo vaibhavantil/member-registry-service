@@ -4,9 +4,6 @@ spring:
   cloud:
     config:
       allow-override: false
-    kubernetes:
-      discovery:
-        enabled: false
 ---
 spring:
   profiles: test, development
