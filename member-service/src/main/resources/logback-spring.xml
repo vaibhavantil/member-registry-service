@@ -25,6 +25,12 @@
     </encoder>
   </appender>
 
+  <appender name="SENTRY" class="io.sentry.logback.SentryAppender">
+    <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+      <level>ERROR</level>
+    </filter>
+  </appender>
+
   <!-- Appender to log to file in plain text format -->
   <!-- <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
       <file>${LOG_FILE}</file>
