@@ -27,12 +27,25 @@ public class SchedulerService {
 
     final JobKey jobKey = JobKey.jobKey("echo3", "test");
     if (!scheduler.checkExists(jobKey)) {
-      scheduler.addJob(newJob().ofType(EchoJob.class).storeDurably().withIdentity("echo3","test").build(),false);
+      scheduler.addJob(
+          newJob()
+              .ofType(EchoJob.class)
+              .storeDurably()
+              .withIdentity(jobKey)
+              .requestRecovery()
+              .build(),
+          false);
     }
 
     final TriggerKey triggerKey = TriggerKey.triggerKey("echo3", "test");
-    if(!scheduler.checkExists(triggerKey)){
-      scheduler.scheduleJob(newTrigger().forJob(jobKey).withIdentity(triggerKey).startNow().withSchedule(simpleSchedule().withIntervalInSeconds(2).repeatForever()).build());
+    if (!scheduler.checkExists(triggerKey)) {
+      scheduler.scheduleJob(
+          newTrigger()
+              .forJob(jobKey)
+              .withIdentity(triggerKey)
+              .startNow()
+              .withSchedule(simpleSchedule().withIntervalInSeconds(15).repeatForever())
+              .build());
     }
 
     System.out.println("hello world, I have just started up");
