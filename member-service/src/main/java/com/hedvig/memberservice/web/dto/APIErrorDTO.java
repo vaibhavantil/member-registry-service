@@ -9,7 +9,7 @@ import org.springframework.http.HttpStatus;
 @JsonTypeName("apiError")
 @JsonTypeInfo(include = JsonTypeInfo.As.WRAPPER_OBJECT, use = JsonTypeInfo.Id.NAME)
 public class APIErrorDTO {
-    HttpStatus status;
-    String code;
-    String message;
+  HttpStatus status;
+  String code;
+  String message;
 }

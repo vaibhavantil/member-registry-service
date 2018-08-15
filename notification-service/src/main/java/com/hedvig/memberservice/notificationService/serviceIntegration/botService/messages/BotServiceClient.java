@@ -4,10 +4,13 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.hedvig.memberservice.notificationService.serviceIntegration.botService.messages.dto.BackOfficeMessage;
 import com.hedvig.memberservice.notificationService.serviceIntegration.botService.messages.dto.BackOfficeResponseDTO;
 import com.hedvig.memberservice.notificationService.serviceIntegration.botService.messages.dto.PushTokenDTO;
-import org.springframework.cloud.netflix.feign.FeignClient;
-import org.springframework.web.bind.annotation.*;
-
 import java.util.List;
+import org.springframework.cloud.openfeign.FeignClient;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 
 @FeignClient(
         name = "bot-service",

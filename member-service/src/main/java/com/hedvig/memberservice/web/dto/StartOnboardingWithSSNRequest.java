@@ -4,5 +4,5 @@ import lombok.Value;
 
 @Value
 public class StartOnboardingWithSSNRequest {
-    String ssn;
+  String ssn;
 }

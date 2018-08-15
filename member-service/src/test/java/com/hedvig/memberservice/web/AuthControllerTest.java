@@ -90,7 +90,7 @@ public class AuthControllerTest {
         collectType.token = someReferenceValue;
         collectType.memberId = memberId;
 
-        when(collectRepo.findOne(someReferenceValue)).thenReturn(collectType);
+        when(collectRepo.findById(someReferenceValue)).thenReturn(Optional.of(collectType));
 
         CollectResponse collectResponse = createCollectResponse(
                 ssn,
@@ -136,7 +136,7 @@ public class AuthControllerTest {
         collectType.token = someReferenceValue;
         collectType.memberId = memberId;
 
-        when(collectRepo.findOne(someReferenceValue)).thenReturn(collectType);
+        when(collectRepo.findById(someReferenceValue)).thenReturn(Optional.of(collectType));
 
         CollectResponse collectResponse = createCollectResponse(
                 ssn,
@@ -175,7 +175,7 @@ public class AuthControllerTest {
         collectType.token = someReferenceValue;
         collectType.memberId = memberId;
 
-        when(collectRepo.findOne(someReferenceValue)).thenReturn(collectType);
+        when(collectRepo.findById(someReferenceValue)).thenReturn(Optional.of(collectType));
 
 
         RpFaultType faultType = new RpFaultType();
@@ -212,7 +212,7 @@ public class AuthControllerTest {
         collectType.token = someReferenceValue;
         collectType.memberId = memberId;
 
-        when(collectRepo.findOne(someReferenceValue)).thenReturn(collectType);
+        when(collectRepo.findById(someReferenceValue)).thenReturn(Optional.of(collectType));
 
         CollectResponse collectResponse = createCollectResponse(
                 ssn,
@@ -247,7 +247,7 @@ public class AuthControllerTest {
         collectType.token = someReferenceValue;
         collectType.memberId = memberId;
 
-        when(collectRepo.findOne(someReferenceValue)).thenReturn(collectType);
+        when(collectRepo.findById(someReferenceValue)).thenReturn(Optional.of(collectType));
 
         CollectResponse collectResponse = createCollectResponse(
                 ssn,
@@ -281,7 +281,7 @@ public class AuthControllerTest {
         collectType.token = someReferenceValue;
         collectType.memberId = memberId;
 
-        when(collectRepo.findOne(someReferenceValue)).thenReturn(collectType);
+        when(collectRepo.findById(someReferenceValue)).thenReturn(Optional.of(collectType));
 
         CollectResponse collectResponse = createCollectResponse(
                 ssn,

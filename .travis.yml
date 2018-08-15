@@ -1,4 +1,5 @@
 language: java
+jdk: openjdk10
 sudo: required
 services:
 - docker
@@ -8,4 +9,3 @@ after_success:
 cache:
   directories:
   - $HOME/.m2
-jdk: openjdk8

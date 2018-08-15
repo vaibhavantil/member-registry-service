@@ -63,7 +63,7 @@ public class MemberEventListener {
 
   @EventHandler
   public void on(EmailUpdatedEvent e) {
-    MemberEntity m = userRepo.findOne(e.getId());
+    MemberEntity m = userRepo.findById(e.getId()).get();
 
     m.setEmail(e.getEmail());
     userRepo.save(m);
@@ -71,7 +71,7 @@ public class MemberEventListener {
 
   @EventHandler
   void on(SSNUpdatedEvent e) {
-    MemberEntity m = userRepo.findOne(e.getMemberId());
+    MemberEntity m = userRepo.findById(e.getMemberId()).get();
 
     m.setSsn(e.getSsn());
 
@@ -103,7 +103,7 @@ public class MemberEventListener {
 
   @EventHandler
   void on(LivingAddressUpdatedEvent e) {
-    MemberEntity m = userRepo.findOne(e.getId());
+    MemberEntity m = userRepo.findById(e.getId()).get();
 
     m.setCity(e.getCity());
     m.setStreet(e.getStreet());
@@ -116,7 +116,7 @@ public class MemberEventListener {
 
   @EventHandler
   void on(NameUpdatedEvent e) {
-    MemberEntity m = userRepo.findOne(e.getMemberId());
+    MemberEntity m = userRepo.findById(e.getMemberId()).get();
 
     m.setFirstName(e.getFirstName());
     m.setLastName(e.getLastName());
@@ -129,7 +129,7 @@ public class MemberEventListener {
       MemberStartedOnBoardingEvent e, EventMessage<MemberStartedOnBoardingEvent> eventMessage) {
     logger.debug("Started handling event: {}", eventMessage.getIdentifier());
 
-    MemberEntity member = userRepo.findOne(e.getMemberId());
+    MemberEntity member = userRepo.findById(e.getMemberId()).get();
     member.setStatus(e.getNewStatus().name());
 
     userRepo.saveAndFlush(member);
@@ -138,21 +138,21 @@ public class MemberEventListener {
 
   @EventHandler
   void on(MemberInactivatedEvent e) {
-    MemberEntity m = userRepo.findOne(e.getId());
+    MemberEntity m = userRepo.findById(e.getId()).get();
     m.setStatus(MemberStatus.INACTIVATED.name());
     userRepo.save(m);
   }
 
   @EventHandler
   void on(NewCashbackSelectedEvent e) {
-    MemberEntity m = userRepo.findOne(e.getMemberId());
+    MemberEntity m = userRepo.findById(e.getMemberId()).get();
     m.setCashbackId(e.getCashbackId());
     userRepo.save(m);
   }
 
   @EventHandler
   void on(MemberSignedEvent e, @Timestamp Instant timestamp) {
-    MemberEntity m = userRepo.findOne(e.getId());
+    MemberEntity m = userRepo.findById(e.getId()).get();
     m.setStatus(MemberStatus.SIGNED.name());
     m.setSignedOn(timestamp);
 
@@ -166,7 +166,7 @@ public class MemberEventListener {
 
   @EventHandler
   void on(MemberCancellationEvent e) {
-    MemberEntity m = userRepo.findOne(e.getMemberId());
+    MemberEntity m = userRepo.findById(e.getMemberId()).get();
     m.setStatus(MemberStatus.TERMINATED.name());
 
     userRepo.save(m);
@@ -174,7 +174,7 @@ public class MemberEventListener {
 
   @EventHandler
   void on(PhoneNumberUpdatedEvent e) {
-    MemberEntity m = userRepo.findOne(e.getId());
+    MemberEntity m = userRepo.findById(e.getId()).get();
     m.setPhoneNumber(e.getPhoneNumber());
 
     userRepo.save(m);
