@@ -4,14 +4,14 @@ spring:
   cloud:
     config:
       allow-override: false
-    kubernetes:
-      discovery:
-        enabled: false
 ---
 spring:
   profiles: test, development
   cloud:
     kubernetes:
       enabled: false
+      discovery.enabled: false
   autoconfigure:
-    exclude: org.springframework.cloud.kubernetes.KubernetesAutoConfiguration
+    exclude:
+    - org.springframework.cloud.kubernetes.discovery.KubernetesDiscoveryClientAutoConfiguration
+    - org.springframework.cloud.kubernetes.KubernetesAutoConfiguration

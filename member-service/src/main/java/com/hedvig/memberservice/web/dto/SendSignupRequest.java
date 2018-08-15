@@ -1,12 +1,11 @@
 package com.hedvig.memberservice.web.dto;
 
-import lombok.Value;
-
 import java.util.UUID;
+import lombok.Value;
 
 @Value
 public class SendSignupRequest {
-    public UUID token;
-    public String email;
-    public String id;
+  public UUID token;
+  public String email;
+  public String id;
 }

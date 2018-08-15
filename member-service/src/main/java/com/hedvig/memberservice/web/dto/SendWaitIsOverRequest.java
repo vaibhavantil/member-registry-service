@@ -4,5 +4,5 @@ import lombok.Value;
 
 @Value
 public class SendWaitIsOverRequest {
-    public String email;
+  public String email;
 }

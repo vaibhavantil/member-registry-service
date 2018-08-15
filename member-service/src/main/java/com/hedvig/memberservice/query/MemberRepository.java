@@ -8,7 +8,6 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 public interface MemberRepository extends JpaRepository<MemberEntity, Long> {
-  Optional<MemberEntity> findById(long s);
 
   Optional<MemberEntity> findBySsn(String s);
 
