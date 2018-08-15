@@ -101,7 +101,7 @@ public class NotificationController {
     try {
       ResponseEntity<List<InsuranceNotificationDTO>> insuranceResponse =
           productPricingService.getInsurancesByActivationDate(
-              LocalDate.now().plusDays(NumberOfDaysFromToday));
+              LocalDate.now().plusDays(NumberOfDaysFromToday).format(DateTimeFormatter.ISO_LOCAL_DATE));
 
       final List<InsuranceNotificationDTO> insurancesToRemind = insuranceResponse.getBody();
 
