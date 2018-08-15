@@ -15,7 +15,9 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
+import org.springframework.stereotype.Service;
 
+@Service
 public class SendActivationAtFutureDateEmail {
 
   private Logger log = LoggerFactory.getLogger(SendActivationEmail.class);
@@ -27,7 +29,7 @@ public class SendActivationAtFutureDateEmail {
   private final String mandateSentNotification;
   private final ClassPathResource signatureImage;
   private static final String PUSH_MESSAGE =
-      "Hej %s! Dagen är äntligen här - din Hedvigförsäkring är aktiverad! 🎉🎉!"; //TODO: CHANGE
+      "Hej %s! Dagen är äntligen här - din Hedvigförsäkring är aktiverad! 🎉🎉!"; // TODO: CHANGE
 
   public SendActivationAtFutureDateEmail(
       JavaMailSender mailSender,
@@ -62,7 +64,7 @@ public class SendActivationAtFutureDateEmail {
     expoNotificationService.sendNotification(Objects.toString(memberId), message);
   }
 
-  //TODO: CHANGE
+  // TODO: CHANGE
   private void sendEmail(final String email, final String firstName) {
     try {
       val message = mailSender.createMimeMessage();
