@@ -39,7 +39,7 @@ public class SendActivationAtFutureDateEmail {
     this.mailSender = mailSender;
     this.memberServiceClient = memberServiceClient;
     this.expoNotificationService = expoNotificationService;
-    this.mandateSentNotification = LoadEmail("SomeEmail");
+    this.mandateSentNotification = LoadEmail("activated.html"); //TODO: CHANGE
     this.signatureImage = new ClassPathResource("mail/wordmark_mail.jpg");
   }
 

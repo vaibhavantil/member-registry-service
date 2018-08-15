@@ -31,8 +31,7 @@ public class NotificationController {
   private final ProductClient productPricingService;
 
   public NotificationController(
-      NotificationService notificationService,
-      ProductClient productPricingService) {
+      NotificationService notificationService, ProductClient productPricingService) {
     this.notificationService = notificationService;
     this.productPricingService = productPricingService;
   }
@@ -56,7 +55,7 @@ public class NotificationController {
       @PathVariable Long memberId, @RequestBody InsuranceActivatedRequest body) {
     MDC.put("memberId", Objects.toString(memberId));
     try {
-      notificationService.insuranceActivated(memberId, body);
+      notificationService.insuranceActivated(memberId);
     } catch (MailException e) {
       log.error("Could not send email to member", e);
       return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
@@ -81,9 +80,8 @@ public class NotificationController {
 
   /**
    * This endpoint is called x days before the activation, in order to notify members for their
-   * insurance's activation.
-   *
-   * @RequestBody NumberOfDaysFromToday the numbers from today that the insurance will be activated
+   * insurance's activation. @RequestBody NumberOfDaysFromToday the numbers from today that the
+   * insurance will be activated
    *
    * @return 204 on success
    *     <p>or
@@ -107,7 +105,7 @@ public class NotificationController {
         try {
           if (NumberOfDaysFromToday == 0) {
             insurancesToRemind.forEach(
-                i -> notificationService.insuranceActivated(Long.parseLong(i.getMemberId());
+                i -> notificationService.insuranceActivated(Long.parseLong(i.getMemberId())));
           } else {
             insurancesToRemind.forEach(
                 i ->

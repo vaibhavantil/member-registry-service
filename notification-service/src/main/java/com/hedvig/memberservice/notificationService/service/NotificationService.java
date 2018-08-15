@@ -46,7 +46,7 @@ public class NotificationService {
     jobPoster.startJob(request2, false);
   }
 
-  public void insuranceActivated(final long memberId, final InsuranceActivatedRequest r) {
+  public void insuranceActivated(final long memberId) {
     SendActivationEmailRequest request = new SendActivationEmailRequest();
     request.setRequestId(UUID.randomUUID().toString());
     request.setMemberId(Objects.toString(memberId));
