@@ -8,6 +8,7 @@ import com.hedvig.memberservice.externalApi.productsPricing.dto.SetCancellationD
 import feign.FeignException;
 import java.time.Instant;
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -86,7 +87,7 @@ public class ProductApi {
   public List<InsuranceNotificationDTO> getInsurancesByActivationDate(LocalDate activationDate) {
     try {
       ResponseEntity<List<InsuranceNotificationDTO>> response =
-          this.client.getInsurancesByActivationDate(activationDate);
+          this.client.getInsurancesByActivationDate(activationDate.format(DateTimeFormatter.ISO_LOCAL_DATE));
       return response.getBody();
     } catch (FeignException ex) {
       if (ex.status() != 404) {

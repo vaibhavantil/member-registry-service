@@ -32,12 +32,12 @@ public class NotificationController {
 
   private final Logger log = LoggerFactory.getLogger(NotificationController.class);
   private final NotificationService notificationService;
-  private final ProductClient productPricingService;
+  private final ProductClient productClient;
 
   public NotificationController(
-      NotificationService notificationService, ProductClient productPricingService) {
+      NotificationService notificationService, ProductClient productClient) {
     this.notificationService = notificationService;
-    this.productPricingService = productPricingService;
+    this.productClient = productClient;
   }
 
   @PostMapping("cancellationEmailSentToInsurer")
@@ -100,7 +100,7 @@ public class NotificationController {
 
     try {
       ResponseEntity<List<InsuranceNotificationDTO>> insuranceResponse =
-          productPricingService.getInsurancesByActivationDate(
+          productClient.getInsurancesByActivationDate(
               LocalDate.now().plusDays(NumberOfDaysFromToday).format(DateTimeFormatter.ISO_LOCAL_DATE));
 
       final List<InsuranceNotificationDTO> insurancesToRemind = insuranceResponse.getBody();
