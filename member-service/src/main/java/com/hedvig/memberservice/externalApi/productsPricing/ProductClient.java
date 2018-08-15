@@ -8,6 +8,8 @@ import com.hedvig.memberservice.externalApi.productsPricing.dto.SetCancellationD
 import java.time.LocalDate;
 import java.util.List;
 import org.springframework.cloud.openfeign.FeignClient;
+import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.format.annotation.DateTimeFormat.ISO;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -35,6 +37,7 @@ public interface ProductClient {
       @PathVariable("memberId") Long memberId, SetCancellationDateRequest body);
 
   @GetMapping("/_/insurance/searchByActivationDate?activationDate={date}")
+
   ResponseEntity<List<InsuranceNotificationDTO>> getInsurancesByActivationDate(
-      @PathVariable("date") LocalDate activationDate);
+      @PathVariable("date")  @DateTimeFormat(iso = ISO.DATE) LocalDate activationDate);
 }
