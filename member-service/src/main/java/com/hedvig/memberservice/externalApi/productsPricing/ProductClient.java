@@ -1,11 +1,15 @@
 package com.hedvig.memberservice.externalApi.productsPricing;
 
 import com.hedvig.memberservice.externalApi.productsPricing.dto.ContractSignedRequest;
+import com.hedvig.memberservice.externalApi.productsPricing.dto.InsuranceNotificationDTO;
 import com.hedvig.memberservice.externalApi.productsPricing.dto.InsuranceStatusDTO;
 import com.hedvig.memberservice.externalApi.productsPricing.dto.SafetyIncreasersDTO;
 import com.hedvig.memberservice.externalApi.productsPricing.dto.SetCancellationDateRequest;
+import java.time.LocalDate;
+import java.util.List;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -29,4 +33,8 @@ public interface ProductClient {
   @RequestMapping(value = "/_/insurance/{memberId}/setCancellationDate")
   ResponseEntity<String> setCancellationDate(
       @PathVariable("memberId") Long memberId, SetCancellationDateRequest body);
+
+  @GetMapping("/_/insurance/searchByActivationDate?activationDate={date}")
+  ResponseEntity<List<InsuranceNotificationDTO>> getInsurancesByActivationDate(
+      @PathVariable("date") LocalDate activationDate);
 }
