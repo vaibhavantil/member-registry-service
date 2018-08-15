@@ -6,7 +6,6 @@ import com.hedvig.memberservice.notificationService.dto.CancellationEmailSentToI
 import com.hedvig.memberservice.notificationService.dto.InsuranceActivatedRequest;
 import com.hedvig.memberservice.notificationService.dto.InsuranceActivationDateUpdatedRequest;
 import com.hedvig.memberservice.notificationService.service.NotificationService;
-import com.hedvig.memberservice.query.MemberRepository;
 import feign.FeignException;
 import java.time.LocalDate;
 import java.util.List;
@@ -30,15 +29,12 @@ public class NotificationController {
   private final Logger log = LoggerFactory.getLogger(NotificationController.class);
   private final NotificationService notificationService;
   private final ProductClient productPricingService;
-  private final MemberRepository memberRepository;
 
   public NotificationController(
       NotificationService notificationService,
-      ProductClient productPricingService,
-      MemberRepository memberRepository) {
+      ProductClient productPricingService) {
     this.notificationService = notificationService;
     this.productPricingService = productPricingService;
-    this.memberRepository = memberRepository;
   }
 
   @PostMapping("cancellationEmailSentToInsurer")
