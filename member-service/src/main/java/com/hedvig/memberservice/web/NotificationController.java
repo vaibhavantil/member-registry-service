@@ -86,7 +86,8 @@ public class NotificationController {
   /**
    * This endpoint is called x days before the activation, in order to notify members for their
    * insurance's activation. @RequestBody NumberOfDaysFromToday, how many days before we want to
-   * notify them.
+   * notify them. @RequestBody NumberOfDaysFromToday the numbers from today that the insurance will
+   * be activated
    *
    * @RequestBody NumberOfDaysFromToday the numbers from today that the insurance will be activated
    *
@@ -97,6 +98,10 @@ public class NotificationController {
   @PostMapping("insuranceWillBeActivatedAt")
   public ResponseEntity<?> insuranceReminder(@RequestBody int NumberOfDaysFromToday) {
 
+    if (NumberOfDaysFromToday < 0) {
+      return ResponseEntity.badRequest().build();
+    }
+
     try {
       ResponseEntity<List<InsuranceNotificationDTO>> insuranceResponse =
           productPricingService.getInsurancesByActivationDate(
@@ -104,17 +109,25 @@ public class NotificationController {
 
       final List<InsuranceNotificationDTO> insurancesToRemind = insuranceResponse.getBody();
 
-      try {
-        insurancesToRemind.forEach(
-            i ->
-                notificationService.insuranceActivationAtFutureDate(
-                    Long.parseLong(i.getMemberId()), i.getActivationDate().toString()));
-      } catch (MailException e) {
-        log.error("Could not send email to member", e);
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+      if (insurancesToRemind != null && insurancesToRemind.size() > 0) {
+        try {
+          if (NumberOfDaysFromToday == 0) {
+            insurancesToRemind.forEach(
+                i -> notificationService.insuranceActivated(Long.parseLong(i.getMemberId());
+          } else {
+            insurancesToRemind.forEach(
+                i ->
+                    notificationService.insuranceActivationAtFutureDate(
+                        Long.parseLong(i.getMemberId()), i.getActivationDate().toString()));
+          }
+        } catch (MailException e) {
+          log.error("Could not send email to member", e);
+          return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+        return ResponseEntity.ok().build();
+      } else {
+        return ResponseEntity.notFound().build();
       }
-
-      return ResponseEntity.ok().build();
     } catch (FeignException ex) {
       if (ex.status() != 404) {
         log.error("Error from products-pricing", ex);
