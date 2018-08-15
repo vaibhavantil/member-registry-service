@@ -1,11 +1,13 @@
 package com.hedvig.memberservice.externalApi.productsPricing;
 
 import com.hedvig.memberservice.externalApi.productsPricing.dto.ContractSignedRequest;
+import com.hedvig.memberservice.externalApi.productsPricing.dto.InsuranceNotificationDTO;
 import com.hedvig.memberservice.externalApi.productsPricing.dto.InsuranceStatusDTO;
 import com.hedvig.memberservice.externalApi.productsPricing.dto.SafetyIncreasersDTO;
 import com.hedvig.memberservice.externalApi.productsPricing.dto.SetCancellationDateRequest;
 import feign.FeignException;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -79,5 +81,18 @@ public class ProductApi {
               responseEntity.getStatusCode(), responseEntity.getBody());
       throw new RuntimeException(message);
     }
+  }
+
+  public List<InsuranceNotificationDTO> getInsurancesByActivationDate(LocalDate activationDate) {
+    try {
+      ResponseEntity<List<InsuranceNotificationDTO>> response =
+          this.client.getInsurancesByActivationDate(activationDate);
+      return response.getBody();
+    } catch (FeignException ex) {
+      if (ex.status() != 404) {
+        log.error("Error getting insurances by activationDate from products-pricing", ex);
+      }
+    }
+    return new ArrayList<>();
   }
 }
