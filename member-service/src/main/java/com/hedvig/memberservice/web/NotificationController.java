@@ -88,6 +88,8 @@ public class NotificationController {
    * insurance's activation. @RequestBody NumberOfDaysFromToday, how many days before we want to
    * notify them.
    *
+   * @RequestBody NumberOfDaysFromToday the numbers from today that the insurance will be activated
+   *
    * @return 204 on success
    *     <p>or
    * @return 404 not found if there is no isnurance that will be activated on that date
