@@ -7,7 +7,11 @@ import com.hedvig.memberservice.notificationService.dto.InsuranceActivatedReques
 import com.hedvig.memberservice.notificationService.dto.InsuranceActivationDateUpdatedRequest;
 import com.hedvig.memberservice.notificationService.service.NotificationService;
 import feign.FeignException;
+import java.time.Instant;
 import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Objects;
 import org.slf4j.Logger;
@@ -110,7 +114,12 @@ public class NotificationController {
             insurancesToRemind.forEach(
                 i ->
                     notificationService.insuranceActivationAtFutureDate(
-                        Long.parseLong(i.getMemberId()), i.getActivationDate().toString()));
+                        Long.parseLong(i.getMemberId()),
+                        ZonedDateTime.ofLocal(
+                                i.getActivationDate(),
+                                ZoneId.of("Europe/Stockholm"),
+                                ZoneId.of("Europe/Stockholm").getRules().getOffset(Instant.now()))
+                            .format(DateTimeFormatter.ISO_DATE)));
           }
         } catch (MailException e) {
           log.error("Could not send email to member", e);
