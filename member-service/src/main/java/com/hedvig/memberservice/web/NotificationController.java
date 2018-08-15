@@ -81,9 +81,7 @@ public class NotificationController {
 
   /**
    * This endpoint is called x days before the activation, in order to notify members for their
-   * insurance's activation. @RequestBody NumberOfDaysFromToday, how many days before we want to
-   * notify them. @RequestBody NumberOfDaysFromToday the numbers from today that the insurance will
-   * be activated
+   * insurance's activation.
    *
    * @RequestBody NumberOfDaysFromToday the numbers from today that the insurance will be activated
    *
