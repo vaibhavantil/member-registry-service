@@ -2,15 +2,14 @@ package com.hedvig.memberservice.notificationService.queue.requests;
 
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import javax.validation.constraints.NotNull;
 import lombok.Data;
-import lombok.Value;
 import lombok.experimental.NonFinal;
 
 @Data
 @NonFinal
 @JsonTypeInfo(
         use = JsonTypeInfo.Id.NAME,
-        include = JsonTypeInfo.As.PROPERTY,
         property = "type")
 @JsonSubTypes({
         @JsonSubTypes.Type(value = SendOldInsuranceCancellationEmailRequest.class, name = "sendOldInsuranceCancellationEmailRequest"),
@@ -18,7 +17,9 @@ import lombok.experimental.NonFinal;
         @JsonSubTypes.Type(value = SendActivationDateUpdatedRequest.class, name = "sendActivationDateUpdatedRequest")
 })
 public class JobRequest {
-    String requestId;
+  @NotNull
+  String memberId;
 
-
+  @NotNull
+  String requestId;
 }

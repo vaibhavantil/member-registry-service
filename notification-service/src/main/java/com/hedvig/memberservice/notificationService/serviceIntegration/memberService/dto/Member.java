@@ -1,14 +1,15 @@
 package com.hedvig.memberservice.notificationService.serviceIntegration.memberService.dto;
 
+import java.time.LocalDate;
+import javax.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Value;
-
-import java.time.LocalDate;
 
 @Value
 @AllArgsConstructor
 public class Member {
 
+    @NotNull
     private final Long memberId;
     private final String ssn;
 

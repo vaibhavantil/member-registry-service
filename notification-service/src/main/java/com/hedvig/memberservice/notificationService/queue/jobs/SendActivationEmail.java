@@ -1,29 +1,26 @@
 package com.hedvig.memberservice.notificationService.queue.jobs;
 
+import com.hedvig.memberservice.notificationService.queue.EmailSender;
 import com.hedvig.memberservice.notificationService.queue.requests.SendActivationEmailRequest;
 import com.hedvig.memberservice.notificationService.serviceIntegration.expo.ExpoNotificationService;
 import com.hedvig.memberservice.notificationService.serviceIntegration.memberService.MemberServiceClient;
 import com.hedvig.memberservice.notificationService.serviceIntegration.memberService.dto.Member;
-import io.sentry.Sentry;
+import java.io.IOException;
+import java.util.Objects;
 import lombok.val;
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.ResponseEntity;
-import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
-
-import java.io.IOException;
-import java.util.Objects;
 
 @Service
 public class SendActivationEmail {
 
     private Logger log = LoggerFactory.getLogger(SendActivationEmail.class);
 
-    private final JavaMailSender mailSender;
+    private final EmailSender emailSender;
     private final MemberServiceClient memberServiceClient;
     private final ExpoNotificationService expoNotificationService;
 
@@ -32,10 +29,10 @@ public class SendActivationEmail {
     private static final String PUSH_MESSAGE = "Hej %s! Dagen är äntligen här - din Hedvigförsäkring är aktiverad! 🎉🎉!";
 
     public SendActivationEmail(
-            JavaMailSender mailSender,
-            MemberServiceClient memberServiceClient,
-            ExpoNotificationService expoNotificationService) throws IOException {
-        this.mailSender = mailSender;
+        EmailSender emailSender,
+        MemberServiceClient memberServiceClient,
+        ExpoNotificationService expoNotificationService) throws IOException {
+        this.emailSender = emailSender;
         this.memberServiceClient = memberServiceClient;
         this.expoNotificationService = expoNotificationService;
         this.mandateSentNotification = LoadEmail("activated.html");
@@ -44,17 +41,22 @@ public class SendActivationEmail {
 
 
     public void run(SendActivationEmailRequest request) {
-        ResponseEntity<Member> profile = memberServiceClient.profile(request.getMemberId());
+      ResponseEntity<Member> profile = memberServiceClient.profile(request.getMemberId());
 
-        Member body = profile.getBody();
+      Member body = profile.getBody();
 
-        if(body.getEmail() != null) {
-            sendEmail(body.getEmail(), body.getFirstName());
+      if (body != null) {
+        if (body.getEmail() != null) {
+          sendEmail(request.getMemberId(), body.getEmail(), body.getFirstName());
         } else {
-            Sentry.capture(String.format("Could not find email on user with id: %s", request.getMemberId()));
+          log.error(
+              String.format("Could not find email on user with id: %s", request.getMemberId()));
         }
 
         sendPush(body.getMemberId(), body.getFirstName());
+      } else {
+        log.error("Response body from member-service is null: {}", profile);
+      }
     }
 
     private void sendPush(Long memberId, String firstName) {
@@ -63,26 +65,11 @@ public class SendActivationEmail {
         expoNotificationService.sendNotification(Objects.toString(memberId), message);
     }
 
-    private void sendEmail(final String email, final String firstName) {
-        try {
-            val message = mailSender.createMimeMessage();
-            val helper = new MimeMessageHelper(message, true, "UTF-8");
+    private void sendEmail(final String memberId, final String email, final String firstName) {
 
-            helper.setSubject("Goda nyheter 🚝");
-            helper.setFrom("\"Hedvig\" <hedvig@hedvig.com>");
-            helper.setTo(email);
-
-            val finalEmail = mandateSentNotification
-                    .replace("{NAME}", firstName);
-
-            helper.setText(finalEmail, true);
-            helper.addInline("image002.jpg", signatureImage);
-
-            mailSender.send(message);
-        }catch (Exception e) {
-            log.error("Could not send email to member", e);
-            throw new RuntimeException("Could not send email to member", e);
-        }
+        val finalEmail = mandateSentNotification
+            .replace("{NAME}", firstName);
+        emailSender.sendEmail(memberId, "Goda nyheter 🚝", email, finalEmail, signatureImage);
     }
 
     private String LoadEmail(final String s) throws IOException {
