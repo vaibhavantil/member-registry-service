@@ -137,4 +137,9 @@ public class NotificationController {
       return ResponseEntity.notFound().build();
     }
   }
+
+  @PostMapping("pushNotification")
+  public ResponseEntity<Void> sendPushNotification(@PathVariable long memberId, @RequestBody SendPushNotificationRequest firebasePushNotificationRequest) {
+
+  }
 }

@@ -1,7 +1,6 @@
 package com.hedvig.memberservice.notificationService.service;
 
 import com.hedvig.memberservice.notificationService.dto.CancellationEmailSentToInsurerRequest;
-import com.hedvig.memberservice.notificationService.dto.InsuranceActivatedRequest;
 import com.hedvig.memberservice.notificationService.dto.InsuranceActivationDateUpdatedRequest;
 import com.hedvig.memberservice.notificationService.queue.JobPoster;
 import com.hedvig.memberservice.notificationService.queue.requests.SendActivationAtFutureDateRequest;
@@ -59,6 +58,10 @@ public class NotificationService {
     request.setMemberId(Objects.toString(memberId));
     request.setActivationDate(activationDate);
     jobPoster.startJob(request, false);
+  }
+
+  public void sendPushNotification() {
+
   }
 
 }
