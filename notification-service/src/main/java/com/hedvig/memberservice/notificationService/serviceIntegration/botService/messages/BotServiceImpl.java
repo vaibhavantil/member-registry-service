@@ -8,18 +8,22 @@ import org.springframework.stereotype.Service;
 @Service
 public class BotServiceImpl implements BotService {
 
-    private static Logger logger = LoggerFactory.getLogger(BotServiceImpl.class);
+  private static Logger logger = LoggerFactory.getLogger(BotServiceImpl.class);
 
-    final private BotServiceClient botServiceClient;
+  private final BotServiceClient botServiceClient;
 
-    public BotServiceImpl(BotServiceClient botServiceClient) {
-        this.botServiceClient = botServiceClient;
-    }
+  public BotServiceImpl(BotServiceClient botServiceClient) {
+    this.botServiceClient = botServiceClient;
+  }
 
-
-    @Override
+  @Override
   public String pushTokenId(String hid, String token) {
-        val pushTokenDto = botServiceClient.getPushTokenByHid(hid, token);
-        return pushTokenDto.getToken();
+    val pushTokenDto = botServiceClient.getPushTokenByHid(hid, token);
+    return pushTokenDto.getToken();
+  }
+
+  @Override
+  public String getFirebasePushTokenByMemberId(String memberId, String token) {
+    return botServiceClient.getFirebasePushTokenByMemberId(memberId, token).getToken();
   }
 }

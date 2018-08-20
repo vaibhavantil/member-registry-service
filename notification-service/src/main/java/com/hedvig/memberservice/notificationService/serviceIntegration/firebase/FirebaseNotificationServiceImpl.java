@@ -39,7 +39,7 @@ public class FirebaseNotificationServiceImpl implements FirebaseNotificationServ
   @Override
   public void sendNotification(String memberId, String body) {
 
-    String memberToken = botService.pushTokenId(memberId, "");
+    String memberToken = botService.getFirebasePushTokenByMemberId(memberId, "");
 
     Message message =
         Message.builder()
