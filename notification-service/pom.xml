@@ -99,6 +99,11 @@
       <artifactId>google-api-client</artifactId>
       <version>1.24.1</version>
     </dependency>
+    <dependency>
+      <groupId>com.google.firebase</groupId>
+      <artifactId>firebase-admin</artifactId>
+      <version>6.3.0</version>
+    </dependency>
   </dependencies>
 
   <build>
