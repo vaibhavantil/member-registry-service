@@ -18,8 +18,8 @@ public class BotServiceImpl implements BotService {
 
 
     @Override
-	public String pushTokenId(String hid, String token) {
+  public String pushTokenId(String hid, String token) {
         val pushTokenDto = botServiceClient.getPushTokenByHid(hid, token);
         return pushTokenDto.getToken();
-	}
+  }
 }
