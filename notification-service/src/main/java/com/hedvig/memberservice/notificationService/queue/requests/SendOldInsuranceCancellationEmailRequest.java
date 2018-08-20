@@ -1,5 +1,6 @@
 package com.hedvig.memberservice.notificationService.queue.requests;
 
+import javax.validation.constraints.NotNull;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
@@ -9,6 +10,6 @@ import lombok.ToString;
 @EqualsAndHashCode(callSuper = true)
 public class SendOldInsuranceCancellationEmailRequest extends JobRequest {
 
-    String memberId;
+    @NotNull
     String insurer;
 }

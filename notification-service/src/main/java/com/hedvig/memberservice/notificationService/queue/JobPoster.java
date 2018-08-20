@@ -17,6 +17,7 @@ import java.util.HashMap;
 import lombok.val;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.aws.messaging.core.QueueMessagingTemplate;
 import org.springframework.cloud.aws.messaging.core.SqsMessageHeaders;
@@ -75,17 +76,24 @@ public class JobPoster {
       JobRequest request = objectMapper.readValue(requestAsJson, JobRequest.class);
       log.info("Receiving jobrequest from sqs queue: {} ", requestAsJson);
 
-      if (SendOldInsuranceCancellationEmailRequest.class.isInstance(request)) {
-        sendCancellationEmail.run((SendOldInsuranceCancellationEmailRequest) request);
-      } else if (SendActivationDateUpdatedRequest.class.isInstance(request)) {
-        sendActivationDateUpdatedEmail.run((SendActivationDateUpdatedRequest) request);
-      } else if (SendActivationEmailRequest.class.isInstance(request)) {
-        sendActivationEmail.run((SendActivationEmailRequest) request);
-      } else if (SendActivationAtFutureDateEmail.class.isInstance(request)) {
-        sendActivationAtFutureDateEmail.run((SendActivationAtFutureDateRequest) request);
-      } else {
-        log.error("Could not start job for message: {}", requestAsJson);
+      try{
+        MDC.put("memberId", request.getMemberId());
+
+        if (SendOldInsuranceCancellationEmailRequest.class.isInstance(request)) {
+          sendCancellationEmail.run((SendOldInsuranceCancellationEmailRequest) request);
+        } else if (SendActivationDateUpdatedRequest.class.isInstance(request)) {
+          sendActivationDateUpdatedEmail.run((SendActivationDateUpdatedRequest) request);
+        } else if (SendActivationEmailRequest.class.isInstance(request)) {
+          sendActivationEmail.run((SendActivationEmailRequest) request);
+        } else if (SendActivationAtFutureDateEmail.class.isInstance(request)) {
+          sendActivationAtFutureDateEmail.run((SendActivationAtFutureDateRequest) request);
+        } else {
+          log.error("Could not start job for message: {}", requestAsJson);
+        }
+      }finally{
+        MDC.remove("memberId");
       }
+
     } catch (Exception e) {
       log.error("Caught exception, {}", e.getMessage(), e);
     }

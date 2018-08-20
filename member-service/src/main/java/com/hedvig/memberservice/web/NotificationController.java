@@ -14,6 +14,7 @@ import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Objects;
+import javax.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
@@ -70,7 +71,7 @@ public class NotificationController {
 
   @PostMapping("insuranceActivationDateUpdated")
   public ResponseEntity<?> insuranceActivationDateUpdated(
-      @PathVariable Long memberId, @RequestBody InsuranceActivationDateUpdatedRequest body) {
+      @PathVariable Long memberId, @RequestBody @Valid InsuranceActivationDateUpdatedRequest body) {
     MDC.put("memberId", Objects.toString(memberId));
     try {
       notificationService.insuranceActivationDateUpdated(memberId, body);
