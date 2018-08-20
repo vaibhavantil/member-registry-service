@@ -43,19 +43,22 @@ public class SendCancellationEmail {
 
 
     public void run(SendOldInsuranceCancellationEmailRequest request) {
+      ResponseEntity<Member> profile = memberServiceClient.profile(request.getMemberId());
+      Member body = profile.getBody();
 
-        ResponseEntity<Member> profile = memberServiceClient.profile(request.getMemberId());
-
-        Member body = profile.getBody();
-        assert body != null;
-
-        if(body.getEmail() != null) {
-            sendEmail(body.getEmail(), body.getFirstName(), request.getInsurer());
+      if (body != null) {
+        if (body.getEmail() != null) {
+          sendEmail(body.getEmail(), body.getFirstName(), request.getInsurer());
         } else {
-            log.error(String.format("Could not find email on user with id: %s", request.getMemberId()));
+          log.error(
+              String.format("Could not find email on user with id: %s", request.getMemberId()));
         }
 
         sendPush(body.getMemberId(), body.getFirstName(), request.getInsurer());
+
+      } else {
+        log.error("Response body from member-service is null: {}", profile);
+      }
     }
 
     private void sendPush(Long memberId, String firstName, String insurer) {

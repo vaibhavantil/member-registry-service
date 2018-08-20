@@ -1,10 +1,9 @@
 package com.hedvig.memberservice.notificationService.queue;
 
-import java.util.Arrays;
+import java.util.List;
 import lombok.val;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
@@ -15,10 +14,10 @@ public class EmailSender {
 
   private final Logger log = LoggerFactory.getLogger(EmailSender.class);
   private final JavaMailSender mailSender;
-  private final String[] bcc;
+  private final List<MemberBCCAddress> bcc;
 
   public EmailSender(
-      JavaMailSender mailSender, @Value("${hedvig.notificationService.memberBcc}") String[] bcc) {
+      JavaMailSender mailSender, List<MemberBCCAddress> bcc) {
     this.mailSender = mailSender;
     this.bcc = bcc;
   }
@@ -37,9 +36,8 @@ public class EmailSender {
       helper.setFrom("\"Hedvig\" <hedvig@hedvig.com>");
       helper.setTo(email);
       helper.setBcc(
-          Arrays.stream(bcc)
-              .map(
-                  x -> new MemberBCCAddress(x).format(memberId))
+          bcc.stream()
+              .map(x -> x.format(memberId))
               .toArray(String[]::new));
 
       helper.setText(html, true);

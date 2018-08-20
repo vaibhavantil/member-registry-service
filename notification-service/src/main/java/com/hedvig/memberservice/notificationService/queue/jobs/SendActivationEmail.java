@@ -41,18 +41,22 @@ public class SendActivationEmail {
 
 
     public void run(SendActivationEmailRequest request) {
-        ResponseEntity<Member> profile = memberServiceClient.profile(request.getMemberId());
+      ResponseEntity<Member> profile = memberServiceClient.profile(request.getMemberId());
 
-        Member body = profile.getBody();
-        assert body != null;
+      Member body = profile.getBody();
 
-        if(body.getEmail() != null) {
-            sendEmail(request.getMemberId(), body.getEmail(), body.getFirstName());
+      if (body != null) {
+        if (body.getEmail() != null) {
+          sendEmail(request.getMemberId(), body.getEmail(), body.getFirstName());
         } else {
-            log.error(String.format("Could not find email on user with id: %s", request.getMemberId()));
+          log.error(
+              String.format("Could not find email on user with id: %s", request.getMemberId()));
         }
 
         sendPush(body.getMemberId(), body.getFirstName());
+      } else {
+        log.error("Response body from member-service is null: {}", profile);
+      }
     }
 
     private void sendPush(Long memberId, String firstName) {

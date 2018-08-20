@@ -21,67 +21,65 @@ import org.springframework.stereotype.Component;
 @Component
 public class SendActivationDateUpdatedEmail {
 
-    private final Logger log = LoggerFactory.getLogger(SendActivationDateUpdatedEmail.class);
+  private final Logger log = LoggerFactory.getLogger(SendActivationDateUpdatedEmail.class);
 
   private final EmailSender emailSender;
 
   private final MemberServiceClient memberServiceClient;
-    private final ExpoNotificationService expoNotificationService;
+  private final ExpoNotificationService expoNotificationService;
 
-    private final String mandateSentNotification;
-    private final ClassPathResource signatureImage;
-    private static final String PUSH_MESSAGE = "Hej %s! Bra nyheter! %s har bekräftat ditt uppsägningsdatum - det är %s. Samma dag aktiveras din Hedvigförsäkring. Jag hör av mig då! 🙌";
+  private final String mandateSentNotification;
+  private final ClassPathResource signatureImage;
+  private static final String PUSH_MESSAGE = "Hej %s! Bra nyheter! %s har bekräftat ditt uppsägningsdatum - det är %s. Samma dag aktiveras din Hedvigförsäkring. Jag hör av mig då! 🙌";
 
-    public SendActivationDateUpdatedEmail(
+  public SendActivationDateUpdatedEmail(
         EmailSender emailSender,
         MemberServiceClient memberServiceClient,
         ExpoNotificationService expoNotificationService)
             throws IOException {
-      this.emailSender = emailSender;
-      this.memberServiceClient = memberServiceClient;
-      this.expoNotificationService = expoNotificationService;
+    this.emailSender = emailSender;
+    this.memberServiceClient = memberServiceClient;
+    this.expoNotificationService = expoNotificationService;
 
-      mandateSentNotification = LoadEmail("notifications/insurance_activation_date_updated.html");
-      signatureImage = new ClassPathResource("mail/wordmark_mail.jpg");
-    }
+    mandateSentNotification = LoadEmail("notifications/insurance_activation_date_updated.html");
+    signatureImage = new ClassPathResource("mail/wordmark_mail.jpg");
+  }
 
 
-    public void run(SendActivationDateUpdatedRequest request) {
+  public void run(SendActivationDateUpdatedRequest request) {
 
-      ResponseEntity<Member> profile = memberServiceClient.profile(request.getMemberId());
-      Member body = profile.getBody();
+    ResponseEntity<Member> profile = memberServiceClient.profile(request.getMemberId());
+    Member body = profile.getBody();
 
-      if (body != null) {
+    if (body != null) {
 
-        val format = DateTimeFormatter.ofPattern("d MMMM yyyy").withLocale(new Locale("sv", "SE"));
-        val localDate = request.getActivationDate().atZone(ZoneId.of("Europe/Stockholm"));
+      val format = DateTimeFormatter.ofPattern("d MMMM yyyy").withLocale(new Locale("sv", "SE"));
+      val localDate = request.getActivationDate().atZone(ZoneId.of("Europe/Stockholm"));
 
-        if (body.getEmail() != null) {
-          sendEmail(
-              request.getMemberId(),
-              body.getEmail(),
-              body.getFirstName(),
-              request.getInsurer(),
-              localDate.format(format)
-          );
-        } else {
-          log.error(
-              String.format("Could not find email on user with id: %s", request.getMemberId()));
-        }
-
-        sendPush(body.getMemberId(), body.getFirstName(), request.getInsurer(),
-            localDate.format(format));
+      if (body.getEmail() != null) {
+        sendEmail(
+            request.getMemberId(),
+            body.getEmail(),
+            body.getFirstName(),
+            request.getInsurer(),
+            localDate.format(format)
+        );
+      } else {
+        log.error(
+            String.format("Could not find email on user with id: %s", request.getMemberId()));
       }
-      else{
-        log.error("Response body from member-service is null: {}", profile);
-      }
-    }
 
-    private void sendPush(Long memberId, String firstName, String insurer, String date) {
-
-        String message = String.format(PUSH_MESSAGE, firstName, insurer, date);
-        expoNotificationService.sendNotification(Objects.toString(memberId), message);
+      sendPush(body.getMemberId(), body.getFirstName(), request.getInsurer(),
+          localDate.format(format));
+    } else {
+      log.error("Response body from member-service is null: {}", profile);
     }
+  }
+
+  private void sendPush(Long memberId, String firstName, String insurer, String date) {
+    String message = String.format(PUSH_MESSAGE, firstName, insurer, date);
+    expoNotificationService.sendNotification(Objects.toString(memberId), message);
+  }
 
   private void sendEmail(
       final String memberId,
