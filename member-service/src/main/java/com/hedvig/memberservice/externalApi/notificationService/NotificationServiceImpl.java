@@ -4,7 +4,10 @@ import com.hedvig.memberservice.externalApi.notificationService.dto.Cancellation
 import com.hedvig.memberservice.externalApi.notificationService.dto.InsuranceActivationDateUpdatedRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
+@Component
 public class NotificationServiceImpl implements NotificationService {
 
   private final Logger logger = LoggerFactory.getLogger(NotificationServiceImpl.class);

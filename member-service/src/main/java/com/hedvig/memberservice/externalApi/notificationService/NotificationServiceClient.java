@@ -10,20 +10,19 @@ import org.springframework.web.bind.annotation.RequestBody;
 
 @FeignClient(
     name = "notification-service",
-    url = "${notificationservice.baseurl}",
-    configuration = FeignClient.class)
+    url = "${hedvig.notificationservice.baseurl}")
 public interface NotificationServiceClient {
 
   @PostMapping("/_/notifications/{memberId}/cancellationEmailSentToInsurer")
   ResponseEntity<?> cancellationEmailSentToInsurer(
-      @PathVariable Long memberId, @RequestBody CancellationEmailSentToInsurerRequest body);
+      @PathVariable(name = "memberId") Long memberId, @RequestBody CancellationEmailSentToInsurerRequest body);
 
   @PostMapping("/_/notifications/{memberId}/insuranceActivated")
-  ResponseEntity<?> insuranceActivated(@PathVariable Long memberId);
+  ResponseEntity<?> insuranceActivated(@PathVariable(name = "memberId") Long memberId);
 
   @PostMapping("/_/notifications/{memberId}/insuranceActivationDateUpdated")
   ResponseEntity<?> insuranceActivationDateUpdated(
-      @PathVariable Long memberId, @RequestBody InsuranceActivationDateUpdatedRequest body);
+      @PathVariable(name = "memberId") Long memberId, @RequestBody InsuranceActivationDateUpdatedRequest body);
 
   @PostMapping("/_/notifications/insuranceWillBeActivatedAt")
   ResponseEntity<?> insuranceReminder(@RequestBody int NumberOfDaysFromToday);
