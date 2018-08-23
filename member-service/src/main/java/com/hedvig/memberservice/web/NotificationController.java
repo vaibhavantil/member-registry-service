@@ -1,25 +1,15 @@
 package com.hedvig.memberservice.web;
 
-import com.hedvig.memberservice.externalApi.productsPricing.ProductClient;
-import com.hedvig.memberservice.externalApi.productsPricing.dto.InsuranceNotificationDTO;
-import com.hedvig.memberservice.notificationService.dto.CancellationEmailSentToInsurerRequest;
-import com.hedvig.memberservice.notificationService.dto.InsuranceActivatedRequest;
-import com.hedvig.memberservice.notificationService.dto.InsuranceActivationDateUpdatedRequest;
-import com.hedvig.memberservice.notificationService.service.NotificationService;
-import feign.FeignException;
-import java.time.Instant;
-import java.time.LocalDate;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.List;
+import com.hedvig.memberservice.externalApi.notificationService.NotificationService;
+import com.hedvig.memberservice.externalApi.notificationService.dto.CancellationEmailSentToInsurerRequest;
+import com.hedvig.memberservice.externalApi.notificationService.dto.InsuranceActivationDateUpdatedRequest;
 import java.util.Objects;
+import javax.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.mail.MailException;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -32,12 +22,9 @@ public class NotificationController {
 
   private final Logger log = LoggerFactory.getLogger(NotificationController.class);
   private final NotificationService notificationService;
-  private final ProductClient productClient;
 
-  public NotificationController(
-      NotificationService notificationService, ProductClient productClient) {
+  public NotificationController(NotificationService notificationService) {
     this.notificationService = notificationService;
-    this.productClient = productClient;
   }
 
   @PostMapping("cancellationEmailSentToInsurer")
@@ -46,7 +33,7 @@ public class NotificationController {
     MDC.put("memberId", Objects.toString(memberId));
     try {
       notificationService.cancellationEmailSentToInsurer(memberId, body);
-    } catch (MailException e) {
+    } catch (Exception e) {
       log.error("Could not send email to member", e);
       return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
     }
@@ -55,12 +42,11 @@ public class NotificationController {
   }
 
   @PostMapping("insuranceActivated")
-  public ResponseEntity<?> insuranceActivated(
-      @PathVariable Long memberId, @RequestBody InsuranceActivatedRequest body) {
+  public ResponseEntity<?> insuranceActivated(@PathVariable Long memberId) {
     MDC.put("memberId", Objects.toString(memberId));
     try {
       notificationService.insuranceActivated(memberId);
-    } catch (MailException e) {
+    } catch (Exception e) {
       log.error("Could not send email to member", e);
       return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
     }
@@ -70,11 +56,11 @@ public class NotificationController {
 
   @PostMapping("insuranceActivationDateUpdated")
   public ResponseEntity<?> insuranceActivationDateUpdated(
-      @PathVariable Long memberId, @RequestBody InsuranceActivationDateUpdatedRequest body) {
+      @PathVariable Long memberId, @RequestBody @Valid InsuranceActivationDateUpdatedRequest body) {
     MDC.put("memberId", Objects.toString(memberId));
     try {
       notificationService.insuranceActivationDateUpdated(memberId, body);
-    } catch (MailException e) {
+    } catch (Exception e) {
       log.error("Could not send email to member", e);
       return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
     }
@@ -93,49 +79,13 @@ public class NotificationController {
    */
   @PostMapping("insuranceWillBeActivatedAt")
   public ResponseEntity<?> insuranceReminder(@RequestBody int NumberOfDaysFromToday) {
-
-    if (NumberOfDaysFromToday < 0) {
-      return ResponseEntity.badRequest().build();
-    }
-
     try {
-      ResponseEntity<List<InsuranceNotificationDTO>> insuranceResponse =
-          productClient.getInsurancesByActivationDate(
-              LocalDate.now().plusDays(NumberOfDaysFromToday).format(DateTimeFormatter.ISO_LOCAL_DATE));
-
-      final List<InsuranceNotificationDTO> insurancesToRemind = insuranceResponse.getBody();
-
-      if (insurancesToRemind != null && insurancesToRemind.size() > 0) {
-        try {
-          if (NumberOfDaysFromToday == 0) {
-            insurancesToRemind.forEach(
-                i -> notificationService.insuranceActivated(Long.parseLong(i.getMemberId())));
-          } else {
-            insurancesToRemind.forEach(
-                i ->
-                    notificationService.insuranceActivationAtFutureDate(
-                        Long.parseLong(i.getMemberId()),
-                        ZonedDateTime.ofLocal(
-                                i.getActivationDate(),
-                                ZoneId.of("Europe/Stockholm"),
-                                ZoneId.of("Europe/Stockholm").getRules().getOffset(Instant.now()))
-                            .format(DateTimeFormatter.ISO_DATE)));
-          }
-        } catch (MailException e) {
-          log.error("Could not send email to member", e);
-          return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-        }
-        return ResponseEntity.ok().build();
-      } else {
-        return ResponseEntity.notFound().build();
-      }
-    } catch (FeignException ex) {
-      if (ex.status() != 404) {
-        log.error("Error from products-pricing", ex);
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-      }
-      return ResponseEntity.notFound().build();
+      notificationService.insuranceReminder(NumberOfDaysFromToday);
+    } catch (Exception e) {
+      log.error("Could not send emails ", e);
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
     }
+    return ResponseEntity.noContent().build();
   }
 
   @PostMapping("pushNotification")

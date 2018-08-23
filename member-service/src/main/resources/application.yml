@@ -10,9 +10,10 @@ spring.jackson.serialization.write_dates_as_timestamps: false
 management.security.enabled: false
 
 hedvig.member-service.url: http://localhost:4084
-hedvig.bot-service.url: http://localhost:4081
+hedvig.bot-service.location: http://localhost:4081
 hedvig.external.bankid.url: https://appapi2.bankid.com/rp/v4
 hedvig.productsPricing.url: http://localhost:4085
+hedvig.notificationservice.baseurl: http://localhost:4086
 
 
 logging.level.com.hedvig: DEBUG
