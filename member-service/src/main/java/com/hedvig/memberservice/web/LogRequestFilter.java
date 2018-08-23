@@ -1,5 +1,7 @@
 package com.hedvig.memberservice.web;
 
+import io.sentry.Sentry;
+import io.sentry.event.UserBuilder;
 import java.io.IOException;
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
@@ -29,6 +31,7 @@ public class LogRequestFilter implements Filter {
         String hedvigToken = httpRequest.getHeader("hedvig.token");
         if (hedvigToken != null) {
           MDC.put("memberId", hedvigToken);
+          Sentry.getContext().setUser(new UserBuilder().setId(hedvigToken).build());
         }
       }
       chain.doFilter(request, response);
