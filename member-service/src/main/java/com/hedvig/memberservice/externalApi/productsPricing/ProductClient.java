@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
-@FeignClient(name = "productPricing", url = "${hedvig.productsPricing.url}")
+@FeignClient(name = "productPricing", url = "${hedvig.productsPricing.url:product-pricing}")
 public interface ProductClient {
 
   @RequestMapping(value = "/_/insurance/contractSigned", method = RequestMethod.POST)
