@@ -200,7 +200,7 @@ public class MemberAggregate {
 
   @CommandHandler
   void inactivateMember(InactivateMemberCommand command) {
-    if (this.status == MemberStatus.INITIATED) {
+    if (this.status == MemberStatus.INITIATED || this.status == MemberStatus.ONBOARDING) {
       apply(new MemberInactivatedEvent(this.id));
     } else {
       String str =

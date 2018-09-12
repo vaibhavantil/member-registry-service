@@ -236,7 +236,32 @@ public class MemberAggregateTests {
             new MemberSignedEvent(memberId, referenceId, "", ""));
   }
 
+  @Test
+  public void inactivateMemberCommand_givenInitiatedMember_thenEmitsMemberInactivatedEvent(){
+    Long memberId = 1234L;
 
+    fixture
+        .given(new MemberCreatedEvent(memberId, MemberStatus.INITIATED))
+        .when(new InactivateMemberCommand(memberId))
+        .expectSuccessfulHandlerExecution()
+        .expectEvents(
+            new MemberInactivatedEvent(memberId));
+
+  }
+
+  @Test
+  public void inactivateMemberCommand_givenOnboardingMember_thenEmitsMemberInactivatedEvent(){
+    Long memberId = 1234L;
+
+    fixture
+        .given(new MemberCreatedEvent(memberId, MemberStatus.INITIATED),
+            new MemberStartedOnBoardingEvent(memberId, MemberStatus.ONBOARDING))
+        .when(new InactivateMemberCommand(memberId))
+        .expectSuccessfulHandlerExecution()
+        .expectEvents(
+            new MemberInactivatedEvent(memberId));
+
+  }
 
   private class AggregateFactoryM<T> extends AbstractAggregateFactory<T> {
 
