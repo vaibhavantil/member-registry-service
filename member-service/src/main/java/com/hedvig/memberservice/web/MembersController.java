@@ -24,7 +24,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.cloud.aws.messaging.core.QueueMessagingTemplate;
 import org.springframework.http.ResponseEntity;
 import org.springframework.retry.support.RetryTemplate;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -59,7 +58,6 @@ public class MembersController {
       RetryTemplate retryTemplate,
       ProductApi productApi,
       CashbackService cashbackService,
-      QueueMessagingTemplate queueMessagingTemplate,
       TrackingIdRepository trackingRepo)
       throws NoSuchAlgorithmException {
     this.repo = repo;
@@ -176,7 +174,7 @@ public class MembersController {
             String.format(cashbackOption.paragraph, me.getFirstName()),
             cashbackOption.selectedUrl,
             insuranceStatus.getSafetyIncreasers(),
-            tId.isPresent() ? tId.get().getTrackingId() : null);
+            tId.map(TrackingIdEntity::getTrackingId).orElse(null));
 
     return ResponseEntity.ok(p);
   }

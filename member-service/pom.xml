@@ -22,7 +22,7 @@
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-    <java.version>1.10</java.version>
+    <java.version>1.9</java.version>
   </properties>
 
   <repositories>
@@ -247,7 +247,7 @@
         <artifactId>maven-compiler-plugin</artifactId>
         <version>3.8.0</version>
         <configuration>
-          <release>10</release>
+          <release>9</release>
         </configuration>
       </plugin>
       <plugin>
