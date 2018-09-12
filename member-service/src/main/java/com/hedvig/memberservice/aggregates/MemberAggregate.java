@@ -210,9 +210,9 @@ public class MemberAggregate {
   }
 
   @CommandHandler
-  void startOnboardingWithSSNCommand(StartOnboardingWithSSNCommand comand) {
+  void startOnboardingWithSSNCommand(StartOnboardingWithSSNCommand command) {
     if (this.status == MemberStatus.INITIATED || this.status == MemberStatus.ONBOARDING) {
-      apply(new OnboardingStartedWithSSNEvent(this.id, comand.getSsn()));
+      apply(new OnboardingStartedWithSSNEvent(this.id, command.getSsn()));
       apply(new MemberStartedOnBoardingEvent(this.id, MemberStatus.ONBOARDING));
     } else {
       throw new RuntimeException(
@@ -333,6 +333,11 @@ public class MemberAggregate {
   @EventSourcingHandler
   public void on(PersonInformationFromBisnodeEvent e) {
     this.latestBisnodeInformation = e.getInformation();
+  }
+
+  @EventSourcingHandler
+  public void on(MemberSignedEvent e) {
+    this.status = MemberStatus.SIGNED;
   }
 
   @EventSourcingHandler
