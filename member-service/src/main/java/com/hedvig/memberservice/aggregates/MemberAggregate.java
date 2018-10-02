@@ -253,6 +253,10 @@ public class MemberAggregate {
               cmd.getApartmentNo(),
               cmd.getFloor()));
     }
+
+    if (!Objects.equals(member.getPhoneNumber(), cmd.getPhoneNumber())) {
+      apply(new PhoneNumberUpdatedEvent(this.id, cmd.getPhoneNumber()));
+    }
   }
 
   @CommandHandler
