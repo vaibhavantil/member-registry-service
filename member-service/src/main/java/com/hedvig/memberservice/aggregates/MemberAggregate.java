@@ -50,11 +50,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
-/** This is an example Aggregate and should be remodeled to suit the needs of you domain. */
+/**
+ * This is an example Aggregate and should be remodeled to suit the needs of you domain.
+ */
 @Aggregate
 public class MemberAggregate {
 
-  @AggregateIdentifier public Long id;
+  @AggregateIdentifier
+  public Long id;
 
   private Logger log = LoggerFactory.getLogger(MemberAggregate.class);
 
@@ -235,11 +238,11 @@ public class MemberAggregate {
     LivingAddress address = this.member.getLivingAddress();
     if (address == null
         || address.needsUpdate(
-            cmd.getStreet(),
-            cmd.getCity(),
-            cmd.getZipCode(),
-            cmd.getApartmentNo(),
-            cmd.getFloor())) {
+        cmd.getStreet(),
+        cmd.getCity(),
+        cmd.getZipCode(),
+        cmd.getApartmentNo(),
+        cmd.getFloor())) {
       apply(
           new LivingAddressUpdatedEvent(
               this.id,
@@ -260,6 +263,10 @@ public class MemberAggregate {
 
     if (this.trackingId == null) {
       generateTrackingId();
+    }
+
+    if (!Objects.equals(this.member.getSsn(), cmd.getPersonalNumber())) {
+      apply(new SSNUpdatedEvent(this.id, cmd.getPersonalNumber()));
     }
   }
 
@@ -289,11 +296,11 @@ public class MemberAggregate {
     LivingAddress address = this.member.getLivingAddress();
     if (address == null
         || address.needsUpdate(
-            cmd.getMember().getStreet(),
-            cmd.getMember().getCity(),
-            cmd.getMember().getZipCode(),
-            cmd.getMember().getApartment(),
-            cmd.getMember().getFloor())) {
+        cmd.getMember().getStreet(),
+        cmd.getMember().getCity(),
+        cmd.getMember().getZipCode(),
+        cmd.getMember().getApartment(),
+        cmd.getMember().getFloor())) {
       apply(
           new LivingAddressUpdatedEvent(
               this.id,
@@ -308,15 +315,6 @@ public class MemberAggregate {
       apply(new PhoneNumberUpdatedEvent(this.id, cmd.getMember().getPhoneNumber()));
     }
   }
-
-  /*
-  @CommandHandler
-  void finalizeOnBoarding(MemberUpdateContactInformationCommand cmd) {
-      apply(new EmailUpdatedEvent(this.id, cmd.getEmail()));
-      apply(new LivingAddressUpdatedEvent(this.id, cmd.getStreet(), cmd.getCity(), cmd.getZipCode(), cmd.getApartmentNo()));
-      apply(new NameUpdatedEvent(this.id, cmd.getFirstName(), cmd.getLastName()));
-      apply(new SSNUpdatedEvent(this.id, cmd.getSsn()));
-  }*/
 
   @EventSourcingHandler
   public void on(MemberCreatedEvent e) {
@@ -378,5 +376,10 @@ public class MemberAggregate {
   @EventSourcingHandler
   public void on(PhoneNumberUpdatedEvent e) {
     this.member.setPhoneNumber(e.getPhoneNumber());
+  }
+
+  @EventSourcingHandler
+  public void on(SSNUpdatedEvent e) {
+    this.member.setSsn(e.getSsn());
   }
 }

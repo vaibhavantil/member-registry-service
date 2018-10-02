@@ -171,8 +171,10 @@ public class AuthController {
         Optional<MemberEntity> memberEntity = memberRepo.findById(hid);
         if (memberEntity.isPresent()) {
           this.commandGateway.sendAndWait(
-              new BankIdSignCommand(
-                  hid, referenceToken, status.getSignature(), status.getOcspResponse()));
+              new
+                  BankIdSignCommand(
+                  hid, referenceToken, status.getSignature(), status.getOcspResponse(),
+                  status.getUserInfo().getPersonalNumber()));
         }
       }
 

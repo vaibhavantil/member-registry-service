@@ -55,9 +55,12 @@ public class MemberAggregateTests {
   // public static final java.util.UUID UUID = java.util.UUID
   //    .fromString("971b25bc-5db5-11e8-9f7c-039208e9dccf");
   private FixtureConfiguration<MemberAggregate> fixture;
-  @MockBean private BisnodeClient bisnodeClient;
-  @MockBean private CashbackService cashbackService;
-  @MockBean private UUIDGenerator uuidGenerator;
+  @MockBean
+  private BisnodeClient bisnodeClient;
+  @MockBean
+  private CashbackService cashbackService;
+  @MockBean
+  private UUIDGenerator uuidGenerator;
 
   @Before
   public void setUp() {
@@ -198,6 +201,7 @@ public class MemberAggregateTests {
   public void bankIdSignCommand_givenMemberWhoHasNotAuthed_ThenDoEmitTrackingIdEvent() {
     Long memberId = 1234L;
     String referenceId = "someReferenceId";
+    String personalNumber = "198902171234";
 
     when(uuidGenerator.generateRandom()).thenReturn(TRACKING_UUID);
 
@@ -205,12 +209,13 @@ public class MemberAggregateTests {
 
     fixture
         .given(new MemberCreatedEvent(memberId, MemberStatus.INITIATED))
-        .when(new BankIdSignCommand(memberId, referenceId, "", ""))
+        .when(new BankIdSignCommand(memberId, referenceId, "", "", personalNumber))
         .expectSuccessfulHandlerExecution()
         .expectEvents(
             new NewCashbackSelectedEvent(memberId, DEFAULT_CASHBACK.toString()),
             new MemberSignedEvent(memberId, referenceId, "", ""),
-            new TrackingIdCreatedEvent(memberId, TRACKING_UUID));
+            new TrackingIdCreatedEvent(memberId, TRACKING_UUID),
+            new SSNUpdatedEvent(memberId, personalNumber));
   }
 
 
@@ -218,6 +223,7 @@ public class MemberAggregateTests {
   public void bankIdSignCommand_givenMemberWhoHasAuthenticated_ThenDoNotEmitTrackingIdEvent() {
     Long memberId = 1234L;
     String referenceId = "someReferenceId";
+    String personalNumber = "198902171234";
 
     when(uuidGenerator.generateRandom()).thenReturn(TRACKING_UUID);
 
@@ -229,15 +235,16 @@ public class MemberAggregateTests {
             new MemberAuthenticatedEvent(memberId, referenceId),
             new MemberStartedOnBoardingEvent(memberId, MemberStatus.ONBOARDING),
             new TrackingIdCreatedEvent(memberId, TRACKING_UUID))
-        .when(new BankIdSignCommand(memberId, referenceId, "", ""))
+        .when(new BankIdSignCommand(memberId, referenceId, "", "", personalNumber))
         .expectSuccessfulHandlerExecution()
         .expectEvents(
             new NewCashbackSelectedEvent(memberId, DEFAULT_CASHBACK.toString()),
-            new MemberSignedEvent(memberId, referenceId, "", ""));
+            new MemberSignedEvent(memberId, referenceId, "", ""),
+            new SSNUpdatedEvent(memberId, personalNumber));
   }
 
   @Test
-  public void inactivateMemberCommand_givenInitiatedMember_thenEmitsMemberInactivatedEvent(){
+  public void inactivateMemberCommand_givenInitiatedMember_thenEmitsMemberInactivatedEvent() {
     Long memberId = 1234L;
 
     fixture
@@ -250,7 +257,7 @@ public class MemberAggregateTests {
   }
 
   @Test
-  public void inactivateMemberCommand_givenOnboardingMember_thenEmitsMemberInactivatedEvent(){
+  public void inactivateMemberCommand_givenOnboardingMember_thenEmitsMemberInactivatedEvent() {
     Long memberId = 1234L;
 
     fixture
