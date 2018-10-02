@@ -18,6 +18,7 @@ import com.hedvig.memberservice.commands.MemberUpdateContactInformationCommand;
 import com.hedvig.memberservice.commands.SelectNewCashbackCommand;
 import com.hedvig.memberservice.commands.StartOnboardingWithSSNCommand;
 import com.hedvig.memberservice.commands.UpdateEmailCommand;
+import com.hedvig.memberservice.commands.UpdatePhoneNumberCommand;
 import com.hedvig.memberservice.events.EmailUpdatedEvent;
 import com.hedvig.memberservice.events.InsuranceCancellationEvent;
 import com.hedvig.memberservice.events.LivingAddressUpdatedEvent;
@@ -313,6 +314,16 @@ public class MemberAggregate {
 
     if (!Objects.equals(this.member.getPhoneNumber(), cmd.getMember().getPhoneNumber())) {
       apply(new PhoneNumberUpdatedEvent(this.id, cmd.getMember().getPhoneNumber()));
+    }
+  }
+
+  @CommandHandler
+  public void on(UpdatePhoneNumberCommand cmd) {
+    log.info("Updating phoneNumber for member {}, new number: {}", cmd.getMemberId(),
+        cmd.getPhoneNumber());
+
+    if (!Objects.equals(member.getPhoneNumber(), cmd.getPhoneNumber())) {
+      apply(new PhoneNumberUpdatedEvent(cmd.getMemberId(), cmd.getPhoneNumber()));
     }
   }
 
