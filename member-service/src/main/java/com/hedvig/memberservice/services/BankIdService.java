@@ -24,13 +24,12 @@ public class BankIdService {
     this.collectRepository = collectRepository;
   }
 
-  public OrderResponse auth(String ssn, Long memberId) {
-    OrderResponse status = bankIdApi.auth(ssn);
+  public OrderResponse auth(Long memberId) {
+    OrderResponse status = bankIdApi.auth();
     log.info(
-        "Started bankId AUTH autostart:{}, reference:{}, ssn:{}",
+        "Started bankId AUTH autostart:{}, reference:{}",
         status.getAutoStartToken(),
-        status.getOrderRef(),
-        ssn);
+        status.getOrderRef());
     trackAuthToken(status.getOrderRef(), memberId);
     return status;
   }

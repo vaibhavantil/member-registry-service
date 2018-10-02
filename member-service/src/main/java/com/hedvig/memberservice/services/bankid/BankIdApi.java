@@ -5,7 +5,7 @@ import com.hedvig.external.bankID.bankidTypes.OrderResponse;
 import java.io.UnsupportedEncodingException;
 
 public interface BankIdApi {
-  OrderResponse auth(String ssn);
+  OrderResponse auth();
 
   OrderResponse sign(String ssn, String message) throws UnsupportedEncodingException;
 

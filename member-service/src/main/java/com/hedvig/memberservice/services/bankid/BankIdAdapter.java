@@ -14,7 +14,7 @@ public class BankIdAdapter implements BankIdApi {
   }
 
   @Override
-  public OrderResponse auth(String ssn) {
+  public OrderResponse auth() {
     return api.auth();
   }
 

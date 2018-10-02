@@ -4,8 +4,8 @@ import com.hedvig.common.UUIDGenerator;
 import com.hedvig.common.UUIDGeneratorImpl;
 import com.hedvig.external.bisnodeBCI.BisnodeClient;
 import com.hedvig.memberservice.aggregates.MemberAggregate;
-import com.hedvig.memberservice.services.bankid.BankIdAdapter;
 import com.hedvig.memberservice.services.bankid.BankIdApi;
+import com.hedvig.memberservice.services.bankid.BankIdRestAdapter;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ScheduledExecutorService;
@@ -31,7 +31,7 @@ import org.springframework.retry.support.RetryTemplate;
 import org.springframework.web.client.RestTemplate;
 
 @SpringBootApplication()
-@EnableFeignClients({"com.hedvig.memberservice"})
+@EnableFeignClients({"com.hedvig.memberservice", "com.hedvig.external.bankID"})
 public class MemberRegistryApplication {
 
   @Value("${hedvig.bisnode.client.id}")
@@ -42,7 +42,6 @@ public class MemberRegistryApplication {
   @Autowired MailSender mailSender;
 
   public static void main(String[] args) {
-
     SpringApplication.run(MemberRegistryApplication.class, args);
   }
 
@@ -53,8 +52,8 @@ public class MemberRegistryApplication {
 
   @Bean("bankId")
   @Primary
-  BankIdApi bankIdApi(com.hedvig.external.bankID.BankIdApi impl) {
-    return new BankIdAdapter(impl);
+  BankIdApi bankIdApi(com.hedvig.external.bankID.bankIdRest.BankIdRestApiImpl impl) {
+    return new BankIdRestAdapter(impl);
   }
 
   @Bean

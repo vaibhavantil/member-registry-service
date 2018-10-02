@@ -1,6 +1,8 @@
 package com.hedvig.external.bankID.bankidTypes;
 
 import bankid.UserInfoType;
+import java.time.Instant;
+import java.util.TimeZone;
 import lombok.Value;
 
 import javax.xml.datatype.XMLGregorianCalendar;
@@ -34,6 +36,16 @@ public class UserInfo {
         this.personalNumber = ssn;
         this.notBefore = toLocalDateTime(notBefore);
         this.notAfter = toLocalDateTime(notAfter);
+        this.ipAddress = ipAddress;
+    }
+
+    public UserInfo(String name, String givenName, String surname, String ssn, String ipAddress, long notBefore, long notAfter) {
+        this.givenName = givenName;
+        this.surname = surname;
+        this.name = name;
+        this.personalNumber = ssn;
+        this.notBefore = LocalDateTime.ofInstant(Instant.ofEpochMilli(notBefore), TimeZone.getTimeZone("Europe/Stockholm").toZoneId());
+        this.notAfter = LocalDateTime.ofInstant(Instant.ofEpochMilli(notAfter), TimeZone.getTimeZone("Europe/Stockholm").toZoneId());
         this.ipAddress = ipAddress;
     }
 

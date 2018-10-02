@@ -69,11 +69,11 @@ public class AuthController {
   public ResponseEntity<BankIdAuthResponse> auth(@RequestBody BankIdAuthRequest request) {
 
     log.info(
-        "Auth request for with: {}", request.getSsn(), value("memberId", request.getMemberId()));
+        "Auth request for with memberId: {}", request.getMemberId(), value("memberId", request.getMemberId()));
 
     long memberId = convertMemberId(request.getMemberId());
 
-    OrderResponse status = bankIdService.auth(request.getSsn(), memberId);
+    OrderResponse status = bankIdService.auth(memberId);
     BankIdAuthResponse response =
         new BankIdAuthResponse(status.getAutoStartToken(), status.getOrderRef());
 
@@ -105,7 +105,8 @@ public class AuthController {
 
   @PostMapping(path = "collect")
   public ResponseEntity<?> collect(
-      @RequestParam String referenceToken, @RequestHeader(value = "hedvig.token") Long hid)
+      @RequestParam String referenceToken,
+      @RequestHeader(value = "hedvig.token")Long hid)
       throws InterruptedException {
 
     log.info("Start collect");
