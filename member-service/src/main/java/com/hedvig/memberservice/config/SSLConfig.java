@@ -17,8 +17,6 @@ public class SSLConfig {
 
     //load the 'javax.net.ssl.trustStore' and
     //'javax.net.ssl.trustStorePassword' from application.properties
-    System.setProperty("javax.net.ssl.trustStore", env.getProperty("http.client.ssl.trust-store"));
-    System.setProperty("javax.net.ssl.trustStorePassword",env.getProperty("http.client.ssl.trust-store-password"));
     System.setProperty("javax.net.ssl.keyStore", env.getProperty("http.client.ssl.key-store"));
     System.setProperty("javax.net.ssl.keyStorePassword",env.getProperty("http.client.ssl.key-store-password"));
   }
