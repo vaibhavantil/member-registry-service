@@ -2,11 +2,13 @@ package com.hedvig.memberservice.services;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.matches;
 import static org.mockito.BDDMockito.given;
 
+import com.hedvig.external.bankID.bankIdRestTypes.BankIdRestError;
 import com.hedvig.external.bankID.bankIdRestTypes.OrderResponse;
 import com.hedvig.memberservice.externalApi.productsPricing.ProductApi;
 import com.hedvig.memberservice.query.SignedMemberEntity;
@@ -89,6 +91,21 @@ public class MemberServiceTest {
 
     thrown.expect(MemberHasExistingInsuranceException.class);
     sut.startWebSign(memberId, new WebsignRequest("test@test.com", ssn));
+  }
+
+  @Test
+  public void startWebSign_givenBankidThrowsError_thenThrowException(){
+    val memberId = 1337L;
+    val ssn = "191212121212";
+
+    given(productApi.hasProductToSign(memberId)).willReturn(true);
+    given(bankIdRestService.startSign(anyLong(), any(), any())).willThrow(BankIdRestError.class);
+
+    val sut = new MemberService(bankIdRestService, productApi, signedMemberRepository );
+
+    thrown.expect(BankIdRestError.class);
+    sut.startWebSign(memberId, new WebsignRequest("test@test.com", ssn));
+
   }
 
 }

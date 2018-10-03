@@ -1,5 +1,6 @@
 package com.hedvig.memberservice.services;
 
+import com.hedvig.external.bankID.bankIdRestTypes.BankIdRestError;
 import com.hedvig.memberservice.externalApi.productsPricing.ProductApi;
 import com.hedvig.memberservice.query.SignedMemberRepository;
 import com.hedvig.memberservice.services.member.CannotSignInsuranceException;
@@ -36,7 +37,6 @@ public class MemberService {
 
     if (productApi.hasProductToSign(memberId)) {
       val result = bankidService.startSign(memberId, request.getSsn(), "SomeMessage");
-
       return new MemberSignResponse(result);
     } else {
       throw new CannotSignInsuranceException();

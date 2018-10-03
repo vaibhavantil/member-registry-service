@@ -1,6 +1,7 @@
 package com.hedvig.memberservice.web.v2;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.BDDMockito.given;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -34,7 +35,7 @@ public class MemberControllerTest {
   @Test
   public void postToWebsign_givenMemberWithExistingInsurance_thenReturn403() throws Exception {
 
-    given(memberService.startWebSign(any(), any())).willThrow(MemberHasExistingInsuranceException.class);
+    given(memberService.startWebSign(anyLong(), any())).willThrow(MemberHasExistingInsuranceException.class);
 
     mockMvc
         .perform(
@@ -49,7 +50,7 @@ public class MemberControllerTest {
   @Test
   public void postToWebsign_givenMemberWithOkProduct_willReturn200() throws Exception {
 
-    given(memberService.startWebSign(any(), any()))
+    given(memberService.startWebSign(anyLong(), any()))
         .willReturn(new MemberSignResponse(new OrderResponse("orderRef", "autostartToken")));
 
     mockMvc
