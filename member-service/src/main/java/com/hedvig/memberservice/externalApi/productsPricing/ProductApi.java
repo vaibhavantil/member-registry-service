@@ -96,4 +96,9 @@ public class ProductApi {
     }
     return new ArrayList<>();
   }
+
+  public boolean hasProductToSign(long memberId) {
+    //TODO: Implement call to procuct-pricing
+    return true;
+  }
 }

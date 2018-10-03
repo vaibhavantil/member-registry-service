@@ -6,7 +6,7 @@ spring:
       allow-override: false
 ---
 spring:
-  profiles: test, development
+  profiles: test, development, unittest
   cloud:
     kubernetes:
       enabled: false
