@@ -13,5 +13,7 @@ public class BankIdRestError extends RuntimeException {
 
   public BankIdRestError(BankIdRestErrorType type) {
     this.type = type;
+    this.errorMessage = null;
+    this.reason = null;
   }
 }
