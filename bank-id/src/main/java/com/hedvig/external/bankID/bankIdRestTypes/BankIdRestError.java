@@ -1,9 +1,9 @@
 package com.hedvig.external.bankID.bankIdRestTypes;
 
-import javax.validation.Valid;
 import lombok.AllArgsConstructor;
+import lombok.Value;
 
-@Valid
+@Value
 @AllArgsConstructor
 public class BankIdRestError extends RuntimeException {
 
