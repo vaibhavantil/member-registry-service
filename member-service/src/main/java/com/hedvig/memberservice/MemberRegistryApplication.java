@@ -4,7 +4,7 @@ import com.hedvig.common.UUIDGenerator;
 import com.hedvig.common.UUIDGeneratorImpl;
 import com.hedvig.external.bisnodeBCI.BisnodeClient;
 import com.hedvig.memberservice.aggregates.MemberAggregate;
-import com.hedvig.memberservice.services.bankid.BankIdApi;
+import com.hedvig.memberservice.services.bankid.BankIdSOAPApi;
 import com.hedvig.memberservice.services.bankid.BankIdRestAdapter;
 import java.util.Collections;
 import java.util.List;
@@ -52,7 +52,7 @@ public class MemberRegistryApplication {
 
   @Bean("bankId")
   @Primary
-  BankIdApi bankIdApi(com.hedvig.external.bankID.bankIdRest.BankIdRestApiImpl impl) {
+  BankIdSOAPApi bankIdApi(com.hedvig.external.bankID.bankIdRest.BankIdRestApiImpl impl) {
     return new BankIdRestAdapter(impl);
   }
 

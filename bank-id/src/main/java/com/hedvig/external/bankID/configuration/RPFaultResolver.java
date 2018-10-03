@@ -1,4 +1,4 @@
-package com.hedvig.external.bankID;
+package com.hedvig.external.bankID.configuration;
 
 import bankid.RpFaultType;
 import com.hedvig.external.bankID.exceptions.BankIDError;

@@ -23,7 +23,7 @@ import com.hedvig.external.bankID.exceptions.BankIDError;
 import java.util.Base64;
 import lombok.val;
 
-public class BankIdRestAdapter implements BankIdApi {
+public class BankIdRestAdapter implements BankIdSOAPApi {
 
   private final BankIdRestApi restApi;
 

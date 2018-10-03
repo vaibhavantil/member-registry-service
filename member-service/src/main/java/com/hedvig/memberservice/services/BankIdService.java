@@ -6,7 +6,7 @@ import com.hedvig.external.bankID.bankidTypes.CollectResponse;
 import com.hedvig.external.bankID.bankidTypes.OrderResponse;
 import com.hedvig.memberservice.query.CollectRepository;
 import com.hedvig.memberservice.query.CollectType;
-import com.hedvig.memberservice.services.bankid.BankIdApi;
+import com.hedvig.memberservice.services.bankid.BankIdSOAPApi;
 import java.io.UnsupportedEncodingException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,17 +15,17 @@ import org.springframework.stereotype.Service;
 @Service
 public class BankIdService {
 
-  private final BankIdApi bankIdApi;
+  private final BankIdSOAPApi bankIdSOAPApi;
   private final CollectRepository collectRepository;
   private final Logger log = LoggerFactory.getLogger(BankIdService.class);
 
-  public BankIdService(BankIdApi bankIdApi, CollectRepository collectRepository) {
-    this.bankIdApi = bankIdApi;
+  public BankIdService(BankIdSOAPApi bankIdSOAPApi, CollectRepository collectRepository) {
+    this.bankIdSOAPApi = bankIdSOAPApi;
     this.collectRepository = collectRepository;
   }
 
   public OrderResponse auth(Long memberId) {
-    OrderResponse status = bankIdApi.auth();
+    OrderResponse status = bankIdSOAPApi.auth();
     log.info(
         "Started bankId AUTH autostart:{}, reference:{}",
         status.getAutoStartToken(),
@@ -36,7 +36,7 @@ public class BankIdService {
 
   public OrderResponse sign(String ssn, String userMessage, Long memberId)
       throws UnsupportedEncodingException {
-    OrderResponse status = bankIdApi.sign(ssn, userMessage);
+    OrderResponse status = bankIdSOAPApi.sign(ssn, userMessage);
     trackSignToken(status.getOrderRef(), memberId);
     return status;
   }
@@ -58,10 +58,10 @@ public class BankIdService {
   }
 
   public CollectResponse authCollect(String referenceToken) {
-    return bankIdApi.authCollect(referenceToken);
+    return bankIdSOAPApi.authCollect(referenceToken);
   }
 
   public CollectResponse signCollect(String referenceToken) {
-    return bankIdApi.signCollect(referenceToken);
+    return bankIdSOAPApi.signCollect(referenceToken);
   }
 }
