@@ -27,6 +27,6 @@ public interface BankIdRestClient {
   ResponseEntity<OrderResponse> sign(@RequestBody OrderSignRequest request);
 
   @RequestMapping(value = "/collect", method = RequestMethod.POST, produces = "application/json",
-      qqconsumes = "application/json")
+      consumes = "application/json")
   ResponseEntity<CollectResponse> collect(@RequestBody CollectRequest request);
 }
