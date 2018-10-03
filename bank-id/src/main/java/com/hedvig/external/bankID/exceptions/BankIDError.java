@@ -7,7 +7,7 @@ import lombok.ToString;
 public class BankIDError extends RuntimeException {
 
 
-    public BankIDError( RpFaultType errorMessages) {
+    public BankIDError(RpFaultType errorMessages) {
         this.errorType = ErrorType.valueOf(errorMessages.getFaultStatus().value());
         this.detail = errorMessages.getDetailedDescription();
     }

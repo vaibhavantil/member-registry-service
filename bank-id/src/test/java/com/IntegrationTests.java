@@ -2,6 +2,7 @@ package com;
 
 import bankid.OrderResponseType;
 import com.hedvig.external.bankID.BankIdClient;
+import com.hedvig.external.bankID.configuration.Config;
 import com.hedvig.external.bankID.exceptions.BankIDError;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
@@ -15,7 +16,7 @@ import org.springframework.ws.client.WebServiceIOException;
 import org.springframework.ws.client.core.WebServiceTemplate;
 
 @SpringBootTest()
-@ContextConfiguration(classes = {com.hedvig.external.bankID.Configuration.class})
+@ContextConfiguration(classes = {Config.class})
 @RunWith(SpringRunner.class)
 public class IntegrationTests {
 

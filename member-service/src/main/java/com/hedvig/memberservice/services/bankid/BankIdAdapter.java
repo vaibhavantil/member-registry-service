@@ -3,8 +3,10 @@ package com.hedvig.memberservice.services.bankid;
 import com.hedvig.external.bankID.bankidTypes.CollectResponse;
 import com.hedvig.external.bankID.bankidTypes.OrderResponse;
 import java.io.UnsupportedEncodingException;
+import org.springframework.stereotype.Component;
 
-public class BankIdAdapter implements BankIdApi {
+@Component
+public class BankIdAdapter implements BankIdSOAPApi {
 
   private final com.hedvig.external.bankID.BankIdApi api;
 
