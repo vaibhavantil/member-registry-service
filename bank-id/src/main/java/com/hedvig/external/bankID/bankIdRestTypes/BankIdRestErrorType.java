@@ -1,0 +1,14 @@
+package com.hedvig.external.bankID.bankIdRestTypes;
+
+public enum BankIdRestErrorType {
+  UNKNOWN,
+  ALREADY_IN_PROGRESS,
+  INVALID_PARAMETERS,
+  UNMAPPED_400,
+  UNAUTHORIZED,
+  NOT_FOUND,
+  REQUEST_TIMEOUT,
+  UNSUPPORTED_MEDIA_TYPE,
+  INTERNAL_ERROR,
+  MAINTENTANCE
+}

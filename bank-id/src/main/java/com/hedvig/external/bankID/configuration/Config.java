@@ -1,4 +1,4 @@
-package com.hedvig.external.bankID;
+package com.hedvig.external.bankID.configuration;
 
 import java.io.File;
 import java.io.IOException;
@@ -14,13 +14,14 @@ import org.apache.http.impl.client.HttpClients;
 import org.apache.http.ssl.SSLContextBuilder;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.oxm.jaxb.Jaxb2Marshaller;
 import org.springframework.ws.client.core.FaultMessageResolver;
 import org.springframework.ws.client.core.WebServiceTemplate;
 import org.springframework.ws.transport.http.HttpComponentsMessageSender;
 
-@org.springframework.context.annotation.Configuration
-public class Configuration {
+@Configuration
+public class Config {
 
   @Value("${hedvig.external.bankid.url}")
   private String bankIDUrl;
@@ -59,7 +60,7 @@ public class Configuration {
       HttpComponentsMessageSender httpComponentsMessageSender,
       FaultMessageResolver faultMessageResolver)
       throws IOException, CertificateException, NoSuchAlgorithmException, KeyStoreException,
-          UnrecoverableKeyException, KeyManagementException {
+      UnrecoverableKeyException, KeyManagementException {
     SSLContext sslContext =
         new SSLContextBuilder()
             .loadTrustMaterial(trustStore, trustStorePassword.toCharArray())
