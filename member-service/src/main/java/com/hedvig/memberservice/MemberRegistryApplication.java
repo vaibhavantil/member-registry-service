@@ -5,7 +5,6 @@ import com.hedvig.common.UUIDGeneratorImpl;
 import com.hedvig.external.bisnodeBCI.BisnodeClient;
 import com.hedvig.memberservice.aggregates.MemberAggregate;
 import com.hedvig.memberservice.services.bankid.BankIdSOAPApi;
-import com.hedvig.memberservice.services.bankid.BankIdRestAdapter;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ScheduledExecutorService;
@@ -48,12 +47,6 @@ public class MemberRegistryApplication {
   @Autowired
   public void configure(EventHandlingConfiguration config) {
     // config.usingTrackingProcessors();
-  }
-
-  @Bean("bankId")
-  @Primary
-  BankIdSOAPApi bankIdApi(com.hedvig.external.bankID.bankIdRest.BankIdRestApiImpl impl) {
-    return new BankIdRestAdapter(impl);
   }
 
   @Bean
