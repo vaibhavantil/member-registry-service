@@ -1,6 +1,5 @@
 package com.hedvig.memberservice.services;
 
-import com.hedvig.external.bankID.bankIdRestTypes.BankIdRestError;
 import com.hedvig.memberservice.externalApi.productsPricing.ProductApi;
 import com.hedvig.memberservice.query.SignedMemberRepository;
 import com.hedvig.memberservice.services.member.CannotSignInsuranceException;
@@ -11,7 +10,6 @@ import lombok.val;
 import org.springframework.stereotype.Service;
 
 @Service
-@Transactional
 public class MemberService {
 
   private final BankIdRestService bankidService;
@@ -27,6 +25,7 @@ public class MemberService {
     this.signedMemberRepository = signedMemberRepository;
   }
 
+  @Transactional
   public MemberSignResponse startWebSign(final long memberId, final WebsignRequest request) {
 
     val existing = signedMemberRepository.findBySsn(request.getSsn());
