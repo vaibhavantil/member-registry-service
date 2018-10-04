@@ -3,6 +3,7 @@ package com.hedvig.memberservice.externalApi.productsPricing;
 import com.hedvig.memberservice.externalApi.productsPricing.dto.ContractSignedRequest;
 import com.hedvig.memberservice.externalApi.productsPricing.dto.InsuranceNotificationDTO;
 import com.hedvig.memberservice.externalApi.productsPricing.dto.InsuranceStatusDTO;
+import com.hedvig.memberservice.externalApi.productsPricing.dto.ProductToSignStatusDTO;
 import com.hedvig.memberservice.externalApi.productsPricing.dto.SafetyIncreasersDTO;
 import com.hedvig.memberservice.externalApi.productsPricing.dto.SetCancellationDateRequest;
 import feign.FeignException;
@@ -100,8 +101,9 @@ public class ProductApi {
 
   public boolean hasProductToSign(long memberId) {
     try {
-      ResponseEntity<?> response = this.client.hasProductToSign(String.valueOf(memberId));
-      return response.getStatusCode().is2xxSuccessful();
+      ResponseEntity<ProductToSignStatusDTO> response = this.client
+          .hasProductToSign(String.valueOf(memberId));
+      return Objects.requireNonNull(response.getBody()).isHasProductToSign();
     } catch (FeignException ex) {
       if (ex.status() == 404) {
         return false;
