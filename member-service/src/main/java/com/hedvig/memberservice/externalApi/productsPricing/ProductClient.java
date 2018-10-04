@@ -38,5 +38,5 @@ public interface ProductClient {
       @PathVariable("date") String activationDate);
 
   @GetMapping("/_/insurance/{memberId}/hasProductToSign")
-  ResponseEntity<?> hasProductToSign(@PathVariable("memberId") String memberId);s
+  ResponseEntity<?> hasProductToSign(@PathVariable("memberId") String memberId);
 }
