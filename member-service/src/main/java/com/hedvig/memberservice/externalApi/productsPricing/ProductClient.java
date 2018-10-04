@@ -34,7 +34,9 @@ public interface ProductClient {
       @PathVariable("memberId") Long memberId, SetCancellationDateRequest body);
 
   @GetMapping("/_/insurance/searchByActivationDate?activationDate={date}")
-
   ResponseEntity<List<InsuranceNotificationDTO>> getInsurancesByActivationDate(
       @PathVariable("date") String activationDate);
+
+  @GetMapping("/_/insurance/{memberId}/hasProductToSign")
+  ResponseEntity<?> hasProductToSign(@PathVariable("memberId") String memberId);s
 }

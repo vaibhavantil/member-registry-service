@@ -87,7 +87,8 @@ public class ProductApi {
   public List<InsuranceNotificationDTO> getInsurancesByActivationDate(LocalDate activationDate) {
     try {
       ResponseEntity<List<InsuranceNotificationDTO>> response =
-          this.client.getInsurancesByActivationDate(activationDate.format(DateTimeFormatter.ISO_LOCAL_DATE));
+          this.client.getInsurancesByActivationDate(
+              activationDate.format(DateTimeFormatter.ISO_LOCAL_DATE));
       return response.getBody();
     } catch (FeignException ex) {
       if (ex.status() != 404) {
@@ -98,7 +99,16 @@ public class ProductApi {
   }
 
   public boolean hasProductToSign(long memberId) {
-    //TODO: Implement call to procuct-pricing
-    return true;
+    try {
+      ResponseEntity<?> response = this.client.hasProductToSign(String.valueOf(memberId));
+      return response.getStatusCode().is2xxSuccessful();
+    } catch (FeignException ex) {
+      if (ex.status() == 404) {
+        return false;
+      } else {
+        log.error("Error getting insurance from products-pricing {}", ex);
+      }
+    }
+    return false;
   }
 }
