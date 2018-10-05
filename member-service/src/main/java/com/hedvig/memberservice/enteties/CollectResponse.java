@@ -18,5 +18,4 @@ public class CollectResponse {
   CollectStatus status;
 
   private String hintCode;
-
 }

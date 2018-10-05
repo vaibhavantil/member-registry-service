@@ -2,14 +2,12 @@ package com.hedvig.memberservice.services;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.matches;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
-import static org.mockito.BDDMockito.willDoNothing;
 import static org.mockito.Mockito.times;
 
 import com.hedvig.external.bankID.bankIdRestTypes.BankIdRestError;
@@ -29,8 +27,10 @@ import com.hedvig.memberservice.query.SignedMemberRepository;
 import com.hedvig.memberservice.services.member.CannotSignInsuranceException;
 import com.hedvig.memberservice.services.member.MemberService;
 import com.hedvig.memberservice.web.v2.dto.WebsignRequest;
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
+import java.util.Date;
 import java.util.Optional;
 import lombok.val;
 import org.junit.Before;
@@ -113,11 +113,12 @@ public class SigningServiceTest {
         .willReturn(new OrderResponse(
             ORDER_REFERENCE, AUTOSTART_TOKEN));
 
-    willDoNothing().given(scheduler).addJob(jobDetailArgumentCaptor.capture(), eq(false));
+    given(scheduler.scheduleJob(jobDetailArgumentCaptor.capture(), any())).willReturn(Date.from(
+        Instant.now()));
 
     val result = sut.startWebSign(MEMBER_ID, new WebsignRequest(EMAIL, SSN, "127.0.0.1"));
 
-    then(scheduler).should(times(1)).addJob(any(), anyBoolean());
+    then(scheduler).should(times(1)).scheduleJob(any(), any());
 
     assertThat(jobDetailArgumentCaptor.getValue().getKey().getName()).isEqualTo(ORDER_REFERENCE);
   }
