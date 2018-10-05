@@ -3,6 +3,7 @@ package com.hedvig.memberservice.externalApi.productsPricing;
 import com.hedvig.memberservice.externalApi.productsPricing.dto.ContractSignedRequest;
 import com.hedvig.memberservice.externalApi.productsPricing.dto.InsuranceNotificationDTO;
 import com.hedvig.memberservice.externalApi.productsPricing.dto.InsuranceStatusDTO;
+import com.hedvig.memberservice.externalApi.productsPricing.dto.ProductToSignStatusDTO;
 import com.hedvig.memberservice.externalApi.productsPricing.dto.SafetyIncreasersDTO;
 import com.hedvig.memberservice.externalApi.productsPricing.dto.SetCancellationDateRequest;
 import feign.FeignException;
@@ -88,7 +89,8 @@ public class ProductApi {
   public List<InsuranceNotificationDTO> getInsurancesByActivationDate(LocalDate activationDate) {
     try {
       ResponseEntity<List<InsuranceNotificationDTO>> response =
-          this.client.getInsurancesByActivationDate(activationDate.format(DateTimeFormatter.ISO_LOCAL_DATE));
+          this.client.getInsurancesByActivationDate(
+              activationDate.format(DateTimeFormatter.ISO_LOCAL_DATE));
       return response.getBody();
     } catch (FeignException ex) {
       if (ex.status() != 404) {
@@ -99,7 +101,17 @@ public class ProductApi {
   }
 
   public boolean hasProductToSign(long memberId) {
-    //TODO: Implement call to procuct-pricing
-    return true;
+    try {
+      ResponseEntity<ProductToSignStatusDTO> response = this.client
+          .hasProductToSign(String.valueOf(memberId));
+      return Objects.requireNonNull(response.getBody()).isHasProductToSign();
+    } catch (FeignException ex) {
+      if (ex.status() == 404) {
+        return false;
+      } else {
+        log.error("Error getting insurance from products-pricing {}", ex);
+      }
+    }
+    return false;
   }
 }

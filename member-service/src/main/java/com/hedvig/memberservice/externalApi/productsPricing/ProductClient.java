@@ -3,6 +3,7 @@ package com.hedvig.memberservice.externalApi.productsPricing;
 import com.hedvig.memberservice.externalApi.productsPricing.dto.ContractSignedRequest;
 import com.hedvig.memberservice.externalApi.productsPricing.dto.InsuranceNotificationDTO;
 import com.hedvig.memberservice.externalApi.productsPricing.dto.InsuranceStatusDTO;
+import com.hedvig.memberservice.externalApi.productsPricing.dto.ProductToSignStatusDTO;
 import com.hedvig.memberservice.externalApi.productsPricing.dto.SafetyIncreasersDTO;
 import com.hedvig.memberservice.externalApi.productsPricing.dto.SetCancellationDateRequest;
 import java.util.List;
@@ -34,7 +35,10 @@ public interface ProductClient {
       @PathVariable("memberId") Long memberId, SetCancellationDateRequest body);
 
   @GetMapping("/_/insurance/searchByActivationDate?activationDate={date}")
-
   ResponseEntity<List<InsuranceNotificationDTO>> getInsurancesByActivationDate(
       @PathVariable("date") String activationDate);
+
+  @GetMapping("/_/insurance/{memberId}/hasProductToSign")
+  ResponseEntity<ProductToSignStatusDTO> hasProductToSign(
+      @PathVariable("memberId") String memberId);
 }
