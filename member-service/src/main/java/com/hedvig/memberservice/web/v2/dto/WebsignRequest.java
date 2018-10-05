@@ -13,4 +13,7 @@ public class WebsignRequest {
   @NotBlank
   final String ssn;
 
+  @NotBlank
+  final String ipAddress;
+
 }

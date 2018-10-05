@@ -84,6 +84,7 @@ public class ProductApi {
     }
   }
 
+  @SuppressWarnings("Duplicates")
   public List<InsuranceNotificationDTO> getInsurancesByActivationDate(LocalDate activationDate) {
     try {
       ResponseEntity<List<InsuranceNotificationDTO>> response =

@@ -5,6 +5,6 @@ import lombok.Value;
 @Value
 public class BankIdRestErrorResponse {
 
-  private String errorMessage;
-  private String reason;
+  private String errorCode;
+  private String details;
 }

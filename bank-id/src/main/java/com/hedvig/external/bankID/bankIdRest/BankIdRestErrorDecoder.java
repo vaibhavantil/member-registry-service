@@ -6,6 +6,7 @@ import com.hedvig.external.bankID.bankIdRestTypes.BankIdRestErrorResponse;
 import com.hedvig.external.bankID.bankIdRestTypes.BankIdRestErrorType;
 import feign.Response;
 import feign.codec.ErrorDecoder;
+import java.io.IOException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,20 +29,27 @@ public class BankIdRestErrorDecoder implements ErrorDecoder {
         methodKey, response.status(), response);
     switch (response.status()) {
       case 400: {
-        BankIdRestErrorResponse res = objectMapper
-            .convertValue(response.body(), BankIdRestErrorResponse.class);
-        switch (res.getErrorMessage().toLowerCase()) {
-          case ALREADY_IN_PROGRESS_LOWER_CASE:
-            return new BankIdRestError(BankIdRestErrorType.ALREADY_IN_PROGRESS,
-                res.getErrorMessage(),
-                res.getReason());
-          case INVALID_PARAMETERS_LOWER_CASE:
-            return new BankIdRestError(BankIdRestErrorType.INVALID_PARAMETERS,
-                res.getErrorMessage(),
-                res.getReason());
-          default:
-            return new BankIdRestError(BankIdRestErrorType.UNMAPPED_400, res.getErrorMessage(),
-                res.getReason());
+        BankIdRestErrorResponse res = null;
+        try {
+          res = objectMapper.readValue(response.body().asReader(), BankIdRestErrorResponse.class);
+
+          switch (res.getErrorCode().toLowerCase()) {
+            case ALREADY_IN_PROGRESS_LOWER_CASE:
+              return new BankIdRestError(BankIdRestErrorType.ALREADY_IN_PROGRESS,
+                  res.getErrorCode(),
+                  res.getDetails());
+            case INVALID_PARAMETERS_LOWER_CASE:
+              return new BankIdRestError(BankIdRestErrorType.INVALID_PARAMETERS,
+                  res.getErrorCode(),
+                  res.getDetails());
+            default:
+              return new BankIdRestError(BankIdRestErrorType.UNMAPPED_400, res.getErrorCode(),
+                  res.getDetails());
+          }
+        }
+        catch (IOException e) {
+          logger.error("Could not read reponse from bankId: " + e.getMessage(), e);
+          throw  new RuntimeException(e.getMessage(), e);
         }
       }
       case 401:

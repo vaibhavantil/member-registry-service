@@ -38,9 +38,9 @@ public class BankIdRestApiImpl implements BankIdRestApi {
   }
 
   @Override
-  public OrderResponse sign(OrderSignRequest request) {
+  public OrderResponse sign(String personalNumber, String endUserIp, String userVisibleData) {
     try {
-      ResponseEntity<?> response = bankIdRestClient.sign(request);
+      ResponseEntity<?> response = bankIdRestClient.sign(new OrderSignRequest(personalNumber, endUserIp, userVisibleData));
       return (OrderResponse) response.getBody();
     } catch (FeignException ex) {
       logger.error(
