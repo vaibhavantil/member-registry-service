@@ -18,6 +18,6 @@ public class BotServiceImpl implements BotService {
   @Override
   public void updateContextWebOnBoarding(Long memberId, UpdateUserContextDTO userContext) {
     logger.info("Start updating context in bot-service");
-    botServiceClient.updateContextWebOnBoarding(memberId, userContext);
+    botServiceClient.initBotServiceSessionWebOnBoarding(memberId, userContext);
   }
 }

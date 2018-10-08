@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 )
 public interface BotServiceClient {
 
- @PostMapping("/_/member/{memberId}/updateContextWebOnBoarding")
-  ResponseEntity<?> updateContextWebOnBoarding(@PathVariable(name = "memberId") Long memberId, @RequestBody UpdateUserContextDTO req);
+ @PostMapping("/_/member/{memberId}/initSessionWebOnBoarding")
+  ResponseEntity<?> initBotServiceSessionWebOnBoarding(@PathVariable(name = "memberId") Long memberId, @RequestBody UpdateUserContextDTO req);
 
 }
