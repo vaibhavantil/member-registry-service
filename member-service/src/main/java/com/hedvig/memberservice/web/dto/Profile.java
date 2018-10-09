@@ -12,6 +12,7 @@ import lombok.Value;
 @AllArgsConstructor
 public class Profile {
 
+  private String memberId;
   private String name;
   private String firstName;
   private String lastName;

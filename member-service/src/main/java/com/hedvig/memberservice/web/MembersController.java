@@ -154,6 +154,7 @@ public class MembersController {
 
     Profile p =
         new Profile(
+            me.getId().toString(),
             String.format("%s %s", me.getFirstName(), me.getLastName()),
             me.getFirstName(),
             me.getLastName(),

@@ -37,3 +37,6 @@ application-development.yml
 .sts4-cache
 .factorypath
 .vs
+
+# jenv
+.java-version
