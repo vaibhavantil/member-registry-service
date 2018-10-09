@@ -24,7 +24,7 @@ public class BankIdRestErrorDecoder implements ErrorDecoder {
 
   @Override
   public Exception decode(String methodKey, Response response) {
-    logger.error(
+    logger.trace(
         "BankIdRestErrorDecoder - Something went wrong with BankId. MethodKey: {}, Response: Status: {}, {}",
         methodKey, response.status(), response);
     switch (response.status()) {

@@ -35,10 +35,11 @@ public class ProductApi {
       String referenceToken,
       String signature,
       String oscpResponse,
-      Instant signedOn) {
+      Instant signedOn,
+      String ssn) {
     this.client.contractSinged(
         new ContractSignedRequest(
-            Objects.toString(memberId), referenceToken, signature, oscpResponse, signedOn));
+            Objects.toString(memberId), referenceToken, signature, oscpResponse, signedOn, ssn));
   }
 
   public List<String> getSafetyIncreasers(long memberId) {

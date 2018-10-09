@@ -9,6 +9,9 @@ import org.springframework.lang.NonNull;
 public class MemberSignResponse {
 
   @NonNull
+  Long signId;
+
+  @NonNull
   SignStatus status;
 
   @NonNull

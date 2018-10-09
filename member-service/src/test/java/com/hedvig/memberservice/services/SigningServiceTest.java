@@ -24,6 +24,7 @@ import com.hedvig.memberservice.enteties.SignStatus;
 import com.hedvig.memberservice.externalApi.productsPricing.ProductApi;
 import com.hedvig.memberservice.query.SignedMemberEntity;
 import com.hedvig.memberservice.query.SignedMemberRepository;
+import com.hedvig.memberservice.services.events.SignSessionCompleteEvent;
 import com.hedvig.memberservice.services.member.CannotSignInsuranceException;
 import com.hedvig.memberservice.services.member.MemberService;
 import com.hedvig.memberservice.web.v2.dto.WebsignRequest;
@@ -44,6 +45,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.quartz.JobDetail;
 import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
+import org.springframework.context.ApplicationEventPublisher;
 
 @RunWith(MockitoJUnitRunner.class)
 public class SigningServiceTest {
@@ -53,6 +55,9 @@ public class SigningServiceTest {
   private static final String SSN = "191212121212";
   private static final String EMAIL = "test@test.com";
   private static final String AUTOSTART_TOKEN = "autostartToken";
+
+  @Mock
+  private ApplicationEventPublisher applicationEventPublisher;
 
   @Mock
   ProductApi productApi;
@@ -79,13 +84,14 @@ public class SigningServiceTest {
 
 
   SigningService sut;
+  ;
 
 
   @Before
   public void setup(){
     given(signedMemberRepository.findBySsn(any())).willReturn(Optional.empty());
     sut = new SigningService(bankIdRestService, productApi, signedMemberRepository,
-        signSessionRepository, scheduler, memberService);
+        signSessionRepository, scheduler, memberService, applicationEventPublisher);
   }
 
 
@@ -116,7 +122,7 @@ public class SigningServiceTest {
     given(scheduler.scheduleJob(jobDetailArgumentCaptor.capture(), any())).willReturn(Date.from(
         Instant.now()));
 
-    val result = sut.startWebSign(MEMBER_ID, new WebsignRequest(EMAIL, SSN, "127.0.0.1"));
+    sut.startWebSign(MEMBER_ID, new WebsignRequest(EMAIL, SSN, "127.0.0.1"));
 
     then(scheduler).should(times(1)).scheduleJob(any(), any());
 
@@ -265,7 +271,7 @@ public class SigningServiceTest {
     val response = makeCollectResponse(CollectStatus.complete);
     given(bankIdRestService.collect(eq(ORDER_REFERENCE))).willReturn(response);
 
-    val status = sut.collectBankId(ORDER_REFERENCE);
+    sut.collectBankId(ORDER_REFERENCE);
 
     then(memberService).should(times(1)).bankIdSignComplete(eq(MEMBER_ID), eq(response));
 
@@ -281,7 +287,7 @@ public class SigningServiceTest {
     val response = makeCollectResponse(CollectStatus.complete);
     given(bankIdRestService.collect(eq(ORDER_REFERENCE))).willReturn(response);
 
-    val status = sut.collectBankId(ORDER_REFERENCE);
+    sut.collectBankId(ORDER_REFERENCE);
 
     assertThat(session.getStatus()).isEqualTo(SignStatus.COMPLETE);
 
@@ -312,7 +318,7 @@ public class SigningServiceTest {
     val response = makeCollectResponse(CollectStatus.failed);
     given(bankIdRestService.collect(eq(ORDER_REFERENCE))).willReturn(response);
 
-    val status = sut.collectBankId(ORDER_REFERENCE);
+    sut.collectBankId(ORDER_REFERENCE);
 
     assertThat(session.getStatus()).isEqualTo(SignStatus.FAILED);
 
@@ -336,6 +342,44 @@ public class SigningServiceTest {
     val status = sut.getSignStatus(MEMBER_ID, ORDER_REFERENCE);
 
     assertThat(status).get().isEqualTo(session);
+  }
+
+  @Test
+  public void productSignConfirmed_givenSignSession_thenSetsStatusToComplete() {
+    val session = makeSignSession(SignStatus.IN_PROGRESS);
+
+    given(signSessionRepository.findByOrderReference(ORDER_REFERENCE))
+        .willReturn(Optional.of(session));
+
+    sut.productSignConfirmed(ORDER_REFERENCE);
+
+    assertThat(session.getStatus()).isEqualTo(SignStatus.COMPLETE);
+    then(signSessionRepository).should(times(1)).save(session);
+
+  }
+
+  @Test
+  public void productSignConfirmed_givenSignSession_thenSendsEventOnRabbitMq() {
+    val session = makeSignSession(SignStatus.IN_PROGRESS);
+
+    given(signSessionRepository.findByOrderReference(ORDER_REFERENCE))
+        .willReturn(Optional.of(session));
+
+    sut.productSignConfirmed(ORDER_REFERENCE);
+
+    then(applicationEventPublisher).should(times(1)).publishEvent(eq(new SignSessionCompleteEvent(MEMBER_ID)));
+
+  }
+
+  @Test
+  public void productSignConfirmed_givenNoSignSession_thenDoesNothing() {
+
+    given(signSessionRepository.findByOrderReference(ORDER_REFERENCE)).willReturn(Optional.empty());
+
+    sut.productSignConfirmed(ORDER_REFERENCE);
+
+    then(signSessionRepository).should(times(0)).save(any());
+
   }
 
   private static SignSession makeSignSession(SignStatus inProgress) {

@@ -13,12 +13,11 @@ import com.hedvig.memberservice.enteties.SignStatus;
 import com.hedvig.memberservice.externalApi.productsPricing.ProductApi;
 import com.hedvig.memberservice.jobs.BankIdCollector;
 import com.hedvig.memberservice.query.SignedMemberRepository;
+import com.hedvig.memberservice.services.events.SignSessionCompleteEvent;
 import com.hedvig.memberservice.services.member.CannotSignInsuranceException;
 import com.hedvig.memberservice.services.member.MemberService;
 import com.hedvig.memberservice.services.member.dto.MemberSignResponse;
 import com.hedvig.memberservice.web.v2.dto.WebsignRequest;
-import java.time.Instant;
-import java.util.Date;
 import java.util.Optional;
 import javax.transaction.Transactional;
 import lombok.val;
@@ -26,6 +25,7 @@ import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 
@@ -40,6 +40,7 @@ public class SigningService {
   private final SignSessionRepository signSessionRepository;
   private final Scheduler scheduler;
   private final MemberService memberService;
+  private final ApplicationEventPublisher applicationEventPublisher;
 
   public SigningService(
       BankIdRestService bankidService,
@@ -47,13 +48,15 @@ public class SigningService {
       SignedMemberRepository signedMemberRepository,
       SignSessionRepository signSessionRepository,
       Scheduler scheduler,
-      MemberService memberService) {
+      MemberService memberService,
+      ApplicationEventPublisher applicationEventPublisher) {
     this.bankidService = bankidService;
     this.productApi = productApi;
     this.signedMemberRepository = signedMemberRepository;
     this.signSessionRepository = signSessionRepository;
     this.scheduler = scheduler;
     this.memberService = memberService;
+    this.applicationEventPublisher = applicationEventPublisher;
   }
 
   @Transactional
@@ -75,16 +78,16 @@ public class SigningService {
 
       signSessionRepository.save(session);
 
-      scheduleCollectJob(memberId, result);
+      scheduleCollectJob(result);
 
-      return new MemberSignResponse(SignStatus.IN_PROGRESS, result);
+      return new MemberSignResponse(session.getSessionId(), SignStatus.IN_PROGRESS, result);
     } else {
       throw new CannotSignInsuranceException();
     }
   }
 
   @Transactional
-  public void scheduleCollectJob(long memberId, OrderResponse result) {
+  public void scheduleCollectJob(OrderResponse result) {
     try {
       val jobName = result.getOrderRef();
       val jobDetail = newJob().withIdentity(jobName, "bankid.collect").ofType(
@@ -93,7 +96,7 @@ public class SigningService {
       val trigger = newTrigger()
           .forJob(jobName, "bankid.collect")
           .withSchedule(simpleSchedule().withIntervalInSeconds(1).withRepeatCount(900))
-          .startAt(Date.from(Instant.now().plusSeconds(1)))
+          //.startAt(Date.from(Instant.now().plusSeconds(1)))
           .build();
 
       scheduler.scheduleJob(jobDetail,
@@ -148,5 +151,18 @@ public class SigningService {
 
   public Optional<SignSession> getSignStatus(final long memberId, @NonNull final String orderRef) {
     return signSessionRepository.findByOrderReference(orderRef);
+  }
+
+  @Transactional
+  public void productSignConfirmed(String id) {
+    val session = signSessionRepository.findByOrderReference(id);
+
+    session.ifPresent(s -> {
+      s.setStatus(SignStatus.COMPLETE);
+      signSessionRepository.save(s);
+      applicationEventPublisher.publishEvent(new SignSessionCompleteEvent(s.getMemberId()));
+    });
+
+
   }
 }

@@ -10,4 +10,5 @@ public class ContractSignedRequest {
   String signature;
   String oscpResponse;
   Instant signedOn;
+  String ssn;
 }

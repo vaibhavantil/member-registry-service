@@ -1,6 +1,5 @@
 package com.hedvig.memberservice.web.v2;
 
-import com.hedvig.memberservice.services.BankIdRestService;
 import com.hedvig.memberservice.services.SigningService;
 import com.hedvig.memberservice.web.v2.dto.SignStatusRequest;
 import com.hedvig.memberservice.web.v2.dto.SignStatusResponse;
@@ -21,13 +20,10 @@ import org.springframework.web.bind.annotation.RestController;
 public class SignController {
 
   private final SigningService signingService;
-  private final BankIdRestService bankIdRestService;
 
   @Autowired
-  SignController(SigningService signingService,
-      BankIdRestService bankIdRestService) {
+  SignController(SigningService signingService) {
     this.signingService = signingService;
-    this.bankIdRestService = bankIdRestService;
   }
 
 
@@ -36,8 +32,7 @@ public class SignController {
 
     val result = signingService.startWebSign(hedvigToken, websignRequest);
 
-    return ResponseEntity.ok(new WebSignResponse(result.getStatus(), result.getBankIdOrderResponse()));
-
+    return ResponseEntity.ok(new WebSignResponse(result.getSignId(),result.getStatus(), result.getBankIdOrderResponse()));
   }
 
   @PostMapping("signStatus")

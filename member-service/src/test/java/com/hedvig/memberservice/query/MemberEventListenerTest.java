@@ -10,7 +10,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
 public class MemberEventListenerTest {
@@ -21,7 +21,7 @@ public class MemberEventListenerTest {
     @Mock
     TrackingIdRepository trackingIdRepository;
 
-    MemberEventListener eventListener;
+    private MemberEventListener eventListener;
 
     @Before
     public void setUp() {

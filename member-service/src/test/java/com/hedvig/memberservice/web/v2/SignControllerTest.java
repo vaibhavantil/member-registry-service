@@ -74,7 +74,7 @@ public class SignControllerTest {
   public void postToWebsign_givenMemberWithOkProduct_willReturn200() throws Exception {
 
     given(signingService.startWebSign(anyLong(), any()))
-        .willReturn(new MemberSignResponse(
+        .willReturn(new MemberSignResponse(10L,
             SignStatus.IN_PROGRESS, new OrderResponse(ORDER_REFERENCE, AUTOSTART_TOKEN)));
 
     mockMvc
@@ -86,7 +86,9 @@ public class SignControllerTest {
                 .content("{\"email\":\"test@test.com\"}"))
         .andExpect(status().isOk())
         .andExpect(jsonPath(".bankIdOrderResponse.orderRef").exists())
-        .andExpect(jsonPath(".status").value("IN_PROGRESS"));
+        .andExpect(jsonPath(".bankIdOrderResponse.autoStartToken").exists())
+        .andExpect(jsonPath(".status").value("IN_PROGRESS"))
+        .andExpect(jsonPath(".signId").value(10));
   }
 
   @Test
