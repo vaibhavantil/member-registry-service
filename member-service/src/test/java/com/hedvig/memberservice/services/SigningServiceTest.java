@@ -328,7 +328,7 @@ public class SigningServiceTest {
   public void getSignStatus_givenNoMatchingSignStatus_thenReturnEmpty() {
     given(signSessionRepository.findByOrderReference(ORDER_REFERENCE)).willReturn(Optional.empty());
 
-    val status = sut.getSignStatus(MEMBER_ID, ORDER_REFERENCE);
+    val status = sut.getSignStatus(ORDER_REFERENCE);
 
     assertThat(status).isEmpty();
   }
@@ -339,7 +339,7 @@ public class SigningServiceTest {
     given(signSessionRepository.findByOrderReference(ORDER_REFERENCE))
         .willReturn(Optional.of(session));
 
-    val status = sut.getSignStatus(MEMBER_ID, ORDER_REFERENCE);
+    val status = sut.getSignStatus(ORDER_REFERENCE);
 
     assertThat(status).get().isEqualTo(session);
   }

@@ -149,7 +149,7 @@ public class SigningService {
             });
   }
 
-  public Optional<SignSession> getSignStatus(final long memberId, @NonNull final String orderRef) {
+  public Optional<SignSession> getSignStatus(@NonNull final String orderRef) {
     return signSessionRepository.findByOrderReference(orderRef);
   }
 

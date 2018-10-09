@@ -40,7 +40,7 @@ public class SignController {
       @Valid @RequestBody SignStatusRequest body) {
 
 
-    val session = signingService.getSignStatus(memberId, body.getOrderRef());
+    val session = signingService.getSignStatus(body.getOrderRef());
 
     return session
         .map(x -> ResponseEntity.ok(SignStatusResponse.CreateFromEntity(x.getCollectResponse())))

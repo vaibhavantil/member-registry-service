@@ -11,7 +11,7 @@ import org.springframework.scheduling.quartz.QuartzJobBean;
 
 public class BankIdCollector extends QuartzJobBean {
 
-  static final Logger log = LoggerFactory.getLogger(EchoJob.class);
+  static final Logger log = LoggerFactory.getLogger(BankIdCollector.class);
 
   @Autowired
   SigningService signingService;
@@ -22,9 +22,9 @@ public class BankIdCollector extends QuartzJobBean {
       val referenceId = context.getJobDetail().getKey().getName();
       log.info("Starting BankIdCollectorJob for {}", referenceId);
 
-      val a = signingService.collectBankId(referenceId);
+      val bankIdSessionOpen = signingService.collectBankId(referenceId);
 
-      if (a == false) {
+      if (bankIdSessionOpen == false) {
         log.info("Removing job ({}) from scheduler", referenceId);
         context.getScheduler().deleteJob(context.getJobDetail().getKey());
       }

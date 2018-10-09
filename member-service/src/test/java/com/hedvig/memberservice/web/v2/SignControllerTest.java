@@ -6,7 +6,6 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.core.IsNull.nullValue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.matches;
 import static org.mockito.BDDMockito.given;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -94,7 +93,7 @@ public class SignControllerTest {
   @Test
   public void postToSignStatus_givenOrderRefThatDoesNotExist_thenReturn404() throws Exception{
 
-    given(signingService.getSignStatus(MEMBER_ID, ORDER_REFERENCE)).willReturn(Optional.empty());
+    given(signingService.getSignStatus(ORDER_REFERENCE)).willReturn(Optional.empty());
 
     mockMvc
         .perform(
@@ -111,7 +110,7 @@ public class SignControllerTest {
 
     SignSession session = makeSignSession(AUTOSTART_TOKEN);
 
-    given(signingService.getSignStatus(eq(MEMBER_ID), matches(ORDER_REFERENCE))).willReturn(Optional.of(session));
+    given(signingService.getSignStatus(matches(ORDER_REFERENCE))).willReturn(Optional.of(session));
 
     mockMvc
         .perform(
@@ -135,7 +134,7 @@ public class SignControllerTest {
 
     session.setCollectResponse(cr);
 
-    given(signingService.getSignStatus(MEMBER_ID, ORDER_REFERENCE)).willReturn(Optional.of(session));
+    given(signingService.getSignStatus(ORDER_REFERENCE)).willReturn(Optional.of(session));
 
     mockMvc
         .perform(
