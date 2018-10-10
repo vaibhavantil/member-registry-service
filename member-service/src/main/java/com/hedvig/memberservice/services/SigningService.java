@@ -10,8 +10,12 @@ import com.hedvig.memberservice.enteties.CollectResponse;
 import com.hedvig.memberservice.enteties.SignSession;
 import com.hedvig.memberservice.enteties.SignSessionRepository;
 import com.hedvig.memberservice.enteties.SignStatus;
+import com.hedvig.memberservice.externalApi.botService.BotService;
+import com.hedvig.memberservice.externalApi.botService.dto.UpdateUserContextDTO;
 import com.hedvig.memberservice.externalApi.productsPricing.ProductApi;
 import com.hedvig.memberservice.jobs.BankIdCollector;
+import com.hedvig.memberservice.query.MemberEntity;
+import com.hedvig.memberservice.query.MemberRepository;
 import com.hedvig.memberservice.query.SignedMemberRepository;
 import com.hedvig.memberservice.services.events.SignSessionCompleteEvent;
 import com.hedvig.memberservice.services.member.CannotSignInsuranceException;
@@ -40,6 +44,8 @@ public class SigningService {
   private final SignSessionRepository signSessionRepository;
   private final Scheduler scheduler;
   private final MemberService memberService;
+  private final MemberRepository memberRepository;
+  private final BotService botService;
   private final ApplicationEventPublisher applicationEventPublisher;
 
   public SigningService(
@@ -49,6 +55,8 @@ public class SigningService {
       SignSessionRepository signSessionRepository,
       Scheduler scheduler,
       MemberService memberService,
+      MemberRepository memberRepository,
+      BotService botService,
       ApplicationEventPublisher applicationEventPublisher) {
     this.bankidService = bankidService;
     this.productApi = productApi;
@@ -56,6 +64,8 @@ public class SigningService {
     this.signSessionRepository = signSessionRepository;
     this.scheduler = scheduler;
     this.memberService = memberService;
+    this.memberRepository = memberRepository;
+    this.botService = botService;
     this.applicationEventPublisher = applicationEventPublisher;
   }
 
@@ -107,8 +117,6 @@ public class SigningService {
   }
 
   /**
-   *
-   * @param orderReference
    * @return true if BankID needs to be collected again, otherwise false
    */
   @Transactional
@@ -127,10 +135,10 @@ public class SigningService {
                 collectResponse.setHintCode(response.getHintCode());
                 s.setCollectResponse(collectResponse);
 
-                if(response.getStatus() == CollectStatus.complete){
+                if (response.getStatus() == CollectStatus.complete) {
                   memberService.bankIdSignComplete(s.getMemberId(), response);
                   s.setStatus(SignStatus.COMPLETE);
-                }else if(response.getStatus() == CollectStatus.failed){
+                } else if (response.getStatus() == CollectStatus.failed) {
                   s.setStatus(SignStatus.FAILED);
                 }
 
@@ -159,6 +167,22 @@ public class SigningService {
     session.ifPresent(s -> {
       s.setStatus(SignStatus.COMPLETE);
       signSessionRepository.save(s);
+
+      MemberEntity member = memberRepository.getOne(s.getMemberId());
+
+      UpdateUserContextDTO userContext = new UpdateUserContextDTO(String.valueOf(
+          s.getMemberId()),
+          member.getSsn(),
+          member.getFirstName(),
+          member.getLastName(),
+          member.getPhoneNumber(),
+          member.getEmail(),
+          member.getStreet(),
+          member.getCity(),
+          member.getZipCode(),
+          true);
+
+      botService.initBotServiceSessionWebOnBoarding(s.getMemberId(), userContext);
       applicationEventPublisher.publishEvent(new SignSessionCompleteEvent(s.getMemberId()));
     });
   }
