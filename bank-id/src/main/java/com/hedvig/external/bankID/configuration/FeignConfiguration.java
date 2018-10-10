@@ -12,5 +12,4 @@ public class FeignConfiguration {
     return new BankIdRestErrorDecoder(objectMapper);
   }
 
-
 }
