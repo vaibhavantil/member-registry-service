@@ -77,7 +77,7 @@ public class SigningService {
     }
 
     val productStatus = productApi.hasProductToSign(memberId);
-    if (productStatus.isElgibleToSign()) {
+    if (productStatus.isEligibleToSign()) {
       val result = bankidService.startSign(request.getSsn(), createUserSignText(productStatus.isSwitching()), request.getIpAddress());
 
       val session = new SignSession(memberId);
