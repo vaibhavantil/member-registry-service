@@ -117,6 +117,8 @@ public class SigningService {
   }
 
   /**
+   *
+   * @param orderReference order reference from bankId
    * @return true if BankID needs to be collected again, otherwise false
    */
   @Transactional
