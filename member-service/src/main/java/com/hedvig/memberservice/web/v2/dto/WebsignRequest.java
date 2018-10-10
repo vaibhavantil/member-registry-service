@@ -8,12 +8,12 @@ import lombok.Value;
 public class WebsignRequest {
 
   @Email
-  final String email;
+  String email;
 
   @NotBlank
-  final String ssn;
+  String ssn;
 
   @NotBlank
-  final String ipAddress;
+  String ipAddress;
 
 }

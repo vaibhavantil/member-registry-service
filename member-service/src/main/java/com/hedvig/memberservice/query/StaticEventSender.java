@@ -21,8 +21,7 @@ public class StaticEventSender {
   private SigningService signService;
 
   @Autowired
-  public StaticEventSender(MemberRepository memberRepo, ProductApi productApi,
-      SigningService signService) {
+  public StaticEventSender(ProductApi productApi, SigningService signService) {
     this.productApi = productApi;
     this.signService = signService;
   }
@@ -52,7 +51,6 @@ public class StaticEventSender {
           e.getMemberId(), e.getInsuranceId(), e.getInactivationDate());
     } catch (RuntimeException ex) {
       logger.error("Could not cancel member at product-pricing: {}", ex.getMessage(), ex);
-      // TODO Send event to sentry
     }
   }
 }
