@@ -19,7 +19,8 @@ public class BankIdRestServiceImpl implements BankIdRestService {
   }
 
   @Override
-  public OrderResponse startSign(long memberId, @NonNull final String ssn, @NonNull final String userVisibleMessage, @NonNull final String ipNumber) {
+  public OrderResponse startSign(@NonNull final String ssn,
+      @NonNull final String userVisibleMessage, @NonNull final String ipNumber) {
     return bankIdRestApi.sign(ssn, ipNumber, Base64.getEncoder().encodeToString(userVisibleMessage.getBytes()));
   }
 

@@ -2,7 +2,6 @@ package com.hedvig.memberservice.services;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.matches;
@@ -100,7 +99,7 @@ public class SigningServiceTest {
   public void startWebSign_givenMemberWithOkProduct_thenReturnOrderRefAndAutoStartToken(){
 
     given(productApi.hasProductToSign(MEMBER_ID)).willReturn(true);
-    given(bankIdRestService.startSign(eq(MEMBER_ID), matches(SSN), anyString(), anyString()))
+    given(bankIdRestService.startSign(matches(SSN), anyString(), anyString()))
         .willReturn(new OrderResponse(ORDER_REFERENCE, "autostartToken"));
 
     val result = sut.startWebSign(MEMBER_ID, new WebsignRequest(EMAIL, SSN,"127.0.0.1"));
@@ -115,7 +114,7 @@ public class SigningServiceTest {
       throws SchedulerException {
 
     given(productApi.hasProductToSign(MEMBER_ID)).willReturn(true);
-    given(bankIdRestService.startSign(eq(MEMBER_ID), matches(SSN), anyString(), anyString()))
+    given(bankIdRestService.startSign(matches(SSN), anyString(), anyString()))
         .willReturn(new OrderResponse(
             ORDER_REFERENCE, AUTOSTART_TOKEN));
 
@@ -158,7 +157,7 @@ public class SigningServiceTest {
   public void startWebSign_givenBankidThrowsError_thenThrowException(){
 
     given(productApi.hasProductToSign(MEMBER_ID)).willReturn(true);
-    given(bankIdRestService.startSign(anyLong(), any(), any(), anyString()))
+    given(bankIdRestService.startSign(any(), any(), anyString()))
         .willThrow(BankIdRestError.class);
 
 

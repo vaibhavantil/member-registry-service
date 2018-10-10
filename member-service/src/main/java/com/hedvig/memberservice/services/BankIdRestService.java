@@ -6,7 +6,8 @@ import org.springframework.lang.NonNull;
 
 public interface BankIdRestService {
 
-  OrderResponse startSign(final long memberId, final @NonNull String ssn, final @NonNull String userVisibleMessage, final @NonNull String ipAddress);
+  OrderResponse startSign(final @NonNull String ssn,
+      final @NonNull String userVisibleMessage, final @NonNull String ipAddress);
 
   CollectResponse collect(@NonNull String someOrderRef);
 }

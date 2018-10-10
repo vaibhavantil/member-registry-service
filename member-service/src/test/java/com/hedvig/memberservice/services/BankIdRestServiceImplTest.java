@@ -25,7 +25,7 @@ public class BankIdRestServiceImplTest {
 
     BankIdRestServiceImpl sut = new BankIdRestServiceImpl(api);
 
-    val result = sut.startSign(1337, "191212121212", "Some message", "127.0.0.1");
+    val result = sut.startSign("191212121212", "Some message", "127.0.0.1");
 
     assertThat(result.getAutoStartToken()).isEqualTo("autoStartToken");
     assertThat(result.getOrderRef()).isEqualTo("orderRef");

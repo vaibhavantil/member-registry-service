@@ -69,7 +69,7 @@ public class SigningService {
     }
 
     if (productApi.hasProductToSign(memberId)) {
-      val result = bankidService.startSign(memberId, request.getSsn(), "SomeMessage", request.getIpAddress());
+      val result = bankidService.startSign(request.getSsn(), "", request.getIpAddress());
 
       val session = new SignSession(memberId);
       session.setAutoStartToken(result.getAutoStartToken());
@@ -95,8 +95,7 @@ public class SigningService {
 
       val trigger = newTrigger()
           .forJob(jobName, "bankid.collect")
-          .withSchedule(simpleSchedule().withIntervalInSeconds(1).withRepeatCount(900))
-          //.startAt(Date.from(Instant.now().plusSeconds(1)))
+          .withSchedule(simpleSchedule().withIntervalInSeconds(1).withRepeatCount(900).withMisfireHandlingInstructionNowWithRemainingCount())
           .build();
 
       scheduler.scheduleJob(jobDetail,
@@ -162,7 +161,17 @@ public class SigningService {
       signSessionRepository.save(s);
       applicationEventPublisher.publishEvent(new SignSessionCompleteEvent(s.getMemberId()));
     });
+  }
 
-
+  private String createUserSignText(boolean mandateSing) {
+    String signText;
+    if (mandateSing) {
+      signText =
+          "Jag har tagit del av förköpsinformation och villkor och bekräftar genom att signera att jag vill byta till Hedvig när min gamla försäkring går ut. Jag ger också  Hedvig fullmakt att byta försäkringen åt mig.";
+    } else {
+      signText =
+          "Jag har tagit del av förköpsinformation och villkor och bekräftar genom att signera att jag skaffar en försäkring hos Hedvig.";
+    }
+    return signText;
   }
 }
