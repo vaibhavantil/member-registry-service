@@ -7,12 +7,13 @@ import org.axonframework.commandhandling.TargetAggregateIdentifier;
 @Value
 public class MemberUpdateContactInformationCommand {
 
-  @TargetAggregateIdentifier long memberId;
+  @TargetAggregateIdentifier
+  long memberId;
 
   String firstName;
   String lastName;
   String email;
-
+  String phoneNumber;
   String street;
   String city;
   String zipCode;
@@ -32,5 +33,6 @@ public class MemberUpdateContactInformationCommand {
     this.zipCode = body.getAddress().getZipCode();
     this.apartmentNo = body.getAddress().getApartmentNo();
     this.floor = body.getAddress().getFloor();
+    this.phoneNumber = body.getPhoneNumber();
   }
 }

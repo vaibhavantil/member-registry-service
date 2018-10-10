@@ -6,6 +6,7 @@ import com.hedvig.memberservice.commands.MemberCancelInsuranceCommand;
 import com.hedvig.memberservice.commands.MemberUpdateContactInformationCommand;
 import com.hedvig.memberservice.commands.StartOnboardingWithSSNCommand;
 import com.hedvig.memberservice.commands.UpdateEmailCommand;
+import com.hedvig.memberservice.commands.UpdatePhoneNumberCommand;
 import com.hedvig.memberservice.query.MemberEntity;
 import com.hedvig.memberservice.query.MemberRepository;
 import com.hedvig.memberservice.web.dto.InsuranceCancellationDTO;
@@ -14,6 +15,7 @@ import com.hedvig.memberservice.web.dto.MemberCancelInsurance;
 import com.hedvig.memberservice.web.dto.StartOnboardingWithSSNRequest;
 import com.hedvig.memberservice.web.dto.UpdateContactInformationRequest;
 import com.hedvig.memberservice.web.dto.UpdateEmailRequest;
+import com.hedvig.memberservice.web.dto.UpdatePhoneNumberRequest;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
@@ -91,6 +93,13 @@ public class InternalMembersController {
 
     commandBus.sendAndWait(new UpdateEmailCommand(memberId, request.getEmail()));
 
+    return ResponseEntity.noContent().build();
+  }
+
+  @RequestMapping(value = "/{memberId}/updatePhoneNumber")
+  public ResponseEntity<?> updatePhoneNumber(@PathVariable Long memberId,
+      @RequestBody UpdatePhoneNumberRequest request) {
+    commandBus.sendAndWait(new UpdatePhoneNumberCommand(memberId, request.getPhoneNumber()));
     return ResponseEntity.noContent().build();
   }
 
