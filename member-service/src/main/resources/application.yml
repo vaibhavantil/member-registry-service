@@ -9,4 +9,8 @@ management.security.enabled: false
 
 logging.level.com.hedvig: DEBUG
 
-
+spring:
+  jpa:
+    hibernate:
+      naming:
+        implicit-strategy: org.hibernate.boot.model.naming.ImplicitNamingStrategyComponentPathImpl

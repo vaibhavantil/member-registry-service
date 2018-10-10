@@ -120,7 +120,7 @@ public class MemberAggregateTests {
         .given(
             new MemberCreatedEvent(memberId, MemberStatus.INITIATED),
             new NewCashbackSelectedEvent(memberId, DEFAULT_CASHBACK.toString()),
-            new MemberSignedEvent(memberId, referenceId, "", ""),
+            new MemberSignedEvent(memberId, referenceId, "", "", TOLVANSSON_SSN),
             new TrackingIdCreatedEvent(memberId, TRACKING_UUID))
         .when(new AuthenticationAttemptCommand(memberId, bankIdAuthStatus))
         .expectSuccessfulHandlerExecution()
@@ -213,7 +213,7 @@ public class MemberAggregateTests {
         .expectSuccessfulHandlerExecution()
         .expectEvents(
             new NewCashbackSelectedEvent(memberId, DEFAULT_CASHBACK.toString()),
-            new MemberSignedEvent(memberId, referenceId, "", ""),
+            new MemberSignedEvent(memberId, referenceId, "", "", personalNumber),
             new TrackingIdCreatedEvent(memberId, TRACKING_UUID),
             new SSNUpdatedEvent(memberId, personalNumber));
   }
@@ -239,7 +239,7 @@ public class MemberAggregateTests {
         .expectSuccessfulHandlerExecution()
         .expectEvents(
             new NewCashbackSelectedEvent(memberId, DEFAULT_CASHBACK.toString()),
-            new MemberSignedEvent(memberId, referenceId, "", ""),
+            new MemberSignedEvent(memberId, referenceId, "", "", personalNumber),
             new SSNUpdatedEvent(memberId, personalNumber));
   }
 

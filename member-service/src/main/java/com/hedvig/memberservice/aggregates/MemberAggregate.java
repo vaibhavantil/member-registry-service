@@ -259,7 +259,7 @@ public class MemberAggregate {
     apply(new NewCashbackSelectedEvent(this.id, cashbackService.getDefaultId().toString()));
     apply(
         new MemberSignedEvent(
-            this.id, cmd.getReferenceId(), cmd.getSignature(), cmd.getOscpResponse()));
+            this.id, cmd.getReferenceId(), cmd.getSignature(), cmd.getOscpResponse(), cmd.getPersonalNumber()));
 
     if (this.trackingId == null) {
       generateTrackingId();

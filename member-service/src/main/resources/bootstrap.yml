@@ -6,11 +6,13 @@ spring:
       allow-override: false
 ---
 spring:
-  profiles: test, development
+  profiles: test, development, unittest
   cloud:
     kubernetes:
-      enabled: false
-      discovery.enabled: false
+      config:
+        enabled: false
+      secrets:
+        enabled: false
   autoconfigure:
     exclude:
     - org.springframework.cloud.kubernetes.discovery.KubernetesDiscoveryClientAutoConfiguration

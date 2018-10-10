@@ -9,6 +9,7 @@ public class MemberSignedEvent {
   private final String referenceId;
   private final String signature;
   private final String oscpResponse;
+  private final String ssn;
 
 
   /**

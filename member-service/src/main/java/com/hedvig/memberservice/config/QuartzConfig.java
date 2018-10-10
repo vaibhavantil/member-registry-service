@@ -1,38 +1,33 @@
 package com.hedvig.memberservice.config;
 
-import static org.quartz.SimpleScheduleBuilder.simpleSchedule;
-import static org.quartz.TriggerBuilder.newTrigger;
-
-import com.hedvig.memberservice.jobs.EchoJob;
-import org.quartz.JobDetail;
-import org.quartz.Trigger;
+import javax.annotation.PostConstruct;
+import org.quartz.JobKey;
+import org.quartz.Scheduler;
+import org.quartz.SchedulerException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.context.annotation.Bean;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.scheduling.quartz.JobDetailFactoryBean;
 
 @Configuration
 public class QuartzConfig {
 
-  Logger log = LoggerFactory.getLogger(QuartzConfig.class);
+  private static Logger log = LoggerFactory.getLogger(QuartzConfig.class);
 
-  @Bean(name="echo2")
-  JobDetailFactoryBean echoJob() {
-    JobDetailFactoryBean jobDetailFactoryBean = new JobDetailFactoryBean();
-    jobDetailFactoryBean.setJobClass(EchoJob.class);
-    jobDetailFactoryBean.setDurability(true);
+  @Autowired
+  Scheduler scheduler;
 
-    return jobDetailFactoryBean;
-  }
+  @PostConstruct
+  public void removeOldJobs() {
 
+    try {
 
-  @Bean
-  Trigger echoTrigger(JobDetail echoJob) {
-    int frequencyInSec = 10;
-    log.info("Configuring trigger");
+      if (scheduler.deleteJob(new JobKey("echo3", "test"))) {
+        log.info("Quartz job eco3 was deleted");
+      }
 
-    return newTrigger().withIdentity("echoTrigger").forJob(echoJob).withSchedule(simpleSchedule().withIntervalInSeconds(frequencyInSec).repeatForever()).build();
-
+    } catch (SchedulerException ex) {
+      log.error("Could not delete old QuartzJobs");
+    }
   }
 }

@@ -70,7 +70,7 @@ public class CashbackControllerTests {
   @Test
   public void PostCashbackOption_WHEN_OptionId_IsnotFound() throws Exception {
     final long memberId = 1337l;
-    final StartOnboardingWithSSNRequest request = new StartOnboardingWithSSNRequest("");
+
     final UUID newOptionId = UUID.fromString("d24c427e-d110-11e7-a47e-0b4e39412e99");
 
     MemberEntity member = new MemberEntity();
@@ -103,7 +103,7 @@ public class CashbackControllerTests {
     when(cashbackService.getCashbackOption(newOptionId)).thenReturn(Optional.of(cashbackOption));
     when(memberRepo.findById(memberId)).thenReturn(Optional.empty());
 
-    StartOnboardingWithSSNRequest request = new StartOnboardingWithSSNRequest("");
+    new StartOnboardingWithSSNRequest("");
 
     mockMvc
         .perform(
