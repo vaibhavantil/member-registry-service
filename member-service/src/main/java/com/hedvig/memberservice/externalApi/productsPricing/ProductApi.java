@@ -101,18 +101,18 @@ public class ProductApi {
     return new ArrayList<>();
   }
 
-  public boolean hasProductToSign(long memberId) {
+  public ProductToSignStatusDTO hasProductToSign(long memberId) {
     try {
       ResponseEntity<ProductToSignStatusDTO> response = this.client
           .hasProductToSign(String.valueOf(memberId));
-      return Objects.requireNonNull(response.getBody()).isHasProductToSign();
+      return Objects.requireNonNull(response.getBody());
     } catch (FeignException ex) {
       if (ex.status() == 404) {
-        return false;
+        return new ProductToSignStatusDTO(false, false);
       } else {
         log.error("Error getting insurance from products-pricing {}", ex);
       }
     }
-    return false;
+    return new ProductToSignStatusDTO(false, false);
   }
 }
