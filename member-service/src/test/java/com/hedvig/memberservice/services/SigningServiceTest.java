@@ -21,6 +21,7 @@ import com.hedvig.memberservice.enteties.SignSession;
 import com.hedvig.memberservice.enteties.SignSessionRepository;
 import com.hedvig.memberservice.enteties.SignStatus;
 import com.hedvig.memberservice.externalApi.productsPricing.ProductApi;
+import com.hedvig.memberservice.externalApi.productsPricing.dto.ProductToSignStatusDTO;
 import com.hedvig.memberservice.query.SignedMemberEntity;
 import com.hedvig.memberservice.query.SignedMemberRepository;
 import com.hedvig.memberservice.services.events.SignSessionCompleteEvent;
@@ -54,6 +55,8 @@ public class SigningServiceTest {
   private static final String SSN = "191212121212";
   private static final String EMAIL = "test@test.com";
   private static final String AUTOSTART_TOKEN = "autostartToken";
+  private static final String SWITCHER_MESSAGE = "SwitcherMessage";
+  private static final String NON_SWITCHER_MESSAGE = "NonSwitcherMessage";
 
   @Mock
   private ApplicationEventPublisher applicationEventPublisher;
@@ -79,18 +82,17 @@ public class SigningServiceTest {
   @Rule
   public ExpectedException thrown = ExpectedException.none();
 
-  ArgumentCaptor<JobDetail> jobDetailArgumentCaptor = ArgumentCaptor.forClass(JobDetail.class);
-
+  private ArgumentCaptor<JobDetail> jobDetailArgumentCaptor = ArgumentCaptor.forClass(JobDetail.class);
+  private ArgumentCaptor<String> argumentCaptor = ArgumentCaptor.forClass(String.class);
 
   SigningService sut;
-  ;
-
 
   @Before
   public void setup(){
     given(signedMemberRepository.findBySsn(any())).willReturn(Optional.empty());
     sut = new SigningService(bankIdRestService, productApi, signedMemberRepository,
-        signSessionRepository, scheduler, memberService, applicationEventPublisher);
+        signSessionRepository, scheduler, memberService, applicationEventPublisher,
+        SWITCHER_MESSAGE, NON_SWITCHER_MESSAGE);
   }
 
 
@@ -98,9 +100,10 @@ public class SigningServiceTest {
   @Test
   public void startWebSign_givenMemberWithOkProduct_thenReturnOrderRefAndAutoStartToken(){
 
-    given(productApi.hasProductToSign(MEMBER_ID)).willReturn(true);
+    given(productApi.hasProductToSign(MEMBER_ID)).willReturn(
+        makeProductToSignStatusEligibleSwitching());
     given(bankIdRestService.startSign(matches(SSN), anyString(), anyString()))
-        .willReturn(new OrderResponse(ORDER_REFERENCE, "autostartToken"));
+        .willReturn(makeOrderResponse());
 
     val result = sut.startWebSign(MEMBER_ID, new WebsignRequest(EMAIL, SSN,"127.0.0.1"));
 
@@ -113,10 +116,10 @@ public class SigningServiceTest {
   public void startWebSign_givenMemberWithOkProduct_thenSchedulesCollectJob()
       throws SchedulerException {
 
-    given(productApi.hasProductToSign(MEMBER_ID)).willReturn(true);
+    given(productApi.hasProductToSign(MEMBER_ID)).willReturn(
+        makeProductToSignStatusEligibleSwitching());
     given(bankIdRestService.startSign(matches(SSN), anyString(), anyString()))
-        .willReturn(new OrderResponse(
-            ORDER_REFERENCE, AUTOSTART_TOKEN));
+        .willReturn(makeOrderResponse());
 
     given(scheduler.scheduleJob(jobDetailArgumentCaptor.capture(), any())).willReturn(Date.from(
         Instant.now()));
@@ -131,7 +134,8 @@ public class SigningServiceTest {
   @Test
   public void startWebSign_givenMemberWithoutOkProduct_thenThrowException(){
 
-    given(productApi.hasProductToSign(MEMBER_ID)).willReturn(false);
+    given(productApi.hasProductToSign(MEMBER_ID)).willReturn(
+        makeProductToSignStatusNotEligibleSwitching());
 
     thrown.expect(CannotSignInsuranceException.class);
     sut.startWebSign(MEMBER_ID, new WebsignRequest(EMAIL, SSN, "127.0.0.1"));
@@ -156,7 +160,8 @@ public class SigningServiceTest {
   @Test
   public void startWebSign_givenBankidThrowsError_thenThrowException(){
 
-    given(productApi.hasProductToSign(MEMBER_ID)).willReturn(true);
+    given(productApi.hasProductToSign(MEMBER_ID)).willReturn(
+        makeProductToSignStatusEligibleSwitching());
     given(bankIdRestService.startSign(any(), any(), anyString()))
         .willThrow(BankIdRestError.class);
 
@@ -164,6 +169,30 @@ public class SigningServiceTest {
     thrown.expect(BankIdRestError.class);
     sut.startWebSign(MEMBER_ID, new WebsignRequest(EMAIL, SSN, "127.0.0.1"));
 
+  }
+
+  @Test
+  public void startWebSign_givenSwitchingMember_thenSendSwitchingMessage(){
+    given(productApi.hasProductToSign(MEMBER_ID)).willReturn(
+        makeProductToSignStatusEligibleSwitching());
+    val response = makeOrderResponse();
+    given(bankIdRestService.startSign(anyString(), argumentCaptor.capture(), anyString())).willReturn(response);
+
+    sut.startWebSign(MEMBER_ID, new WebsignRequest(EMAIL, SSN, "127.0.0.1"));
+
+    assertThat(argumentCaptor.getValue()).isEqualTo(SWITCHER_MESSAGE);
+  }
+
+  @Test
+  public void startWebSign_givenNonSwitchingMember_thenSendSwitchingMessage(){
+    given(productApi.hasProductToSign(MEMBER_ID)).willReturn(
+        makeProductToSignStatusEligibleNotSwitching());
+    val response = makeOrderResponse();
+    given(bankIdRestService.startSign(anyString(), argumentCaptor.capture(), anyString())).willReturn(response);
+
+    sut.startWebSign(MEMBER_ID, new WebsignRequest(EMAIL, SSN, "127.0.0.1"));
+
+    assertThat(argumentCaptor.getValue()).isEqualTo(NON_SWITCHER_MESSAGE);
   }
 
   @Test
@@ -176,9 +205,9 @@ public class SigningServiceTest {
     val response = makeCollectResponse(CollectStatus.pending);
     given(bankIdRestService.collect(ORDER_REFERENCE)).willReturn(response);
 
-    val acctual = sut.collectBankId(ORDER_REFERENCE);
+    val actual = sut.collectBankId(ORDER_REFERENCE);
 
-    assertThat(acctual).isEqualTo(true);
+    assertThat(actual).isEqualTo(true);
   }
 
   @Test
@@ -379,6 +408,23 @@ public class SigningServiceTest {
 
     then(signSessionRepository).should(times(0)).save(any());
 
+  }
+
+  private OrderResponse makeOrderResponse() {
+    return new OrderResponse(
+        ORDER_REFERENCE, AUTOSTART_TOKEN);
+  }
+
+  private ProductToSignStatusDTO makeProductToSignStatusEligibleSwitching() {
+    return new ProductToSignStatusDTO(true, true);
+  }
+
+  private ProductToSignStatusDTO makeProductToSignStatusNotEligibleSwitching() {
+    return new ProductToSignStatusDTO(false, true);
+  }
+
+  private ProductToSignStatusDTO makeProductToSignStatusEligibleNotSwitching() {
+    return new ProductToSignStatusDTO(true, false);
   }
 
   private static SignSession makeSignSession(SignStatus inProgress) {

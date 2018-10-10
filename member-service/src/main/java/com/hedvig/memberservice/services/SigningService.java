@@ -25,6 +25,7 @@ import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
@@ -42,6 +43,9 @@ public class SigningService {
   private final MemberService memberService;
   private final ApplicationEventPublisher applicationEventPublisher;
 
+  private final String switcherMessage;
+  private final String nonSwitcherMessage;
+
   public SigningService(
       BankIdRestService bankidService,
       ProductApi productApi,
@@ -49,7 +53,9 @@ public class SigningService {
       SignSessionRepository signSessionRepository,
       Scheduler scheduler,
       MemberService memberService,
-      ApplicationEventPublisher applicationEventPublisher) {
+      ApplicationEventPublisher applicationEventPublisher,
+      @Value("${hedvig.bankid.signmessage.switcher}") String switcherMessage,
+      @Value("${hedvig.bankid.signmessage.nonSwitcher}") String nonSwitcherMessage) {
     this.bankidService = bankidService;
     this.productApi = productApi;
     this.signedMemberRepository = signedMemberRepository;
@@ -57,6 +63,8 @@ public class SigningService {
     this.scheduler = scheduler;
     this.memberService = memberService;
     this.applicationEventPublisher = applicationEventPublisher;
+    this.switcherMessage = switcherMessage;
+    this.nonSwitcherMessage = nonSwitcherMessage;
   }
 
   @Transactional
@@ -68,8 +76,9 @@ public class SigningService {
       throw new MemberHasExistingInsuranceException();
     }
 
-    if (productApi.hasProductToSign(memberId)) {
-      val result = bankidService.startSign(request.getSsn(), "", request.getIpAddress());
+    val productStatus = productApi.hasProductToSign(memberId);
+    if (productStatus.isElgibleToSign()) {
+      val result = bankidService.startSign(request.getSsn(), createUserSignText(productStatus.isSwitching()), request.getIpAddress());
 
       val session = new SignSession(memberId);
       session.setAutoStartToken(result.getAutoStartToken());
@@ -163,14 +172,12 @@ public class SigningService {
     });
   }
 
-  private String createUserSignText(boolean mandateSing) {
+  private String createUserSignText(boolean isSwitching) {
     String signText;
-    if (mandateSing) {
-      signText =
-          "Jag har tagit del av förköpsinformation och villkor och bekräftar genom att signera att jag vill byta till Hedvig när min gamla försäkring går ut. Jag ger också  Hedvig fullmakt att byta försäkringen åt mig.";
+    if (isSwitching) {
+      signText = switcherMessage;
     } else {
-      signText =
-          "Jag har tagit del av förköpsinformation och villkor och bekräftar genom att signera att jag skaffar en försäkring hos Hedvig.";
+      signText = nonSwitcherMessage;
     }
     return signText;
   }
