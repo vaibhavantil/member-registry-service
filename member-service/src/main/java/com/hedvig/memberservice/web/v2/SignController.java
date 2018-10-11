@@ -1,14 +1,13 @@
 package com.hedvig.memberservice.web.v2;
 
 import com.hedvig.memberservice.services.SigningService;
-import com.hedvig.memberservice.web.v2.dto.SignStatusRequest;
 import com.hedvig.memberservice.web.v2.dto.SignStatusResponse;
 import com.hedvig.memberservice.web.v2.dto.WebSignResponse;
 import com.hedvig.memberservice.web.v2.dto.WebsignRequest;
-import javax.validation.Valid;
 import lombok.val;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -35,12 +34,11 @@ public class SignController {
     return ResponseEntity.ok(new WebSignResponse(result.getSignId(),result.getStatus(), result.getBankIdOrderResponse()));
   }
 
-  @PostMapping("signStatus")
-  public ResponseEntity<?> signStatus(@RequestHeader("hedvig.token") final long memberId,
-      @Valid @RequestBody SignStatusRequest body) {
+  @GetMapping("signStatus")
+  public ResponseEntity<?> signStatus(@RequestHeader("hedvig.token") final long memberId) {
 
 
-    val session = signingService.getSignStatus(body.getOrderRef());
+    val session = signingService.getSignStatus(memberId);
 
     return session
         .map(x -> ResponseEntity.ok(SignStatusResponse.CreateFromEntity(x.getCollectResponse())))

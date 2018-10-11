@@ -6,8 +6,8 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.core.IsNull.nullValue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.ArgumentMatchers.matches;
 import static org.mockito.BDDMockito.given;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -91,40 +91,36 @@ public class SignControllerTest {
   }
 
   @Test
-  public void postToSignStatus_givenOrderRefThatDoesNotExist_thenReturn404() throws Exception{
+  public void getSignStatus_givenNoActiveSession_thenReturn404() throws Exception{
 
-    given(signingService.getSignStatus(ORDER_REFERENCE)).willReturn(Optional.empty());
+    given(signingService.getSignStatus(MEMBER_ID)).willReturn(Optional.empty());
 
     mockMvc
         .perform(
-            post("/v2/member/sign/signStatus")
+            get("/v2/member/sign/signStatus")
                 .header("hedvig.token", "1337")
-                .header("Content-Type", "application/json")
-                .header("Accept", "application/json")
-                .content("{\"orderRef\":\"someOrderRef\"}"))
+                .header("Accept", "application/json"))
         .andExpect(status().isNotFound());
   }
 
   @Test
-  public void postToSignStatus_givenNoCollecResponse_thenReturnOkWithCollectDataNull() throws Exception {
+  public void getSignStatus_givenNoCollectResponse_thenReturnOkWithCollectDataNull() throws Exception {
 
     SignSession session = makeSignSession(AUTOSTART_TOKEN);
 
-    given(signingService.getSignStatus(matches(ORDER_REFERENCE))).willReturn(Optional.of(session));
+    given(signingService.getSignStatus(MEMBER_ID)).willReturn(Optional.of(session));
 
     mockMvc
         .perform(
-            post("/v2/member/sign/signStatus")
+            get("/v2/member/sign/signStatus")
                 .header("hedvig.token", "1337")
-                .header("Content-Type", "application/json")
-                .header("Accept", "application/json")
-                .content("{\"orderRef\":\"orderReference\"}"))
+                .header("Accept", "application/json"))
         .andExpect(status().isOk())
         .andExpect(jsonPath(".collectData").value(allOf(contains(nullValue()),hasSize(1))));
   }
 
   @Test
-  public void postToSignStatus_givenCollectResponse_thenReturnCollectResponse() throws Exception{
+  public void getSignStatus_givenCollectResponse_thenReturnCollectResponse() throws Exception{
 
     SignSession session = makeSignSession(AUTOSTART_TOKEN);
 
@@ -134,15 +130,13 @@ public class SignControllerTest {
 
     session.setCollectResponse(cr);
 
-    given(signingService.getSignStatus(ORDER_REFERENCE)).willReturn(Optional.of(session));
+    given(signingService.getSignStatus(MEMBER_ID)).willReturn(Optional.of(session));
 
     mockMvc
         .perform(
-            post("/v2/member/sign/signStatus")
+            get("/v2/member/sign/signStatus")
                 .header("hedvig.token", "1337")
-                .header("Content-Type", "application/json")
-                .header("Accept", "application/json")
-                .content("{\"orderRef\":\"orderReference\"}"))
+                .header("Accept", "application/json"))
         .andExpect(status().isOk())
         .andExpect(jsonPath("collectData.status").value("complete"));
   }
