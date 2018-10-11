@@ -30,7 +30,6 @@ import org.quartz.SchedulerException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 
@@ -169,8 +168,8 @@ public class SigningService {
             });
   }
 
-  public Optional<SignSession> getSignStatus(@NonNull final String orderRef) {
-    return signSessionRepository.findByOrderReference(orderRef);
+  public Optional<SignSession> getSignStatus(@NonNull final long orderRef) {
+    return signSessionRepository.findByMemberId(orderRef);
   }
 
   @Transactional
