@@ -1,4 +1,4 @@
-package com.hedvig.memberservice.services;
+package com.hedvig.memberservice.services.redispublisher;
 
 import lombok.Value;
 
