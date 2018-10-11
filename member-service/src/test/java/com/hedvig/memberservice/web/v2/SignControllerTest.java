@@ -128,7 +128,7 @@ public class SignControllerTest {
     cr.setHintCode(null);
     cr.setStatus(CollectStatus.complete);
 
-    session.setCollectResponse(cr);
+    session.newCollectResponse(cr);
 
     given(signingService.getSignStatus(MEMBER_ID)).willReturn(Optional.of(session));
 
@@ -143,8 +143,7 @@ public class SignControllerTest {
 
   public SignSession makeSignSession(String autostartToken) {
     val session = new SignSession(MEMBER_ID);
-    session.setAutoStartToken(autostartToken);
-    session.setOrderReference(ORDER_REFERENCE);
+    session.newOrderStarted(new OrderResponse(ORDER_REFERENCE, autostartToken));
     return session;
   }
 }

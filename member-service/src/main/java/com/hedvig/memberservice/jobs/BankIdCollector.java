@@ -2,6 +2,7 @@ package com.hedvig.memberservice.jobs;
 
 import com.hedvig.memberservice.services.SigningService;
 import lombok.val;
+import org.quartz.DisallowConcurrentExecution;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 import org.slf4j.Logger;
@@ -9,6 +10,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.quartz.QuartzJobBean;
 
+@DisallowConcurrentExecution
 public class BankIdCollector extends QuartzJobBean {
 
   static final Logger log = LoggerFactory.getLogger(BankIdCollector.class);
