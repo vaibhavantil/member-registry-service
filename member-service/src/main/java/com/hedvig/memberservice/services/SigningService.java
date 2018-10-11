@@ -95,6 +95,11 @@ public class SigningService {
 
       scheduleCollectJob(result);
 
+      MemberEntity member = memberRepository.getOne(memberId);
+      member.setSsn(request.getSsn());
+      member.setEmail(request.getEmail());
+      memberRepository.save(member);
+
       return new MemberSignResponse(session.getSessionId(), SignStatus.IN_PROGRESS, result);
     } else {
       throw new CannotSignInsuranceException();

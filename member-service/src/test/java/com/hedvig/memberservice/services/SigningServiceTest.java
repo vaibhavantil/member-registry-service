@@ -109,6 +109,7 @@ public class SigningServiceTest {
         makeProductToSignStatusEligibleSwitching());
     given(bankIdRestService.startSign(matches(SSN), anyString(), anyString()))
         .willReturn(makeOrderResponse());
+    given(memberRepository.getOne(MEMBER_ID)).willReturn(new MemberEntity());
 
     val result = sut.startWebSign(MEMBER_ID, new WebsignRequest(EMAIL, SSN, "127.0.0.1"));
 
@@ -125,6 +126,8 @@ public class SigningServiceTest {
         makeProductToSignStatusEligibleSwitching());
     given(bankIdRestService.startSign(matches(SSN), anyString(), anyString()))
         .willReturn(makeOrderResponse());
+    given(memberRepository.getOne(MEMBER_ID)).willReturn(new MemberEntity());
+
 
     given(scheduler.scheduleJob(jobDetailArgumentCaptor.capture(), any())).willReturn(Date.from(
         Instant.now()));
@@ -179,6 +182,8 @@ public class SigningServiceTest {
         makeProductToSignStatusEligibleSwitching());
     val response = makeOrderResponse();
     given(bankIdRestService.startSign(anyString(), argumentCaptor.capture(), anyString())).willReturn(response);
+    given(memberRepository.getOne(MEMBER_ID)).willReturn(new MemberEntity());
+
 
     sut.startWebSign(MEMBER_ID, new WebsignRequest(EMAIL, SSN, "127.0.0.1"));
 
@@ -191,6 +196,8 @@ public class SigningServiceTest {
         makeProductToSignStatusEligibleNotSwitching());
     val response = makeOrderResponse();
     given(bankIdRestService.startSign(anyString(), argumentCaptor.capture(), anyString())).willReturn(response);
+    given(memberRepository.getOne(MEMBER_ID)).willReturn(new MemberEntity());
+
 
     sut.startWebSign(MEMBER_ID, new WebsignRequest(EMAIL, SSN, "127.0.0.1"));
 
