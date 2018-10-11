@@ -4,6 +4,7 @@ import static org.quartz.JobBuilder.newJob;
 import static org.quartz.SimpleScheduleBuilder.simpleSchedule;
 import static org.quartz.TriggerBuilder.newTrigger;
 
+import com.hedvig.external.bankID.bankIdRestTypes.BankIdRestError;
 import com.hedvig.external.bankID.bankIdRestTypes.CollectStatus;
 import com.hedvig.external.bankID.bankIdRestTypes.OrderResponse;
 import com.hedvig.memberservice.enteties.CollectResponse;
@@ -17,7 +18,6 @@ import com.hedvig.memberservice.jobs.BankIdCollector;
 import com.hedvig.memberservice.query.MemberEntity;
 import com.hedvig.memberservice.query.MemberRepository;
 import com.hedvig.memberservice.query.SignedMemberRepository;
-import com.hedvig.memberservice.services.events.SignSessionCompleteEvent;
 import com.hedvig.memberservice.services.member.CannotSignInsuranceException;
 import com.hedvig.memberservice.services.member.MemberService;
 import com.hedvig.memberservice.services.member.dto.MemberSignResponse;
@@ -47,7 +47,6 @@ public class SigningService {
   private final MemberService memberService;
   private final MemberRepository memberRepository;
   private final BotService botService;
-  private final ApplicationEventPublisher applicationEventPublisher;
 
   private final String switcherMessage;
   private final String nonSwitcherMessage;
@@ -61,7 +60,6 @@ public class SigningService {
       MemberService memberService,
       MemberRepository memberRepository,
       BotService botService,
-      ApplicationEventPublisher applicationEventPublisher,
       @Value("${hedvig.bankid.signmessage.switcher}") String switcherMessage,
       @Value("${hedvig.bankid.signmessage.nonSwitcher}") String nonSwitcherMessage) {
     this.bankidService = bankidService;
@@ -72,7 +70,6 @@ public class SigningService {
     this.memberService = memberService;
     this.memberRepository = memberRepository;
     this.botService = botService;
-    this.applicationEventPublisher = applicationEventPublisher;
     this.switcherMessage = switcherMessage;
     this.nonSwitcherMessage = nonSwitcherMessage;
   }
@@ -139,23 +136,28 @@ public class SigningService {
         .map(
             s -> {
               if (s.getStatus() == SignStatus.IN_PROGRESS) {
-                val response = bankidService.collect(orderReference);
+                try {
+                  val response = bankidService.collect(orderReference);
 
-                final CollectResponse collectResponse = new CollectResponse();
-                collectResponse.setStatus(response.getStatus());
-                collectResponse.setHintCode(response.getHintCode());
-                s.setCollectResponse(collectResponse);
+                  final CollectResponse collectResponse = new CollectResponse();
+                  collectResponse.setStatus(response.getStatus());
+                  collectResponse.setHintCode(response.getHintCode());
+                  s.setCollectResponse(collectResponse);
 
-                if (response.getStatus() == CollectStatus.complete) {
-                  memberService.bankIdSignComplete(s.getMemberId(), response);
-                  s.setStatus(SignStatus.COMPLETE);
-                } else if (response.getStatus() == CollectStatus.failed) {
+                  if (response.getStatus() == CollectStatus.complete) {
+                    memberService.bankIdSignComplete(s.getMemberId(), response);
+                    s.setStatus(SignStatus.COMPLETE);
+                  } else if (response.getStatus() == CollectStatus.failed) {
+                    s.setStatus(SignStatus.FAILED);
+                  }
+
+                  signSessionRepository.save(s);
+
+                  return response.getStatus() == CollectStatus.pending;
+                } catch (BankIdRestError e) {
                   s.setStatus(SignStatus.FAILED);
+                  signSessionRepository.save(s);
                 }
-
-                signSessionRepository.save(s);
-
-                return response.getStatus() == CollectStatus.pending;
               }
 
               return false;
@@ -194,7 +196,6 @@ public class SigningService {
           true);
 
       botService.initBotServiceSessionWebOnBoarding(s.getMemberId(), userContext);
-      applicationEventPublisher.publishEvent(new SignSessionCompleteEvent(s.getMemberId()));
     });
   }
 

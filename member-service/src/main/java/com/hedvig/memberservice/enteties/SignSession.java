@@ -10,7 +10,6 @@ import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
-import javax.persistence.PostPersist;
 import javax.validation.constraints.NotNull;
 import lombok.AccessLevel;
 import lombok.Data;

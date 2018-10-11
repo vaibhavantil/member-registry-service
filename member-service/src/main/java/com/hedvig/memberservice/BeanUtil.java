@@ -1,22 +1,23 @@
 package com.hedvig.memberservice;
 
-import org.springframework.beans.BeansException;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.ApplicationContextAware;
+import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.context.ApplicationEventPublisherAware;
 import org.springframework.stereotype.Service;
 
 @Service
-public class BeanUtil implements ApplicationContextAware {
+public class BeanUtil implements ApplicationEventPublisherAware {
 
-  private static ApplicationContext context;
+  private static ApplicationEventPublisher applicationEventPublisher;
+
+
+  public static  ApplicationEventPublisher getBean() {
+    return applicationEventPublisher;
+  }
+
 
   @Override
-  public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
-    context = applicationContext;
-  }
+  public void setApplicationEventPublisher(ApplicationEventPublisher applicationEventPublisher) {
 
-  public static <T> T getBean(Class<T> beanClass) {
-    return context.getBean(beanClass);
+    BeanUtil.applicationEventPublisher = applicationEventPublisher;
   }
-
 }

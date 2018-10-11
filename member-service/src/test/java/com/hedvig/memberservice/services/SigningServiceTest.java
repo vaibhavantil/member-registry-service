@@ -23,12 +23,11 @@ import com.hedvig.memberservice.enteties.SignSessionRepository;
 import com.hedvig.memberservice.enteties.SignStatus;
 import com.hedvig.memberservice.externalApi.botService.BotService;
 import com.hedvig.memberservice.externalApi.productsPricing.ProductApi;
-import com.hedvig.memberservice.query.MemberEntity;
 import com.hedvig.memberservice.externalApi.productsPricing.dto.ProductToSignStatusDTO;
+import com.hedvig.memberservice.query.MemberEntity;
 import com.hedvig.memberservice.query.MemberRepository;
 import com.hedvig.memberservice.query.SignedMemberEntity;
 import com.hedvig.memberservice.query.SignedMemberRepository;
-import com.hedvig.memberservice.services.events.SignSessionCompleteEvent;
 import com.hedvig.memberservice.services.member.CannotSignInsuranceException;
 import com.hedvig.memberservice.services.member.MemberService;
 import com.hedvig.memberservice.web.v2.dto.WebsignRequest;
@@ -49,7 +48,6 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.quartz.JobDetail;
 import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
-import org.springframework.context.ApplicationEventPublisher;
 
 @RunWith(MockitoJUnitRunner.class)
 public class SigningServiceTest {
@@ -62,8 +60,6 @@ public class SigningServiceTest {
   private static final String SWITCHER_MESSAGE = "SwitcherMessage";
   private static final String NON_SWITCHER_MESSAGE = "NonSwitcherMessage";
 
-  @Mock
-  private ApplicationEventPublisher applicationEventPublisher;
 
   @Mock
   ProductApi productApi;
@@ -102,7 +98,7 @@ public class SigningServiceTest {
     given(signedMemberRepository.findBySsn(any())).willReturn(Optional.empty());
     sut = new SigningService(bankIdRestService, productApi, signedMemberRepository,
         signSessionRepository, scheduler, memberService, memberRepository, botService,
-        applicationEventPublisher, SWITCHER_MESSAGE, NON_SWITCHER_MESSAGE);
+        SWITCHER_MESSAGE, NON_SWITCHER_MESSAGE);
   }
 
 
@@ -403,9 +399,6 @@ public class SigningServiceTest {
     given(memberRepository.getOne(anyLong())).willReturn(new MemberEntity());
 
     sut.productSignConfirmed(ORDER_REFERENCE);
-
-    then(applicationEventPublisher).should(times(1))
-        .publishEvent(eq(new SignSessionCompleteEvent(MEMBER_ID)));
 
   }
 
