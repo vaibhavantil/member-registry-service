@@ -4,16 +4,20 @@ import static org.quartz.JobBuilder.newJob;
 import static org.quartz.SimpleScheduleBuilder.simpleSchedule;
 import static org.quartz.TriggerBuilder.newTrigger;
 
+import com.hedvig.external.bankID.bankIdRestTypes.BankIdRestError;
 import com.hedvig.external.bankID.bankIdRestTypes.CollectStatus;
 import com.hedvig.external.bankID.bankIdRestTypes.OrderResponse;
 import com.hedvig.memberservice.enteties.CollectResponse;
 import com.hedvig.memberservice.enteties.SignSession;
 import com.hedvig.memberservice.enteties.SignSessionRepository;
 import com.hedvig.memberservice.enteties.SignStatus;
+import com.hedvig.memberservice.externalApi.botService.BotService;
+import com.hedvig.memberservice.externalApi.botService.dto.UpdateUserContextDTO;
 import com.hedvig.memberservice.externalApi.productsPricing.ProductApi;
 import com.hedvig.memberservice.jobs.BankIdCollector;
+import com.hedvig.memberservice.query.MemberEntity;
+import com.hedvig.memberservice.query.MemberRepository;
 import com.hedvig.memberservice.query.SignedMemberRepository;
-import com.hedvig.memberservice.services.events.SignSessionCompleteEvent;
 import com.hedvig.memberservice.services.member.CannotSignInsuranceException;
 import com.hedvig.memberservice.services.member.MemberService;
 import com.hedvig.memberservice.services.member.dto.MemberSignResponse;
@@ -41,7 +45,8 @@ public class SigningService {
   private final SignSessionRepository signSessionRepository;
   private final Scheduler scheduler;
   private final MemberService memberService;
-  private final ApplicationEventPublisher applicationEventPublisher;
+  private final MemberRepository memberRepository;
+  private final BotService botService;
 
   private final String switcherMessage;
   private final String nonSwitcherMessage;
@@ -53,7 +58,8 @@ public class SigningService {
       SignSessionRepository signSessionRepository,
       Scheduler scheduler,
       MemberService memberService,
-      ApplicationEventPublisher applicationEventPublisher,
+      MemberRepository memberRepository,
+      BotService botService,
       @Value("${hedvig.bankid.signmessage.switcher}") String switcherMessage,
       @Value("${hedvig.bankid.signmessage.nonSwitcher}") String nonSwitcherMessage) {
     this.bankidService = bankidService;
@@ -62,7 +68,8 @@ public class SigningService {
     this.signSessionRepository = signSessionRepository;
     this.scheduler = scheduler;
     this.memberService = memberService;
-    this.applicationEventPublisher = applicationEventPublisher;
+    this.memberRepository = memberRepository;
+    this.botService = botService;
     this.switcherMessage = switcherMessage;
     this.nonSwitcherMessage = nonSwitcherMessage;
   }
@@ -117,7 +124,7 @@ public class SigningService {
 
   /**
    *
-   * @param orderReference
+   * @param orderReference order reference from bankId
    * @return true if BankID needs to be collected again, otherwise false
    */
   @Transactional
@@ -129,23 +136,28 @@ public class SigningService {
         .map(
             s -> {
               if (s.getStatus() == SignStatus.IN_PROGRESS) {
-                val response = bankidService.collect(orderReference);
+                try {
+                  val response = bankidService.collect(orderReference);
 
-                final CollectResponse collectResponse = new CollectResponse();
-                collectResponse.setStatus(response.getStatus());
-                collectResponse.setHintCode(response.getHintCode());
-                s.setCollectResponse(collectResponse);
+                  final CollectResponse collectResponse = new CollectResponse();
+                  collectResponse.setStatus(response.getStatus());
+                  collectResponse.setHintCode(response.getHintCode());
+                  s.setCollectResponse(collectResponse);
 
-                if(response.getStatus() == CollectStatus.complete){
-                  memberService.bankIdSignComplete(s.getMemberId(), response);
-                  s.setStatus(SignStatus.COMPLETE);
-                }else if(response.getStatus() == CollectStatus.failed){
+                  if (response.getStatus() == CollectStatus.complete) {
+                    memberService.bankIdSignComplete(s.getMemberId(), response);
+                    s.setStatus(SignStatus.COMPLETE);
+                  } else if (response.getStatus() == CollectStatus.failed) {
+                    s.setStatus(SignStatus.FAILED);
+                  }
+
+                  signSessionRepository.save(s);
+
+                  return response.getStatus() == CollectStatus.pending;
+                } catch (BankIdRestError e) {
                   s.setStatus(SignStatus.FAILED);
+                  signSessionRepository.save(s);
                 }
-
-                signSessionRepository.save(s);
-
-                return response.getStatus() == CollectStatus.pending;
               }
 
               return false;
@@ -168,7 +180,22 @@ public class SigningService {
     session.ifPresent(s -> {
       s.setStatus(SignStatus.COMPLETE);
       signSessionRepository.save(s);
-      applicationEventPublisher.publishEvent(new SignSessionCompleteEvent(s.getMemberId()));
+
+      MemberEntity member = memberRepository.getOne(s.getMemberId());
+
+      UpdateUserContextDTO userContext = new UpdateUserContextDTO(String.valueOf(
+          s.getMemberId()),
+          member.getSsn(),
+          member.getFirstName(),
+          member.getLastName(),
+          member.getPhoneNumber(),
+          member.getEmail(),
+          member.getStreet(),
+          member.getCity(),
+          member.getZipCode(),
+          true);
+
+      botService.initBotServiceSessionWebOnBoarding(s.getMemberId(), userContext);
     });
   }
 

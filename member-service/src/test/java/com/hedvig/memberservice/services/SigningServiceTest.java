@@ -2,6 +2,7 @@ package com.hedvig.memberservice.services;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.matches;
@@ -20,11 +21,13 @@ import com.hedvig.external.bankID.bankIdRestTypes.OrderResponse;
 import com.hedvig.memberservice.enteties.SignSession;
 import com.hedvig.memberservice.enteties.SignSessionRepository;
 import com.hedvig.memberservice.enteties.SignStatus;
+import com.hedvig.memberservice.externalApi.botService.BotService;
 import com.hedvig.memberservice.externalApi.productsPricing.ProductApi;
 import com.hedvig.memberservice.externalApi.productsPricing.dto.ProductToSignStatusDTO;
+import com.hedvig.memberservice.query.MemberEntity;
+import com.hedvig.memberservice.query.MemberRepository;
 import com.hedvig.memberservice.query.SignedMemberEntity;
 import com.hedvig.memberservice.query.SignedMemberRepository;
-import com.hedvig.memberservice.services.events.SignSessionCompleteEvent;
 import com.hedvig.memberservice.services.member.CannotSignInsuranceException;
 import com.hedvig.memberservice.services.member.MemberService;
 import com.hedvig.memberservice.web.v2.dto.WebsignRequest;
@@ -45,7 +48,6 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.quartz.JobDetail;
 import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
-import org.springframework.context.ApplicationEventPublisher;
 
 @RunWith(MockitoJUnitRunner.class)
 public class SigningServiceTest {
@@ -58,8 +60,6 @@ public class SigningServiceTest {
   private static final String SWITCHER_MESSAGE = "SwitcherMessage";
   private static final String NON_SWITCHER_MESSAGE = "NonSwitcherMessage";
 
-  @Mock
-  private ApplicationEventPublisher applicationEventPublisher;
 
   @Mock
   ProductApi productApi;
@@ -79,6 +79,12 @@ public class SigningServiceTest {
   @Mock
   MemberService memberService;
 
+  @Mock
+  MemberRepository memberRepository;
+
+  @Mock
+  BotService botService;
+
   @Rule
   public ExpectedException thrown = ExpectedException.none();
 
@@ -88,24 +94,23 @@ public class SigningServiceTest {
   SigningService sut;
 
   @Before
-  public void setup(){
+  public void setup() {
     given(signedMemberRepository.findBySsn(any())).willReturn(Optional.empty());
     sut = new SigningService(bankIdRestService, productApi, signedMemberRepository,
-        signSessionRepository, scheduler, memberService, applicationEventPublisher,
+        signSessionRepository, scheduler, memberService, memberRepository, botService,
         SWITCHER_MESSAGE, NON_SWITCHER_MESSAGE);
   }
 
 
-
   @Test
-  public void startWebSign_givenMemberWithOkProduct_thenReturnOrderRefAndAutoStartToken(){
+  public void startWebSign_givenMemberWithOkProduct_thenReturnOrderRefAndAutoStartToken() {
 
     given(productApi.hasProductToSign(MEMBER_ID)).willReturn(
         makeProductToSignStatusEligibleSwitching());
     given(bankIdRestService.startSign(matches(SSN), anyString(), anyString()))
         .willReturn(makeOrderResponse());
 
-    val result = sut.startWebSign(MEMBER_ID, new WebsignRequest(EMAIL, SSN,"127.0.0.1"));
+    val result = sut.startWebSign(MEMBER_ID, new WebsignRequest(EMAIL, SSN, "127.0.0.1"));
 
     assertThat(result.getBankIdOrderResponse()).hasFieldOrProperty("orderRef");
     assertThat(result.getBankIdOrderResponse()).hasFieldOrProperty("autoStartToken");
@@ -132,7 +137,7 @@ public class SigningServiceTest {
   }
 
   @Test
-  public void startWebSign_givenMemberWithoutOkProduct_thenThrowException(){
+  public void startWebSign_givenMemberWithoutOkProduct_thenThrowException() {
 
     given(productApi.hasProductToSign(MEMBER_ID)).willReturn(
         makeProductToSignStatusNotEligibleSwitching());
@@ -142,29 +147,26 @@ public class SigningServiceTest {
   }
 
   @Test
-  public void startWebSign_givenMemberInSignedMemberEntity_thenThrowException(){
+  public void startWebSign_givenMemberInSignedMemberEntity_thenThrowException() {
 
     val memberId = MEMBER_ID;
-
 
     val memberEntity = new SignedMemberEntity();
     memberEntity.setId(memberId);
     memberEntity.setSsn(SSN);
     given(signedMemberRepository.findBySsn(SSN)).willReturn(Optional.of(memberEntity));
 
-
     thrown.expect(MemberHasExistingInsuranceException.class);
     sut.startWebSign(memberId, new WebsignRequest(EMAIL, SSN, "127.0.0.1"));
   }
 
   @Test
-  public void startWebSign_givenBankidThrowsError_thenThrowException(){
+  public void startWebSign_givenBankidThrowsError_thenThrowException() {
 
     given(productApi.hasProductToSign(MEMBER_ID)).willReturn(
         makeProductToSignStatusEligibleSwitching());
     given(bankIdRestService.startSign(any(), any(), anyString()))
         .willThrow(BankIdRestError.class);
-
 
     thrown.expect(BankIdRestError.class);
     sut.startWebSign(MEMBER_ID, new WebsignRequest(EMAIL, SSN, "127.0.0.1"));
@@ -267,7 +269,6 @@ public class SigningServiceTest {
     assertThat(session.getCollectResponse())
         .hasFieldOrPropertyWithValue("status", CollectStatus.pending);
     then(signSessionRepository).should(times(1)).save(eq(session));
-
   }
 
   @Test
@@ -379,6 +380,8 @@ public class SigningServiceTest {
     given(signSessionRepository.findByOrderReference(ORDER_REFERENCE))
         .willReturn(Optional.of(session));
 
+    given(memberRepository.getOne(anyLong())).willReturn(new MemberEntity());
+
     sut.productSignConfirmed(ORDER_REFERENCE);
 
     assertThat(session.getStatus()).isEqualTo(SignStatus.COMPLETE);
@@ -393,9 +396,9 @@ public class SigningServiceTest {
     given(signSessionRepository.findByOrderReference(ORDER_REFERENCE))
         .willReturn(Optional.of(session));
 
-    sut.productSignConfirmed(ORDER_REFERENCE);
+    given(memberRepository.getOne(anyLong())).willReturn(new MemberEntity());
 
-    then(applicationEventPublisher).should(times(1)).publishEvent(eq(new SignSessionCompleteEvent(MEMBER_ID)));
+    sut.productSignConfirmed(ORDER_REFERENCE);
 
   }
 
