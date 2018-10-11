@@ -5,10 +5,12 @@ import static javax.persistence.GenerationType.SEQUENCE;
 import java.time.Instant;
 import javax.persistence.Embedded;
 import javax.persistence.Entity;
+import javax.persistence.EntityListeners;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.PostPersist;
 import javax.validation.constraints.NotNull;
 import lombok.AccessLevel;
 import lombok.Data;
@@ -18,6 +20,7 @@ import org.hibernate.annotations.UpdateTimestamp;
 
 @Entity
 @Data
+@EntityListeners(SignSessionEntityListener.class)
 public class SignSession {
 
   @Id
@@ -53,4 +56,5 @@ public class SignSession {
   public SignSession(long memberId) {
     this.memberId = memberId;
   }
+
 }

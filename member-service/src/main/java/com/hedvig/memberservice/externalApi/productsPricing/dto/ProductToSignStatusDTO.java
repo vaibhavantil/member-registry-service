@@ -5,5 +5,6 @@ import lombok.Value;
 @Value
 public class ProductToSignStatusDTO {
 
-  private boolean hasProductToSign;
+  boolean eligibleToSign;
+  boolean switching;
 }

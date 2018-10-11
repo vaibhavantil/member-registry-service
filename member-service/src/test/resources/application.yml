@@ -1,3 +1,7 @@
 spring:
   datasource:
     url: jdbc:h2:mem:product-pricing;MODE=PostgreSQL
+  jpa:
+    hibernate:
+      naming:
+        implicit-strategy: org.hibernate.boot.model.naming.ImplicitNamingStrategyComponentPathImpl
