@@ -138,7 +138,8 @@ public class SignControllerTest {
                 .header("hedvig.token", "1337")
                 .header("Accept", "application/json"))
         .andExpect(status().isOk())
-        .andExpect(jsonPath("collectData.status").value("complete"));
+        .andExpect(jsonPath("collectData.status").value("complete"))
+        .andExpect(jsonPath("status").value( "IN_PROGRESS"));
   }
 
   public SignSession makeSignSession(String autostartToken) {

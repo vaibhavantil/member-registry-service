@@ -27,7 +27,7 @@ public class SignController {
 
 
   @PostMapping("websign")
-  public ResponseEntity<?> websign(@RequestHeader("hedvig.token") final long hedvigToken, @RequestBody WebsignRequest websignRequest) {
+  public ResponseEntity<WebSignResponse> websign(@RequestHeader("hedvig.token") final long hedvigToken, @RequestBody WebsignRequest websignRequest) {
 
     val result = signingService.startWebSign(hedvigToken, websignRequest);
 
@@ -35,13 +35,13 @@ public class SignController {
   }
 
   @GetMapping("signStatus")
-  public ResponseEntity<?> signStatus(@RequestHeader("hedvig.token") final long memberId) {
+  public ResponseEntity<SignStatusResponse> signStatus(@RequestHeader("hedvig.token") final long memberId) {
 
 
     val session = signingService.getSignStatus(memberId);
 
     return session
-        .map(x -> ResponseEntity.ok(SignStatusResponse.CreateFromEntity(x.getCollectResponse())))
+        .map(x -> ResponseEntity.ok(SignStatusResponse.CreateFromEntity(x)))
         .orElseGet(() -> ResponseEntity.notFound().build());
   }
 
