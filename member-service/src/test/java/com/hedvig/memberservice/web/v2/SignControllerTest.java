@@ -65,7 +65,7 @@ public class SignControllerTest {
                 .header("hedvig.token", "1337")
                 .header("Content-Type", "application/json")
                 .header("Accept", "application/json")
-                .content("{\"email\":\"test@test.com\"}"))
+                .content("{\"email\":\"test@test.com\", \"ssn\": \"191212121212\", \"ipAddress\":\"127.0.0.1\"}"))
         .andExpect(status().isForbidden());
   }
 
@@ -82,7 +82,7 @@ public class SignControllerTest {
                 .header("hedvig.token", "1337")
                 .header("Content-Type", "application/json")
                 .header("Accept", "application/json")
-                .content("{\"email\":\"test@test.com\"}"))
+                .content("{\"email\":\"test@test.com\", \"ssn\": \"191212121212\", \"ipAddress\":\"127.0.0.1\"}"))
         .andExpect(status().isOk())
         .andExpect(jsonPath(".bankIdOrderResponse.orderRef").exists())
         .andExpect(jsonPath(".bankIdOrderResponse.autoStartToken").exists())

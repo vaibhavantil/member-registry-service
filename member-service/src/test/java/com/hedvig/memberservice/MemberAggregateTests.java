@@ -212,10 +212,10 @@ public class MemberAggregateTests {
         .when(new BankIdSignCommand(memberId, referenceId, "", "", personalNumber))
         .expectSuccessfulHandlerExecution()
         .expectEvents(
+            new SSNUpdatedEvent(memberId, personalNumber),
             new NewCashbackSelectedEvent(memberId, DEFAULT_CASHBACK.toString()),
             new MemberSignedEvent(memberId, referenceId, "", "", personalNumber),
-            new TrackingIdCreatedEvent(memberId, TRACKING_UUID),
-            new SSNUpdatedEvent(memberId, personalNumber));
+            new TrackingIdCreatedEvent(memberId, TRACKING_UUID));
   }
 
 
@@ -238,9 +238,10 @@ public class MemberAggregateTests {
         .when(new BankIdSignCommand(memberId, referenceId, "", "", personalNumber))
         .expectSuccessfulHandlerExecution()
         .expectEvents(
+            new SSNUpdatedEvent(memberId, personalNumber),
             new NewCashbackSelectedEvent(memberId, DEFAULT_CASHBACK.toString()),
-            new MemberSignedEvent(memberId, referenceId, "", "", personalNumber),
-            new SSNUpdatedEvent(memberId, personalNumber));
+            new MemberSignedEvent(memberId, referenceId, "", "", personalNumber)
+            );
   }
 
   @Test
