@@ -90,7 +90,7 @@ public class SigningService {
     val productStatus = productApi.hasProductToSign(memberId);
     if (productStatus.isEligibleToSign()) {
 
-      val session = signSessionRepository.findByMemberId(memberId).orElseGet(SignSession::new);
+      val session = signSessionRepository.findByMemberId(memberId).orElseGet(() -> new SignSession(memberId));
 
       if (session.canReuseBankIdSession() == false) {
 
