@@ -37,6 +37,7 @@ import java.time.ZoneOffset;
 import java.util.Date;
 import java.util.Optional;
 import lombok.val;
+import org.axonframework.commandhandling.gateway.CommandGateway;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -92,6 +93,9 @@ public class SigningServiceTest {
   @Mock
   BotService botService;
 
+  @Mock
+  CommandGateway commandGateway;
+
   @Rule
   public ExpectedException thrown = ExpectedException.none();
 
@@ -104,7 +108,7 @@ public class SigningServiceTest {
   public void setup() {
     given(signedMemberRepository.findBySsn(any())).willReturn(Optional.empty());
     sut = new SigningService(bankIdRestService, productApi, signedMemberRepository,
-        signSessionRepository, scheduler, memberService, memberRepository, botService,
+        signSessionRepository, scheduler, memberService, memberRepository, botService, commandGateway,
         SWITCHER_MESSAGE, NON_SWITCHER_MESSAGE);
   }
 
@@ -132,6 +136,7 @@ public class SigningServiceTest {
         makeProductToSignStatusEligibleSwitching());
     given(bankIdRestService.startSign(matches(SSN), anyString(), anyString()))
         .willReturn(makeOrderResponse());
+
 
     given(scheduler.scheduleJob(jobDetailArgumentCaptor.capture(), any())).willReturn(Date.from(
         Instant.now()));
@@ -187,6 +192,7 @@ public class SigningServiceTest {
     val response = makeOrderResponse();
     given(bankIdRestService.startSign(anyString(), argumentCaptor.capture(), anyString())).willReturn(response);
 
+
     sut.startWebSign(MEMBER_ID, new WebsignRequest(EMAIL, SSN, IP_ADDRESS));
 
     assertThat(argumentCaptor.getValue()).isEqualTo(SWITCHER_MESSAGE);
@@ -198,6 +204,7 @@ public class SigningServiceTest {
         makeProductToSignStatusEligibleNotSwitching());
     val response = makeOrderResponse();
     given(bankIdRestService.startSign(anyString(), argumentCaptor.capture(), anyString())).willReturn(response);
+
 
     sut.startWebSign(MEMBER_ID, new WebsignRequest(EMAIL, SSN, IP_ADDRESS));
 
