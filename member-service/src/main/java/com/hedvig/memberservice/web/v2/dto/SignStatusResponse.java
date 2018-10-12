@@ -9,7 +9,7 @@ public class SignStatusResponse {
   CollectData collectData;
 
   public static SignStatusResponse CreateFromEntity(
-      com.hedvig.memberservice.enteties.CollectResponse collectResponse) {
+      com.hedvig.memberservice.entities.CollectResponse collectResponse) {
 
     val data =
         collectResponse == null
