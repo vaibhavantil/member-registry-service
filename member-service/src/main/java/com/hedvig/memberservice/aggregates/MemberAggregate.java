@@ -266,6 +266,12 @@ public class MemberAggregate {
 
   @CommandHandler
   void bankIdSignHandler(BankIdSignCommand cmd) {
+
+    if (cmd.getPersonalNumber() != null
+        && !Objects.equals(this.member.getSsn(), cmd.getPersonalNumber())) {
+      apply(new SSNUpdatedEvent(this.id, cmd.getPersonalNumber()));
+    }
+
     apply(new NewCashbackSelectedEvent(this.id, cashbackService.getDefaultId().toString()));
     apply(
         new MemberSignedEvent(
@@ -276,10 +282,7 @@ public class MemberAggregate {
       generateTrackingId();
     }
 
-    if (cmd.getPersonalNumber() != null
-        && !Objects.equals(this.member.getSsn(), cmd.getPersonalNumber())) {
-      apply(new SSNUpdatedEvent(this.id, cmd.getPersonalNumber()));
-    }
+
   }
 
   @CommandHandler

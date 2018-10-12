@@ -158,7 +158,7 @@ public class MemberEventListener {
 
     SignedMemberEntity sme = new SignedMemberEntity();
     sme.setId(e.getId());
-    sme.setSsn(m.getSsn());
+    sme.setSsn(e.getSsn());
 
     userRepo.save(m);
     signedMemberRepository.save(sme);
