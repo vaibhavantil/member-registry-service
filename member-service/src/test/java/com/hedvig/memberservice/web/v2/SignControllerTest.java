@@ -15,9 +15,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.hedvig.external.bankID.bankIdRestTypes.CollectStatus;
 import com.hedvig.external.bankID.bankIdRestTypes.OrderResponse;
 import com.hedvig.memberservice.TestApplication;
-import com.hedvig.memberservice.enteties.CollectResponse;
-import com.hedvig.memberservice.enteties.SignSession;
-import com.hedvig.memberservice.enteties.SignStatus;
+import com.hedvig.memberservice.entities.CollectResponse;
+import com.hedvig.memberservice.entities.SignSession;
+import com.hedvig.memberservice.entities.SignStatus;
 import com.hedvig.memberservice.services.BankIdRestService;
 import com.hedvig.memberservice.services.MemberHasExistingInsuranceException;
 import com.hedvig.memberservice.services.SigningService;
@@ -128,7 +128,7 @@ public class SignControllerTest {
     cr.setHintCode(null);
     cr.setStatus(CollectStatus.complete);
 
-    session.setCollectResponse(cr);
+    session.newCollectResponse(cr);
 
     given(signingService.getSignStatus(MEMBER_ID)).willReturn(Optional.of(session));
 
@@ -143,8 +143,7 @@ public class SignControllerTest {
 
   public SignSession makeSignSession(String autostartToken) {
     val session = new SignSession(MEMBER_ID);
-    session.setAutoStartToken(autostartToken);
-    session.setOrderReference(ORDER_REFERENCE);
+    session.newOrderStarted(new OrderResponse(ORDER_REFERENCE, autostartToken));
     return session;
   }
 }

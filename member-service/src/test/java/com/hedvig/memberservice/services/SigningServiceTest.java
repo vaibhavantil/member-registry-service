@@ -18,9 +18,9 @@ import com.hedvig.external.bankID.bankIdRestTypes.CollectResponse;
 import com.hedvig.external.bankID.bankIdRestTypes.CollectStatus;
 import com.hedvig.external.bankID.bankIdRestTypes.CompletionData;
 import com.hedvig.external.bankID.bankIdRestTypes.OrderResponse;
-import com.hedvig.memberservice.enteties.SignSession;
-import com.hedvig.memberservice.enteties.SignSessionRepository;
-import com.hedvig.memberservice.enteties.SignStatus;
+import com.hedvig.memberservice.entities.SignSession;
+import com.hedvig.memberservice.entities.SignSessionRepository;
+import com.hedvig.memberservice.entities.SignStatus;
 import com.hedvig.memberservice.externalApi.botService.BotService;
 import com.hedvig.memberservice.externalApi.productsPricing.ProductApi;
 import com.hedvig.memberservice.externalApi.productsPricing.dto.ProductToSignStatusDTO;
@@ -44,6 +44,7 @@ import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.quartz.JobDetail;
 import org.quartz.Scheduler;
@@ -52,13 +53,19 @@ import org.quartz.SchedulerException;
 @RunWith(MockitoJUnitRunner.class)
 public class SigningServiceTest {
 
-  private static final String ORDER_REFERENCE = "orderReference";
   private static final long MEMBER_ID = 1337L;
   private static final String SSN = "191212121212";
   private static final String EMAIL = "test@test.com";
-  private static final String AUTOSTART_TOKEN = "autostartToken";
+
+  private static final String ORDER_REFERENCE = "orderReference";
+  private static final String AUTO_START_TOKEN = "autoStartToken";
+
+  private static final String ORDER_REFERENCE2 = "orderReference2";
+  private static final String AUTO_START_TOKEN2 = "autoStartToken2";
+
   private static final String SWITCHER_MESSAGE = "SwitcherMessage";
   private static final String NON_SWITCHER_MESSAGE = "NonSwitcherMessage";
+  private static final String IP_ADDRESS = "127.0.0.1";
 
 
   @Mock
@@ -91,7 +98,7 @@ public class SigningServiceTest {
   private ArgumentCaptor<JobDetail> jobDetailArgumentCaptor = ArgumentCaptor.forClass(JobDetail.class);
   private ArgumentCaptor<String> argumentCaptor = ArgumentCaptor.forClass(String.class);
 
-  SigningService sut;
+  private SigningService sut;
 
   @Before
   public void setup() {
@@ -111,7 +118,7 @@ public class SigningServiceTest {
         .willReturn(makeOrderResponse());
     given(memberRepository.getOne(MEMBER_ID)).willReturn(new MemberEntity());
 
-    val result = sut.startWebSign(MEMBER_ID, new WebsignRequest(EMAIL, SSN, "127.0.0.1"));
+    val result = sut.startWebSign(MEMBER_ID, new WebsignRequest(EMAIL, SSN, IP_ADDRESS));
 
     assertThat(result.getBankIdOrderResponse()).hasFieldOrProperty("orderRef");
     assertThat(result.getBankIdOrderResponse()).hasFieldOrProperty("autoStartToken");
@@ -132,7 +139,7 @@ public class SigningServiceTest {
     given(scheduler.scheduleJob(jobDetailArgumentCaptor.capture(), any())).willReturn(Date.from(
         Instant.now()));
 
-    sut.startWebSign(MEMBER_ID, new WebsignRequest(EMAIL, SSN, "127.0.0.1"));
+    sut.startWebSign(MEMBER_ID, new WebsignRequest(EMAIL, SSN, IP_ADDRESS));
 
     then(scheduler).should(times(1)).scheduleJob(any(), any());
 
@@ -146,7 +153,7 @@ public class SigningServiceTest {
         makeProductToSignStatusNotEligibleSwitching());
 
     thrown.expect(CannotSignInsuranceException.class);
-    sut.startWebSign(MEMBER_ID, new WebsignRequest(EMAIL, SSN, "127.0.0.1"));
+    sut.startWebSign(MEMBER_ID, new WebsignRequest(EMAIL, SSN, IP_ADDRESS));
   }
 
   @Test
@@ -160,7 +167,7 @@ public class SigningServiceTest {
     given(signedMemberRepository.findBySsn(SSN)).willReturn(Optional.of(memberEntity));
 
     thrown.expect(MemberHasExistingInsuranceException.class);
-    sut.startWebSign(memberId, new WebsignRequest(EMAIL, SSN, "127.0.0.1"));
+    sut.startWebSign(memberId, new WebsignRequest(EMAIL, SSN, IP_ADDRESS));
   }
 
   @Test
@@ -172,7 +179,7 @@ public class SigningServiceTest {
         .willThrow(BankIdRestError.class);
 
     thrown.expect(BankIdRestError.class);
-    sut.startWebSign(MEMBER_ID, new WebsignRequest(EMAIL, SSN, "127.0.0.1"));
+    sut.startWebSign(MEMBER_ID, new WebsignRequest(EMAIL, SSN, IP_ADDRESS));
 
   }
 
@@ -185,13 +192,13 @@ public class SigningServiceTest {
     given(memberRepository.getOne(MEMBER_ID)).willReturn(new MemberEntity());
 
 
-    sut.startWebSign(MEMBER_ID, new WebsignRequest(EMAIL, SSN, "127.0.0.1"));
+    sut.startWebSign(MEMBER_ID, new WebsignRequest(EMAIL, SSN, IP_ADDRESS));
 
     assertThat(argumentCaptor.getValue()).isEqualTo(SWITCHER_MESSAGE);
   }
 
   @Test
-  public void startWebSign_givenNonSwitchingMember_thenSendSwitchingMessage(){
+  public void startWebSign_givenNonSwitchingMember_thenSendNonSwitchingMessage(){
     given(productApi.hasProductToSign(MEMBER_ID)).willReturn(
         makeProductToSignStatusEligibleNotSwitching());
     val response = makeOrderResponse();
@@ -199,9 +206,51 @@ public class SigningServiceTest {
     given(memberRepository.getOne(MEMBER_ID)).willReturn(new MemberEntity());
 
 
-    sut.startWebSign(MEMBER_ID, new WebsignRequest(EMAIL, SSN, "127.0.0.1"));
+    sut.startWebSign(MEMBER_ID, new WebsignRequest(EMAIL, SSN, IP_ADDRESS));
 
     assertThat(argumentCaptor.getValue()).isEqualTo(NON_SWITCHER_MESSAGE);
+  }
+
+  @Test
+  public void startWebSign_givenReusableBankIdSession_thenDontCallBankIdReturnSignSession(){
+    given(productApi.hasProductToSign(MEMBER_ID)).willReturn(
+        makeProductToSignStatusEligibleNotSwitching());
+
+    val signSession = Mockito.spy(SignSession.class);
+
+    given(signSession.canReuseBankIdSession()).willReturn(true);
+    given(signSession.getOrderResponse()).willReturn(new OrderResponse(ORDER_REFERENCE, AUTO_START_TOKEN));
+
+    given(signSessionRepository.findByMemberId(MEMBER_ID)).willReturn(
+        Optional.of(signSession));
+
+    val response = sut.startWebSign(MEMBER_ID, new WebsignRequest(EMAIL, SSN, IP_ADDRESS));
+
+    then(bankIdRestService).should(times(0)).startSign(anyString(), anyString(), anyString());
+
+    assertThat(response.getBankIdOrderResponse().getOrderRef()).isEqualTo(ORDER_REFERENCE);
+    assertThat(response.getBankIdOrderResponse().getAutoStartToken()).isEqualTo(AUTO_START_TOKEN);
+  }
+
+  @Test
+  public void startWebSign_givenNonReusableBankIdSession_thenCallBankIdReturnOrderRefAndAutoStartToken() {
+
+    given(productApi.hasProductToSign(MEMBER_ID)).willReturn(
+        makeProductToSignStatusEligibleSwitching());
+    val signSession = Mockito.mock(SignSession.class);
+
+    given(signSession.canReuseBankIdSession()).willReturn(false);
+    given(signSessionRepository.findByMemberId(MEMBER_ID)).willReturn(Optional.of(signSession));
+
+    given(bankIdRestService.startSign(matches(SSN), anyString(), anyString()))
+        .willReturn(makeOrderResponse(ORDER_REFERENCE2, AUTO_START_TOKEN2));
+
+    val result = sut.startWebSign(MEMBER_ID, new WebsignRequest(EMAIL, SSN, IP_ADDRESS));
+
+    assertThat(result.getBankIdOrderResponse()).hasFieldOrPropertyWithValue("orderRef", ORDER_REFERENCE2);
+    assertThat(result.getBankIdOrderResponse()).hasFieldOrPropertyWithValue("autoStartToken",
+        AUTO_START_TOKEN2);
+
   }
 
   @Test
@@ -331,7 +380,7 @@ public class SigningServiceTest {
 
   public CollectResponse makeCollectResponse(CollectStatus collectStatus) {
     val userData = new User(SSN, "Tolvan Tolvansson", "Tolvan", "Tolvansson");
-    val device = new Device("127.0.0.1");
+    val device = new Device(IP_ADDRESS);
     val cert = new Cert(
         LocalDateTime.parse("2018-09-01T00:00:00").toInstant(
             ZoneOffset.UTC).toEpochMilli(),
@@ -422,7 +471,12 @@ public class SigningServiceTest {
 
   private OrderResponse makeOrderResponse() {
     return new OrderResponse(
-        ORDER_REFERENCE, AUTOSTART_TOKEN);
+        ORDER_REFERENCE, AUTO_START_TOKEN);
+  }
+
+  private OrderResponse makeOrderResponse(String orderReference, String autostartToken) {
+    return new OrderResponse(
+        orderReference, autostartToken);
   }
 
   private ProductToSignStatusDTO makeProductToSignStatusEligibleSwitching() {
@@ -439,7 +493,7 @@ public class SigningServiceTest {
 
   private static SignSession makeSignSession(SignStatus inProgress) {
     val session = new SignSession(MEMBER_ID);
-    session.setOrderReference(ORDER_REFERENCE);
+    session.newOrderStarted(new OrderResponse(ORDER_REFERENCE, AUTO_START_TOKEN));
     session.setStatus(inProgress);
     return session;
   }

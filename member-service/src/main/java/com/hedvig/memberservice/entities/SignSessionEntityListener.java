@@ -1,4 +1,4 @@
-package com.hedvig.memberservice.enteties;
+package com.hedvig.memberservice.entities;
 
 import com.hedvig.memberservice.BeanUtil;
 import com.hedvig.memberservice.services.events.SignSessionCompleteEvent;

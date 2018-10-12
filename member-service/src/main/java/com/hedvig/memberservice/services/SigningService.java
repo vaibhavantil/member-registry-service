@@ -7,10 +7,10 @@ import static org.quartz.TriggerBuilder.newTrigger;
 import com.hedvig.external.bankID.bankIdRestTypes.BankIdRestError;
 import com.hedvig.external.bankID.bankIdRestTypes.CollectStatus;
 import com.hedvig.external.bankID.bankIdRestTypes.OrderResponse;
-import com.hedvig.memberservice.enteties.CollectResponse;
-import com.hedvig.memberservice.enteties.SignSession;
-import com.hedvig.memberservice.enteties.SignSessionRepository;
-import com.hedvig.memberservice.enteties.SignStatus;
+import com.hedvig.memberservice.entities.CollectResponse;
+import com.hedvig.memberservice.entities.SignSession;
+import com.hedvig.memberservice.entities.SignSessionRepository;
+import com.hedvig.memberservice.entities.SignStatus;
 import com.hedvig.memberservice.externalApi.botService.BotService;
 import com.hedvig.memberservice.externalApi.botService.dto.UpdateUserContextDTO;
 import com.hedvig.memberservice.externalApi.productsPricing.ProductApi;
@@ -84,23 +84,28 @@ public class SigningService {
 
     val productStatus = productApi.hasProductToSign(memberId);
     if (productStatus.isEligibleToSign()) {
-      val result = bankidService.startSign(request.getSsn(), createUserSignText(productStatus.isSwitching()), request.getIpAddress());
 
-      val session = new SignSession(memberId);
-      session.setAutoStartToken(result.getAutoStartToken());
-      session.setOrderReference(result.getOrderRef());
-      session.setStatus(SignStatus.IN_PROGRESS);
+      val session = signSessionRepository.findByMemberId(memberId).orElseGet(SignSession::new);
 
-      signSessionRepository.save(session);
+      if (session.canReuseBankIdSession() == false) {
 
-      scheduleCollectJob(result);
+        val result =
+            bankidService.startSign(
+                request.getSsn(),
+                createUserSignText(productStatus.isSwitching()),
+                request.getIpAddress());
 
-      MemberEntity member = memberRepository.getOne(memberId);
-      member.setSsn(request.getSsn());
-      member.setEmail(request.getEmail());
-      memberRepository.save(member);
+        session.newOrderStarted(result);
 
-      return new MemberSignResponse(session.getSessionId(), SignStatus.IN_PROGRESS, result);
+        signSessionRepository.save(session);
+        scheduleCollectJob(result);
+
+        return new MemberSignResponse(session.getSessionId(), SignStatus.IN_PROGRESS, result);
+      }
+
+      return new MemberSignResponse(session.getSessionId(), SignStatus.IN_PROGRESS,
+          session.getOrderResponse());
+
     } else {
       throw new CannotSignInsuranceException();
     }
@@ -110,8 +115,10 @@ public class SigningService {
   public void scheduleCollectJob(OrderResponse result) {
     try {
       val jobName = result.getOrderRef();
-      val jobDetail = newJob().withIdentity(jobName, "bankid.collect").ofType(
-          BankIdCollector.class).build();
+      val jobDetail = newJob()
+          .withIdentity(jobName, "bankid.collect")
+          .ofType(BankIdCollector.class)
+          .build();
 
       val trigger = newTrigger()
           .forJob(jobName, "bankid.collect")
@@ -146,7 +153,7 @@ public class SigningService {
                   final CollectResponse collectResponse = new CollectResponse();
                   collectResponse.setStatus(response.getStatus());
                   collectResponse.setHintCode(response.getHintCode());
-                  s.setCollectResponse(collectResponse);
+                  s.newCollectResponse(collectResponse);
 
                   if (response.getStatus() == CollectStatus.complete) {
                     memberService.bankIdSignComplete(s.getMemberId(), response);
