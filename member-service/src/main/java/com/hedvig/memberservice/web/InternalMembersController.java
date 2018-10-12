@@ -38,7 +38,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/i/member")
+@RequestMapping({"/i/member", "/_/member"})
 public class InternalMembersController {
 
   private final Logger log = LoggerFactory.getLogger(InternalMembersController.class);
