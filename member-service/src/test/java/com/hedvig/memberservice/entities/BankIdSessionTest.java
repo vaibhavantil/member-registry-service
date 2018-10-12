@@ -1,4 +1,4 @@
-package com.hedvig.memberservice.enteties;
+package com.hedvig.memberservice.entities;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

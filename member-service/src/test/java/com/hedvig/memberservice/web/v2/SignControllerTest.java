@@ -15,9 +15,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.hedvig.external.bankID.bankIdRestTypes.CollectStatus;
 import com.hedvig.external.bankID.bankIdRestTypes.OrderResponse;
 import com.hedvig.memberservice.TestApplication;
-import com.hedvig.memberservice.enteties.CollectResponse;
-import com.hedvig.memberservice.enteties.SignSession;
-import com.hedvig.memberservice.enteties.SignStatus;
+import com.hedvig.memberservice.entities.CollectResponse;
+import com.hedvig.memberservice.entities.SignSession;
+import com.hedvig.memberservice.entities.SignStatus;
 import com.hedvig.memberservice.services.BankIdRestService;
 import com.hedvig.memberservice.services.MemberHasExistingInsuranceException;
 import com.hedvig.memberservice.services.SigningService;

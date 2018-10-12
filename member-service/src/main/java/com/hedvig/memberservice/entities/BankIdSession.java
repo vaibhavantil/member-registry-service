@@ -1,4 +1,4 @@
-package com.hedvig.memberservice.enteties;
+package com.hedvig.memberservice.entities;
 
 import com.hedvig.external.bankID.bankIdRestTypes.CollectStatus;
 import java.time.Instant;
