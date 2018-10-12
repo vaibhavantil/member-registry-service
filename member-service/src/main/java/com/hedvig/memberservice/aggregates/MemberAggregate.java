@@ -19,6 +19,7 @@ import com.hedvig.memberservice.commands.SelectNewCashbackCommand;
 import com.hedvig.memberservice.commands.StartOnboardingWithSSNCommand;
 import com.hedvig.memberservice.commands.UpdateEmailCommand;
 import com.hedvig.memberservice.commands.UpdatePhoneNumberCommand;
+import com.hedvig.memberservice.commands.UpdateWebOnBoardingInfoCommand;
 import com.hedvig.memberservice.events.EmailUpdatedEvent;
 import com.hedvig.memberservice.events.InsuranceCancellationEvent;
 import com.hedvig.memberservice.events.LivingAddressUpdatedEvent;
@@ -227,12 +228,15 @@ public class MemberAggregate {
   @CommandHandler
   void memberUpdateContactInformation(MemberUpdateContactInformationCommand cmd) {
 
-    if (!Objects.equals(this.member.getFirstName(), cmd.getFirstName())
-        || !Objects.equals(this.member.getLastName(), cmd.getLastName())) {
+    if ((cmd.getFirstName() != null
+        && !Objects.equals(this.member.getFirstName(), cmd.getFirstName()))
+        || (cmd.getLastName() != null
+        && !Objects.equals(this.member.getLastName(), cmd.getLastName()))) {
       apply(new NameUpdatedEvent(this.id, cmd.getFirstName(), cmd.getLastName()));
     }
 
-    if (Objects.equals(member.getEmail(), cmd.getEmail()) == false) {
+    if (cmd.getEmail() != null
+        &&!Objects.equals(member.getEmail(), cmd.getEmail())) {
       apply(new EmailUpdatedEvent(this.id, cmd.getEmail()));
     }
 
@@ -254,7 +258,8 @@ public class MemberAggregate {
               cmd.getFloor()));
     }
 
-    if (!Objects.equals(member.getPhoneNumber(), cmd.getPhoneNumber())) {
+    if (cmd.getPhoneNumber() != null
+        && !Objects.equals(this.member.getPhoneNumber(), cmd.getPhoneNumber())) {
       apply(new PhoneNumberUpdatedEvent(this.id, cmd.getPhoneNumber()));
     }
   }
@@ -264,13 +269,15 @@ public class MemberAggregate {
     apply(new NewCashbackSelectedEvent(this.id, cashbackService.getDefaultId().toString()));
     apply(
         new MemberSignedEvent(
-            this.id, cmd.getReferenceId(), cmd.getSignature(), cmd.getOscpResponse(), cmd.getPersonalNumber()));
+            this.id, cmd.getReferenceId(), cmd.getSignature(), cmd.getOscpResponse(),
+            cmd.getPersonalNumber()));
 
     if (this.trackingId == null) {
       generateTrackingId();
     }
 
-    if (!Objects.equals(this.member.getSsn(), cmd.getPersonalNumber())) {
+    if (cmd.getPersonalNumber() != null
+        && !Objects.equals(this.member.getSsn(), cmd.getPersonalNumber())) {
       apply(new SSNUpdatedEvent(this.id, cmd.getPersonalNumber()));
     }
   }
@@ -287,14 +294,17 @@ public class MemberAggregate {
 
   @CommandHandler
   void editMemberInformation(EditMemberInformationCommand cmd) {
-    if (!Objects.equals(this.member.getFirstName(), cmd.getMember().getFirstName())
-        || !Objects.equals(this.member.getLastName(), cmd.getMember().getLastName())) {
+    if ((cmd.getMember().getFirstName() != null
+         && !Objects.equals(this.member.getFirstName(), cmd.getMember().getFirstName()))
+        || (cmd.getMember().getLastName() != null
+            && !Objects.equals(this.member.getLastName(), cmd.getMember().getLastName()))) {
       apply(
           new NameUpdatedEvent(
               this.id, cmd.getMember().getFirstName(), cmd.getMember().getLastName()));
     }
 
-    if (Objects.equals(member.getEmail(), cmd.getMember().getEmail()) == false) {
+    if (cmd.getMember().getEmail() != null
+        && !Objects.equals(member.getEmail(), cmd.getMember().getEmail())) {
       apply(new EmailUpdatedEvent(this.id, cmd.getMember().getEmail()));
     }
 
@@ -316,7 +326,8 @@ public class MemberAggregate {
               cmd.getMember().getFloor()));
     }
 
-    if (!Objects.equals(this.member.getPhoneNumber(), cmd.getMember().getPhoneNumber())) {
+    if (cmd.getMember().getPhoneNumber() != null
+        && !Objects.equals(this.member.getPhoneNumber(), cmd.getMember().getPhoneNumber())) {
       apply(new PhoneNumberUpdatedEvent(this.id, cmd.getMember().getPhoneNumber()));
     }
   }
@@ -326,8 +337,25 @@ public class MemberAggregate {
     log.info("Updating phoneNumber for member {}, new number: {}", cmd.getMemberId(),
         cmd.getPhoneNumber());
 
-    if (!Objects.equals(member.getPhoneNumber(), cmd.getPhoneNumber())) {
+    if (cmd.getPhoneNumber() != null
+        && !Objects.equals(member.getPhoneNumber(), cmd.getPhoneNumber())) {
       apply(new PhoneNumberUpdatedEvent(cmd.getMemberId(), cmd.getPhoneNumber()));
+    }
+  }
+
+  @CommandHandler
+  public void on(UpdateWebOnBoardingInfoCommand cmd) {
+    log.debug("Updating ssn and email for webOnBoarding member {}, ssn: {}, email: {}",
+        cmd.getMemberId(), cmd.getSSN(), cmd.getEmail());
+
+    if (cmd.getSSN() != null
+        && !Objects.equals(member.getSsn(), cmd.getSSN())) {
+      apply(new SSNUpdatedEvent(this.id, cmd.getSSN()));
+    }
+
+    if (cmd.getEmail() != null
+        && !Objects.equals(member.getEmail(), cmd.getEmail())) {
+      apply(new EmailUpdatedEvent(this.id, cmd.getEmail()));
     }
   }
 
