@@ -7,6 +7,7 @@ import static org.quartz.TriggerBuilder.newTrigger;
 import com.hedvig.external.bankID.bankIdRestTypes.BankIdRestError;
 import com.hedvig.external.bankID.bankIdRestTypes.CollectStatus;
 import com.hedvig.external.bankID.bankIdRestTypes.OrderResponse;
+import com.hedvig.memberservice.commands.UpdateWebOnBoardingInfoCommand;
 import com.hedvig.memberservice.entities.CollectResponse;
 import com.hedvig.memberservice.entities.SignSession;
 import com.hedvig.memberservice.entities.SignSessionRepository;
@@ -25,6 +26,7 @@ import com.hedvig.memberservice.web.v2.dto.WebsignRequest;
 import java.util.Optional;
 import javax.transaction.Transactional;
 import lombok.val;
+import org.axonframework.commandhandling.gateway.CommandGateway;
 import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
 import org.slf4j.Logger;
@@ -46,6 +48,7 @@ public class SigningService {
   private final MemberService memberService;
   private final MemberRepository memberRepository;
   private final BotService botService;
+  private final CommandGateway commandGateway;
 
   private final String switcherMessage;
   private final String nonSwitcherMessage;
@@ -59,6 +62,7 @@ public class SigningService {
       MemberService memberService,
       MemberRepository memberRepository,
       BotService botService,
+      CommandGateway commandGateway,
       @Value("${hedvig.bankid.signmessage.switcher}") String switcherMessage,
       @Value("${hedvig.bankid.signmessage.nonSwitcher}") String nonSwitcherMessage) {
     this.bankidService = bankidService;
@@ -69,6 +73,7 @@ public class SigningService {
     this.memberService = memberService;
     this.memberRepository = memberRepository;
     this.botService = botService;
+    this.commandGateway = commandGateway;
     this.switcherMessage = switcherMessage;
     this.nonSwitcherMessage = nonSwitcherMessage;
   }
@@ -103,6 +108,10 @@ public class SigningService {
         return new MemberSignResponse(session.getSessionId(), SignStatus.IN_PROGRESS, result);
       }
 
+      UpdateWebOnBoardingInfoCommand cmd = new UpdateWebOnBoardingInfoCommand(memberId,
+          request.getSsn(), request.getEmail());
+      commandGateway.sendAndWait(cmd);
+
       return new MemberSignResponse(session.getSessionId(), SignStatus.IN_PROGRESS,
           session.getOrderResponse());
 
@@ -122,7 +131,8 @@ public class SigningService {
 
       val trigger = newTrigger()
           .forJob(jobName, "bankid.collect")
-          .withSchedule(simpleSchedule().withIntervalInSeconds(1).withRepeatCount(900).withMisfireHandlingInstructionNowWithRemainingCount())
+          .withSchedule(simpleSchedule().withIntervalInSeconds(1).withRepeatCount(900)
+              .withMisfireHandlingInstructionNowWithRemainingCount())
           .build();
 
       scheduler.scheduleJob(jobDetail,
@@ -134,7 +144,6 @@ public class SigningService {
   }
 
   /**
-   *
    * @param orderReference order reference from bankId
    * @return true if BankID needs to be collected again, otherwise false
    */
