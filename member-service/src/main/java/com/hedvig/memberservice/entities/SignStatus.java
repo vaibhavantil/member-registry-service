@@ -5,6 +5,6 @@ public enum SignStatus {
   INITIATED,
   IN_PROGRESS,
   FAILED,
-  COMPLETE
+  COMPLETED
 
 }

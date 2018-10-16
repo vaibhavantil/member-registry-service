@@ -166,7 +166,7 @@ public class SigningService {
 
                   if (response.getStatus() == CollectStatus.complete) {
                     memberService.bankIdSignComplete(s.getMemberId(), response);
-                    s.setStatus(SignStatus.COMPLETE);
+                    s.setStatus(SignStatus.COMPLETED);
                   } else if (response.getStatus() == CollectStatus.failed) {
                     s.setStatus(SignStatus.FAILED);
                   }
@@ -198,7 +198,7 @@ public class SigningService {
     val session = signSessionRepository.findByOrderReference(id);
 
     session.ifPresent(s -> {
-      s.setStatus(SignStatus.COMPLETE);
+      s.setStatus(SignStatus.COMPLETED);
       signSessionRepository.save(s);
 
       MemberEntity member = memberRepository.getOne(s.getMemberId());

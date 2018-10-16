@@ -270,7 +270,7 @@ public class SigningServiceTest {
 
   @Test
   public void collectBankId_givenSessionThatIsComplete_thenReturnFalse() {
-    SignSession session = makeSignSession(SignStatus.COMPLETE);
+    SignSession session = makeSignSession(SignStatus.COMPLETED);
 
     given(signSessionRepository.findByOrderReference(ORDER_REFERENCE))
         .willReturn(Optional.of(session));
@@ -374,7 +374,7 @@ public class SigningServiceTest {
 
     sut.collectBankId(ORDER_REFERENCE);
 
-    assertThat(session.getStatus()).isEqualTo(SignStatus.COMPLETE);
+    assertThat(session.getStatus()).isEqualTo(SignStatus.COMPLETED);
 
   }
 
@@ -440,7 +440,7 @@ public class SigningServiceTest {
 
     sut.productSignConfirmed(ORDER_REFERENCE);
 
-    assertThat(session.getStatus()).isEqualTo(SignStatus.COMPLETE);
+    assertThat(session.getStatus()).isEqualTo(SignStatus.COMPLETED);
     then(signSessionRepository).should(times(1)).save(session);
 
   }
