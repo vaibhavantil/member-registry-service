@@ -9,9 +9,11 @@ import com.hedvig.memberservice.commands.UpdateEmailCommand;
 import com.hedvig.memberservice.commands.UpdatePhoneNumberCommand;
 import com.hedvig.memberservice.query.MemberEntity;
 import com.hedvig.memberservice.query.MemberRepository;
+import com.hedvig.memberservice.util.PageableBuilder;
 import com.hedvig.memberservice.web.dto.InsuranceCancellationDTO;
 import com.hedvig.memberservice.web.dto.InternalMember;
 import com.hedvig.memberservice.web.dto.MemberCancelInsurance;
+import com.hedvig.memberservice.web.dto.MembersSortColumn;
 import com.hedvig.memberservice.web.dto.StartOnboardingWithSSNRequest;
 import com.hedvig.memberservice.web.dto.UpdateContactInformationRequest;
 import com.hedvig.memberservice.web.dto.UpdateEmailRequest;
@@ -25,6 +27,8 @@ import lombok.val;
 import org.axonframework.commandhandling.gateway.CommandGateway;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -107,11 +111,16 @@ public class InternalMembersController {
   @Transactional
   public Iterator<InternalMember> searchMembers(
       @RequestParam(name = "status", defaultValue = "", required = false) String status,
-      @RequestParam(name = "query", defaultValue = "", required = false) String query) {
+      @RequestParam(name = "query", defaultValue = "", required = false) String query,
+      @RequestParam(name = "page", required = false) Integer page,
+      @RequestParam(name = "pageSize", required = false) Integer pageSize,
+      @RequestParam(name = "sortBy", required = false) MembersSortColumn sortBy,
+      @RequestParam(name = "sortOrder", required = false) Sort.Direction sortDirection) {
 
     status = status.trim();
     query = query.trim();
-    try (val stream = search(status, query)) {
+
+    try (val stream = search(status, query, page, pageSize, sortBy, sortDirection)) {
       return stream.map(InternalMember::fromEntity).collect(Collectors.toList()).iterator();
     }
   }
@@ -168,28 +177,45 @@ public class InternalMembersController {
     return ResponseEntity.ok(members);
   }
 
-  private Stream<MemberEntity> search(String status, String query) {
+  private Stream<MemberEntity> search(String status, String query, Integer page, Integer pageSize, MembersSortColumn sortBy, Sort.Direction sortDirection) {
+    PageableBuilder pageableBuilder = new PageableBuilder();
+
+    if (page != null && pageSize != null) {
+      pageableBuilder = pageableBuilder.paged(page, pageSize);
+    }
+
+    if (sortBy != null) {
+      String entSortProp = MemberEntity.SORT_COLUMN_MAPPING.get(sortBy);
+      if (entSortProp == null) {
+        throw new RuntimeException("Invalid entity sort property");
+      }
+
+      pageableBuilder = pageableBuilder.orderBy(entSortProp, sortDirection);
+    }
+
+    Pageable pageReq = pageableBuilder.build();
+
     if (!query.equals("")) {
       Long memberId = parseMemberId(query);
       if (memberId != null) {
         if (!status.equals("")) {
-          return memberRepository.searchByIdAndStatus(memberId, status);
+          return memberRepository.searchByIdAndStatus(memberId, status, pageReq);
         } else {
-          return memberRepository.searchById(memberId);
+          return memberRepository.searchById(memberId, pageReq);
         }
       }
     }
 
     if (!status.equals("") && !query.equals("")) {
-      return memberRepository.searchByStatusAndQuery(status, query);
+      return memberRepository.searchByStatusAndQuery(status, query, pageReq);
     }
     if (!status.equals("")) {
-      return memberRepository.searchByStatus(status);
+      return memberRepository.searchByStatus(status, pageReq);
     }
     if (!query.equals("")) {
-      return memberRepository.searchByQuery(query);
+      return memberRepository.searchByQuery(query, pageReq);
     }
-    return memberRepository.searchAll();
+    return memberRepository.searchAll(pageReq);
   }
 
   private Long parseMemberId(String query) {

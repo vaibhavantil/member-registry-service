@@ -3,6 +3,8 @@ package com.hedvig.memberservice.query;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
+
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -17,26 +19,26 @@ public interface MemberRepository extends JpaRepository<MemberEntity, Long> {
   Long countSignedMembers();
 
   @Query("SELECT m FROM MemberEntity m")
-  Stream<MemberEntity> searchAll();
+  Stream<MemberEntity> searchAll(Pageable p);
 
   @Query(
       "SELECT m FROM MemberEntity m WHERE lower(m.firstName) LIKE lower(concat('%', :query, '%')) "
           + "OR lower(m.lastName) LIKE lower(concat('%', :query, '%'))")
-  Stream<MemberEntity> searchByQuery(@Param("query") String query);
+  Stream<MemberEntity> searchByQuery(@Param("query") String query, Pageable p);
 
   @Query("SELECT m FROM MemberEntity m WHERE status = :status")
-  Stream<MemberEntity> searchByStatus(@Param("status") String status);
+  Stream<MemberEntity> searchByStatus(@Param("status") String status, Pageable p);
 
   @Query(
       "SELECT m FROM MemberEntity m WHERE status = :status "
           + "AND (lower(m.firstName) LIKE lower(concat('%', :query, '%')) "
           + "OR lower(m.lastName) LIKE lower(concat('%', :query, '%')))")
   Stream<MemberEntity> searchByStatusAndQuery(
-      @Param("status") String status, @Param("query") String query);
+      @Param("status") String status, @Param("query") String query, Pageable p);
 
   @Query("select m from MemberEntity m where m.id = :id")
-  Stream<MemberEntity> searchById(@Param("id") Long id);
+  Stream<MemberEntity> searchById(@Param("id") Long id, Pageable p);
 
   @Query("select m from MemberEntity m where m.id = :id and m.status = :status")
-  Stream<MemberEntity> searchByIdAndStatus(@Param("id") Long id, @Param("status") String status);
+  Stream<MemberEntity> searchByIdAndStatus(@Param("id") Long id, @Param("status") String status, Pageable p);
 }
