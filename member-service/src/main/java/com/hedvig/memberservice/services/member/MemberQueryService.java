@@ -8,6 +8,7 @@ import com.hedvig.memberservice.web.dto.InternalMemberSearchRequestDTO;
 import com.hedvig.memberservice.web.dto.InternalMemberSearchResultDTO;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
@@ -47,7 +48,7 @@ public class MemberQueryService {
 
     if (request.getSortBy() != null) {
       String entSortProp = MemberEntity.SORT_COLUMN_MAPPING.get(request.getSortBy());
-      pageableBuilder = pageableBuilder.orderBy(entSortProp, request.getSortDirection());
+      pageableBuilder = pageableBuilder.orderBy(entSortProp, request.getSortDirection(), Sort.NullHandling.NULLS_LAST);
     }
 
     Pageable pageReq = pageableBuilder.build();

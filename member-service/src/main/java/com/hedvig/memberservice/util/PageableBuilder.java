@@ -21,8 +21,8 @@ public class PageableBuilder {
     return this;
   }
 
-  public PageableBuilder orderBy(String prop, Sort.Direction direction) {
-    orders.add(new Sort.Order(direction, prop));
+  public PageableBuilder orderBy(String prop, Sort.Direction direction, Sort.NullHandling nullHandlingHint) {
+    orders.add(new Sort.Order(direction, prop, nullHandlingHint));
     return this;
   }
 

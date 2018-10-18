@@ -13,7 +13,10 @@ import javax.persistence.Table;
 import com.hedvig.memberservice.aggregates.MemberStatus;
 import com.hedvig.memberservice.util.EnumMapChecker;
 import com.hedvig.memberservice.web.dto.MembersSortColumn;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.Formula;
 
@@ -23,6 +26,9 @@ import org.hibernate.annotations.Formula;
     indexes = {@Index(columnList = "ssn", name = "ix_member_entity_ssn")})
 @Getter
 @Setter
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class MemberEntity {
 
   @Id private Long id;
@@ -51,7 +57,7 @@ public class MemberEntity {
 
   private Instant createdOn;
 
-  @Formula("concat(last_name, first_name)")
+  @Formula("concat(last_name, ' ', first_name)")
   private String fullName;
 
   public static final EnumMap<MembersSortColumn, String> SORT_COLUMN_MAPPING = new EnumMap<MembersSortColumn, String>(MembersSortColumn.class) {{
