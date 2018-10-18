@@ -45,7 +45,7 @@ public class InternalMember {
   public static InternalMember fromEntity(MemberEntity entity) {
     val dto = new InternalMember();
     dto.setMemberId(entity.getId());
-    dto.setStatus(entity.getStatus());
+    dto.setStatus(entity.getStatus() != null ? entity.getStatus().name() : "");
     dto.setSsn(entity.getSsn());
     dto.setFirstName(entity.getFirstName());
     dto.setLastName(entity.getLastName());

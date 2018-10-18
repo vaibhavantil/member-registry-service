@@ -4,12 +4,15 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.util.EnumMap;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.Id;
 import javax.persistence.Index;
 import javax.persistence.Table;
 
+import com.hedvig.memberservice.aggregates.MemberStatus;
+import com.hedvig.memberservice.util.EnumMapChecker;
 import com.hedvig.memberservice.web.dto.MembersSortColumn;
-import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.Formula;
@@ -21,10 +24,14 @@ import org.hibernate.annotations.Formula;
 @Getter
 @Setter
 public class MemberEntity {
-  String zipCode;
+
   @Id private Long id;
+
+  String zipCode;
   private String apartment;
-  private String status;
+
+  @Enumerated(EnumType.STRING)
+  private MemberStatus status;
   private String ssn;
   private String firstName;
   private String lastName;
@@ -51,5 +58,7 @@ public class MemberEntity {
     put(MembersSortColumn.CREATED, "createdOn");
     put(MembersSortColumn.NAME, "fullName");
     put(MembersSortColumn.SIGN_UP, "signedOn");
+
+    EnumMapChecker.ensureMapContainsAllEnumVals(this, MembersSortColumn.class);
   }};
 }

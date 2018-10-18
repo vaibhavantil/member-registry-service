@@ -136,7 +136,7 @@ public class MembersController {
               m2.setStreet("");
               m2.setCity("");
               m2.setApartment("");
-              m2.setStatus("");
+              m2.setStatus(null);
               m2.setSsn("");
               m2.setEmail("");
               m2.setCashbackId(cashbackService.getDefaultId().toString());
