@@ -1,5 +1,6 @@
 package com.hedvig.memberservice.web;
 
+import com.hedvig.memberservice.aggregates.MemberStatus;
 import com.hedvig.memberservice.commands.EditMemberInformationCommand;
 import com.hedvig.memberservice.commands.InsurnaceCancellationCommand;
 import com.hedvig.memberservice.commands.MemberCancelInsuranceCommand;
@@ -9,22 +10,29 @@ import com.hedvig.memberservice.commands.UpdateEmailCommand;
 import com.hedvig.memberservice.commands.UpdatePhoneNumberCommand;
 import com.hedvig.memberservice.query.MemberEntity;
 import com.hedvig.memberservice.query.MemberRepository;
+import com.hedvig.memberservice.services.member.MemberQueryService;
 import com.hedvig.memberservice.web.dto.InsuranceCancellationDTO;
 import com.hedvig.memberservice.web.dto.InternalMember;
+import com.hedvig.memberservice.web.dto.InternalMemberSearchRequestDTO;
+import com.hedvig.memberservice.web.dto.InternalMemberSearchResultDTO;
 import com.hedvig.memberservice.web.dto.MemberCancelInsurance;
+import com.hedvig.memberservice.web.dto.MembersSortColumn;
 import com.hedvig.memberservice.web.dto.StartOnboardingWithSSNRequest;
 import com.hedvig.memberservice.web.dto.UpdateContactInformationRequest;
 import com.hedvig.memberservice.web.dto.UpdateEmailRequest;
 import com.hedvig.memberservice.web.dto.UpdatePhoneNumberRequest;
-import java.util.Iterator;
+
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
+
 import lombok.val;
 import org.axonframework.commandhandling.gateway.CommandGateway;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -44,10 +52,12 @@ public class InternalMembersController {
   private final Logger log = LoggerFactory.getLogger(InternalMembersController.class);
   private final CommandGateway commandBus;
   private final MemberRepository memberRepository;
+  private final MemberQueryService memberQueryService;
 
-  public InternalMembersController(CommandGateway commandBus, MemberRepository memberRepository) {
+  public InternalMembersController(CommandGateway commandBus, MemberRepository memberRepository, MemberQueryService memberQueryService) {
     this.commandBus = commandBus;
     this.memberRepository = memberRepository;
+    this.memberQueryService = memberQueryService;
   }
 
   @GetMapping("/{memberId}")
@@ -104,16 +114,27 @@ public class InternalMembersController {
   }
 
   @RequestMapping(value = "/search", method = RequestMethod.GET)
-  @Transactional
-  public Iterator<InternalMember> searchMembers(
+  public List<InternalMember> searchMembers(
       @RequestParam(name = "status", defaultValue = "", required = false) String status,
       @RequestParam(name = "query", defaultValue = "", required = false) String query) {
 
-    status = status.trim();
     query = query.trim();
-    try (val stream = search(status, query)) {
-      return stream.map(InternalMember::fromEntity).collect(Collectors.toList()).iterator();
+
+    InternalMemberSearchRequestDTO req = new InternalMemberSearchRequestDTO();
+    req.setQuery(query);
+    try {
+      req.setStatus(MemberStatus.valueOf(status.trim()));
+    } catch (Exception e) {
+      //for backward compatibility
+      return Collections.emptyList();
     }
+
+    return memberQueryService.search(req).getMembers();
+  }
+
+  @RequestMapping(value = "/searchPaged", method = RequestMethod.GET)
+  public InternalMemberSearchResultDTO searchMembersPaged(InternalMemberSearchRequestDTO req) {
+    return memberQueryService.search(req);
   }
 
   @RequestMapping(value = "/{memberId}/cancelMembership", method = RequestMethod.POST)
@@ -168,35 +189,7 @@ public class InternalMembersController {
     return ResponseEntity.ok(members);
   }
 
-  private Stream<MemberEntity> search(String status, String query) {
-    if (!query.equals("")) {
-      Long memberId = parseMemberId(query);
-      if (memberId != null) {
-        if (!status.equals("")) {
-          return memberRepository.searchByIdAndStatus(memberId, status);
-        } else {
-          return memberRepository.searchById(memberId);
-        }
-      }
-    }
 
-    if (!status.equals("") && !query.equals("")) {
-      return memberRepository.searchByStatusAndQuery(status, query);
-    }
-    if (!status.equals("")) {
-      return memberRepository.searchByStatus(status);
-    }
-    if (!query.equals("")) {
-      return memberRepository.searchByQuery(query);
-    }
-    return memberRepository.searchAll();
-  }
 
-  private Long parseMemberId(String query) {
-    try {
-      return Long.parseLong(query);
-    } catch (NumberFormatException e) {
-      return null;
-    }
-  }
+
 }

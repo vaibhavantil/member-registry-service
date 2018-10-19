@@ -47,7 +47,7 @@ public class MemberEventListener {
     System.out.println("MemberEventListener: " + e);
     MemberEntity user = new MemberEntity();
     user.setId(e.getId());
-    user.setStatus(e.getStatus().name());
+    user.setStatus(e.getStatus());
     user.setCreatedOn(e.getCreatedOn());
 
     userRepo.save(user);
@@ -130,7 +130,7 @@ public class MemberEventListener {
     logger.debug("Started handling event: {}", eventMessage.getIdentifier());
 
     MemberEntity member = userRepo.findById(e.getMemberId()).get();
-    member.setStatus(e.getNewStatus().name());
+    member.setStatus(e.getNewStatus());
 
     userRepo.saveAndFlush(member);
     logger.debug("Completed handling event: {}", eventMessage.getIdentifier());
@@ -139,7 +139,7 @@ public class MemberEventListener {
   @EventHandler
   void on(MemberInactivatedEvent e) {
     MemberEntity m = userRepo.findById(e.getId()).get();
-    m.setStatus(MemberStatus.INACTIVATED.name());
+    m.setStatus(MemberStatus.INACTIVATED);
     userRepo.save(m);
   }
 
@@ -153,7 +153,7 @@ public class MemberEventListener {
   @EventHandler
   void on(MemberSignedEvent e, @Timestamp Instant timestamp) {
     MemberEntity m = userRepo.findById(e.getId()).get();
-    m.setStatus(MemberStatus.SIGNED.name());
+    m.setStatus(MemberStatus.SIGNED);
     m.setSignedOn(timestamp);
 
     SignedMemberEntity sme = new SignedMemberEntity();
@@ -167,7 +167,7 @@ public class MemberEventListener {
   @EventHandler
   void on(MemberCancellationEvent e) {
     MemberEntity m = userRepo.findById(e.getMemberId()).get();
-    m.setStatus(MemberStatus.TERMINATED.name());
+    m.setStatus(MemberStatus.TERMINATED);
 
     userRepo.save(m);
   }

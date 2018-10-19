@@ -2,39 +2,69 @@ package com.hedvig.memberservice.query;
 
 import java.time.Instant;
 import java.time.LocalDate;
+import java.util.EnumMap;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.Id;
 import javax.persistence.Index;
 import javax.persistence.Table;
+
+import com.hedvig.memberservice.aggregates.MemberStatus;
+import com.hedvig.memberservice.util.EnumMapChecker;
+import com.hedvig.memberservice.web.dto.MembersSortColumn;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.Formula;
 
 @Entity
 @Table(
     name = "member_entity",
     indexes = {@Index(columnList = "ssn", name = "ix_member_entity_ssn")})
+@Getter
+@Setter
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class MemberEntity {
 
-  @Getter @Setter String zipCode;
-  @Id @Getter @Setter private Long id;
-  @Getter @Setter private String apartment;
-  @Getter @Setter private String status;
-  @Getter @Setter private String ssn;
-  @Getter @Setter private String firstName;
-  @Getter @Setter private String lastName;
-  @Getter @Setter private LocalDate birthDate;
-  @Getter @Setter private String street;
-  @Getter @Setter private String city;
+  @Id private Long id;
 
-  @Getter @Setter private String phoneNumber;
+  String zipCode;
+  private String apartment;
 
-  @Getter @Setter private String email;
+  @Enumerated(EnumType.STRING)
+  private MemberStatus status;
+  private String ssn;
+  private String firstName;
+  private String lastName;
+  private LocalDate birthDate;
+  private String street;
+  private String city;
 
-  @Getter @Setter private String cashbackId;
+  private String phoneNumber;
 
-  @Getter @Setter private Integer floor;
+  private String email;
 
-  @Getter @Setter private Instant signedOn;
+  private String cashbackId;
 
-  @Getter @Setter private Instant createdOn;
+  private Integer floor;
+
+  private Instant signedOn;
+
+  private Instant createdOn;
+
+  @Formula("concat(last_name, ' ', first_name)")
+  private String fullName;
+
+  public static final EnumMap<MembersSortColumn, String> SORT_COLUMN_MAPPING = new EnumMap<MembersSortColumn, String>(MembersSortColumn.class) {{
+    put(MembersSortColumn.CREATED, "createdOn");
+    put(MembersSortColumn.NAME, "fullName");
+    put(MembersSortColumn.SIGN_UP, "signedOn");
+
+    EnumMapChecker.ensureMapContainsAllEnumVals(this, MembersSortColumn.class);
+  }};
 }
