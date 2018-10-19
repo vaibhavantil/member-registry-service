@@ -4,6 +4,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -14,8 +15,12 @@ import com.hedvig.memberservice.query.MemberRepository;
 import com.hedvig.memberservice.services.member.MemberQueryService;
 import com.hedvig.memberservice.web.InternalMembersController;
 import com.hedvig.memberservice.web.dto.Address;
+import com.hedvig.memberservice.web.dto.InternalMemberSearchRequestDTO;
+import com.hedvig.memberservice.web.dto.InternalMemberSearchResultDTO;
 import com.hedvig.memberservice.web.dto.StartOnboardingWithSSNRequest;
 import com.hedvig.memberservice.web.dto.UpdateContactInformationRequest;
+
+import java.util.Collections;
 import java.util.Objects;
 import java.util.Optional;
 import org.axonframework.commandhandling.gateway.CommandGateway;
@@ -109,5 +114,20 @@ public class InternalMembersControllerTests {
 
     verify(commandGateway, times(1))
         .sendAndWait(new StartOnboardingWithSSNCommand(memberId, request));
+  }
+
+  @Test
+  public void TestSearchAcceptsEmptyStatus() throws Exception {
+    InternalMemberSearchRequestDTO request = new InternalMemberSearchRequestDTO("", null, null, null, null, null);
+    when(memberQueryService.search(request)).thenReturn(new InternalMemberSearchResultDTO(Collections.emptyList(), null, null));
+
+    mockMvc
+      .perform(
+        get("/i/member/search?status=&query=")
+      )
+      .andExpect(status().is2xxSuccessful());
+
+    verify(memberQueryService, times(1))
+      .search(request);
   }
 }

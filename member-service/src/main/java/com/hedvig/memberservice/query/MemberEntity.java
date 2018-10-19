@@ -57,7 +57,7 @@ public class MemberEntity {
 
   private Instant createdOn;
 
-  @Formula("concat(last_name, ' ', first_name)")
+  @Formula("last_name || ' ' || first_name")
   private String fullName;
 
   public static final EnumMap<MembersSortColumn, String> SORT_COLUMN_MAPPING = new EnumMap<MembersSortColumn, String>(MembersSortColumn.class) {{
