@@ -35,6 +35,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -123,7 +124,9 @@ public class InternalMembersController {
     InternalMemberSearchRequestDTO req = new InternalMemberSearchRequestDTO();
     req.setQuery(query);
     try {
-      req.setStatus(MemberStatus.valueOf(status.trim()));
+      if (StringUtils.hasText(status)) {
+        req.setStatus(MemberStatus.valueOf(status.trim()));
+      }
     } catch (Exception e) {
       //for backward compatibility
       return Collections.emptyList();
