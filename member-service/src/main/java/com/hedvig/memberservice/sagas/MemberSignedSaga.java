@@ -39,7 +39,7 @@ public class MemberSignedSaga {
           eventMessage.getTimestamp(),
           e.getSsn());
     }catch (RuntimeException ex) {
-      log.error("Could not notify product-pricing about signed member for memberId: {}", e.getId());
+      log.error("Could not notify product-pricing about signed member for memberId: {}", e.getId(), ex);
     }
 
 
