@@ -4,11 +4,10 @@ spring.jpa.properties.hibernate.dialect: com.hedvig.memberservice.PostgresDialec
 spring.jpa.hibernate.ddl-auto: update
 spring.jackson.serialization.write_dates_as_timestamps: false
 
-management.security.enabled: false
-
 
 hedvig.bankid.signmessage.switcher: Jag har tagit del av förköpsinformation och villkor och bekräftar genom att signera att jag vill byta till Hedvig när min gamla försäkring går ut. Jag ger också  Hedvig fullmakt att byta försäkringen åt mig.
 hedvig.bankid.signmessage.nonSwitcher: Jag har tagit del av förköpsinformation och villkor och bekräftar genom att signera att jag skaffar en försäkring hos Hedvig.
+logging.level.root: WARN
 logging.level.com.hedvig: DEBUG
 
 spring:
