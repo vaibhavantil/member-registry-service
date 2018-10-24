@@ -8,6 +8,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.matches;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
+import static org.mockito.BDDMockito.willThrow;
 import static org.mockito.Mockito.times;
 
 import com.hedvig.external.bankID.bankIdRestTypes.BankIdRestError;
@@ -446,19 +447,6 @@ public class SigningServiceTest {
   }
 
   @Test
-  public void productSignConfirmed_givenSignSession_thenSendsEventOnRabbitMq() {
-    val session = makeSignSession(SignStatus.IN_PROGRESS);
-
-    given(signSessionRepository.findByOrderReference(ORDER_REFERENCE))
-        .willReturn(Optional.of(session));
-
-    given(memberRepository.getOne(anyLong())).willReturn(new MemberEntity());
-
-    sut.productSignConfirmed(ORDER_REFERENCE);
-
-  }
-
-  @Test
   public void productSignConfirmed_givenNoSignSession_thenDoesNothing() {
 
     given(signSessionRepository.findByOrderReference(ORDER_REFERENCE)).willReturn(Optional.empty());
@@ -467,6 +455,20 @@ public class SigningServiceTest {
 
     then(signSessionRepository).should(times(0)).save(any());
 
+  }
+
+  @Test
+  public void productSignConfirmed_whenBotserviceThrowsException_Continues() {
+    val session = makeSignSession(SignStatus.IN_PROGRESS);
+
+    given(signSessionRepository.findByOrderReference(ORDER_REFERENCE))
+        .willReturn(Optional.of(session));
+
+    given(memberRepository.getOne(anyLong())).willReturn(new MemberEntity());
+
+    willThrow(RuntimeException.class).given(botService).initBotServiceSessionWebOnBoarding(anyLong(), any());
+
+    sut.productSignConfirmed(ORDER_REFERENCE);
   }
 
   private OrderResponse makeOrderResponse() {

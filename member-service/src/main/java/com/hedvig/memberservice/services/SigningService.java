@@ -215,7 +215,12 @@ public class SigningService {
           member.getZipCode(),
           true);
 
-      botService.initBotServiceSessionWebOnBoarding(s.getMemberId(), userContext);
+      try {
+        botService.initBotServiceSessionWebOnBoarding(s.getMemberId(), userContext);
+      }
+      catch (RuntimeException ex) {
+        log.error("Could not initialize bot-service for memberId: {}", s.getMemberId());
+      }
     });
   }
 

@@ -3,15 +3,8 @@ package com.hedvig.memberservice;
 import com.hedvig.common.UUIDGenerator;
 import com.hedvig.common.UUIDGeneratorImpl;
 import com.hedvig.external.bisnodeBCI.BisnodeClient;
-import com.hedvig.memberservice.aggregates.MemberAggregate;
-import com.hedvig.memberservice.services.bankid.BankIdSOAPApi;
 import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
-import org.axonframework.config.EventHandlingConfiguration;
-import org.axonframework.eventsourcing.AggregateFactory;
-import org.axonframework.spring.eventsourcing.SpringPrototypeAggregateFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
@@ -19,10 +12,6 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.cloud.openfeign.EnableFeignClients;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.ComponentScan;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Primary;
-import org.springframework.context.annotation.Profile;
 import org.springframework.http.client.BufferingClientHttpRequestFactory;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
@@ -47,11 +36,6 @@ public class MemberRegistryApplication {
     SpringApplication.run(MemberRegistryApplication.class, args);
   }
 
-  @Autowired
-  public void configure(EventHandlingConfiguration config) {
-    // config.usingTrackingProcessors();
-  }
-
   @Bean
   public RetryTemplate retryTemplate() {
     RetryTemplate retryTemplate = new RetryTemplate();
@@ -65,11 +49,6 @@ public class MemberRegistryApplication {
     retryTemplate.setRetryPolicy(retryPolicy);
 
     return retryTemplate;
-  }
-
-  @Bean
-  public ScheduledExecutorService executorService() {
-    return new ScheduledThreadPoolExecutor(5);
   }
 
   @Bean
@@ -93,14 +72,5 @@ public class MemberRegistryApplication {
   @Bean
   public UUIDGenerator uuidGenerator() {
     return new UUIDGeneratorImpl();
-  }
-
-  @Bean
-  public AggregateFactory<MemberAggregate> memberAggregateFactory() {
-    SpringPrototypeAggregateFactory<MemberAggregate> springPrototypeAggregateFactory =
-        new SpringPrototypeAggregateFactory<>();
-    springPrototypeAggregateFactory.setPrototypeBeanName("memberAggregate");
-
-    return springPrototypeAggregateFactory;
   }
 }
