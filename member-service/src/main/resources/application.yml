@@ -8,7 +8,7 @@ spring.jackson.serialization.write_dates_as_timestamps: false
 hedvig.bankid.signmessage.switcher: Jag har tagit del av förköpsinformation och villkor och bekräftar genom att signera att jag vill byta till Hedvig när min gamla försäkring går ut. Jag ger också  Hedvig fullmakt att byta försäkringen åt mig.
 hedvig.bankid.signmessage.nonSwitcher: Jag har tagit del av förköpsinformation och villkor och bekräftar genom att signera att jag skaffar en försäkring hos Hedvig.
 logging.level.root: WARN
-logging.level.com.hedvig: DEBUG
+logging.level.com.hedvig: INFO
 
 spring:
   jpa:
