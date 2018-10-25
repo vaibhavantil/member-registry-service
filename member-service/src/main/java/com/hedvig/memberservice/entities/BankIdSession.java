@@ -2,6 +2,7 @@ package com.hedvig.memberservice.entities;
 
 import com.hedvig.external.bankID.bankIdRestTypes.CollectStatus;
 import java.time.Instant;
+import javax.persistence.Column;
 import javax.persistence.Embeddable;
 import javax.persistence.Embedded;
 import javax.validation.constraints.NotNull;
@@ -20,9 +21,11 @@ public class BankIdSession {
   String orderReference;
 
   @Setter(AccessLevel.NONE)
+  @Column(name = "bank_id_session_created_at")
   Instant createdAt;
 
   @Setter(AccessLevel.NONE)
+  @Column(name = "bank_id_session_updated_at")
   Instant updatedAt;
 
   @Embedded
