@@ -171,9 +171,8 @@ public class InternalMembersController {
     }
   }
 
-  @GetMapping("/many/[{memberIds}]")
-  public ResponseEntity<List<InternalMember>> getMembers(
-      @PathVariable("memberIds") List<Long> memberIds) {
+  @PostMapping("/many")
+  public ResponseEntity<List<InternalMember>> getMembers(@RequestBody List<Long> memberIds) {
     val members =
         memberRepository
             .findAllByIdIn(memberIds)
