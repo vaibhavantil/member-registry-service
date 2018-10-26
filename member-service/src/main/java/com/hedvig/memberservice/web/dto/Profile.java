@@ -13,6 +13,7 @@ import lombok.Value;
 public class Profile {
 
   private String memberId;
+  private String ssn;
   private String name;
   private String firstName;
   private String lastName;
