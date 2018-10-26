@@ -6,5 +6,5 @@ import lombok.Value;
 @Value
 public class ChargeMembersDTO {
 
-  private List<Long> memberIds;
+  private List<String> memberIds;
 }

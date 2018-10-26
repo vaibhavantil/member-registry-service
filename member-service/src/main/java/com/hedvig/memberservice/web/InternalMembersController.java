@@ -17,25 +17,19 @@ import com.hedvig.memberservice.web.dto.InternalMember;
 import com.hedvig.memberservice.web.dto.InternalMemberSearchRequestDTO;
 import com.hedvig.memberservice.web.dto.InternalMemberSearchResultDTO;
 import com.hedvig.memberservice.web.dto.MemberCancelInsurance;
-import com.hedvig.memberservice.web.dto.MembersSortColumn;
 import com.hedvig.memberservice.web.dto.StartOnboardingWithSSNRequest;
 import com.hedvig.memberservice.web.dto.UpdateContactInformationRequest;
 import com.hedvig.memberservice.web.dto.UpdateEmailRequest;
 import com.hedvig.memberservice.web.dto.UpdatePhoneNumberRequest;
-
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
-
 import lombok.val;
 import org.axonframework.commandhandling.gateway.CommandGateway;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -56,7 +50,8 @@ public class InternalMembersController {
   private final MemberRepository memberRepository;
   private final MemberQueryService memberQueryService;
 
-  public InternalMembersController(CommandGateway commandBus, MemberRepository memberRepository, MemberQueryService memberQueryService) {
+  public InternalMembersController(CommandGateway commandBus, MemberRepository memberRepository,
+      MemberQueryService memberQueryService) {
     this.commandBus = commandBus;
     this.memberRepository = memberRepository;
     this.memberQueryService = memberQueryService;
@@ -176,7 +171,8 @@ public class InternalMembersController {
   public ResponseEntity<List<InternalMember>> getMembers(@RequestBody ChargeMembersDTO dto) {
     val members =
         memberRepository
-            .findAllByIdIn(dto.getMemberIds())
+            .findAllByIdIn(
+                dto.getMemberIds().stream().map(Long::parseLong).collect(Collectors.toList()))
             .stream()
             .map(m -> InternalMember.fromEntity(m))
             .collect(Collectors.toList());
@@ -191,8 +187,6 @@ public class InternalMembersController {
 
     return ResponseEntity.ok(members);
   }
-
-
 
 
 }
