@@ -11,6 +11,7 @@ import com.hedvig.memberservice.commands.UpdatePhoneNumberCommand;
 import com.hedvig.memberservice.query.MemberEntity;
 import com.hedvig.memberservice.query.MemberRepository;
 import com.hedvig.memberservice.services.member.MemberQueryService;
+import com.hedvig.memberservice.web.dto.ChargeMembersDTO;
 import com.hedvig.memberservice.web.dto.InsuranceCancellationDTO;
 import com.hedvig.memberservice.web.dto.InternalMember;
 import com.hedvig.memberservice.web.dto.InternalMemberSearchRequestDTO;
@@ -172,18 +173,18 @@ public class InternalMembersController {
   }
 
   @PostMapping("/many")
-  public ResponseEntity<List<InternalMember>> getMembers(@RequestBody List<Long> memberIds) {
+  public ResponseEntity<List<InternalMember>> getMembers(@RequestBody ChargeMembersDTO dto) {
     val members =
         memberRepository
-            .findAllByIdIn(memberIds)
+            .findAllByIdIn(dto.getMemberIds())
             .stream()
             .map(m -> InternalMember.fromEntity(m))
             .collect(Collectors.toList());
 
-    if (memberIds.size() != members.size()) {
+    if (dto.getMemberIds().size() != members.size()) {
       log.error(
           "Length mismatch of supplied members and found members: wanted {}, found {}",
-          memberIds.size(),
+          dto.getMemberIds().size(),
           members.size());
       return ResponseEntity.notFound().build();
     }
