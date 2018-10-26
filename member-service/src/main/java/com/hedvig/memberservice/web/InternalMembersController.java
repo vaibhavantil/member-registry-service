@@ -11,30 +11,25 @@ import com.hedvig.memberservice.commands.UpdatePhoneNumberCommand;
 import com.hedvig.memberservice.query.MemberEntity;
 import com.hedvig.memberservice.query.MemberRepository;
 import com.hedvig.memberservice.services.member.MemberQueryService;
+import com.hedvig.memberservice.web.dto.ChargeMembersDTO;
 import com.hedvig.memberservice.web.dto.InsuranceCancellationDTO;
 import com.hedvig.memberservice.web.dto.InternalMember;
 import com.hedvig.memberservice.web.dto.InternalMemberSearchRequestDTO;
 import com.hedvig.memberservice.web.dto.InternalMemberSearchResultDTO;
 import com.hedvig.memberservice.web.dto.MemberCancelInsurance;
-import com.hedvig.memberservice.web.dto.MembersSortColumn;
 import com.hedvig.memberservice.web.dto.StartOnboardingWithSSNRequest;
 import com.hedvig.memberservice.web.dto.UpdateContactInformationRequest;
 import com.hedvig.memberservice.web.dto.UpdateEmailRequest;
 import com.hedvig.memberservice.web.dto.UpdatePhoneNumberRequest;
-
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
-
 import lombok.val;
 import org.axonframework.commandhandling.gateway.CommandGateway;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -55,7 +50,8 @@ public class InternalMembersController {
   private final MemberRepository memberRepository;
   private final MemberQueryService memberQueryService;
 
-  public InternalMembersController(CommandGateway commandBus, MemberRepository memberRepository, MemberQueryService memberQueryService) {
+  public InternalMembersController(CommandGateway commandBus, MemberRepository memberRepository,
+      MemberQueryService memberQueryService) {
     this.commandBus = commandBus;
     this.memberRepository = memberRepository;
     this.memberQueryService = memberQueryService;
@@ -171,28 +167,26 @@ public class InternalMembersController {
     }
   }
 
-  @GetMapping("/many/[{memberIds}]")
-  public ResponseEntity<List<InternalMember>> getMembers(
-      @PathVariable("memberIds") List<Long> memberIds) {
+  @PostMapping("/many")
+  public ResponseEntity<List<InternalMember>> getMembers(@RequestBody ChargeMembersDTO dto) {
     val members =
         memberRepository
-            .findAllByIdIn(memberIds)
+            .findAllByIdIn(
+                dto.getMemberIds().stream().map(Long::parseLong).collect(Collectors.toList()))
             .stream()
             .map(m -> InternalMember.fromEntity(m))
             .collect(Collectors.toList());
 
-    if (memberIds.size() != members.size()) {
+    if (dto.getMemberIds().size() != members.size()) {
       log.error(
           "Length mismatch of supplied members and found members: wanted {}, found {}",
-          memberIds.size(),
+          dto.getMemberIds().size(),
           members.size());
       return ResponseEntity.notFound().build();
     }
 
     return ResponseEntity.ok(members);
   }
-
-
 
 
 }
