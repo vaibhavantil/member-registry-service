@@ -114,17 +114,13 @@ public class MembersController {
 
     log.info("New member created with id: " + id);
     return ResponseEntity.ok()
-      .contentType(MediaType.APPLICATION_JSON)
-      .body("{\"memberId\":" + id + "}");
+        .contentType(MediaType.APPLICATION_JSON)
+        .body("{\"memberId\":" + id + "}");
   }
 
   @GetMapping("/me")
   public ResponseEntity<?> me(@RequestHeader(value = "hedvig.token", required = false) Long hid) {
     Optional<MemberEntity> m = repo.findById(hid);
-    // if(!m.isPresent()) {
-    //    return ResponseEntity.status(HttpStatus.NOT_FOUND).body("{\"message:\":\"Member not
-    // found.\"");
-    // }
 
     MemberEntity me =
         m.orElseGet(
@@ -143,14 +139,14 @@ public class MembersController {
               return m2;
             });
 
-    UUID selectedCashbackId =
-        me.getCashbackId() == null
-            ? cashbackService.getDefaultId()
-            : UUID.fromString(me.getCashbackId());
-    CashbackOption cashbackOption =
-        cashbackService
-            .getCashbackOption(selectedCashbackId)
-            .orElseGet(cashbackService::getDefaultCashback);
+    CashbackOption cashbackOption = null;
+
+    if (me.getCashbackId() != null) {
+      cashbackOption =
+          cashbackService
+              .getCashbackOption(UUID.fromString(me.getCashbackId()))
+              .orElseGet(cashbackService::getDefaultCashback);
+    }
 
     InsuranceStatusDTO insuranceStatus = this.productApi.getInsuranceStatus(hid);
     Optional<TrackingIdEntity> tId = trackingRepo.findByMemberId(hid);
@@ -158,6 +154,7 @@ public class MembersController {
     Profile p =
         new Profile(
             me.getId().toString(),
+            me.getSsn(),
             String.format("%s %s", me.getFirstName(), me.getLastName()),
             me.getFirstName(),
             me.getLastName(),
@@ -169,28 +166,18 @@ public class MembersController {
             insuranceStatus.getInsuranceStatus().equals("ACTIVE")
                 ? "Betalas via autogiro"
                 : "Betalning sätts upp när försäkringen aktiveras", // ""XXXX XXXX 1234",
-            cashbackOption.name,
+            cashbackOption == null ? null : cashbackOption.name,
             insuranceStatus.getInsuranceStatus(),
             insuranceStatus.getInsuranceStatus().equals("ACTIVE")
                 ? LocalDate.now().withDayOfMonth(25)
                 : null,
-            cashbackOption.signature,
-            String.format(cashbackOption.paragraph, me.getFirstName()),
-            cashbackOption.selectedUrl,
+            cashbackOption == null ? null : cashbackOption.signature,
+            cashbackOption == null ? null : String.format(cashbackOption.paragraph, me.getFirstName()),
+            cashbackOption == null ? null : cashbackOption.selectedUrl,
             insuranceStatus.getSafetyIncreasers(),
             tId.map(TrackingIdEntity::getTrackingId).orElse(null));
 
     return ResponseEntity.ok(p);
   }
-
-  /*
-  @RequestMapping("/test")
-  public ResponseEntity<?> testSqs(@RequestParam Integer delay){
-      val headers = new HashMap<String, Object>();
-      headers.put(SQS_DELAY_HEADER, delay);
-      SqsMessageHeaders sqsMessageHeaders = new SqsMessageHeaders(headers);
-      queueMessagingTemplate.convertAndSend("member-service-signup-email", MessageBuilder.createMessage(new SignupEmail("12345", "Johan", "tjelldén"), new SqsMessageHeaders(headers)), sqsMessageHeaders);
-      return ResponseEntity.ok("ok");
-  }*/
-
+  
 }
