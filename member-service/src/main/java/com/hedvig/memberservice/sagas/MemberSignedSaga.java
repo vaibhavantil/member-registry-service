@@ -2,6 +2,7 @@ package com.hedvig.memberservice.sagas;
 
 import com.hedvig.memberservice.events.MemberSignedEvent;
 import com.hedvig.memberservice.externalApi.productsPricing.ProductApi;
+import com.hedvig.memberservice.services.SNSNotificationService;
 import com.hedvig.memberservice.services.SigningService;
 import org.axonframework.eventhandling.EventMessage;
 import org.axonframework.eventhandling.saga.EndSaga;
@@ -21,6 +22,7 @@ public class MemberSignedSaga {
   @Autowired transient ProductApi productApi;
 
   @Autowired transient SigningService signingService;
+  @Autowired transient SNSNotificationService snsNotificationService;
 
   @SagaEventHandler(associationProperty = "id")
   @StartSaga
@@ -44,6 +46,7 @@ public class MemberSignedSaga {
 
 
     signingService.productSignConfirmed(e.getReferenceId());
+    snsNotificationService.sendMemberSignedNotification(e.getId());
   }
 
 }
