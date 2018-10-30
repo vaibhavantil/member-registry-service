@@ -279,7 +279,7 @@ public class MemberAggregateTests {
 
     @Override
     protected T doCreateAggregate(String aggregateIdentifier, DomainEventMessage firstEvent) {
-      return (T) new MemberAggregate(bisnodeClient, cashbackService, uuidGenerator);
+      return (T) new MemberAggregate(bisnodeClient, cashbackService, uuidGenerator, true);
     }
   }
 }
