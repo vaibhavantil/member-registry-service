@@ -13,8 +13,8 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
 import static org.mockito.BDDMockito.times;
 import static org.mockito.BDDMockito.any;
@@ -59,7 +59,7 @@ public class MembersControllerTest {
 
   @Test
   public void givenACreatedMember_whenAssigningTrackingId_thenShouldGetTrackingId() throws Exception {
-    when(memberRepository.findById(MEMBER_ID)).thenReturn(Optional.of(new MemberEntity()));
+    given(memberRepository.findById(MEMBER_ID)).willReturn(Optional.of(new MemberEntity()));
     mockMvc
         .perform(post("/member/trackingId", "").content(objectMapper.writeValueAsString(new TrackingIdDto(TRACKING_ID)))
             .contentType(MediaType.APPLICATION_JSON).header("hedvig.token", Long.toString(MEMBER_ID)))
@@ -70,7 +70,7 @@ public class MembersControllerTest {
 
   @Test
   public void givenANonExistentMember_whenAssigningTrackingId_thenShouldReturnNotFound() throws Exception {
-    when(memberRepository.findById(MEMBER_ID)).thenReturn(Optional.empty());
+    given(memberRepository.findById(MEMBER_ID)).willReturn(Optional.empty());
 
     mockMvc
         .perform(post("/member/trackingId", "").content(objectMapper.writeValueAsString(new TrackingIdDto(TRACKING_ID)))
