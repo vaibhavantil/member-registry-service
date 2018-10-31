@@ -19,6 +19,7 @@ import com.hedvig.external.bankID.bankIdRestTypes.CollectResponse;
 import com.hedvig.external.bankID.bankIdRestTypes.CollectStatus;
 import com.hedvig.external.bankID.bankIdRestTypes.CompletionData;
 import com.hedvig.external.bankID.bankIdRestTypes.OrderResponse;
+import com.hedvig.memberservice.commands.UpdateWebOnBoardingInfoCommand;
 import com.hedvig.memberservice.entities.SignSession;
 import com.hedvig.memberservice.entities.SignSessionRepository;
 import com.hedvig.memberservice.entities.SignStatus;
@@ -45,6 +46,7 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
@@ -100,8 +102,9 @@ public class SigningServiceTest {
   @Rule
   public ExpectedException thrown = ExpectedException.none();
 
-  private ArgumentCaptor<JobDetail> jobDetailArgumentCaptor = ArgumentCaptor.forClass(JobDetail.class);
-  private ArgumentCaptor<String> argumentCaptor = ArgumentCaptor.forClass(String.class);
+  @Captor ArgumentCaptor<JobDetail> jobDetailArgumentCaptor;
+  @Captor ArgumentCaptor<String> argumentCaptor;
+  @Captor ArgumentCaptor<UpdateWebOnBoardingInfoCommand> updateWebOnBoardingInfoCommandArgumentCaptor;
 
   private SigningService sut;
 
@@ -225,12 +228,20 @@ public class SigningServiceTest {
     given(signSessionRepository.findByMemberId(MEMBER_ID)).willReturn(
         Optional.of(signSession));
 
+
+
     val response = sut.startWebSign(MEMBER_ID, new WebsignRequest(EMAIL, SSN, IP_ADDRESS));
+
 
     then(bankIdRestService).should(times(0)).startSign(anyString(), anyString(), anyString());
 
+
     assertThat(response.getBankIdOrderResponse().getOrderRef()).isEqualTo(ORDER_REFERENCE);
     assertThat(response.getBankIdOrderResponse().getAutoStartToken()).isEqualTo(AUTO_START_TOKEN);
+
+    then(commandGateway).should().sendAndWait(updateWebOnBoardingInfoCommandArgumentCaptor.capture());
+    assertThat(updateWebOnBoardingInfoCommandArgumentCaptor.getValue().getEmail()).isNotEmpty();
+
   }
 
   @Test
@@ -251,6 +262,9 @@ public class SigningServiceTest {
     assertThat(result.getBankIdOrderResponse()).hasFieldOrPropertyWithValue("orderRef", ORDER_REFERENCE2);
     assertThat(result.getBankIdOrderResponse()).hasFieldOrPropertyWithValue("autoStartToken",
         AUTO_START_TOKEN2);
+
+    then(commandGateway).should().sendAndWait(updateWebOnBoardingInfoCommandArgumentCaptor.capture());
+    assertThat(updateWebOnBoardingInfoCommandArgumentCaptor.getValue().getEmail()).isNotEmpty();
 
   }
 

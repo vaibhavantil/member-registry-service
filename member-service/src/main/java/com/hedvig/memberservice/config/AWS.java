@@ -3,12 +3,12 @@ package com.hedvig.memberservice.config;
 import com.amazonaws.auth.AWSCredentialsProvider;
 import com.amazonaws.auth.DefaultAWSCredentialsProviderChain;
 import com.amazonaws.client.builder.AwsClientBuilder;
+import com.amazonaws.services.sns.AmazonSNS;
 import com.amazonaws.services.sqs.AmazonSQSAsync;
 import com.amazonaws.services.sqs.AmazonSQSAsyncClientBuilder;
 import lombok.val;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.cloud.aws.messaging.config.SimpleMessageListenerContainerFactory;
+import org.springframework.cloud.aws.messaging.core.NotificationMessagingTemplate;
 import org.springframework.cloud.aws.messaging.core.QueueMessagingTemplate;
 import org.springframework.cloud.aws.messaging.support.destination.DynamicQueueUrlDestinationResolver;
 import org.springframework.context.annotation.Bean;
@@ -17,8 +17,6 @@ import org.springframework.context.annotation.Profile;
 
 @Configuration
 public class AWS {
-
-  private Logger log = LoggerFactory.getLogger(AWS.class);
 
   @Bean
   @Profile("development")
@@ -55,5 +53,15 @@ public class AWS {
   @Bean
   AWSCredentialsProvider credentialsProvider() {
     return new DefaultAWSCredentialsProviderChain();
+  }
+
+  @Bean
+  @Profile(Profiles.PRODUCTION)
+  public NotificationMessagingTemplate notificationTemplate(AmazonSNS amazonSNS) {
+    return new NotificationMessagingTemplate(amazonSNS);
+  }
+
+  class Profiles {
+    public static final String PRODUCTION = "production";
   }
 }

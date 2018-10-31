@@ -52,6 +52,7 @@ import org.axonframework.spring.stereotype.Aggregate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 
 /**
  * This is an example Aggregate and should be remodeled to suit the needs of you domain.
@@ -77,12 +78,18 @@ public class MemberAggregate {
   private UUIDGenerator uuidGenerator;
   private UUID trackingId;
 
+  private boolean defaultCharityEnabled;
+
   @Autowired
   public MemberAggregate(
-      BisnodeClient bisnodeClient, CashbackService cashbackService, UUIDGenerator uuidGenerator) {
+      BisnodeClient bisnodeClient,
+      CashbackService cashbackService,
+      UUIDGenerator uuidGenerator,
+      @Value("${hedvig.memberAggregate.defaultCharity.enabled:true}") boolean defaultCharityEnabled) {
     this.bisnodeClient = bisnodeClient;
     this.cashbackService = cashbackService;
     this.uuidGenerator = uuidGenerator;
+    this.defaultCharityEnabled = defaultCharityEnabled;
   }
 
   @CommandHandler
@@ -271,13 +278,15 @@ public class MemberAggregate {
 
   @CommandHandler
   void bankIdSignHandler(BankIdSignCommand cmd) {
-
     if (cmd.getPersonalNumber() != null
         && !Objects.equals(this.member.getSsn(), cmd.getPersonalNumber())) {
       apply(new SSNUpdatedEvent(this.id, cmd.getPersonalNumber()));
     }
 
-    apply(new NewCashbackSelectedEvent(this.id, cashbackService.getDefaultId().toString()));
+    if (defaultCharityEnabled){
+      apply(new NewCashbackSelectedEvent(this.id, cashbackService.getDefaultId().toString()));
+    }
+
     apply(
         new MemberSignedEvent(
             this.id, cmd.getReferenceId(), cmd.getSignature(), cmd.getOscpResponse(),
@@ -286,8 +295,6 @@ public class MemberAggregate {
     if (this.trackingId == null) {
       generateTrackingId();
     }
-
-
   }
 
   @CommandHandler

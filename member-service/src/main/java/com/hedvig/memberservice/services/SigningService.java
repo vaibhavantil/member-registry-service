@@ -92,6 +92,10 @@ public class SigningService {
 
       val session = signSessionRepository.findByMemberId(memberId).orElseGet(() -> new SignSession(memberId));
 
+      UpdateWebOnBoardingInfoCommand cmd = new UpdateWebOnBoardingInfoCommand(memberId,
+          request.getSsn(), request.getEmail());
+      commandGateway.sendAndWait(cmd);
+
       if (session.canReuseBankIdSession() == false) {
 
         val result =
@@ -107,10 +111,6 @@ public class SigningService {
 
         return new MemberSignResponse(session.getSessionId(), SignStatus.IN_PROGRESS, result);
       }
-
-      UpdateWebOnBoardingInfoCommand cmd = new UpdateWebOnBoardingInfoCommand(memberId,
-          request.getSsn(), request.getEmail());
-      commandGateway.sendAndWait(cmd);
 
       return new MemberSignResponse(session.getSessionId(), SignStatus.IN_PROGRESS,
           session.getOrderResponse());
