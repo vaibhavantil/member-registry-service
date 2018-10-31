@@ -40,6 +40,8 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import lombok.val;
+
 @RestController()
 @RequestMapping("/member/")
 public class MembersController {
@@ -116,6 +118,10 @@ public class MembersController {
   @PostMapping("/trackingId")
   public ResponseEntity<Void> setTrackingId(@RequestHeader(value = "hedvig.token", required = true) Long hid,
       @RequestBody TrackingIdDto trackingIdDto) {
+    val member = repo.findById(hid);
+    if (!member.isPresent()) {
+      return ResponseEntity.notFound().build();
+    }
     commandGateway.sendAndWait(new AssignTrackingIdCommand(hid, trackingIdDto.getTrackingId()));
     return ResponseEntity.ok().build();
   }
