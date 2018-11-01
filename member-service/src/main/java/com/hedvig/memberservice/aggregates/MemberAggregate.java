@@ -6,6 +6,7 @@ import com.hedvig.common.UUIDGenerator;
 import com.hedvig.external.bisnodeBCI.BisnodeClient;
 import com.hedvig.external.bisnodeBCI.dto.Person;
 import com.hedvig.external.bisnodeBCI.dto.PersonSearchResult;
+import com.hedvig.memberservice.commands.AssignTrackingIdCommand;
 import com.hedvig.memberservice.commands.AuthenticationAttemptCommand;
 import com.hedvig.memberservice.commands.BankIdAuthenticationStatus;
 import com.hedvig.memberservice.commands.BankIdSignCommand;
@@ -141,6 +142,10 @@ public class MemberAggregate {
 
   private void generateTrackingId() {
     apply(new TrackingIdCreatedEvent(this.id, uuidGenerator.generateRandom()));
+  }
+
+  public void on(AssignTrackingIdCommand assignTrackingIdCommand) {
+    apply(new TrackingIdCreatedEvent(this.id, assignTrackingIdCommand.getTrackingId()));
   }
 
   @CommandHandler
