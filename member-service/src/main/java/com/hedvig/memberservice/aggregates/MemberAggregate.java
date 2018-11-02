@@ -144,6 +144,7 @@ public class MemberAggregate {
     apply(new TrackingIdCreatedEvent(this.id, uuidGenerator.generateRandom()));
   }
 
+  @CommandHandler
   public void on(AssignTrackingIdCommand assignTrackingIdCommand) {
     apply(new TrackingIdCreatedEvent(this.id, assignTrackingIdCommand.getTrackingId()));
   }
