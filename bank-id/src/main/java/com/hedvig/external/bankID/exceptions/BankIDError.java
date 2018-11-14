@@ -8,6 +8,7 @@ public class BankIDError extends RuntimeException {
 
 
     public BankIDError(RpFaultType errorMessages) {
+        super(String.format("%s : %s", errorMessages.getFaultStatus().value(), errorMessages.getDetailedDescription()));
         this.errorType = ErrorType.valueOf(errorMessages.getFaultStatus().value());
         this.detail = errorMessages.getDetailedDescription();
     }
