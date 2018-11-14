@@ -16,15 +16,17 @@ public class LivingAddressUpdatedEvent {
   private final String zipCode;
   private final String apartmentNo;
   private final int floor;
+  private final String token;
 
   public LivingAddressUpdatedEvent(
-      Long id, String street, String city, String zipCode, String apartmentNo, int floor) {
+    Long id, String street, String city, String zipCode, String apartmentNo, int floor, String token) {
     this.id = id;
     this.street = street;
     this.city = city;
     this.zipCode = zipCode;
     this.apartmentNo = apartmentNo;
     this.floor = floor;
+    this.token = token;
   }
 
   public LivingAddressUpdatedEvent(Long memberId, BisnodeAddress a) {
@@ -38,6 +40,7 @@ public class LivingAddressUpdatedEvent {
     this.zipCode = a.getPostalCode();
     this.apartmentNo = a.getApartment();
     this.floor = parseFloorFromApartment(a.getApartment());
+    this.token = null;
   }
 
   private int parseFloorFromApartment(String apartmentNo) {

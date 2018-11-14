@@ -15,17 +15,20 @@ import org.mockito.junit.MockitoJUnitRunner;
 @RunWith(MockitoJUnitRunner.class)
 public class MemberEventListenerTest {
 
-    @Mock
-    MemberRepository memberRepository;
+  @Mock
+  MemberRepository memberRepository;
 
-    @Mock
-    TrackingIdRepository trackingIdRepository;
+  @Mock
+  TrackingIdRepository trackingIdRepository;
 
-    private MemberEventListener eventListener;
+  @Mock
+  TraceMemberRepository traceMemberRepository;
+
+  private MemberEventListener eventListener;
 
     @Before
     public void setUp() {
-        eventListener = new MemberEventListener(memberRepository, null, trackingIdRepository);
+        eventListener = new MemberEventListener(memberRepository, null, trackingIdRepository, traceMemberRepository);
     }
 
     @Test

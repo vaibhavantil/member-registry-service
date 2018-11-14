@@ -10,9 +10,11 @@ public class EditMemberInformationCommand {
   @TargetAggregateIdentifier Long id;
 
   InternalMember member;
+  String token;
 
-  public EditMemberInformationCommand(String id, InternalMember updatedMember) {
+  public EditMemberInformationCommand(String id, InternalMember updatedMember, String token) {
     this.id = Long.parseLong(id);
     this.member = updatedMember;
+    this.token = token;
   }
 }

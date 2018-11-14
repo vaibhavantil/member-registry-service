@@ -98,7 +98,7 @@ public class MemberAggregateTests {
         .expectEvents(
             new SSNUpdatedEvent(memberId, TOLVANSSON_SSN),
             new TrackingIdCreatedEvent(memberId, uuid),
-            new NameUpdatedEvent(memberId, "Tolvan", "Tolvansson"),
+            new NameUpdatedEvent(memberId, "Tolvan", "Tolvansson", null),
             new MemberStartedOnBoardingEvent(memberId, MemberStatus.ONBOARDING),
             new MemberAuthenticatedEvent(memberId, referenceTokenValue));
   }
@@ -155,10 +155,10 @@ public class MemberAggregateTests {
 
     fixture
         .given(new MemberCreatedEvent(memberId, MemberStatus.INITIATED))
-        .when(new MemberUpdateContactInformationCommand(memberId, request))
+        .when(new MemberUpdateContactInformationCommand(memberId, request, "1234"))
         .expectSuccessfulHandlerExecution()
         .expectEvents(
-            new NameUpdatedEvent(memberId, request.getFirstName(), request.getLastName()),
+            new NameUpdatedEvent(memberId, request.getFirstName(), request.getLastName(), "1234"),
             new EmailUpdatedEvent(memberId, "email@hedvig.com"),
             new LivingAddressUpdatedEvent(
                 memberId,
@@ -166,7 +166,7 @@ public class MemberAggregateTests {
                 address.getCity(),
                 address.getZipCode(),
                 address.getApartmentNo(),
-                0));
+                0, "1234"));
   }
 
   @Test

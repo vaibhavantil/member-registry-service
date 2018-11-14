@@ -6,37 +6,8 @@ import com.hedvig.common.UUIDGenerator;
 import com.hedvig.external.bisnodeBCI.BisnodeClient;
 import com.hedvig.external.bisnodeBCI.dto.Person;
 import com.hedvig.external.bisnodeBCI.dto.PersonSearchResult;
-import com.hedvig.memberservice.commands.AssignTrackingIdCommand;
-import com.hedvig.memberservice.commands.AuthenticationAttemptCommand;
-import com.hedvig.memberservice.commands.BankIdAuthenticationStatus;
-import com.hedvig.memberservice.commands.BankIdSignCommand;
-import com.hedvig.memberservice.commands.CreateMemberCommand;
-import com.hedvig.memberservice.commands.EditMemberInformationCommand;
-import com.hedvig.memberservice.commands.InactivateMemberCommand;
-import com.hedvig.memberservice.commands.InsurnaceCancellationCommand;
-import com.hedvig.memberservice.commands.MemberCancelInsuranceCommand;
-import com.hedvig.memberservice.commands.MemberUpdateContactInformationCommand;
-import com.hedvig.memberservice.commands.SelectNewCashbackCommand;
-import com.hedvig.memberservice.commands.StartOnboardingWithSSNCommand;
-import com.hedvig.memberservice.commands.UpdateEmailCommand;
-import com.hedvig.memberservice.commands.UpdatePhoneNumberCommand;
-import com.hedvig.memberservice.commands.UpdateWebOnBoardingInfoCommand;
-import com.hedvig.memberservice.events.EmailUpdatedEvent;
-import com.hedvig.memberservice.events.InsuranceCancellationEvent;
-import com.hedvig.memberservice.events.LivingAddressUpdatedEvent;
-import com.hedvig.memberservice.events.MemberAuthenticatedEvent;
-import com.hedvig.memberservice.events.MemberCancellationEvent;
-import com.hedvig.memberservice.events.MemberCreatedEvent;
-import com.hedvig.memberservice.events.MemberInactivatedEvent;
-import com.hedvig.memberservice.events.MemberSignedEvent;
-import com.hedvig.memberservice.events.MemberStartedOnBoardingEvent;
-import com.hedvig.memberservice.events.NameUpdatedEvent;
-import com.hedvig.memberservice.events.NewCashbackSelectedEvent;
-import com.hedvig.memberservice.events.OnboardingStartedWithSSNEvent;
-import com.hedvig.memberservice.events.PersonInformationFromBisnodeEvent;
-import com.hedvig.memberservice.events.PhoneNumberUpdatedEvent;
-import com.hedvig.memberservice.events.SSNUpdatedEvent;
-import com.hedvig.memberservice.events.TrackingIdCreatedEvent;
+import com.hedvig.memberservice.commands.*;
+import com.hedvig.memberservice.events.*;
 import com.hedvig.memberservice.services.CashbackService;
 import java.time.ZoneId;
 import java.util.List;
@@ -120,7 +91,7 @@ public class MemberAggregate {
                     new NameUpdatedEvent(
                         this.id,
                         formatName(bankIdAuthResponse.getGivenName()),
-                        formatName(bankIdAuthResponse.getSurname())));
+                        formatName(bankIdAuthResponse.getSurname()), null));
       }
 
       if (this.status == MemberStatus.INITIATED) {
@@ -192,7 +163,7 @@ public class MemberAggregate {
 
     applyChain =
         applyChain.andThenApply(
-            () -> new NameUpdatedEvent(this.id, getFirstName(person), person.getFamilyName()));
+            () -> new NameUpdatedEvent(this.id, getFirstName(person), person.getFamilyName(), null));
 
     BisnodeInformation pi = new BisnodeInformation(ssn, person);
     if (pi.getAddress().isPresent()) {
@@ -245,7 +216,7 @@ public class MemberAggregate {
         && !Objects.equals(this.member.getFirstName(), cmd.getFirstName()))
         || (cmd.getLastName() != null
         && !Objects.equals(this.member.getLastName(), cmd.getLastName()))) {
-      apply(new NameUpdatedEvent(this.id, cmd.getFirstName(), cmd.getLastName()));
+      apply(new NameUpdatedEvent(this.id, cmd.getFirstName(), cmd.getLastName(), cmd.getToken()));
     }
 
     if (cmd.getEmail() != null
@@ -268,12 +239,12 @@ public class MemberAggregate {
               cmd.getCity(),
               cmd.getZipCode(),
               cmd.getApartmentNo(),
-              cmd.getFloor()));
+              cmd.getFloor(), cmd.getToken()));
     }
 
     if (cmd.getPhoneNumber() != null
         && !Objects.equals(this.member.getPhoneNumber(), cmd.getPhoneNumber())) {
-      apply(new PhoneNumberUpdatedEvent(this.id, cmd.getPhoneNumber()));
+      apply(new PhoneNumberUpdatedEvent(this.id, cmd.getPhoneNumber(), cmd.getToken()));
     }
   }
 
@@ -316,7 +287,7 @@ public class MemberAggregate {
             && !Objects.equals(this.member.getLastName(), cmd.getMember().getLastName()))) {
       apply(
           new NameUpdatedEvent(
-              this.id, cmd.getMember().getFirstName(), cmd.getMember().getLastName()));
+              this.id, cmd.getMember().getFirstName(), cmd.getMember().getLastName(), cmd.getToken()));
     }
 
     if (cmd.getMember().getEmail() != null
@@ -339,23 +310,30 @@ public class MemberAggregate {
               cmd.getMember().getCity(),
               cmd.getMember().getZipCode(),
               cmd.getMember().getApartment(),
-              cmd.getMember().getFloor()));
+              cmd.getMember().getFloor(), cmd.getToken()));
     }
 
     if (cmd.getMember().getPhoneNumber() != null
         && !Objects.equals(this.member.getPhoneNumber(), cmd.getMember().getPhoneNumber())) {
-      apply(new PhoneNumberUpdatedEvent(this.id, cmd.getMember().getPhoneNumber()));
+      apply(new PhoneNumberUpdatedEvent(this.id, cmd.getMember().getPhoneNumber(), cmd.getToken()));
     }
   }
 
   @CommandHandler
   public void on(UpdatePhoneNumberCommand cmd) {
     log.info("Updating phoneNumber for member {}, new number: {}", cmd.getMemberId(),
-        cmd.getPhoneNumber());
+      cmd.getPhoneNumber());
 
     if (cmd.getPhoneNumber() != null
-        && !Objects.equals(member.getPhoneNumber(), cmd.getPhoneNumber())) {
-      apply(new PhoneNumberUpdatedEvent(cmd.getMemberId(), cmd.getPhoneNumber()));
+      && !Objects.equals(member.getPhoneNumber(), cmd.getPhoneNumber())) {
+      apply(new PhoneNumberUpdatedEvent(cmd.getMemberId(), cmd.getPhoneNumber(), cmd.getToken()));
+    }
+  }
+
+  @CommandHandler
+  public void on(FraudulentStatusCommand cmd) {
+    if (cmd.getFraudulentStatus() != null) {
+      apply(new FraudulentStatusEvent(cmd.getMemberId(), cmd.getFraudulentStatus(), cmd.getFraudulentDescription(), cmd.getToken()));
     }
   }
 

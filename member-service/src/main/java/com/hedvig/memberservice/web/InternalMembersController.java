@@ -1,26 +1,14 @@
 package com.hedvig.memberservice.web;
 
+import com.hedvig.memberservice.aggregates.FraudulentStatus;
 import com.hedvig.memberservice.aggregates.MemberStatus;
-import com.hedvig.memberservice.commands.EditMemberInformationCommand;
-import com.hedvig.memberservice.commands.InsurnaceCancellationCommand;
-import com.hedvig.memberservice.commands.MemberCancelInsuranceCommand;
-import com.hedvig.memberservice.commands.MemberUpdateContactInformationCommand;
-import com.hedvig.memberservice.commands.StartOnboardingWithSSNCommand;
-import com.hedvig.memberservice.commands.UpdateEmailCommand;
-import com.hedvig.memberservice.commands.UpdatePhoneNumberCommand;
+import com.hedvig.memberservice.commands.*;
 import com.hedvig.memberservice.query.MemberEntity;
 import com.hedvig.memberservice.query.MemberRepository;
+import com.hedvig.memberservice.query.TraceMemberRepository;
 import com.hedvig.memberservice.services.member.MemberQueryService;
-import com.hedvig.memberservice.web.dto.ChargeMembersDTO;
-import com.hedvig.memberservice.web.dto.InsuranceCancellationDTO;
-import com.hedvig.memberservice.web.dto.InternalMember;
-import com.hedvig.memberservice.web.dto.InternalMemberSearchRequestDTO;
-import com.hedvig.memberservice.web.dto.InternalMemberSearchResultDTO;
-import com.hedvig.memberservice.web.dto.MemberCancelInsurance;
-import com.hedvig.memberservice.web.dto.StartOnboardingWithSSNRequest;
-import com.hedvig.memberservice.web.dto.UpdateContactInformationRequest;
-import com.hedvig.memberservice.web.dto.UpdateEmailRequest;
-import com.hedvig.memberservice.web.dto.UpdatePhoneNumberRequest;
+import com.hedvig.memberservice.web.dto.*;
+
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -49,12 +37,14 @@ public class InternalMembersController {
   private final CommandGateway commandBus;
   private final MemberRepository memberRepository;
   private final MemberQueryService memberQueryService;
+  private final TraceMemberRepository traceMemberRepository;
 
   public InternalMembersController(CommandGateway commandBus, MemberRepository memberRepository,
-      MemberQueryService memberQueryService) {
+      MemberQueryService memberQueryService, TraceMemberRepository traceMemberRepository) {
     this.commandBus = commandBus;
     this.memberRepository = memberRepository;
     this.memberQueryService = memberQueryService;
+    this.traceMemberRepository = traceMemberRepository;
   }
 
   @GetMapping("/{memberId}")
@@ -63,7 +53,9 @@ public class InternalMembersController {
     Optional<MemberEntity> member = memberRepository.findById(memberId);
     if (member.isPresent()) {
 
-      return ResponseEntity.ok(InternalMember.fromEntity(member.get()));
+      InternalMember internalMember = InternalMember.fromEntity(member.get());
+      internalMember.setTraceMemberInfo(traceMemberRepository.findByMemberId(memberId));
+      return ResponseEntity.ok(internalMember);
     }
 
     return ResponseEntity.notFound().build();
@@ -71,10 +63,10 @@ public class InternalMembersController {
 
   @RequestMapping(value = "/{memberId}/finalizeOnboarding", method = RequestMethod.POST)
   public ResponseEntity<?> finalizeOnboarding(
-      @PathVariable Long memberId, @RequestBody UpdateContactInformationRequest body) {
+      @PathVariable Long memberId, @RequestBody UpdateContactInformationRequest body, @RequestHeader("Authorization") String token) {
 
     MemberUpdateContactInformationCommand finalizeOnBoardingCommand =
-        new MemberUpdateContactInformationCommand(memberId, body);
+        new MemberUpdateContactInformationCommand(memberId, body, token);
 
     commandBus.sendAndWait(finalizeOnBoardingCommand);
 
@@ -105,8 +97,8 @@ public class InternalMembersController {
 
   @RequestMapping(value = "/{memberId}/updatePhoneNumber")
   public ResponseEntity<?> updatePhoneNumber(@PathVariable Long memberId,
-      @RequestBody UpdatePhoneNumberRequest request) {
-    commandBus.sendAndWait(new UpdatePhoneNumberCommand(memberId, request.getPhoneNumber()));
+      @RequestBody UpdatePhoneNumberRequest request, @RequestHeader("Authorization") String token) {
+    commandBus.sendAndWait(new UpdatePhoneNumberCommand(memberId, request.getPhoneNumber(), token));
     return ResponseEntity.noContent().build();
   }
 
@@ -146,11 +138,21 @@ public class InternalMembersController {
 
   @RequestMapping(value = "/{memberId}/memberCancelInsurance", method = RequestMethod.POST)
   public ResponseEntity<?> insuranceCancellation(
-      @PathVariable Long memberId, @RequestBody InsuranceCancellationDTO request) {
+    @PathVariable Long memberId, @RequestBody InsuranceCancellationDTO request) {
     log.info("Dispatching Insurance Cancelation for member ({})", memberId);
     commandBus.sendAndWait(
-        new InsurnaceCancellationCommand(
-            memberId, request.getInsuranceId(), request.getCancellationDate()));
+      new InsurnaceCancellationCommand(
+        memberId, request.getInsuranceId(), request.getCancellationDate()));
+    return ResponseEntity.accepted().build();
+  }
+
+  @RequestMapping(value = "/{memberId}/setFraudulentStatus", method = RequestMethod.POST)
+  public ResponseEntity<?> fraudulentStatus(
+    @PathVariable Long memberId, @RequestBody MemberFraudulentStatusDTO request, @RequestHeader("Authorization") String token) {
+    log.info("Change Fraudulent status for member ({}) with {} and {}", memberId, request.getFraudulentStatus(), request.getFraudulentStatusDescription());
+    commandBus.sendAndWait(
+      new FraudulentStatusCommand(
+        memberId, FraudulentStatus.valueOf(request.getFraudulentStatus()), request.getFraudulentStatusDescription(), token));
     return ResponseEntity.accepted().build();
   }
 
@@ -163,7 +165,7 @@ public class InternalMembersController {
     Optional<MemberEntity> member = memberRepository.findById(Long.parseLong(memberId));
 
     if (member.isPresent() && !InternalMember.fromEntity(member.get()).equals(dto)) {
-      commandBus.sendAndWait(new EditMemberInformationCommand(memberId, dto));
+      commandBus.sendAndWait(new EditMemberInformationCommand(memberId, dto, token));
     }
   }
 

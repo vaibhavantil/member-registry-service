@@ -6,4 +6,5 @@ import lombok.Value;
 public class PhoneNumberUpdatedEvent {
   private final Long id;
   private final String phoneNumber;
+  private final String token;
 }

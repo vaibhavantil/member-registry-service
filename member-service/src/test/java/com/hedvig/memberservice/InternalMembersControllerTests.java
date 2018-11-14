@@ -12,6 +12,7 @@ import com.hedvig.memberservice.commands.MemberUpdateContactInformationCommand;
 import com.hedvig.memberservice.commands.StartOnboardingWithSSNCommand;
 import com.hedvig.memberservice.query.MemberEntity;
 import com.hedvig.memberservice.query.MemberRepository;
+import com.hedvig.memberservice.query.TraceMemberRepository;
 import com.hedvig.memberservice.services.member.MemberQueryService;
 import com.hedvig.memberservice.web.InternalMembersController;
 import com.hedvig.memberservice.web.dto.Address;
@@ -44,6 +45,8 @@ public class InternalMembersControllerTests {
 
   @MockBean private MemberRepository memberRepo;
 
+  @MockBean private TraceMemberRepository traceMemberRepo;
+
   @MockBean private MemberQueryService memberQueryService;
 
   @MockBean private CommandGateway commandGateway;
@@ -66,11 +69,12 @@ public class InternalMembersControllerTests {
         .perform(
             post("/i/member/{memberId}/finalizeOnboarding", "1337")
                 .contentType(MediaType.APPLICATION_JSON_UTF8)
-                .content(jsonMapper.writeValueAsBytes(request)))
+                .content(jsonMapper.writeValueAsBytes(request))
+                .header("Authorization", "1234"))
         .andExpect(status().is2xxSuccessful());
 
     verify(commandGateway, times(1))
-        .sendAndWait(new MemberUpdateContactInformationCommand(1337l, request));
+        .sendAndWait(new MemberUpdateContactInformationCommand(1337l, request, "1234"));
   }
 
   @Test

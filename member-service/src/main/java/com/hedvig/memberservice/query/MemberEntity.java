@@ -10,6 +10,7 @@ import javax.persistence.Id;
 import javax.persistence.Index;
 import javax.persistence.Table;
 
+import com.hedvig.memberservice.aggregates.FraudulentStatus;
 import com.hedvig.memberservice.aggregates.MemberStatus;
 import com.hedvig.memberservice.util.EnumMapChecker;
 import com.hedvig.memberservice.web.dto.MembersSortColumn;
@@ -56,6 +57,10 @@ public class MemberEntity {
   private Instant signedOn;
 
   private Instant createdOn;
+
+  @Enumerated(EnumType.STRING)
+  private FraudulentStatus fraudulentStatus = FraudulentStatus.UNDEFINED;
+  private String fraudulentDescription;
 
   @Formula("last_name || ' ' || first_name")
   private String fullName;
