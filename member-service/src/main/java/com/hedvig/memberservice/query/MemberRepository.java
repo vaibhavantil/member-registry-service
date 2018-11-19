@@ -1,10 +1,8 @@
 package com.hedvig.memberservice.query;
 
+import com.hedvig.memberservice.aggregates.MemberStatus;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Stream;
-
-import com.hedvig.memberservice.aggregates.MemberStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;

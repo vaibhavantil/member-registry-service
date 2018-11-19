@@ -87,18 +87,17 @@ public class MemberEventListener {
   @EventHandler
   void on(TrackingIdCreatedEvent e) {
     // Assign a unique tracking id per SSN
-    TrackingIdEntity c =
-        trackingRepo
-            .findByTrackingId(e.getTrackingId())
-            .orElseGet(
-                () -> {
-                  TrackingIdEntity newCampaign = new TrackingIdEntity();
-                  newCampaign.setMemberId(e.getMemberId());
-                  newCampaign.setTrackingId(e.getTrackingId());
-                  trackingRepo.save(newCampaign);
-                  return newCampaign;
-                });
-    ;
+
+    trackingRepo
+        .findByTrackingId(e.getTrackingId())
+        .orElseGet(
+            () -> {
+              TrackingIdEntity newCampaign = new TrackingIdEntity();
+              newCampaign.setMemberId(e.getMemberId());
+              newCampaign.setTrackingId(e.getTrackingId());
+              trackingRepo.save(newCampaign);
+              return newCampaign;
+            });
   }
 
   @EventHandler

@@ -23,7 +23,7 @@ public class ForgetMeAggregate {
   }
 
   @CommandHandler
-  public void ForgetMeAggregate(ForgetMeCommand cmd) {
+  public void forgetMeAggregate(ForgetMeCommand cmd) {
     log.info("ForgetMeAggregate");
     apply(new ForgetMeEvent(cmd.getMemberId()));
   }
