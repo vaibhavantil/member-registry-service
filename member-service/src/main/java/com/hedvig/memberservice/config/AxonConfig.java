@@ -3,10 +3,13 @@ package com.hedvig.memberservice.config;
 import com.hedvig.memberservice.aggregates.MemberAggregate;
 import com.hedvig.memberservice.sagas.MemberSignedSaga;
 import lombok.val;
+import org.axonframework.config.EventProcessingConfiguration;
 import org.axonframework.config.SagaConfiguration;
 import org.axonframework.eventhandling.TrackingEventProcessorConfiguration;
 import org.axonframework.eventsourcing.AggregateFactory;
+import org.axonframework.messaging.StreamableMessageSource;
 import org.axonframework.spring.eventsourcing.SpringPrototypeAggregateFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -29,8 +32,18 @@ public class AxonConfig {
     config.configureTrackingProcessor(
         x ->
             TrackingEventProcessorConfiguration.forParallelProcessing(2)
-                .andInitialTrackingToken(streamableMessageSource -> streamableMessageSource.createHeadToken()));
+                .andInitialTrackingToken(StreamableMessageSource::createHeadToken));
 
     return config;
+  }
+
+  @Autowired
+  public void configure(EventProcessingConfiguration config) {
+
+    config.registerTrackingEventProcessor(
+        "SegmentProcessorGroup",
+        x ->
+            TrackingEventProcessorConfiguration.forSingleThreadedProcessing()
+                .andInitialTrackingToken(StreamableMessageSource::createTailToken));
   }
 }
