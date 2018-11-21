@@ -32,7 +32,7 @@ public class AxonConfig {
     config.configureTrackingProcessor(
         x ->
             TrackingEventProcessorConfiguration.forParallelProcessing(2)
-                .andInitialTrackingToken(StreamableMessageSource::createHeadToken));
+                .andInitialTrackingToken(StreamableMessageSource::createTailToken));
 
     return config;
   }
