@@ -21,14 +21,11 @@ public class MemberEventListenerTest {
   @Mock
   TrackingIdRepository trackingIdRepository;
 
-  @Mock
-  TraceMemberRepository traceMemberRepository;
-
   private MemberEventListener eventListener;
 
     @Before
     public void setUp() {
-        eventListener = new MemberEventListener(memberRepository, null, trackingIdRepository, traceMemberRepository);
+        eventListener = new MemberEventListener(memberRepository, null, trackingIdRepository);
     }
 
     @Test

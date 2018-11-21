@@ -3,9 +3,9 @@ package com.hedvig.memberservice.web.dto;
 import com.hedvig.memberservice.query.MemberEntity;
 import java.time.Instant;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
-import com.hedvig.memberservice.query.TraceMemberEntity;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.val;
@@ -49,7 +49,7 @@ public class InternalMember {
 
   private String fraudulentDescription;
 
-  private List<TraceMemberEntity> traceMemberInfo;
+  private List<TraceMemberDTO> traceMemberInfo = new ArrayList<>();
 
   public static InternalMember fromEntity(MemberEntity entity) {
     val dto = new InternalMember();

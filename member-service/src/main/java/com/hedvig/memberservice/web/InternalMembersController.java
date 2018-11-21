@@ -5,8 +5,8 @@ import com.hedvig.memberservice.aggregates.MemberStatus;
 import com.hedvig.memberservice.commands.*;
 import com.hedvig.memberservice.query.MemberEntity;
 import com.hedvig.memberservice.query.MemberRepository;
-import com.hedvig.memberservice.query.TraceMemberRepository;
 import com.hedvig.memberservice.services.member.MemberQueryService;
+import com.hedvig.memberservice.services.trace.TraceMemberService;
 import com.hedvig.memberservice.web.dto.*;
 
 import java.util.Collections;
@@ -37,14 +37,14 @@ public class InternalMembersController {
   private final CommandGateway commandBus;
   private final MemberRepository memberRepository;
   private final MemberQueryService memberQueryService;
-  private final TraceMemberRepository traceMemberRepository;
+  private final TraceMemberService traceMemberService;
 
   public InternalMembersController(CommandGateway commandBus, MemberRepository memberRepository,
-      MemberQueryService memberQueryService, TraceMemberRepository traceMemberRepository) {
+      MemberQueryService memberQueryService, TraceMemberService traceMemberService) {
     this.commandBus = commandBus;
     this.memberRepository = memberRepository;
     this.memberQueryService = memberQueryService;
-    this.traceMemberRepository = traceMemberRepository;
+    this.traceMemberService = traceMemberService;
   }
 
   @GetMapping("/{memberId}")
@@ -54,7 +54,7 @@ public class InternalMembersController {
     if (member.isPresent()) {
 
       InternalMember internalMember = InternalMember.fromEntity(member.get());
-      internalMember.setTraceMemberInfo(traceMemberRepository.findByMemberId(memberId));
+      internalMember.getTraceMemberInfo().addAll(traceMemberService.getTracesByMemberId(memberId));
       return ResponseEntity.ok(internalMember);
     }
 
@@ -88,9 +88,9 @@ public class InternalMembersController {
 
   @RequestMapping(value = "/{memberId}/updateEmail", method = RequestMethod.POST)
   public ResponseEntity<?> updateEmail(
-      @PathVariable Long memberId, @RequestBody UpdateEmailRequest request) {
+      @PathVariable Long memberId, @RequestBody UpdateEmailRequest request, @RequestHeader("Authorization") String token) {
 
-    commandBus.sendAndWait(new UpdateEmailCommand(memberId, request.getEmail()));
+    commandBus.sendAndWait(new UpdateEmailCommand(memberId, request.getEmail(), token));
 
     return ResponseEntity.noContent().build();
   }

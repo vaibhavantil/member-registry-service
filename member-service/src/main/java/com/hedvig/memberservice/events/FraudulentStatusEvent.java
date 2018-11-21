@@ -3,13 +3,20 @@ package com.hedvig.memberservice.events;
 import com.hedvig.memberservice.aggregates.FraudulentStatus;
 import lombok.Value;
 
-import java.time.Instant;
-import java.util.UUID;
+import java.util.HashMap;
+import java.util.Map;
 
 @Value
-public class FraudulentStatusEvent {
+public class FraudulentStatusEvent implements Traceable {
   private Long memberId;
   private FraudulentStatus fraudulentStatus;
   private String fraudulentDescription;
-  private String token;
+
+  @Override
+  public Map<String, Object> getValues() {
+    Map result = new HashMap();
+    result.put("Fraudulent status", fraudulentStatus);
+    result.put("Fraudulent description", fraudulentDescription);
+    return result;
+  }
 }

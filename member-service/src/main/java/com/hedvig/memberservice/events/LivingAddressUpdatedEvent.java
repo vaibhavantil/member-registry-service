@@ -1,6 +1,9 @@
 package com.hedvig.memberservice.events;
 
 import com.hedvig.memberservice.aggregates.BisnodeAddress;
+
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -9,24 +12,22 @@ import lombok.extern.slf4j.Slf4j;
 
 @Value
 @Slf4j
-public class LivingAddressUpdatedEvent {
+public class LivingAddressUpdatedEvent implements Traceable {
   private final Long id;
   private final String street;
   private final String city;
   private final String zipCode;
   private final String apartmentNo;
   private final int floor;
-  private final String token;
 
   public LivingAddressUpdatedEvent(
-    Long id, String street, String city, String zipCode, String apartmentNo, int floor, String token) {
+    Long id, String street, String city, String zipCode, String apartmentNo, int floor) {
     this.id = id;
     this.street = street;
     this.city = city;
     this.zipCode = zipCode;
     this.apartmentNo = apartmentNo;
     this.floor = floor;
-    this.token = token;
   }
 
   public LivingAddressUpdatedEvent(Long memberId, BisnodeAddress a) {
@@ -40,7 +41,6 @@ public class LivingAddressUpdatedEvent {
     this.zipCode = a.getPostalCode();
     this.apartmentNo = a.getApartment();
     this.floor = parseFloorFromApartment(a.getApartment());
-    this.token = null;
   }
 
   private int parseFloorFromApartment(String apartmentNo) {
@@ -60,5 +60,21 @@ public class LivingAddressUpdatedEvent {
 
   private String orEmpty(String entrance) {
     return Optional.ofNullable(entrance).orElse("");
+  }
+
+  @Override
+  public Long getMemberId() {
+    return id;
+  }
+
+  @Override
+  public Map<String, Object> getValues() {
+    Map result = new HashMap();
+    result.put("Street", street);
+    result.put("City", city);
+    result.put("Zip code", zipCode);
+    result.put("Apartment No", apartmentNo);
+    result.put("Floor", floor);
+    return result;
   }
 }

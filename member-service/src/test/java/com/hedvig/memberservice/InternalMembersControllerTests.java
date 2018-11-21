@@ -12,8 +12,8 @@ import com.hedvig.memberservice.commands.MemberUpdateContactInformationCommand;
 import com.hedvig.memberservice.commands.StartOnboardingWithSSNCommand;
 import com.hedvig.memberservice.query.MemberEntity;
 import com.hedvig.memberservice.query.MemberRepository;
-import com.hedvig.memberservice.query.TraceMemberRepository;
 import com.hedvig.memberservice.services.member.MemberQueryService;
+import com.hedvig.memberservice.services.trace.TraceMemberService;
 import com.hedvig.memberservice.web.InternalMembersController;
 import com.hedvig.memberservice.web.dto.Address;
 import com.hedvig.memberservice.web.dto.InternalMemberSearchRequestDTO;
@@ -45,11 +45,11 @@ public class InternalMembersControllerTests {
 
   @MockBean private MemberRepository memberRepo;
 
-  @MockBean private TraceMemberRepository traceMemberRepo;
-
   @MockBean private MemberQueryService memberQueryService;
 
   @MockBean private CommandGateway commandGateway;
+
+  @MockBean private TraceMemberService traceMemberService;
 
   @Test
   public void TestUpdateContactInformation() throws Exception {

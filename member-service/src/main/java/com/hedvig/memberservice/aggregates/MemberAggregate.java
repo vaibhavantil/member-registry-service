@@ -19,6 +19,7 @@ import org.axonframework.commandhandling.model.AggregateIdentifier;
 import org.axonframework.commandhandling.model.ApplyMore;
 import org.axonframework.eventhandling.EventHandler;
 import org.axonframework.eventsourcing.EventSourcingHandler;
+import org.axonframework.messaging.MetaData;
 import org.axonframework.spring.stereotype.Aggregate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -91,7 +92,7 @@ public class MemberAggregate {
                     new NameUpdatedEvent(
                         this.id,
                         formatName(bankIdAuthResponse.getGivenName()),
-                        formatName(bankIdAuthResponse.getSurname()), null));
+                        formatName(bankIdAuthResponse.getSurname())));
       }
 
       if (this.status == MemberStatus.INITIATED) {
@@ -163,7 +164,7 @@ public class MemberAggregate {
 
     applyChain =
         applyChain.andThenApply(
-            () -> new NameUpdatedEvent(this.id, getFirstName(person), person.getFamilyName(), null));
+            () -> new NameUpdatedEvent(this.id, getFirstName(person), person.getFamilyName()));
 
     BisnodeInformation pi = new BisnodeInformation(ssn, person);
     if (pi.getAddress().isPresent()) {
@@ -216,7 +217,7 @@ public class MemberAggregate {
         && !Objects.equals(this.member.getFirstName(), cmd.getFirstName()))
         || (cmd.getLastName() != null
         && !Objects.equals(this.member.getLastName(), cmd.getLastName()))) {
-      apply(new NameUpdatedEvent(this.id, cmd.getFirstName(), cmd.getLastName(), cmd.getToken()));
+      apply(new NameUpdatedEvent(this.id, cmd.getFirstName(), cmd.getLastName()), MetaData.with("token", cmd.getToken()));
     }
 
     if (cmd.getEmail() != null
@@ -239,12 +240,12 @@ public class MemberAggregate {
               cmd.getCity(),
               cmd.getZipCode(),
               cmd.getApartmentNo(),
-              cmd.getFloor(), cmd.getToken()));
+              cmd.getFloor()), MetaData.with("token", cmd.getToken()));
     }
 
     if (cmd.getPhoneNumber() != null
         && !Objects.equals(this.member.getPhoneNumber(), cmd.getPhoneNumber())) {
-      apply(new PhoneNumberUpdatedEvent(this.id, cmd.getPhoneNumber(), cmd.getToken()));
+      apply(new PhoneNumberUpdatedEvent(this.id, cmd.getPhoneNumber()), MetaData.with("token", cmd.getToken()));
     }
   }
 
@@ -276,7 +277,7 @@ public class MemberAggregate {
 
   @CommandHandler
   void updateEmail(UpdateEmailCommand cmd) {
-    apply(new EmailUpdatedEvent(this.id, cmd.getEmail()));
+    apply(new EmailUpdatedEvent(this.id, cmd.getEmail()), MetaData.with("token", cmd.getToken()));
   }
 
   @CommandHandler
@@ -287,12 +288,12 @@ public class MemberAggregate {
             && !Objects.equals(this.member.getLastName(), cmd.getMember().getLastName()))) {
       apply(
           new NameUpdatedEvent(
-              this.id, cmd.getMember().getFirstName(), cmd.getMember().getLastName(), cmd.getToken()));
+              this.id, cmd.getMember().getFirstName(), cmd.getMember().getLastName()), MetaData.with("token", cmd.getToken()));
     }
 
     if (cmd.getMember().getEmail() != null
         && !Objects.equals(member.getEmail(), cmd.getMember().getEmail())) {
-      apply(new EmailUpdatedEvent(this.id, cmd.getMember().getEmail()));
+      apply(new EmailUpdatedEvent(this.id, cmd.getMember().getEmail()), MetaData.with("token", cmd.getToken()));
     }
 
     LivingAddress address = this.member.getLivingAddress();
@@ -310,12 +311,12 @@ public class MemberAggregate {
               cmd.getMember().getCity(),
               cmd.getMember().getZipCode(),
               cmd.getMember().getApartment(),
-              cmd.getMember().getFloor(), cmd.getToken()));
+              cmd.getMember().getFloor()), MetaData.with("token", cmd.getToken()));
     }
 
     if (cmd.getMember().getPhoneNumber() != null
         && !Objects.equals(this.member.getPhoneNumber(), cmd.getMember().getPhoneNumber())) {
-      apply(new PhoneNumberUpdatedEvent(this.id, cmd.getMember().getPhoneNumber(), cmd.getToken()));
+      apply(new PhoneNumberUpdatedEvent(this.id, cmd.getMember().getPhoneNumber()), MetaData.with("token", cmd.getToken()));
     }
   }
 
@@ -326,14 +327,14 @@ public class MemberAggregate {
 
     if (cmd.getPhoneNumber() != null
       && !Objects.equals(member.getPhoneNumber(), cmd.getPhoneNumber())) {
-      apply(new PhoneNumberUpdatedEvent(cmd.getMemberId(), cmd.getPhoneNumber(), cmd.getToken()));
+      apply(new PhoneNumberUpdatedEvent(cmd.getMemberId(), cmd.getPhoneNumber()), MetaData.with("token", cmd.getToken()));
     }
   }
 
   @CommandHandler
   public void on(FraudulentStatusCommand cmd) {
     if (cmd.getFraudulentStatus() != null) {
-      apply(new FraudulentStatusEvent(cmd.getMemberId(), cmd.getFraudulentStatus(), cmd.getFraudulentDescription(), cmd.getToken()));
+      apply(new FraudulentStatusEvent(cmd.getMemberId(), cmd.getFraudulentStatus(), cmd.getFraudulentDescription()), MetaData.with("token", cmd.getToken()));
     }
   }
 

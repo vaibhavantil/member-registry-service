@@ -1,16 +1,11 @@
 package com.hedvig.memberservice.query;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hedvig.memberservice.aggregates.MemberStatus;
 import com.hedvig.memberservice.events.*;
 
-import java.io.IOException;
 import java.time.Instant;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Map;
 
 import lombok.extern.slf4j.Slf4j;
 import org.axonframework.eventhandling.EventHandler;
@@ -21,9 +16,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import org.springframework.security.jwt.JwtHelper;
-
-
 @Component
 @Slf4j
 public class MemberEventListener {
@@ -32,17 +24,15 @@ public class MemberEventListener {
   private final MemberRepository userRepo;
   private final SignedMemberRepository signedMemberRepository;
   private final TrackingIdRepository trackingRepo;
-  private final TraceMemberRepository traceMemberRepository;
 
   @Autowired
   public MemberEventListener(
       MemberRepository userRepo,
       SignedMemberRepository signedMemberRepository,
-      TrackingIdRepository trackingRepo, TraceMemberRepository traceMemberRepository) {
+      TrackingIdRepository trackingRepo) {
     this.userRepo = userRepo;
     this.signedMemberRepository = signedMemberRepository;
     this.trackingRepo = trackingRepo;
-    this.traceMemberRepository = traceMemberRepository;
   }
 
   @EventHandler
@@ -108,12 +98,6 @@ public class MemberEventListener {
   void on(LivingAddressUpdatedEvent e) {
     MemberEntity m = userRepo.findById(e.getId()).get();
 
-    saveTrace(e.getCity(), m.getCity(), "city", m.getId(), e.getToken());
-    saveTrace(e.getStreet(), m.getStreet(), "Street", m.getId(), e.getToken());
-    saveTrace(e.getZipCode(), m.getZipCode(), "ZipCode", m.getId(), e.getToken());
-    saveTrace(e.getApartmentNo(), m.getApartment(), "Apartment", m.getId(), e.getToken());
-    saveTrace(""+e.getFloor(), ""+m.getFloor(), "Floor", m.getId(), e.getToken());
-
     m.setCity(e.getCity());
     m.setStreet(e.getStreet());
     m.setZipCode(e.getZipCode());
@@ -126,9 +110,6 @@ public class MemberEventListener {
   @EventHandler
   void on(NameUpdatedEvent e) {
     MemberEntity m = userRepo.findById(e.getMemberId()).get();
-
-    saveTrace(e.getFirstName(), m.getFirstName(), "FirstName", m.getId(), e.getToken());
-    saveTrace(e.getLastName(), m.getLastName(), "LastName", m.getId(), e.getToken());
 
     m.setFirstName(e.getFirstName());
     m.setLastName(e.getLastName());
@@ -186,7 +167,6 @@ public class MemberEventListener {
   @EventHandler
   void on(PhoneNumberUpdatedEvent e) {
     MemberEntity m = userRepo.findById(e.getId()).get();
-    saveTrace(e.getPhoneNumber(), m.getPhoneNumber(), "PhoneNumber", m.getId(), e.getToken());
     m.setPhoneNumber(e.getPhoneNumber());
 
     userRepo.save(m);
@@ -195,35 +175,9 @@ public class MemberEventListener {
   @EventHandler
   void on(FraudulentStatusEvent e) {
     MemberEntity m = userRepo.findById(e.getMemberId()).get();
-    saveTrace(e.getFraudulentStatus().name(), m.getFraudulentStatus()!=null?m.getFraudulentStatus().name():"", "fraudulentStatus", m.getId(), e.getToken());
-    saveTrace(e.getFraudulentDescription(), m.getFraudulentDescription(), "FraudulentDescription", m.getId(), e.getToken());
     m.setFraudulentStatus(e.getFraudulentStatus());
     m.setFraudulentDescription(e.getFraudulentDescription());
     userRepo.save(m);
   }
 
-
-  private void saveTrace (String newValue, String oldValue, String fieldName, Long memberId, String token) {
-    if (oldValue!= null && !oldValue.equals(newValue) || oldValue== null && newValue!=null) {
-      TraceMemberEntity traceMemberEntity = new TraceMemberEntity();
-      traceMemberEntity.setDate(LocalDateTime.now());
-      traceMemberEntity.setFieldName(fieldName);
-      traceMemberEntity.setNewValue(newValue);
-      traceMemberEntity.setOldValue(oldValue);
-      traceMemberEntity.setMemberId(memberId);
-      traceMemberEntity.setUserId(getUserId(token));
-
-      traceMemberRepository.save(traceMemberEntity);
-    }
-  }
-
-  private String getUserId (String token) {
-    try {
-      Map<String, String> map = (new ObjectMapper().readValue(JwtHelper.decode(token).getClaims(), new TypeReference<Map<String, String>>() {}));
-      return map.get("email");
-    } catch (IOException e) {
-      log.error(e.getMessage());
-      return null;
-    }
-  }
 }
