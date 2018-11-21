@@ -1,11 +1,9 @@
 package com.hedvig.memberservice.util;
 
-import org.springframework.data.domain.AbstractPageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
-
 import java.util.ArrayList;
 import java.util.List;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 
 public class PageableBuilder {
   boolean paged = false;
