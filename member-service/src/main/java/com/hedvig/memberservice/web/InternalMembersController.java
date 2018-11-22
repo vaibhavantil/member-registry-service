@@ -103,7 +103,7 @@ public class InternalMembersController {
     return ResponseEntity.noContent().build();
   }
 
-  @RequestMapping(value = "/{memberId}/updatePhoneNumber")
+  @RequestMapping(value = "/{memberId}/updatePhoneNumber", method = RequestMethod.POST)
   public ResponseEntity<?> updatePhoneNumber(@PathVariable Long memberId,
       @RequestBody UpdatePhoneNumberRequest request) {
     commandBus.sendAndWait(new UpdatePhoneNumberCommand(memberId, request.getPhoneNumber()));
