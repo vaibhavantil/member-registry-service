@@ -6,8 +6,39 @@ import com.hedvig.common.UUIDGenerator;
 import com.hedvig.external.bisnodeBCI.BisnodeClient;
 import com.hedvig.external.bisnodeBCI.dto.Person;
 import com.hedvig.external.bisnodeBCI.dto.PersonSearchResult;
-import com.hedvig.memberservice.commands.*;
-import com.hedvig.memberservice.events.*;
+import com.hedvig.memberservice.commands.AssignTrackingIdCommand;
+import com.hedvig.memberservice.commands.AuthenticationAttemptCommand;
+import com.hedvig.memberservice.commands.BankIdAuthenticationStatus;
+import com.hedvig.memberservice.commands.BankIdSignCommand;
+import com.hedvig.memberservice.commands.CreateMemberCommand;
+import com.hedvig.memberservice.commands.EditMemberInformationCommand;
+import com.hedvig.memberservice.commands.SetFraudulentStatusCommand;
+import com.hedvig.memberservice.commands.InactivateMemberCommand;
+import com.hedvig.memberservice.commands.InsurnaceCancellationCommand;
+import com.hedvig.memberservice.commands.MemberCancelInsuranceCommand;
+import com.hedvig.memberservice.commands.MemberUpdateContactInformationCommand;
+import com.hedvig.memberservice.commands.SelectNewCashbackCommand;
+import com.hedvig.memberservice.commands.StartOnboardingWithSSNCommand;
+import com.hedvig.memberservice.commands.UpdateEmailCommand;
+import com.hedvig.memberservice.commands.UpdatePhoneNumberCommand;
+import com.hedvig.memberservice.commands.UpdateWebOnBoardingInfoCommand;
+import com.hedvig.memberservice.events.EmailUpdatedEvent;
+import com.hedvig.memberservice.events.FraudulentStatusUpdatedEvent;
+import com.hedvig.memberservice.events.InsuranceCancellationEvent;
+import com.hedvig.memberservice.events.LivingAddressUpdatedEvent;
+import com.hedvig.memberservice.events.MemberAuthenticatedEvent;
+import com.hedvig.memberservice.events.MemberCancellationEvent;
+import com.hedvig.memberservice.events.MemberCreatedEvent;
+import com.hedvig.memberservice.events.MemberInactivatedEvent;
+import com.hedvig.memberservice.events.MemberSignedEvent;
+import com.hedvig.memberservice.events.MemberStartedOnBoardingEvent;
+import com.hedvig.memberservice.events.NameUpdatedEvent;
+import com.hedvig.memberservice.events.NewCashbackSelectedEvent;
+import com.hedvig.memberservice.events.OnboardingStartedWithSSNEvent;
+import com.hedvig.memberservice.events.PersonInformationFromBisnodeEvent;
+import com.hedvig.memberservice.events.PhoneNumberUpdatedEvent;
+import com.hedvig.memberservice.events.SSNUpdatedEvent;
+import com.hedvig.memberservice.events.TrackingIdCreatedEvent;
 import com.hedvig.memberservice.services.CashbackService;
 import java.time.ZoneId;
 import java.util.List;
@@ -332,10 +363,8 @@ public class MemberAggregate {
   }
 
   @CommandHandler
-  public void on(FraudulentStatusCommand cmd) {
-    if (cmd.getFraudulentStatus() != null) {
-      apply(new FraudulentStatusEvent(cmd.getMemberId(), cmd.getFraudulentStatus(), cmd.getFraudulentDescription()), MetaData.with("token", cmd.getToken()));
-    }
+  public void on(SetFraudulentStatusCommand cmd) {
+    apply(new FraudulentStatusUpdatedEvent(cmd.getMemberId(), cmd.getFraudulentStatus(), cmd.getFraudulentDescription()), MetaData.with("token", cmd.getToken()));
   }
 
   @CommandHandler

@@ -62,7 +62,7 @@ public class MemberEntity {
   private FraudulentStatus fraudulentStatus = FraudulentStatus.UNDEFINED;
   private String fraudulentDescription;
 
-  @Formula("last_name || ' ' || first_name")
+  @Formula("first_name || ' ' || last_name")
   private String fullName;
 
   public static final EnumMap<MembersSortColumn, String> SORT_COLUMN_MAPPING = new EnumMap<MembersSortColumn, String>(MembersSortColumn.class) {{

@@ -151,8 +151,7 @@ public class InternalMembersController {
     @PathVariable Long memberId, @RequestBody MemberFraudulentStatusDTO request, @RequestHeader("Authorization") String token) {
     log.info("Change Fraudulent status for member ({}) with {} and {}", memberId, request.getFraudulentStatus(), request.getFraudulentStatusDescription());
     commandBus.sendAndWait(
-      new FraudulentStatusCommand(
-        memberId, FraudulentStatus.valueOf(request.getFraudulentStatus()), request.getFraudulentStatusDescription(), token));
+      new SetFraudulentStatusCommand(memberId, request.getFraudulentStatus(), request.getFraudulentStatusDescription(), token));
     return ResponseEntity.accepted().build();
   }
 

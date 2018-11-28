@@ -8,7 +8,9 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.hedvig.memberservice.aggregates.FraudulentStatus;
 import com.hedvig.memberservice.commands.MemberUpdateContactInformationCommand;
+import com.hedvig.memberservice.commands.SetFraudulentStatusCommand;
 import com.hedvig.memberservice.commands.StartOnboardingWithSSNCommand;
 import com.hedvig.memberservice.query.MemberEntity;
 import com.hedvig.memberservice.query.MemberRepository;
@@ -18,6 +20,7 @@ import com.hedvig.memberservice.web.InternalMembersController;
 import com.hedvig.memberservice.web.dto.Address;
 import com.hedvig.memberservice.web.dto.InternalMemberSearchRequestDTO;
 import com.hedvig.memberservice.web.dto.InternalMemberSearchResultDTO;
+import com.hedvig.memberservice.web.dto.MemberFraudulentStatusDTO;
 import com.hedvig.memberservice.web.dto.StartOnboardingWithSSNRequest;
 import com.hedvig.memberservice.web.dto.UpdateContactInformationRequest;
 
@@ -133,5 +136,45 @@ public class InternalMembersControllerTests {
 
     verify(memberQueryService, times(1))
       .search(request);
+  }
+
+  @Test
+  public void testFraudulentStatus() throws Exception {
+    final MemberFraudulentStatusDTO fraudulentStatus = new MemberFraudulentStatusDTO("SUSPECTED_FRAUD", "Just for testing");
+    final MemberFraudulentStatusDTO emptyFraudulentStatus = new MemberFraudulentStatusDTO(null, "Just for testing");
+    final Long memberId = 1337L;
+    final String token = "12345";
+
+    mockMvc
+      .perform(
+        post("/_/member/{memberId}/setFraudulentStatus", memberId)
+          .contentType(MediaType.APPLICATION_JSON_UTF8)
+          .content(new ObjectMapper().writeValueAsBytes(fraudulentStatus)).header("Authorization", token))
+      .andExpect(status().is2xxSuccessful());
+
+    verify(commandGateway)
+      .sendAndWait(
+        new SetFraudulentStatusCommand(
+          memberId,
+          FraudulentStatus.SUSPECTED_FRAUD.toString(),
+          fraudulentStatus.getFraudulentStatusDescription(),
+          token)
+      );
+
+    mockMvc
+      .perform(
+        post("/_/member/{memberId}/setFraudulentStatus", memberId)
+          .contentType(MediaType.APPLICATION_JSON_UTF8)
+          .content(new ObjectMapper().writeValueAsBytes(emptyFraudulentStatus)).header("Authorization", token))
+      .andExpect(status().is2xxSuccessful());
+
+    verify(commandGateway)
+      .sendAndWait(
+        new SetFraudulentStatusCommand(
+          memberId,
+          FraudulentStatus.UNDEFINED.toString(),
+          emptyFraudulentStatus.getFraudulentStatusDescription(),
+          token)
+      );
   }
 }

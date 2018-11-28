@@ -7,7 +7,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Value
-public class FraudulentStatusEvent implements Traceable {
+public class FraudulentStatusUpdatedEvent implements Traceable {
   private Long memberId;
   private FraudulentStatus fraudulentStatus;
   private String fraudulentDescription;
