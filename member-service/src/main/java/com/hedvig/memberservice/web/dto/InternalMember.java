@@ -3,6 +3,9 @@ package com.hedvig.memberservice.web.dto;
 import com.hedvig.memberservice.query.MemberEntity;
 import java.time.Instant;
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
+
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.val;
@@ -42,6 +45,12 @@ public class InternalMember {
 
   private Instant createdOn;
 
+  private String fraudulentStatus;
+
+  private String fraudulentDescription;
+
+  private List<TraceMemberDTO> traceMemberInfo = new ArrayList<>();
+
   public static InternalMember fromEntity(MemberEntity entity) {
     val dto = new InternalMember();
     dto.setMemberId(entity.getId());
@@ -60,6 +69,8 @@ public class InternalMember {
     dto.setBirthDate(entity.getBirthDate());
     dto.setSignedOn(entity.getSignedOn());
     dto.setCreatedOn(entity.getCreatedOn());
+    dto.setFraudulentStatus(entity.getFraudulentStatus() != null ? entity.getFraudulentStatus().name() : "");
+    dto.setFraudulentDescription(entity.getFraudulentDescription());
     return dto;
   }
 }

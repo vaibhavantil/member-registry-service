@@ -10,6 +10,7 @@ import javax.persistence.Id;
 import javax.persistence.Index;
 import javax.persistence.Table;
 
+import com.hedvig.memberservice.aggregates.FraudulentStatus;
 import com.hedvig.memberservice.aggregates.MemberStatus;
 import com.hedvig.memberservice.util.EnumMapChecker;
 import com.hedvig.memberservice.web.dto.MembersSortColumn;
@@ -57,7 +58,11 @@ public class MemberEntity {
 
   private Instant createdOn;
 
-  @Formula("last_name || ' ' || first_name")
+  @Enumerated(EnumType.STRING)
+  private FraudulentStatus fraudulentStatus = FraudulentStatus.UNDEFINED;
+  private String fraudulentDescription;
+
+  @Formula("first_name || ' ' || last_name")
   private String fullName;
 
   public static final EnumMap<MembersSortColumn, String> SORT_COLUMN_MAPPING = new EnumMap<MembersSortColumn, String>(MembersSortColumn.class) {{

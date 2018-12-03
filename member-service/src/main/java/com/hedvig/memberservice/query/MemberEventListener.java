@@ -1,7 +1,13 @@
 package com.hedvig.memberservice.query;
 
 import com.hedvig.memberservice.aggregates.MemberStatus;
+
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+
 import com.hedvig.memberservice.events.EmailUpdatedEvent;
+import com.hedvig.memberservice.events.FraudulentStatusUpdatedEvent;
 import com.hedvig.memberservice.events.LivingAddressUpdatedEvent;
 import com.hedvig.memberservice.events.MemberCancellationEvent;
 import com.hedvig.memberservice.events.MemberCreatedEvent;
@@ -13,9 +19,7 @@ import com.hedvig.memberservice.events.NewCashbackSelectedEvent;
 import com.hedvig.memberservice.events.PhoneNumberUpdatedEvent;
 import com.hedvig.memberservice.events.SSNUpdatedEvent;
 import com.hedvig.memberservice.events.TrackingIdCreatedEvent;
-import java.time.Instant;
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
+import lombok.extern.slf4j.Slf4j;
 import org.axonframework.eventhandling.EventHandler;
 import org.axonframework.eventhandling.EventMessage;
 import org.axonframework.eventhandling.Timestamp;
@@ -25,6 +29,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
+@Slf4j
 public class MemberEventListener {
 
   private final Logger logger = LoggerFactory.getLogger(MemberEventListener.class);
@@ -124,8 +129,7 @@ public class MemberEventListener {
   }
 
   @EventHandler
-  public void on(
-      MemberStartedOnBoardingEvent e, EventMessage<MemberStartedOnBoardingEvent> eventMessage) {
+  public void on(MemberStartedOnBoardingEvent e, EventMessage<MemberStartedOnBoardingEvent> eventMessage) {
     logger.debug("Started handling event: {}", eventMessage.getIdentifier());
 
     MemberEntity member = userRepo.findById(e.getMemberId()).get();
@@ -178,4 +182,13 @@ public class MemberEventListener {
 
     userRepo.save(m);
   }
+
+  @EventHandler
+  void on(FraudulentStatusUpdatedEvent e) {
+    MemberEntity m = userRepo.findById(e.getMemberId()).get();
+    m.setFraudulentStatus(e.getFraudulentStatus());
+    m.setFraudulentDescription(e.getFraudulentDescription());
+    userRepo.save(m);
+  }
+
 }

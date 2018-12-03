@@ -7,4 +7,5 @@ import org.axonframework.commandhandling.TargetAggregateIdentifier;
 public class UpdateEmailCommand {
   @TargetAggregateIdentifier Long id;
   String email;
+  String token;
 }

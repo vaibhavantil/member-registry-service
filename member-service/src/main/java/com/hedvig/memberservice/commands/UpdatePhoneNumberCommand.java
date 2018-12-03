@@ -11,4 +11,5 @@ public class UpdatePhoneNumberCommand {
   @TargetAggregateIdentifier
   private long memberId;
   private String phoneNumber;
+  private String token;
 }

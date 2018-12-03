@@ -1,6 +1,9 @@
 package com.hedvig.memberservice.events;
 
 import com.hedvig.memberservice.aggregates.BisnodeAddress;
+
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -9,7 +12,7 @@ import lombok.extern.slf4j.Slf4j;
 
 @Value
 @Slf4j
-public class LivingAddressUpdatedEvent {
+public class LivingAddressUpdatedEvent implements Traceable {
   private final Long id;
   private final String street;
   private final String city;
@@ -18,7 +21,7 @@ public class LivingAddressUpdatedEvent {
   private final int floor;
 
   public LivingAddressUpdatedEvent(
-      Long id, String street, String city, String zipCode, String apartmentNo, int floor) {
+    Long id, String street, String city, String zipCode, String apartmentNo, int floor) {
     this.id = id;
     this.street = street;
     this.city = city;
@@ -57,5 +60,21 @@ public class LivingAddressUpdatedEvent {
 
   private String orEmpty(String entrance) {
     return Optional.ofNullable(entrance).orElse("");
+  }
+
+  @Override
+  public Long getMemberId() {
+    return id;
+  }
+
+  @Override
+  public Map<String, Object> getValues() {
+    Map result = new HashMap();
+    result.put("Street", street);
+    result.put("City", city);
+    result.put("Zip code", zipCode);
+    result.put("Apartment No", apartmentNo);
+    result.put("Floor", floor);
+    return result;
   }
 }

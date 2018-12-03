@@ -12,6 +12,7 @@ import com.hedvig.memberservice.commands.BankIdAuthenticationStatus;
 import com.hedvig.memberservice.commands.BankIdSignCommand;
 import com.hedvig.memberservice.commands.CreateMemberCommand;
 import com.hedvig.memberservice.commands.EditMemberInformationCommand;
+import com.hedvig.memberservice.commands.SetFraudulentStatusCommand;
 import com.hedvig.memberservice.commands.InactivateMemberCommand;
 import com.hedvig.memberservice.commands.InsurnaceCancellationCommand;
 import com.hedvig.memberservice.commands.MemberCancelInsuranceCommand;
@@ -22,6 +23,7 @@ import com.hedvig.memberservice.commands.UpdateEmailCommand;
 import com.hedvig.memberservice.commands.UpdatePhoneNumberCommand;
 import com.hedvig.memberservice.commands.UpdateWebOnBoardingInfoCommand;
 import com.hedvig.memberservice.events.EmailUpdatedEvent;
+import com.hedvig.memberservice.events.FraudulentStatusUpdatedEvent;
 import com.hedvig.memberservice.events.InsuranceCancellationEvent;
 import com.hedvig.memberservice.events.LivingAddressUpdatedEvent;
 import com.hedvig.memberservice.events.MemberAuthenticatedEvent;
@@ -48,6 +50,7 @@ import org.axonframework.commandhandling.model.AggregateIdentifier;
 import org.axonframework.commandhandling.model.ApplyMore;
 import org.axonframework.eventhandling.EventHandler;
 import org.axonframework.eventsourcing.EventSourcingHandler;
+import org.axonframework.messaging.MetaData;
 import org.axonframework.spring.stereotype.Aggregate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -245,7 +248,7 @@ public class MemberAggregate {
         && !Objects.equals(this.member.getFirstName(), cmd.getFirstName()))
         || (cmd.getLastName() != null
         && !Objects.equals(this.member.getLastName(), cmd.getLastName()))) {
-      apply(new NameUpdatedEvent(this.id, cmd.getFirstName(), cmd.getLastName()));
+      apply(new NameUpdatedEvent(this.id, cmd.getFirstName(), cmd.getLastName()), MetaData.with("token", cmd.getToken()));
     }
 
     if (cmd.getEmail() != null
@@ -268,12 +271,12 @@ public class MemberAggregate {
               cmd.getCity(),
               cmd.getZipCode(),
               cmd.getApartmentNo(),
-              cmd.getFloor()));
+              cmd.getFloor()), MetaData.with("token", cmd.getToken()));
     }
 
     if (cmd.getPhoneNumber() != null
         && !Objects.equals(this.member.getPhoneNumber(), cmd.getPhoneNumber())) {
-      apply(new PhoneNumberUpdatedEvent(this.id, cmd.getPhoneNumber()));
+      apply(new PhoneNumberUpdatedEvent(this.id, cmd.getPhoneNumber()), MetaData.with("token", cmd.getToken()));
     }
   }
 
@@ -305,7 +308,7 @@ public class MemberAggregate {
 
   @CommandHandler
   void updateEmail(UpdateEmailCommand cmd) {
-    apply(new EmailUpdatedEvent(this.id, cmd.getEmail()));
+    apply(new EmailUpdatedEvent(this.id, cmd.getEmail()), MetaData.with("token", cmd.getToken()));
   }
 
   @CommandHandler
@@ -316,12 +319,12 @@ public class MemberAggregate {
             && !Objects.equals(this.member.getLastName(), cmd.getMember().getLastName()))) {
       apply(
           new NameUpdatedEvent(
-              this.id, cmd.getMember().getFirstName(), cmd.getMember().getLastName()));
+              this.id, cmd.getMember().getFirstName(), cmd.getMember().getLastName()), MetaData.with("token", cmd.getToken()));
     }
 
     if (cmd.getMember().getEmail() != null
         && !Objects.equals(member.getEmail(), cmd.getMember().getEmail())) {
-      apply(new EmailUpdatedEvent(this.id, cmd.getMember().getEmail()));
+      apply(new EmailUpdatedEvent(this.id, cmd.getMember().getEmail()), MetaData.with("token", cmd.getToken()));
     }
 
     LivingAddress address = this.member.getLivingAddress();
@@ -339,24 +342,29 @@ public class MemberAggregate {
               cmd.getMember().getCity(),
               cmd.getMember().getZipCode(),
               cmd.getMember().getApartment(),
-              cmd.getMember().getFloor()));
+              cmd.getMember().getFloor()), MetaData.with("token", cmd.getToken()));
     }
 
     if (cmd.getMember().getPhoneNumber() != null
         && !Objects.equals(this.member.getPhoneNumber(), cmd.getMember().getPhoneNumber())) {
-      apply(new PhoneNumberUpdatedEvent(this.id, cmd.getMember().getPhoneNumber()));
+      apply(new PhoneNumberUpdatedEvent(this.id, cmd.getMember().getPhoneNumber()), MetaData.with("token", cmd.getToken()));
     }
   }
 
   @CommandHandler
   public void on(UpdatePhoneNumberCommand cmd) {
     log.info("Updating phoneNumber for member {}, new number: {}", cmd.getMemberId(),
-        cmd.getPhoneNumber());
+      cmd.getPhoneNumber());
 
     if (cmd.getPhoneNumber() != null
-        && !Objects.equals(member.getPhoneNumber(), cmd.getPhoneNumber())) {
-      apply(new PhoneNumberUpdatedEvent(cmd.getMemberId(), cmd.getPhoneNumber()));
+      && !Objects.equals(member.getPhoneNumber(), cmd.getPhoneNumber())) {
+      apply(new PhoneNumberUpdatedEvent(cmd.getMemberId(), cmd.getPhoneNumber()), MetaData.with("token", cmd.getToken()));
     }
+  }
+
+  @CommandHandler
+  public void on(SetFraudulentStatusCommand cmd) {
+    apply(new FraudulentStatusUpdatedEvent(cmd.getMemberId(), cmd.getFraudulentStatus(), cmd.getFraudulentDescription()), MetaData.with("token", cmd.getToken()));
   }
 
   @CommandHandler

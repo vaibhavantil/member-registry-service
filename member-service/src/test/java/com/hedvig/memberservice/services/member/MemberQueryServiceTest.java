@@ -79,8 +79,8 @@ public class MemberQueryServiceTest {
     init();
     InternalMemberSearchResultDTO res = search("", null, null, null, MembersSortColumn.NAME, Sort.Direction.ASC);
     assertThat(res.getMembers().size()).isEqualTo(6);
-    assertThat(res.getMembers().get(0).getLastName()).isEqualTo("Doe");
-    assertThat(res.getMembers().get(5).getLastName()).isEqualTo("Oneida");
+    assertThat(res.getMembers().get(0).getLastName()).isEqualTo("Oneida");
+    assertThat(res.getMembers().get(5).getLastName()).isEqualTo("Ester");
   }
 
   @Test
@@ -88,8 +88,8 @@ public class MemberQueryServiceTest {
     init();
     InternalMemberSearchResultDTO res = search("", null, null, null, MembersSortColumn.NAME, Sort.Direction.DESC);
     assertThat(res.getMembers().size()).isEqualTo(6);
-    assertThat(res.getMembers().get(0).getLastName()).isEqualTo("Oneida");
-    assertThat(res.getMembers().get(5).getLastName()).isEqualTo("Doe");
+    assertThat(res.getMembers().get(0).getLastName()).isEqualTo("Ester");
+    assertThat(res.getMembers().get(5).getLastName()).isEqualTo("Oneida");
   }
 
   @Test
@@ -119,7 +119,7 @@ public class MemberQueryServiceTest {
     assertThat(res.getMembers().size()).isEqualTo(3);
     assertThat(res.getMembers().get(0).getLastName()).isEqualTo("Ester");
     assertThat(res.getMembers().get(1).getLastName()).isEqualTo("Eldred");
-    assertThat(res.getMembers().get(2).getLastName()).isEqualTo("Doe");
+    assertThat(res.getMembers().get(2).getLastName()).isEqualTo("Oneida");
     assertThat(res.getTotalPages()).isEqualTo(2);
   }
 
