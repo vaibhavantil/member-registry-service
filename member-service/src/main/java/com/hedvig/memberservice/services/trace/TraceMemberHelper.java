@@ -50,13 +50,13 @@ public class TraceMemberHelper {
       return null;
     } catch (IllegalArgumentException e) {
       log.error(e.getMessage());
-      return "Member";
+      return "System";
     }
   }
 
   public static Map<String, TraceMemberDTO> getTraceInfo (Traceable entity, String memberId, Instant changeDate, Object token) {
     final Map<String, TraceMemberDTO> result = new HashMap<>();
-    final String email =  TraceMemberHelper.getIxMail (Optional.ofNullable(token).orElse("Member").toString());
+    final String email =  TraceMemberHelper.getIxMail (Optional.ofNullable(token).orElse("System").toString());
 
     entity.getValues().keySet().forEach((String item) -> result.put(formatDate (entity.getValues().get(item))+item+email, new TraceMemberDTO (
       LocalDateTime.ofInstant (changeDate, ZoneId.of("Europe/Stockholm")),
