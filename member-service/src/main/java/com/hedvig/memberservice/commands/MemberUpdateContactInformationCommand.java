@@ -19,10 +19,9 @@ public class MemberUpdateContactInformationCommand {
   String zipCode;
   String apartmentNo;
   Integer floor;
-  String token;
 
   public MemberUpdateContactInformationCommand(
-      Long memberId, UpdateContactInformationRequest body, String token) {
+      Long memberId, UpdateContactInformationRequest body) {
     this.memberId = memberId;
 
     this.firstName = body.getFirstName();
@@ -35,6 +34,5 @@ public class MemberUpdateContactInformationCommand {
     this.apartmentNo = body.getAddress().getApartmentNo();
     this.floor = body.getAddress().getFloor();
     this.phoneNumber = body.getPhoneNumber();
-    this.token = token;
   }
 }

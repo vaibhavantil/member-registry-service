@@ -17,7 +17,7 @@ import java.util.*;
 @Slf4j
 public class TraceMemberHelper {
 
-  public static String formatDate (Object date) {
+  private static String formatDate (Object date) {
     if (date != null) {
       if (date instanceof LocalDateTime) return formatDate(localDateToInstant((LocalDateTime)date));
       if (date instanceof Instant) return formatDate((Instant) date);
@@ -28,7 +28,7 @@ public class TraceMemberHelper {
     return "";
   }
 
-  public static Instant localDateToInstant (LocalDateTime date) {
+  private static Instant localDateToInstant (LocalDateTime date) {
     return date.atZone(ZoneId.of("Europe/Stockholm")).toInstant();
   }
 
@@ -41,7 +41,7 @@ public class TraceMemberHelper {
     return formatDate(Date.from(date));
   }
 
-  public static String getIxMail(String token) {
+  private static String getIxMail(String token) {
     try {
       Map<String, String> map = (new ObjectMapper().readValue(JwtHelper.decode(token).getClaims(), new TypeReference<Map<String, String>>() {}));
       return map.get("email");
@@ -50,13 +50,13 @@ public class TraceMemberHelper {
       return null;
     } catch (IllegalArgumentException e) {
       log.error(e.getMessage());
-      return "";
+      return "System";
     }
   }
 
   public static Map<String, TraceMemberDTO> getTraceInfo (Traceable entity, String memberId, Instant changeDate, Object token) {
     final Map<String, TraceMemberDTO> result = new HashMap<>();
-    final String email =  TraceMemberHelper.getIxMail (Optional.ofNullable(token).orElse("").toString());
+    final String email =  TraceMemberHelper.getIxMail (Optional.ofNullable(token).orElse("System").toString());
 
     entity.getValues().keySet().forEach((String item) -> result.put(formatDate (entity.getValues().get(item))+item+email, new TraceMemberDTO (
       LocalDateTime.ofInstant (changeDate, ZoneId.of("Europe/Stockholm")),

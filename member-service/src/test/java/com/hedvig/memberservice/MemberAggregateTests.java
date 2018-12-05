@@ -155,7 +155,7 @@ public class MemberAggregateTests {
 
     fixture
         .given(new MemberCreatedEvent(memberId, MemberStatus.INITIATED))
-        .when(new MemberUpdateContactInformationCommand(memberId, request, "1234"))
+        .when(new MemberUpdateContactInformationCommand(memberId, request))
         .expectSuccessfulHandlerExecution()
         .expectEvents(
             new NameUpdatedEvent(memberId, request.getFirstName(), request.getLastName()),
