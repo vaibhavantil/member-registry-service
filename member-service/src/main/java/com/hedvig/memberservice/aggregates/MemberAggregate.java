@@ -248,7 +248,7 @@ public class MemberAggregate {
         && !Objects.equals(this.member.getFirstName(), cmd.getFirstName()))
         || (cmd.getLastName() != null
         && !Objects.equals(this.member.getLastName(), cmd.getLastName()))) {
-      apply(new NameUpdatedEvent(this.id, cmd.getFirstName(), cmd.getLastName()), MetaData.with("token", cmd.getToken()));
+      apply(new NameUpdatedEvent(this.id, cmd.getFirstName(), cmd.getLastName()));
     }
 
     if (cmd.getEmail() != null
@@ -271,12 +271,12 @@ public class MemberAggregate {
               cmd.getCity(),
               cmd.getZipCode(),
               cmd.getApartmentNo(),
-              cmd.getFloor()), MetaData.with("token", cmd.getToken()));
+              cmd.getFloor()));
     }
 
     if (cmd.getPhoneNumber() != null
         && !Objects.equals(this.member.getPhoneNumber(), cmd.getPhoneNumber())) {
-      apply(new PhoneNumberUpdatedEvent(this.id, cmd.getPhoneNumber()), MetaData.with("token", cmd.getToken()));
+      apply(new PhoneNumberUpdatedEvent(this.id, cmd.getPhoneNumber()));
     }
   }
 
@@ -308,7 +308,7 @@ public class MemberAggregate {
 
   @CommandHandler
   void updateEmail(UpdateEmailCommand cmd) {
-    apply(new EmailUpdatedEvent(this.id, cmd.getEmail()), MetaData.with("token", cmd.getToken()));
+    apply(new EmailUpdatedEvent(this.id, cmd.getEmail()));
   }
 
   @CommandHandler
@@ -358,7 +358,7 @@ public class MemberAggregate {
 
     if (cmd.getPhoneNumber() != null
       && !Objects.equals(member.getPhoneNumber(), cmd.getPhoneNumber())) {
-      apply(new PhoneNumberUpdatedEvent(cmd.getMemberId(), cmd.getPhoneNumber()), MetaData.with("token", cmd.getToken()));
+      apply(new PhoneNumberUpdatedEvent(cmd.getMemberId(), cmd.getPhoneNumber()));
     }
   }
 
@@ -393,6 +393,11 @@ public class MemberAggregate {
   @EventSourcingHandler
   public void on(MemberStartedOnBoardingEvent e) {
     this.status = e.getNewStatus();
+  }
+
+  @EventSourcingHandler
+  public void on(NameUpdatedEvent e) {
+    this.member.setFirstName(e.getFirstName()); this.member.setLastName(e.getLastName());
   }
 
   @EventSourcingHandler

@@ -72,12 +72,11 @@ public class InternalMembersControllerTests {
         .perform(
             post("/i/member/{memberId}/finalizeOnboarding", "1337")
                 .contentType(MediaType.APPLICATION_JSON_UTF8)
-                .content(jsonMapper.writeValueAsBytes(request))
-                .header("Authorization", "1234"))
+                .content(jsonMapper.writeValueAsBytes(request)))
         .andExpect(status().is2xxSuccessful());
 
     verify(commandGateway, times(1))
-        .sendAndWait(new MemberUpdateContactInformationCommand(1337l, request, "1234"));
+        .sendAndWait(new MemberUpdateContactInformationCommand(1337l, request));
   }
 
   @Test
