@@ -27,4 +27,15 @@ public class Person {
 
     private List<Telephone> phoneList;
 
+    public String getPreferredOrFirstName() throws RuntimeException {
+      if (getPreferredFirstName() == null) {
+        if (getFirstNames() == null || getFirstNames().size() == 0) {
+          throw new RuntimeException(
+              "Could not find firstname in bisnode response, prefferedFirstName and firstNames are null");
+        }
+        return getFirstNames().get(0);
+      }
+
+      return getPreferredFirstName();
+    }
 }

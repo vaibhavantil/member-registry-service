@@ -1,14 +1,14 @@
 package com.hedvig.memberservice.events;
 
 import com.hedvig.memberservice.aggregates.BisnodeAddress;
+import lombok.Value;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import lombok.Value;
-import lombok.extern.slf4j.Slf4j;
+
+import static com.hedvig.memberservice.aggregates.BisnodeAddress.parseFloorFromApartment;
 
 @Value
 @Slf4j
@@ -41,21 +41,6 @@ public class LivingAddressUpdatedEvent implements Traceable {
     this.zipCode = a.getPostalCode();
     this.apartmentNo = a.getApartment();
     this.floor = parseFloorFromApartment(a.getApartment());
-  }
-
-  private int parseFloorFromApartment(String apartmentNo) {
-    final Pattern compile = Pattern.compile("\\d\\d\\d\\d");
-    final Matcher matcher = compile.matcher(apartmentNo == null ? "" : apartmentNo);
-    if (matcher.matches()) {
-      try {
-        return Integer.parseInt(apartmentNo.substring(0, 2)) - 10;
-      } catch (NumberFormatException ex) {
-        log.error("Could not parse apartmentnumber: " + ex.getMessage(), ex);
-      }
-    }
-    log.error("ApartmentNo does not match regex. apartmentNo: '{}'", apartmentNo);
-
-    return 0;
   }
 
   private String orEmpty(String entrance) {

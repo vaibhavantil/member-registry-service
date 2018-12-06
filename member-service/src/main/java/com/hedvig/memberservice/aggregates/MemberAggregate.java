@@ -1,49 +1,12 @@
 package com.hedvig.memberservice.aggregates;
 
-import static org.axonframework.commandhandling.model.AggregateLifecycle.apply;
-
 import com.hedvig.common.UUIDGenerator;
 import com.hedvig.external.bisnodeBCI.BisnodeClient;
 import com.hedvig.external.bisnodeBCI.dto.Person;
 import com.hedvig.external.bisnodeBCI.dto.PersonSearchResult;
-import com.hedvig.memberservice.commands.AssignTrackingIdCommand;
-import com.hedvig.memberservice.commands.AuthenticationAttemptCommand;
-import com.hedvig.memberservice.commands.BankIdAuthenticationStatus;
-import com.hedvig.memberservice.commands.BankIdSignCommand;
-import com.hedvig.memberservice.commands.CreateMemberCommand;
-import com.hedvig.memberservice.commands.EditMemberInformationCommand;
-import com.hedvig.memberservice.commands.SetFraudulentStatusCommand;
-import com.hedvig.memberservice.commands.InactivateMemberCommand;
-import com.hedvig.memberservice.commands.InsurnaceCancellationCommand;
-import com.hedvig.memberservice.commands.MemberCancelInsuranceCommand;
-import com.hedvig.memberservice.commands.MemberUpdateContactInformationCommand;
-import com.hedvig.memberservice.commands.SelectNewCashbackCommand;
-import com.hedvig.memberservice.commands.StartOnboardingWithSSNCommand;
-import com.hedvig.memberservice.commands.UpdateEmailCommand;
-import com.hedvig.memberservice.commands.UpdatePhoneNumberCommand;
-import com.hedvig.memberservice.commands.UpdateWebOnBoardingInfoCommand;
-import com.hedvig.memberservice.events.EmailUpdatedEvent;
-import com.hedvig.memberservice.events.FraudulentStatusUpdatedEvent;
-import com.hedvig.memberservice.events.InsuranceCancellationEvent;
-import com.hedvig.memberservice.events.LivingAddressUpdatedEvent;
-import com.hedvig.memberservice.events.MemberAuthenticatedEvent;
-import com.hedvig.memberservice.events.MemberCancellationEvent;
-import com.hedvig.memberservice.events.MemberCreatedEvent;
-import com.hedvig.memberservice.events.MemberInactivatedEvent;
-import com.hedvig.memberservice.events.MemberSignedEvent;
-import com.hedvig.memberservice.events.MemberStartedOnBoardingEvent;
-import com.hedvig.memberservice.events.NameUpdatedEvent;
-import com.hedvig.memberservice.events.NewCashbackSelectedEvent;
-import com.hedvig.memberservice.events.OnboardingStartedWithSSNEvent;
-import com.hedvig.memberservice.events.PersonInformationFromBisnodeEvent;
-import com.hedvig.memberservice.events.PhoneNumberUpdatedEvent;
-import com.hedvig.memberservice.events.SSNUpdatedEvent;
-import com.hedvig.memberservice.events.TrackingIdCreatedEvent;
+import com.hedvig.memberservice.commands.*;
+import com.hedvig.memberservice.events.*;
 import com.hedvig.memberservice.services.CashbackService;
-import java.time.ZoneId;
-import java.util.List;
-import java.util.Objects;
-import java.util.UUID;
 import lombok.val;
 import org.axonframework.commandhandling.CommandHandler;
 import org.axonframework.commandhandling.model.AggregateIdentifier;
@@ -56,6 +19,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+
+import java.time.ZoneId;
+import java.util.List;
+import java.util.Objects;
+import java.util.UUID;
+
+import static org.axonframework.commandhandling.model.AggregateLifecycle.apply;
 
 /**
  * This is an example Aggregate and should be remodeled to suit the needs of you domain.
@@ -195,7 +165,7 @@ public class MemberAggregate {
 
     applyChain =
         applyChain.andThenApply(
-            () -> new NameUpdatedEvent(this.id, getFirstName(person), person.getFamilyName()));
+            () -> new NameUpdatedEvent(this.id, person.getPreferredOrFirstName(), person.getFamilyName()));
 
     BisnodeInformation pi = new BisnodeInformation(ssn, person);
     if (pi.getAddress().isPresent()) {
@@ -207,19 +177,7 @@ public class MemberAggregate {
     return applyChain;
   }
 
-  private String getFirstName(Person person) throws RuntimeException {
-    if (person.getPreferredFirstName() == null) {
-      if (person.getFirstNames() == null || person.getFirstNames().size() == 0) {
-        throw new RuntimeException(
-            "Could not find firstname in bisnode response, prefferedFirstName and firstNames are null");
-      }
-      return person.getFirstNames().get(0);
-    }
-
-    return person.getPreferredFirstName();
-  }
-
-  @CommandHandler
+    @CommandHandler
   void inactivateMember(InactivateMemberCommand command) {
     if (this.status == MemberStatus.INITIATED || this.status == MemberStatus.ONBOARDING) {
       apply(new MemberInactivatedEvent(this.id));

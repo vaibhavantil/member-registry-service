@@ -1,22 +1,18 @@
 package com.hedvig.external.bisnodeBCI;
 
 import com.hedvig.external.bisnodeBCI.dto.PersonSearchResultListResponse;
-import java.time.Instant;
-import java.util.HashMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.util.Base64Utils;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriTemplate;
+
+import java.time.Instant;
+import java.util.HashMap;
 
 public class BisnodeClient {
 

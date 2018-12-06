@@ -1,12 +1,13 @@
 package com.hedvig.memberservice.aggregates;
 
 import com.hedvig.external.bisnodeBCI.dto.Person;
+import lombok.Getter;
+import lombok.Setter;
+
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
-import lombok.Getter;
-import lombok.Setter;
 
 @Getter
 @Setter
@@ -78,13 +79,6 @@ public class BisnodeInformation {
                         p.getTelemarketingRestriction(),
                         p.getSecretPhoneNumber()))
             .collect(Collectors.toList());
-  }
-
-  public String getFullName() {
-
-    return String.format(
-        "%s %s",
-        Optional.ofNullable(preferredFirstName).orElse(""), Optional.of(familyName).orElse(""));
   }
 
   public Optional<BisnodeAddress> getAddress() {
