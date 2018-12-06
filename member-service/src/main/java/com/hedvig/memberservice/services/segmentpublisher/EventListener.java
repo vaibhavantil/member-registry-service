@@ -5,13 +5,16 @@ import com.hedvig.memberservice.events.EmailUpdatedEvent;
 import com.hedvig.memberservice.events.NameUpdatedEvent;
 import com.segment.analytics.Analytics;
 import com.segment.analytics.messages.IdentifyMessage;
-import java.util.Map;
-import java.util.Objects;
 import org.axonframework.config.ProcessingGroup;
 import org.axonframework.eventhandling.EventHandler;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
-@Component
+import java.util.Map;
+import java.util.Objects;
+
+@Component()
+@Profile("customer.io")
 @ProcessingGroup("SegmentProcessorGroup")
 public class EventListener {
 
