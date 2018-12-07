@@ -8,7 +8,7 @@ import org.axonframework.commandhandling.TargetAggregateIdentifier;
 public class SetFraudulentStatusCommand {
   @TargetAggregateIdentifier Long memberId;
 
-  private FraudulentStatus fraudulentStatus = FraudulentStatus.UNDEFINED;
+  private FraudulentStatus fraudulentStatus = FraudulentStatus.NOT_FRAUD;
   private String fraudulentDescription;
   private String token;
 
@@ -19,9 +19,8 @@ public class SetFraudulentStatusCommand {
       try {
         this.fraudulentStatus = FraudulentStatus.valueOf(fraudulentStatus);
       } catch (IllegalArgumentException e) {
-        this.fraudulentStatus = FraudulentStatus.UNDEFINED;
+        this.fraudulentStatus = FraudulentStatus.NOT_FRAUD;
       }
-
     }
   }
 
