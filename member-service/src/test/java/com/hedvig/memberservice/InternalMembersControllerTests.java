@@ -171,7 +171,7 @@ public class InternalMembersControllerTests {
       .sendAndWait(
         new SetFraudulentStatusCommand(
           memberId,
-          FraudulentStatus.UNDEFINED.toString(),
+          FraudulentStatus.NOT_FRAUD.toString(),
           emptyFraudulentStatus.getFraudulentStatusDescription(),
           token)
       );

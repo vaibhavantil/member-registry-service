@@ -59,7 +59,7 @@ public class MemberEntity {
   private Instant createdOn;
 
   @Enumerated(EnumType.STRING)
-  private FraudulentStatus fraudulentStatus = FraudulentStatus.UNDEFINED;
+  private FraudulentStatus fraudulentStatus = FraudulentStatus.NOT_FRAUD;
   private String fraudulentDescription;
 
   @Formula("first_name || ' ' || last_name")
