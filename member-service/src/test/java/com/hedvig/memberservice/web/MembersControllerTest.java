@@ -1,5 +1,13 @@
 package com.hedvig.memberservice.web;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.hedvig.memberservice.commands.AssignTrackingIdCommand;
+import com.hedvig.memberservice.externalApi.productsPricing.ProductApi;
+import com.hedvig.memberservice.query.MemberEntity;
+import com.hedvig.memberservice.query.MemberRepository;
+import com.hedvig.memberservice.query.TrackingIdRepository;
+import com.hedvig.memberservice.services.CashbackService;
+import com.hedvig.memberservice.web.dto.TrackingIdDto;
 import org.axonframework.commandhandling.gateway.CommandGateway;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -8,32 +16,17 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.retry.support.RetryTemplate;
-import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
-
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.BDDMockito.then;
-import static org.mockito.BDDMockito.times;
-import static org.mockito.BDDMockito.any;
 
 import java.util.Optional;
 import java.util.UUID;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.hedvig.memberservice.TestApplication;
-import com.hedvig.memberservice.commands.AssignTrackingIdCommand;
-import com.hedvig.memberservice.externalApi.productsPricing.ProductApi;
-import com.hedvig.memberservice.query.MemberEntity;
-import com.hedvig.memberservice.query.MemberRepository;
-import com.hedvig.memberservice.query.TrackingIdRepository;
-import com.hedvig.memberservice.services.CashbackService;
-import com.hedvig.memberservice.web.dto.TrackingIdDto;
+import static org.mockito.BDDMockito.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @RunWith(SpringRunner.class)
-@ContextConfiguration(classes = TestApplication.class)
 @WebMvcTest(controllers = MembersController.class)
 public class MembersControllerTest {
   @Autowired
