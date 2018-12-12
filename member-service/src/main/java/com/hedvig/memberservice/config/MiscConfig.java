@@ -3,10 +3,12 @@ package com.hedvig.memberservice.config;
 import com.hedvig.common.UUIDGenerator;
 import com.hedvig.common.UUIDGeneratorImpl;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.retry.backoff.FixedBackOffPolicy;
 import org.springframework.retry.policy.SimpleRetryPolicy;
 import org.springframework.retry.support.RetryTemplate;
 
+@Configuration
 public class MiscConfig {
 
     @Bean

@@ -12,7 +12,7 @@ import java.util.Collections;
 import java.util.List;
 
 @Configuration
-public class RestTemplate {
+public class RestTemplateConfig {
 
     @Bean
     public org.springframework.web.client.RestTemplate restTemplate(

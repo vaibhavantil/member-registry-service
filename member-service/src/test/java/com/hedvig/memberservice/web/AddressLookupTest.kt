@@ -43,7 +43,7 @@ class AddressLookupTest {
             makePostRequest(
                 "/_/addresslookup/swe",
                 mapOf(
-                    "personnummer" to SSN,
+                    "ssn" to SSN,
                     "memberId" to "1337"
                 )
             )
@@ -67,7 +67,7 @@ class AddressLookupTest {
             makePostRequest(
                 "/_/addresslookup/swe",
                 mapOf(
-                    "personnummer" to SSN,
+                    "ssn" to SSN,
                     "memberId" to "1337"
                 )
             )
@@ -87,7 +87,7 @@ class AddressLookupTest {
             makePostRequest(
                 "/_/addresslookup/swe",
                 mapOf(
-                    "personnummer" to SSN,
+                    "ssn" to SSN,
                     "memberId" to "1337"
                 )
             )
@@ -102,7 +102,8 @@ class AddressLookupTest {
     //Entrance can be null
     //Floor seems to always be null
     private fun makeResponse(): PersonSearchResultListResponse? {
-        val response = PersonSearchResultListResponse(
+
+        return PersonSearchResultListResponse(
             listOf(
                 PersonSearchResult(
                     "random",
@@ -139,12 +140,11 @@ class AddressLookupTest {
                     , listOf())
                 )
             ))
-
-        return response
     }
 
     private fun makeResponseWithoutAddress(): PersonSearchResultListResponse? {
-        val response = PersonSearchResultListResponse(
+
+        return PersonSearchResultListResponse(
             listOf(
                 PersonSearchResult(
                     "random",
@@ -166,16 +166,13 @@ class AddressLookupTest {
                         , listOf())
                 )
             ))
-
-        return response
     }
 
     private fun makeEmptyResponse(): PersonSearchResultListResponse? {
-        val response = PersonSearchResultListResponse(
+
+        return PersonSearchResultListResponse(
             listOf()
             )
-
-        return response
     }
 
 
