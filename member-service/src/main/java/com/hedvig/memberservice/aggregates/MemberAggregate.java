@@ -177,7 +177,7 @@ public class MemberAggregate {
     return applyChain;
   }
 
-    @CommandHandler
+  @CommandHandler
   void inactivateMember(InactivateMemberCommand command) {
     if (this.status == MemberStatus.INITIATED || this.status == MemberStatus.ONBOARDING) {
       apply(new MemberInactivatedEvent(this.id));
