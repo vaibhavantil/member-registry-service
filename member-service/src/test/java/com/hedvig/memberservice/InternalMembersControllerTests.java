@@ -1,12 +1,5 @@
 package com.hedvig.memberservice;
 
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hedvig.memberservice.aggregates.FraudulentStatus;
 import com.hedvig.memberservice.commands.MemberUpdateContactInformationCommand;
@@ -17,16 +10,7 @@ import com.hedvig.memberservice.query.MemberRepository;
 import com.hedvig.memberservice.services.member.MemberQueryService;
 import com.hedvig.memberservice.services.trace.TraceMemberService;
 import com.hedvig.memberservice.web.InternalMembersController;
-import com.hedvig.memberservice.web.dto.Address;
-import com.hedvig.memberservice.web.dto.InternalMemberSearchRequestDTO;
-import com.hedvig.memberservice.web.dto.InternalMemberSearchResultDTO;
-import com.hedvig.memberservice.web.dto.MemberFraudulentStatusDTO;
-import com.hedvig.memberservice.web.dto.StartOnboardingWithSSNRequest;
-import com.hedvig.memberservice.web.dto.UpdateContactInformationRequest;
-
-import java.util.Collections;
-import java.util.Objects;
-import java.util.Optional;
+import com.hedvig.memberservice.web.dto.*;
 import org.axonframework.commandhandling.gateway.CommandGateway;
 import org.axonframework.spring.config.EnableAxon;
 import org.junit.Test;
@@ -35,12 +19,19 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.util.Collections;
+import java.util.Objects;
+import java.util.Optional;
+
+import static org.mockito.Mockito.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
 @RunWith(SpringRunner.class)
-@ContextConfiguration(classes = TestApplication.class)
 @WebMvcTest(controllers = InternalMembersController.class)
 @EnableAxon
 public class InternalMembersControllerTests {

@@ -1,12 +1,10 @@
 package com.hedvig.memberservice.services.member;
 
-import com.hedvig.memberservice.TestApplication;
 import com.hedvig.memberservice.aggregates.MemberStatus;
 import com.hedvig.memberservice.query.MemberEntity;
 import com.hedvig.memberservice.web.dto.InternalMemberSearchRequestDTO;
 import com.hedvig.memberservice.web.dto.InternalMemberSearchResultDTO;
 import com.hedvig.memberservice.web.dto.MembersSortColumn;
-
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,7 +13,6 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.FilterType;
 import org.springframework.data.domain.Sort;
-import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import java.time.Instant;
@@ -28,7 +25,6 @@ import static com.hedvig.memberservice.aggregates.MemberStatus.*;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @RunWith(SpringRunner.class)
-@ContextConfiguration(classes = TestApplication.class)
 @DataJpaTest(includeFilters =
   @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, value = MemberQueryService.class)
 )

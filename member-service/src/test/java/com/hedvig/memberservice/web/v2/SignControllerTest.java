@@ -1,8 +1,27 @@
 package com.hedvig.memberservice.web.v2;
 
-import static org.hamcrest.Matchers.allOf;
-import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.hasSize;
+import com.hedvig.external.bankID.bankIdRestTypes.CollectStatus;
+import com.hedvig.external.bankID.bankIdRestTypes.OrderResponse;
+import com.hedvig.memberservice.entities.CollectResponse;
+import com.hedvig.memberservice.entities.SignSession;
+import com.hedvig.memberservice.entities.SignStatus;
+import com.hedvig.memberservice.services.BankIdRestService;
+import com.hedvig.memberservice.services.MemberHasExistingInsuranceException;
+import com.hedvig.memberservice.services.SigningService;
+import com.hedvig.memberservice.services.member.dto.MemberSignResponse;
+import lombok.val;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.web.servlet.MockMvc;
+
+import java.util.Optional;
+
+import static org.hamcrest.Matchers.*;
 import static org.hamcrest.core.IsNull.nullValue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -12,30 +31,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import com.hedvig.external.bankID.bankIdRestTypes.CollectStatus;
-import com.hedvig.external.bankID.bankIdRestTypes.OrderResponse;
-import com.hedvig.memberservice.TestApplication;
-import com.hedvig.memberservice.entities.CollectResponse;
-import com.hedvig.memberservice.entities.SignSession;
-import com.hedvig.memberservice.entities.SignStatus;
-import com.hedvig.memberservice.services.BankIdRestService;
-import com.hedvig.memberservice.services.MemberHasExistingInsuranceException;
-import com.hedvig.memberservice.services.SigningService;
-import com.hedvig.memberservice.services.member.dto.MemberSignResponse;
-import java.util.Optional;
-import lombok.val;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.test.web.servlet.MockMvc;
-
 @RunWith(SpringRunner.class)
-@ContextConfiguration(classes = TestApplication.class)
 @WebMvcTest(controllers = SignController.class)
 @ActiveProfiles(profiles = "unittest")
 public class SignControllerTest {

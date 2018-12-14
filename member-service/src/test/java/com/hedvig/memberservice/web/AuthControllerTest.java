@@ -1,36 +1,16 @@
 package com.hedvig.memberservice.web;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.hamcrest.Matchers.is;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
 import bankid.FaultStatusType;
 import bankid.RpFaultType;
 import com.hedvig.external.bankID.bankidTypes.CollectResponse;
 import com.hedvig.external.bankID.bankidTypes.ProgressStatus;
 import com.hedvig.external.bankID.bankidTypes.UserInfo;
 import com.hedvig.external.bankID.exceptions.BankIDError;
-import com.hedvig.memberservice.TestApplication;
 import com.hedvig.memberservice.commands.AuthenticationAttemptCommand;
 import com.hedvig.memberservice.commands.BankIdAuthenticationStatus;
 import com.hedvig.memberservice.commands.BankIdSignCommand;
-import com.hedvig.memberservice.query.CollectRepository;
-import com.hedvig.memberservice.query.CollectType;
-import com.hedvig.memberservice.query.MemberEntity;
-import com.hedvig.memberservice.query.MemberRepository;
-import com.hedvig.memberservice.query.SignedMemberEntity;
-import com.hedvig.memberservice.query.SignedMemberRepository;
+import com.hedvig.memberservice.query.*;
 import com.hedvig.memberservice.services.BankIdService;
-import java.time.ZonedDateTime;
-import java.util.GregorianCalendar;
-import java.util.Optional;
-import javax.xml.datatype.DatatypeConfigurationException;
-import javax.xml.datatype.DatatypeFactory;
-import javax.xml.datatype.XMLGregorianCalendar;
 import org.axonframework.commandhandling.gateway.CommandGateway;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -39,12 +19,25 @@ import org.mockito.Captor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 
+import javax.xml.datatype.DatatypeConfigurationException;
+import javax.xml.datatype.DatatypeFactory;
+import javax.xml.datatype.XMLGregorianCalendar;
+import java.time.ZonedDateTime;
+import java.util.GregorianCalendar;
+import java.util.Optional;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.Matchers.is;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
 @RunWith(SpringRunner.class)
-@ContextConfiguration(classes = TestApplication.class)
 @WebMvcTest(controllers = AuthController.class)
 public class AuthControllerTest {
 
