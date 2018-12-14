@@ -10,7 +10,7 @@ import org.springframework.web.client.RestTemplate;
 public class BisnodeConfig {
 
     @Value("${hedvig.bisnode.client.id}")
-    String bisnodeClientId = "";
+    String bisnodeClientId;
 
     @Value("${hedvig.bisnode.client.key}")
     String bisnodeClientKey = "";
