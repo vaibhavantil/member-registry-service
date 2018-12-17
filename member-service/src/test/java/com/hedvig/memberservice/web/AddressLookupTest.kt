@@ -54,7 +54,7 @@ class AddressLookupTest {
         ).andExpect(
             jsonPath("lastName").value("Tolvansson")
         ).andExpect(
-            jsonPath("address.street").value("Street 13A 1101")
+            jsonPath("address.street").value("Street 13A")
         )
     }
 

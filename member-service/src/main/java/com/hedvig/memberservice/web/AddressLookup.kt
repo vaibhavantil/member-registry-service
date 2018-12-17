@@ -42,8 +42,7 @@ class AddressLookup(private val client: BisnodeClient) {
             
             val addr = if (person.addressList.size > 0 && person.addressList[0].streetName != null) {
                 val address = person.addressList[0]
-                val apartment = if (address.apartment != null) " ${address.apartment}" else ""
-                Address("${address.streetName} ${address.streetNumber.orEmpty()}${address.entrance.orEmpty()}$apartment", address.city, address.postalCode, address.apartment)
+                Address("${address.streetName} ${address.streetNumber.orEmpty()}${address.entrance.orEmpty()}", address.city, address.postalCode, address.apartment)
             } else null
 
             return ResponseEntity.ok(SweAddressResponse(person.preferredOrFirstName, person.familyName, addr))
