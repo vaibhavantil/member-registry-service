@@ -39,9 +39,9 @@ class AddressLookup(private val client: BisnodeClient) {
         val match = client.match(request.ssn)
         if (match.persons.size == 1) {
             val person = match.persons[0].person
-            
-            val addr = if (person.addressList.size > 0 && person.addressList[0].streetName != null) {
-                val address = person.addressList[0]
+            val address =  person.addressList.getOrNull(0)
+            val addr = if (address?.streetName != null) {
+
                 Address("${address.streetName} ${address.streetNumber.orEmpty()}${address.entrance.orEmpty()}", address.city, address.postalCode, address.apartment)
             } else null
 
