@@ -46,5 +46,10 @@ public class EventListener {
             .enableIntegration("All", false)
             .enableIntegration("Customer.io", true)
             .traits(traitsMap));
+    try {
+      Thread.sleep(10);
+    } catch (final InterruptedException e) {
+      throw new RuntimeException("Interrupted while throttling segment queueing", e);
+    }
   }
 }
