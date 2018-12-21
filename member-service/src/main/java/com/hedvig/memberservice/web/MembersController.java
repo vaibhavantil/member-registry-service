@@ -14,14 +14,15 @@ import com.hedvig.memberservice.web.dto.CounterDTO;
 import com.hedvig.memberservice.web.dto.Member;
 import com.hedvig.memberservice.web.dto.Profile;
 import com.hedvig.memberservice.web.dto.TrackingIdDto;
-
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
+import lombok.val;
 import org.axonframework.commandhandling.gateway.CommandGateway;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,8 +41,6 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import lombok.val;
-
 @RestController()
 @RequestMapping("/member/")
 public class MembersController {
@@ -59,7 +58,8 @@ public class MembersController {
   public String counterKey;
 
   @Autowired
-  public MembersController(MemberRepository repo, CommandGateway commandGateway, RetryTemplate retryTemplate,
+  public MembersController(MemberRepository repo, CommandGateway commandGateway,
+      RetryTemplate retryTemplate,
       ProductApi productApi, CashbackService cashbackService, TrackingIdRepository trackingRepo)
       throws NoSuchAlgorithmException {
     this.repo = repo;
@@ -112,11 +112,13 @@ public class MembersController {
     });
 
     log.info("New member created with id: " + id);
-    return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body("{\"memberId\":" + id + "}");
+    return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON)
+        .body("{\"memberId\":" + id + "}");
   }
 
   @PostMapping("/trackingId")
-  public ResponseEntity<Void> setTrackingId(@RequestHeader(value = "hedvig.token", required = true) Long hid,
+  public ResponseEntity<Void> setTrackingId(
+      @RequestHeader(value = "hedvig.token", required = true) Long hid,
       @RequestBody TrackingIdDto trackingIdDto) {
     val member = repo.findById(hid);
     if (!member.isPresent()) {
@@ -156,16 +158,22 @@ public class MembersController {
     Optional<TrackingIdEntity> tId = trackingRepo.findByMemberId(hid);
 
     Profile p = new Profile(me.getId().toString(), me.getSsn(),
-        String.format("%s %s", me.getFirstName(), me.getLastName()), me.getFirstName(), me.getLastName(),
-        new ArrayList<>(), me.getBirthDate() == null ? null : me.getBirthDate().until(LocalDate.now()).getYears(),
+        String.format("%s %s", me.getFirstName(), me.getLastName()), me.getFirstName(),
+        me.getLastName(),
+        new ArrayList<>(),
+        me.getBirthDate() == null ? null : me.getBirthDate().until(LocalDate.now()).getYears(),
         me.getEmail(), me.getStreet(), 0,
         insuranceStatus.getInsuranceStatus().equals("ACTIVE") ? "Betalas via autogiro"
             : "Betalning sätts upp när försäkringen aktiveras", // ""XXXX XXXX 1234",
         cashbackOption == null ? null : cashbackOption.name, insuranceStatus.getInsuranceStatus(),
-        insuranceStatus.getInsuranceStatus().equals("ACTIVE") ? LocalDate.now().withDayOfMonth(25) : null,
+        insuranceStatus.getInsuranceStatus().equals("ACTIVE") ? LocalDate.now().withDayOfMonth(25)
+            : null,
         cashbackOption == null ? null : cashbackOption.signature,
         cashbackOption == null ? null : String.format(cashbackOption.paragraph, me.getFirstName()),
-        cashbackOption == null ? null : cashbackOption.selectedUrl, insuranceStatus.getSafetyIncreasers(),
+        cashbackOption == null ? null : cashbackOption.selectedUrl,
+        insuranceStatus.getSafetyIncreasers().size() == 1 && insuranceStatus.getSafetyIncreasers()
+            .get(0).isEmpty() ? Collections
+            .EMPTY_LIST : insuranceStatus.getSafetyIncreasers(),
         tId.map(TrackingIdEntity::getTrackingId).orElse(null));
 
     return ResponseEntity.ok(p);
