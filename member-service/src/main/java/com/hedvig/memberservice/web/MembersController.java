@@ -3,6 +3,8 @@ package com.hedvig.memberservice.web;
 import com.google.common.collect.Lists;
 import com.hedvig.memberservice.commands.AssignTrackingIdCommand;
 import com.hedvig.memberservice.commands.CreateMemberCommand;
+import com.hedvig.memberservice.commands.UpdateEmailCommand;
+import com.hedvig.memberservice.commands.UpdatePhoneNumberCommand;
 import com.hedvig.memberservice.externalApi.productsPricing.ProductApi;
 import com.hedvig.memberservice.externalApi.productsPricing.dto.InsuranceStatusDTO;
 import com.hedvig.memberservice.query.MemberEntity;
@@ -14,6 +16,8 @@ import com.hedvig.memberservice.web.dto.CashbackOption;
 import com.hedvig.memberservice.web.dto.CounterDTO;
 import com.hedvig.memberservice.web.dto.Member;
 import com.hedvig.memberservice.web.dto.MemberMeDTO;
+import com.hedvig.memberservice.web.dto.PostEmailRequestDTO;
+import com.hedvig.memberservice.web.dto.PostPhoneNumberRequestDTO;
 import com.hedvig.memberservice.web.dto.TrackingIdDto;
 import lombok.val;
 import org.axonframework.commandhandling.gateway.CommandGateway;
@@ -34,6 +38,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.validation.Valid;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.time.LocalDate;
@@ -130,7 +135,7 @@ public class MembersController {
     }
 
     @GetMapping("/me")
-    public ResponseEntity<?> me(@RequestHeader(value = "hedvig.token", required = false) Long hid) {
+    public ResponseEntity<?> me(@RequestHeader(value = "hedvig.token") Long hid) {
         Optional<MemberEntity> m = repo.findById(hid);
 
         MemberEntity me = m.orElseGet(() -> {
@@ -181,5 +186,21 @@ public class MembersController {
                 me.getPhoneNumber());
 
         return ResponseEntity.ok(p);
+    }
+
+    @PostMapping("/email")
+    public ResponseEntity<?> postEmail(@RequestHeader(value = "hedvig.token") Long hid, @RequestBody @Valid PostEmailRequestDTO body) {
+
+        commandGateway.sendAndWait(new UpdateEmailCommand(hid, body.getEmail()));
+
+        return ResponseEntity.accepted().build();
+    }
+
+    @PostMapping("/phonenumber")
+    public ResponseEntity<?> postPhoneNumber(@RequestHeader(value = "hedvig.token") Long hid, @RequestBody @Valid PostPhoneNumberRequestDTO body) {
+
+        commandGateway.sendAndWait(new UpdatePhoneNumberCommand(hid, body.getPhoneNumber()));
+
+        return ResponseEntity.accepted().build();
     }
 }
