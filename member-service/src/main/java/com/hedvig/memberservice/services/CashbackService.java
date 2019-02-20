@@ -23,7 +23,7 @@ public class CashbackService {
             "SOS Barnbyar gör ett fantastiskt arbete för att hjälpa barn som förlorat allt. Hos SOS Barnbyar får barnen en familj och en uppväxt i ett tryggt hem och möjlighet att gå i skolan med ambitionen att ta sig ur fattigdomen.",
             false,
             true,
-            "https://s3.eu-central-1.amazonaws.com/com-hedvig-web-content/sos.png",
+            "https://s3.eu-central-1.amazonaws.com/com-hedvig-web-content/sos-barnbyar-logo.png",
             "https://s3.eu-central-1.amazonaws.com/com-hedvig-web-content/sos-barnbyar-logo.png",
             "",
             "När Hedvig har betalat årets alla skador går din andel av överskottet till att ge fler barn en trygg uppväxt");
@@ -36,7 +36,7 @@ public class CashbackService {
             "Barncancerfonden arbetar för att bekämpa barncancer och se till att drabbade och deras familjer får den vård och stöd de behöver. Pengarna går till forskning och stöd till de cirka 300 familjer som varje år drabbas av ett cancerbesked.",
             false,
             true,
-            "https://s3.eu-central-1.amazonaws.com/com-hedvig-web-content/barncancerfonden.png",
+            "https://s3.eu-central-1.amazonaws.com/com-hedvig-web-content/barncancerfonden-2.png",
             "https://s3.eu-central-1.amazonaws.com/com-hedvig-web-content/barncancerfonden-2.png",
             "",
             "När Hedvig har betalat årets alla skador går din andel av överskottet till att stödja kampen mot barncancer");
