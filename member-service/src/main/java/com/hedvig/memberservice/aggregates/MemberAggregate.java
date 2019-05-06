@@ -7,6 +7,7 @@ import com.hedvig.external.bisnodeBCI.dto.PersonSearchResult;
 import com.hedvig.memberservice.commands.*;
 import com.hedvig.memberservice.events.*;
 import com.hedvig.memberservice.services.CashbackService;
+import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.axonframework.commandhandling.CommandHandler;
 import org.axonframework.commandhandling.model.AggregateIdentifier;
@@ -30,13 +31,12 @@ import static org.axonframework.commandhandling.model.AggregateLifecycle.apply;
 /**
  * This is an example Aggregate and should be remodeled to suit the needs of you domain.
  */
+@Slf4j
 @Aggregate
 public class MemberAggregate {
 
   @AggregateIdentifier
   public Long id;
-
-  private Logger log = LoggerFactory.getLogger(MemberAggregate.class);
 
   private BisnodeClient bisnodeClient;
 
@@ -55,10 +55,10 @@ public class MemberAggregate {
 
   @Autowired
   public MemberAggregate(
-      BisnodeClient bisnodeClient,
-      CashbackService cashbackService,
-      UUIDGenerator uuidGenerator,
-      @Value("${hedvig.memberAggregate.defaultCharity.enabled:true}") boolean defaultCharityEnabled) {
+    BisnodeClient bisnodeClient,
+    CashbackService cashbackService,
+    UUIDGenerator uuidGenerator,
+    @Value("${hedvig.memberAggregate.defaultCharity.enabled:true}") boolean defaultCharityEnabled) {
     this.bisnodeClient = bisnodeClient;
     this.cashbackService = cashbackService;
     this.uuidGenerator = uuidGenerator;
@@ -88,23 +88,23 @@ public class MemberAggregate {
       } catch (RuntimeException ex) {
         log.error("Caught exception calling bisnode for personalInformation", ex);
         applyChain =
-            applyChain.andThenApply(
-                () ->
-                    new NameUpdatedEvent(
-                        this.id,
-                        formatName(bankIdAuthResponse.getGivenName()),
-                        formatName(bankIdAuthResponse.getSurname())));
+          applyChain.andThenApply(
+            () ->
+              new NameUpdatedEvent(
+                this.id,
+                formatName(bankIdAuthResponse.getGivenName()),
+                formatName(bankIdAuthResponse.getSurname())));
       }
 
       if (this.status == MemberStatus.INITIATED) {
         applyChain =
-            applyChain.andThenApply(
-                () -> new MemberStartedOnBoardingEvent(this.id, MemberStatus.ONBOARDING));
+          applyChain.andThenApply(
+            () -> new MemberStartedOnBoardingEvent(this.id, MemberStatus.ONBOARDING));
       }
     }
 
     MemberAuthenticatedEvent authenticatedEvent =
-        new MemberAuthenticatedEvent(this.id, bankIdAuthResponse.getReferenceToken());
+      new MemberAuthenticatedEvent(this.id, bankIdAuthResponse.getReferenceToken());
 
     if (applyChain != null) {
       applyChain.andThenApply(() -> authenticatedEvent);
@@ -125,28 +125,28 @@ public class MemberAggregate {
   @CommandHandler
   public void on(MemberCancelInsuranceCommand memberCommand) {
     val localCancellationDate =
-        memberCommand.getInactivationDate().atStartOfDay(ZoneId.of("Europe/Stockholm"));
+      memberCommand.getInactivationDate().atStartOfDay(ZoneId.of("Europe/Stockholm"));
     log.info(
-        "Applying MemberCancellationEvent {}, {}",
-        memberCommand.getMemberId(),
-        localCancellationDate.toInstant());
+      "Applying MemberCancellationEvent {}, {}",
+      memberCommand.getMemberId(),
+      localCancellationDate.toInstant());
     apply(
-        new MemberCancellationEvent(
-            memberCommand.getMemberId(), localCancellationDate.toInstant()));
+      new MemberCancellationEvent(
+        memberCommand.getMemberId(), localCancellationDate.toInstant()));
   }
 
   @CommandHandler
   public void on(InsurnaceCancellationCommand cmd) {
     // FIXME: pass a ZonedDatetime here
     val localCancellationDate =
-        cmd.getInactivationDate().atStartOfDay(ZoneId.of("Europe/Stockholm")).plusHours(2);
+      cmd.getInactivationDate().atStartOfDay(ZoneId.of("Europe/Stockholm")).plusHours(2);
     log.info(
-        "Applying InsuranceCancellation {}, {}",
-        cmd.getMemberId(),
-        localCancellationDate.toInstant());
+      "Applying InsuranceCancellation {}, {}",
+      cmd.getMemberId(),
+      localCancellationDate.toInstant());
     apply(
-        new InsuranceCancellationEvent(
-            cmd.getMemberId(), cmd.getInsuranceId(), localCancellationDate.toInstant()));
+      new InsuranceCancellationEvent(
+        cmd.getMemberId(), cmd.getInsuranceId(), localCancellationDate.toInstant()));
   }
 
   private String formatName(String name) {
@@ -155,7 +155,7 @@ public class MemberAggregate {
   }
 
   private ApplyMore getPersonInformationFromBisnode(ApplyMore applyChain, String ssn)
-      throws RuntimeException {
+    throws RuntimeException {
     log.info("Calling bisnode for person information for {}", ssn);
     List<PersonSearchResult> personList = bisnodeClient.match(ssn).getPersons();
     Person person = personList.get(0).getPerson();
@@ -164,14 +164,14 @@ public class MemberAggregate {
     }
 
     applyChain =
-        applyChain.andThenApply(
-            () -> new NameUpdatedEvent(this.id, person.getPreferredOrFirstName(), person.getFamilyName()));
+      applyChain.andThenApply(
+        () -> new NameUpdatedEvent(this.id, person.getPreferredOrFirstName(), person.getFamilyName()));
 
     BisnodeInformation pi = new BisnodeInformation(ssn, person);
     if (pi.getAddress().isPresent()) {
       applyChain =
-          applyChain.andThenApply(
-              () -> new LivingAddressUpdatedEvent(this.id, pi.getAddress().get()));
+        applyChain.andThenApply(
+          () -> new LivingAddressUpdatedEvent(this.id, pi.getAddress().get()));
     }
     applyChain.andThenApply(() -> new PersonInformationFromBisnodeEvent(this.id, pi));
     return applyChain;
@@ -183,7 +183,7 @@ public class MemberAggregate {
       apply(new MemberInactivatedEvent(this.id));
     } else {
       String str =
-          String.format("Cannot INACTIAVTE member %s in status: %s", this.id, this.status.name());
+        String.format("Cannot INACTIAVTE member %s in status: %s", this.id, this.status.name());
       throw new RuntimeException(str);
     }
   }
@@ -195,7 +195,7 @@ public class MemberAggregate {
       apply(new MemberStartedOnBoardingEvent(this.id, MemberStatus.ONBOARDING));
     } else {
       throw new RuntimeException(
-          String.format("Cannot start onboarding in state: %s", this.status));
+        String.format("Cannot start onboarding in state: %s", this.status));
     }
   }
 
@@ -203,37 +203,37 @@ public class MemberAggregate {
   void memberUpdateContactInformation(MemberUpdateContactInformationCommand cmd) {
 
     if ((cmd.getFirstName() != null
-        && !Objects.equals(this.member.getFirstName(), cmd.getFirstName()))
-        || (cmd.getLastName() != null
-        && !Objects.equals(this.member.getLastName(), cmd.getLastName()))) {
+      && !Objects.equals(this.member.getFirstName(), cmd.getFirstName()))
+      || (cmd.getLastName() != null
+      && !Objects.equals(this.member.getLastName(), cmd.getLastName()))) {
       apply(new NameUpdatedEvent(this.id, cmd.getFirstName(), cmd.getLastName()));
     }
 
     if (cmd.getEmail() != null
-        &&!Objects.equals(member.getEmail(), cmd.getEmail())) {
+      && !Objects.equals(member.getEmail(), cmd.getEmail())) {
       apply(new EmailUpdatedEvent(this.id, cmd.getEmail()));
     }
 
     LivingAddress address = this.member.getLivingAddress();
     if (address == null
-        || address.needsUpdate(
-        cmd.getStreet(),
-        cmd.getCity(),
-        cmd.getZipCode(),
-        cmd.getApartmentNo(),
-        cmd.getFloor())) {
+      || address.needsUpdate(
+      cmd.getStreet(),
+      cmd.getCity(),
+      cmd.getZipCode(),
+      cmd.getApartmentNo(),
+      cmd.getFloor())) {
       apply(
-          new LivingAddressUpdatedEvent(
-              this.id,
-              cmd.getStreet(),
-              cmd.getCity(),
-              cmd.getZipCode(),
-              cmd.getApartmentNo(),
-              cmd.getFloor()));
+        new LivingAddressUpdatedEvent(
+          this.id,
+          cmd.getStreet(),
+          cmd.getCity(),
+          cmd.getZipCode(),
+          cmd.getApartmentNo(),
+          cmd.getFloor()));
     }
 
     if (cmd.getPhoneNumber() != null
-        && !Objects.equals(this.member.getPhoneNumber(), cmd.getPhoneNumber())) {
+      && !Objects.equals(this.member.getPhoneNumber(), cmd.getPhoneNumber())) {
       apply(new PhoneNumberUpdatedEvent(this.id, cmd.getPhoneNumber()));
     }
   }
@@ -241,18 +241,18 @@ public class MemberAggregate {
   @CommandHandler
   void bankIdSignHandler(BankIdSignCommand cmd) {
     if (cmd.getPersonalNumber() != null
-        && !Objects.equals(this.member.getSsn(), cmd.getPersonalNumber())) {
+      && !Objects.equals(this.member.getSsn(), cmd.getPersonalNumber())) {
       apply(new SSNUpdatedEvent(this.id, cmd.getPersonalNumber()));
     }
 
-    if (defaultCharityEnabled){
+    if (defaultCharityEnabled) {
       apply(new NewCashbackSelectedEvent(this.id, cashbackService.getDefaultId().toString()));
     }
 
     apply(
-        new MemberSignedEvent(
-            this.id, cmd.getReferenceId(), cmd.getSignature(), cmd.getOscpResponse(),
-            cmd.getPersonalNumber()));
+      new MemberSignedEvent(
+        this.id, cmd.getReferenceId(), cmd.getSignature(), cmd.getOscpResponse(),
+        cmd.getPersonalNumber()));
 
     if (this.trackingId == null) {
       generateTrackingId();
@@ -272,39 +272,39 @@ public class MemberAggregate {
   @CommandHandler
   void editMemberInformation(EditMemberInformationCommand cmd) {
     if ((cmd.getMember().getFirstName() != null
-         && !Objects.equals(this.member.getFirstName(), cmd.getMember().getFirstName()))
-        || (cmd.getMember().getLastName() != null
-            && !Objects.equals(this.member.getLastName(), cmd.getMember().getLastName()))) {
+      && !Objects.equals(this.member.getFirstName(), cmd.getMember().getFirstName()))
+      || (cmd.getMember().getLastName() != null
+      && !Objects.equals(this.member.getLastName(), cmd.getMember().getLastName()))) {
       apply(
-          new NameUpdatedEvent(
-              this.id, cmd.getMember().getFirstName(), cmd.getMember().getLastName()), MetaData.with("token", cmd.getToken()));
+        new NameUpdatedEvent(
+          this.id, cmd.getMember().getFirstName(), cmd.getMember().getLastName()), MetaData.with("token", cmd.getToken()));
     }
 
     if (cmd.getMember().getEmail() != null
-        && !Objects.equals(member.getEmail(), cmd.getMember().getEmail())) {
+      && !Objects.equals(member.getEmail(), cmd.getMember().getEmail())) {
       apply(new EmailUpdatedEvent(this.id, cmd.getMember().getEmail()), MetaData.with("token", cmd.getToken()));
     }
 
     LivingAddress address = this.member.getLivingAddress();
     if (address == null
-        || address.needsUpdate(
-        cmd.getMember().getStreet(),
-        cmd.getMember().getCity(),
-        cmd.getMember().getZipCode(),
-        cmd.getMember().getApartment(),
-        cmd.getMember().getFloor())) {
+      || address.needsUpdate(
+      cmd.getMember().getStreet(),
+      cmd.getMember().getCity(),
+      cmd.getMember().getZipCode(),
+      cmd.getMember().getApartment(),
+      cmd.getMember().getFloor())) {
       apply(
-          new LivingAddressUpdatedEvent(
-              this.id,
-              cmd.getMember().getStreet(),
-              cmd.getMember().getCity(),
-              cmd.getMember().getZipCode(),
-              cmd.getMember().getApartment(),
-              cmd.getMember().getFloor()), MetaData.with("token", cmd.getToken()));
+        new LivingAddressUpdatedEvent(
+          this.id,
+          cmd.getMember().getStreet(),
+          cmd.getMember().getCity(),
+          cmd.getMember().getZipCode(),
+          cmd.getMember().getApartment(),
+          cmd.getMember().getFloor()), MetaData.with("token", cmd.getToken()));
     }
 
     if (cmd.getMember().getPhoneNumber() != null
-        && !Objects.equals(this.member.getPhoneNumber(), cmd.getMember().getPhoneNumber())) {
+      && !Objects.equals(this.member.getPhoneNumber(), cmd.getMember().getPhoneNumber())) {
       apply(new PhoneNumberUpdatedEvent(this.id, cmd.getMember().getPhoneNumber()), MetaData.with("token", cmd.getToken()));
     }
   }
@@ -328,18 +328,72 @@ public class MemberAggregate {
   @CommandHandler
   public void on(UpdateWebOnBoardingInfoCommand cmd) {
     log.debug("Updating ssn and email for webOnBoarding member {}, ssn: {}, email: {}",
-        cmd.getMemberId(), cmd.getSSN(), cmd.getEmail());
+      cmd.getMemberId(), cmd.getSSN(), cmd.getEmail());
 
     if (cmd.getSSN() != null
-        && !Objects.equals(member.getSsn(), cmd.getSSN())) {
+      && !Objects.equals(member.getSsn(), cmd.getSSN())) {
       apply(new SSNUpdatedEvent(this.id, cmd.getSSN()));
     }
 
     if (cmd.getEmail() != null
-        && !Objects.equals(member.getEmail(), cmd.getEmail())) {
+      && !Objects.equals(member.getEmail(), cmd.getEmail())) {
       apply(new EmailUpdatedEvent(this.id, cmd.getEmail()));
     }
   }
+
+  @CommandHandler
+  public void on(InitializeAppleUserCommand cmd) {
+    apply(
+      new MemberCreatedEvent(
+        cmd.getMemberId(),
+        MemberStatus.SIGNED)
+    );
+
+    apply(
+      new SSNUpdatedEvent(
+        this.id,
+        cmd.getPersonalNumber()
+      )
+    );
+
+    apply(
+      new NewCashbackSelectedEvent(
+        this.id,
+        cashbackService.getDefaultId().toString())
+    );
+
+    apply(
+      new NameUpdatedEvent(
+        this.id,
+        cmd.getFirstName(),
+        cmd.getLastName()),
+      null
+    );
+
+    apply(
+      new PhoneNumberUpdatedEvent(
+        cmd.getMemberId(),
+        cmd.getPhoneNumber()
+      )
+    );
+
+    apply(
+      new EmailUpdatedEvent(
+        this.id,
+        cmd.getEmail())
+    );
+
+    apply(new LivingAddressUpdatedEvent(
+        this.id,
+        cmd.getStreet(),
+        cmd.getCity(),
+        cmd.getZipCode(),
+        null,
+        0
+      )
+    );
+  }
+
 
   @EventSourcingHandler
   public void on(MemberCreatedEvent e) {
@@ -355,7 +409,8 @@ public class MemberAggregate {
 
   @EventSourcingHandler
   public void on(NameUpdatedEvent e) {
-    this.member.setFirstName(e.getFirstName()); this.member.setLastName(e.getLastName());
+    this.member.setFirstName(e.getFirstName());
+    this.member.setLastName(e.getLastName());
   }
 
   @EventSourcingHandler
@@ -377,8 +432,8 @@ public class MemberAggregate {
   public void on(LivingAddressUpdatedEvent e) {
 
     LivingAddress address =
-        new LivingAddress(
-            e.getStreet(), e.getCity(), e.getZipCode(), e.getApartmentNo(), e.getFloor());
+      new LivingAddress(
+        e.getStreet(), e.getCity(), e.getZipCode(), e.getApartmentNo(), e.getFloor());
     this.member.setLivingAddress(address);
   }
 

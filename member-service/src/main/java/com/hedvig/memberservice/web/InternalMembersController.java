@@ -1,50 +1,25 @@
 package com.hedvig.memberservice.web;
 
 import com.hedvig.memberservice.aggregates.MemberStatus;
-import com.hedvig.memberservice.commands.EditMemberInformationCommand;
-import com.hedvig.memberservice.commands.InsurnaceCancellationCommand;
-import com.hedvig.memberservice.commands.MemberCancelInsuranceCommand;
-import com.hedvig.memberservice.commands.MemberUpdateContactInformationCommand;
-import com.hedvig.memberservice.commands.SetFraudulentStatusCommand;
-import com.hedvig.memberservice.commands.StartOnboardingWithSSNCommand;
-import com.hedvig.memberservice.commands.UpdateEmailCommand;
-import com.hedvig.memberservice.commands.UpdatePhoneNumberCommand;
+import com.hedvig.memberservice.commands.*;
 import com.hedvig.memberservice.query.MemberEntity;
 import com.hedvig.memberservice.query.MemberRepository;
 import com.hedvig.memberservice.services.member.MemberQueryService;
 import com.hedvig.memberservice.services.trace.TraceMemberService;
+import com.hedvig.memberservice.web.dto.*;
+import lombok.val;
+import org.axonframework.commandhandling.gateway.CommandGateway;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.ResponseEntity;
+import org.springframework.util.StringUtils;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
-
-import com.hedvig.memberservice.web.dto.ChargeMembersDTO;
-import com.hedvig.memberservice.web.dto.InsuranceCancellationDTO;
-import com.hedvig.memberservice.web.dto.InternalMember;
-import com.hedvig.memberservice.web.dto.InternalMemberSearchRequestDTO;
-import com.hedvig.memberservice.web.dto.InternalMemberSearchResultDTO;
-import com.hedvig.memberservice.web.dto.MemberCancelInsurance;
-import com.hedvig.memberservice.web.dto.MemberFraudulentStatusDTO;
-import com.hedvig.memberservice.web.dto.StartOnboardingWithSSNRequest;
-import com.hedvig.memberservice.web.dto.UpdateContactInformationRequest;
-import com.hedvig.memberservice.web.dto.UpdateEmailRequest;
-import com.hedvig.memberservice.web.dto.UpdatePhoneNumberRequest;
-import lombok.val;
-import org.axonframework.commandhandling.gateway.CommandGateway;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.http.ResponseEntity;
-import org.springframework.util.StringUtils;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping({"/i/member", "/_/member"})
@@ -56,8 +31,12 @@ public class InternalMembersController {
   private final MemberQueryService memberQueryService;
   private final TraceMemberService traceMemberService;
 
+  @Value("${hedvig.apple.user.memberId:00000}")
+  private String APPLE_MEMBER_ID;
+
+
   public InternalMembersController(CommandGateway commandBus, MemberRepository memberRepository,
-      MemberQueryService memberQueryService, TraceMemberService traceMemberService) {
+                                   MemberQueryService memberQueryService, TraceMemberService traceMemberService) {
     this.commandBus = commandBus;
     this.memberRepository = memberRepository;
     this.memberQueryService = memberQueryService;
@@ -80,10 +59,10 @@ public class InternalMembersController {
 
   @RequestMapping(value = "/{memberId}/finalizeOnboarding", method = RequestMethod.POST)
   public ResponseEntity<?> finalizeOnboarding(
-      @PathVariable Long memberId, @RequestBody UpdateContactInformationRequest body) {
+    @PathVariable Long memberId, @RequestBody UpdateContactInformationRequest body) {
 
     MemberUpdateContactInformationCommand finalizeOnBoardingCommand =
-        new MemberUpdateContactInformationCommand(memberId, body);
+      new MemberUpdateContactInformationCommand(memberId, body);
 
     commandBus.sendAndWait(finalizeOnBoardingCommand);
 
@@ -92,7 +71,7 @@ public class InternalMembersController {
 
   @RequestMapping(value = "/{memberId}/startOnboardingWithSSN", method = RequestMethod.POST)
   public ResponseEntity<?> startOnboardingWithSSN(
-      @PathVariable Long memberId, @RequestBody StartOnboardingWithSSNRequest request) {
+    @PathVariable Long memberId, @RequestBody StartOnboardingWithSSNRequest request) {
 
     try {
       commandBus.sendAndWait(new StartOnboardingWithSSNCommand(memberId, request));
@@ -105,7 +84,7 @@ public class InternalMembersController {
 
   @RequestMapping(value = "/{memberId}/updateEmail", method = RequestMethod.POST)
   public ResponseEntity<?> updateEmail(
-      @PathVariable Long memberId, @RequestBody UpdateEmailRequest request) {
+    @PathVariable Long memberId, @RequestBody UpdateEmailRequest request) {
 
     commandBus.sendAndWait(new UpdateEmailCommand(memberId, request.getEmail()));
 
@@ -114,15 +93,15 @@ public class InternalMembersController {
 
   @RequestMapping(value = "/{memberId}/updatePhoneNumber", method = RequestMethod.POST)
   public ResponseEntity<?> updatePhoneNumber(@PathVariable Long memberId,
-      @RequestBody UpdatePhoneNumberRequest request) {
+                                             @RequestBody UpdatePhoneNumberRequest request) {
     commandBus.sendAndWait(new UpdatePhoneNumberCommand(memberId, request.getPhoneNumber()));
     return ResponseEntity.noContent().build();
   }
 
   @RequestMapping(value = "/search", method = RequestMethod.GET)
   public List<InternalMember> searchMembers(
-      @RequestParam(name = "status", defaultValue = "", required = false) String status,
-      @RequestParam(name = "query", defaultValue = "", required = false) String query) {
+    @RequestParam(name = "status", defaultValue = "", required = false) String status,
+    @RequestParam(name = "query", defaultValue = "", required = false) String query) {
 
     query = query.trim();
 
@@ -147,7 +126,7 @@ public class InternalMembersController {
 
   @RequestMapping(value = "/{memberId}/cancelMembership", method = RequestMethod.POST)
   public ResponseEntity<?> memberCancellation(
-      @PathVariable Long memberId, @RequestBody MemberCancelInsurance body) {
+    @PathVariable Long memberId, @RequestBody MemberCancelInsurance body) {
     log.info("Dispatching MemberCancellation for member ({})", memberId);
     commandBus.sendAndWait(new MemberCancelInsuranceCommand(memberId, body.getCancellationDate()));
     return ResponseEntity.accepted().build();
@@ -174,9 +153,9 @@ public class InternalMembersController {
 
   @PostMapping("{memberId}/edit")
   public void editMember(
-      @PathVariable("memberId") String memberId,
-      @RequestBody InternalMember dto,
-      @RequestHeader("Authorization") String token) {
+    @PathVariable("memberId") String memberId,
+    @RequestBody InternalMember dto,
+    @RequestHeader("Authorization") String token) {
 
     Optional<MemberEntity> member = memberRepository.findById(Long.parseLong(memberId));
 
@@ -188,23 +167,36 @@ public class InternalMembersController {
   @PostMapping("/many")
   public ResponseEntity<List<InternalMember>> getMembers(@RequestBody ChargeMembersDTO dto) {
     val members =
-        memberRepository
-            .findAllByIdIn(
-                dto.getMemberIds().stream().map(Long::parseLong).collect(Collectors.toList()))
-            .stream()
-            .map(m -> InternalMember.fromEntity(m))
-            .collect(Collectors.toList());
+      memberRepository
+        .findAllByIdIn(
+          dto.getMemberIds().stream().map(Long::parseLong).collect(Collectors.toList()))
+        .stream()
+        .map(m -> InternalMember.fromEntity(m))
+        .collect(Collectors.toList());
 
     if (dto.getMemberIds().size() != members.size()) {
       log.error(
-          "Length mismatch of supplied members and found members: wanted {}, found {}",
-          dto.getMemberIds().size(),
-          members.size());
+        "Length mismatch of supplied members and found members: wanted {}, found {}",
+        dto.getMemberIds().size(),
+        members.size());
       return ResponseEntity.notFound().build();
     }
 
     return ResponseEntity.ok(members);
   }
 
+
+  @PostMapping("/initAppleUser")
+  public ResponseEntity<?> intitiateAppleUser(@RequestBody AppleInitializationRequest req) {
+    if (!APPLE_MEMBER_ID.equals(req.getMemberId())) {
+      return ResponseEntity.badRequest().build();
+    }
+
+    commandBus.sendAndWait(new CreateMemberCommand(Long.parseLong(req.getMemberId())));
+
+    commandBus.sendAndWait(InitializeAppleUserCommand.from(req));
+
+    return ResponseEntity.ok().build();
+  }
 
 }
