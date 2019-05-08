@@ -31,10 +31,6 @@ public class InternalMembersController {
   private final MemberQueryService memberQueryService;
   private final TraceMemberService traceMemberService;
 
-  @Value("${hedvig.apple.user.memberId:00000}")
-  private String APPLE_MEMBER_ID;
-
-
   public InternalMembersController(CommandGateway commandBus, MemberRepository memberRepository,
                                    MemberQueryService memberQueryService, TraceMemberService traceMemberService) {
     this.commandBus = commandBus;
@@ -184,19 +180,4 @@ public class InternalMembersController {
 
     return ResponseEntity.ok(members);
   }
-
-
-  @PostMapping("/initAppleUser")
-  public ResponseEntity<?> intitiateAppleUser(@RequestBody AppleInitializationRequest req) {
-    if (!APPLE_MEMBER_ID.equals(req.getMemberId())) {
-      return ResponseEntity.badRequest().build();
-    }
-
-    commandBus.sendAndWait(new CreateMemberCommand(Long.parseLong(req.getMemberId())));
-
-    commandBus.sendAndWait(InitializeAppleUserCommand.from(req));
-
-    return ResponseEntity.ok().build();
-  }
-
 }
