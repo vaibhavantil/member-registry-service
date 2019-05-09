@@ -16,8 +16,6 @@ import org.axonframework.eventhandling.EventHandler;
 import org.axonframework.eventsourcing.EventSourcingHandler;
 import org.axonframework.messaging.MetaData;
 import org.axonframework.spring.stereotype.Aggregate;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 
@@ -351,20 +349,20 @@ public class MemberAggregate {
 
     apply(
       new SSNUpdatedEvent(
-        this.id,
+        cmd.getMemberId(),
         cmd.getPersonalNumber()
       )
     );
 
     apply(
       new NewCashbackSelectedEvent(
-        this.id,
+        cmd.getMemberId(),
         cashbackService.getDefaultId().toString())
     );
 
     apply(
       new NameUpdatedEvent(
-        this.id,
+        cmd.getMemberId(),
         cmd.getFirstName(),
         cmd.getLastName()),
       null
@@ -379,12 +377,12 @@ public class MemberAggregate {
 
     apply(
       new EmailUpdatedEvent(
-        this.id,
+        cmd.getMemberId(),
         cmd.getEmail())
     );
 
     apply(new LivingAddressUpdatedEvent(
-        this.id,
+        cmd.getMemberId(),
         cmd.getStreet(),
         cmd.getCity(),
         cmd.getZipCode(),
