@@ -4,6 +4,7 @@ import com.hedvig.memberservice.commands.CreateMemberCommand;
 import com.hedvig.memberservice.commands.InitializeAppleUserCommand;
 import com.hedvig.memberservice.query.MemberEntity;
 import com.hedvig.memberservice.query.MemberRepository;
+import com.hedvig.memberservice.web.dto.AppleInitializationRequest;
 import org.axonframework.commandhandling.gateway.CommandGateway;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
@@ -46,8 +47,8 @@ public class AppleController {
   }
 
   @PostMapping("/initAppleUser")
-  public ResponseEntity<Void> intitiateAppleUser(@RequestBody String memberId) {
-    if (!APPLE_USER_MEMBER_ID.equals(memberId)) {
+  public ResponseEntity<Void> intitiateAppleUser(@RequestBody AppleInitializationRequest request) {
+    if (!APPLE_USER_MEMBER_ID.equals(request.getMemberId())) {
       return ResponseEntity.badRequest().build();
     }
 
@@ -77,5 +78,4 @@ public class AppleController {
 
     return ResponseEntity.noContent().build();
   }
-
 }
