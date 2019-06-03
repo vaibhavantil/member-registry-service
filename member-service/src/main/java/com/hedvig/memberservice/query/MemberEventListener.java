@@ -19,6 +19,11 @@ import com.hedvig.memberservice.events.NewCashbackSelectedEvent;
 import com.hedvig.memberservice.events.PhoneNumberUpdatedEvent;
 import com.hedvig.memberservice.events.SSNUpdatedEvent;
 import com.hedvig.memberservice.events.TrackingIdCreatedEvent;
+import com.hedvig.memberservice.externalApi.productsPricing.ProductApi;
+import com.hedvig.memberservice.externalApi.productsPricing.ProductClient;
+import com.hedvig.memberservice.externalApi.productsPricing.dto.EditMemberNameDto;
+import com.hedvig.memberservice.web.InternalMembersController;
+import com.hedvig.memberservice.web.dto.InternalMember;
 import lombok.extern.slf4j.Slf4j;
 import org.axonframework.eventhandling.EventHandler;
 import org.axonframework.eventhandling.EventMessage;
@@ -36,15 +41,18 @@ public class MemberEventListener {
   private final MemberRepository userRepo;
   private final SignedMemberRepository signedMemberRepository;
   private final TrackingIdRepository trackingRepo;
+  private final ProductApi productApi;
 
   @Autowired
   public MemberEventListener(
-      MemberRepository userRepo,
-      SignedMemberRepository signedMemberRepository,
-      TrackingIdRepository trackingRepo) {
+    MemberRepository userRepo,
+    SignedMemberRepository signedMemberRepository,
+    TrackingIdRepository trackingRepo,
+    ProductApi productApi) {
     this.userRepo = userRepo;
     this.signedMemberRepository = signedMemberRepository;
     this.trackingRepo = trackingRepo;
+    this.productApi = productApi;
   }
 
   @EventHandler
@@ -126,6 +134,14 @@ public class MemberEventListener {
     m.setLastName(e.getLastName());
 
     userRepo.save(m);
+
+    EditMemberNameDto editMemberNameDto = new EditMemberNameDto(
+      String.valueOf(e.getMemberId()),
+      e.getFirstName(),
+      e.getLastName()
+    );
+
+    productApi.editMember(String.valueOf(e.getMemberId()), editMemberNameDto, "abc");
   }
 
   @EventHandler

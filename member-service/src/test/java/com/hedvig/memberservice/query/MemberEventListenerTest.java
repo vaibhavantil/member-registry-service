@@ -25,7 +25,7 @@ public class MemberEventListenerTest {
 
     @Before
     public void setUp() {
-        eventListener = new MemberEventListener(memberRepository, null, trackingIdRepository);
+        eventListener = new MemberEventListener(memberRepository, null, trackingIdRepository, null);
     }
 
     @Test
