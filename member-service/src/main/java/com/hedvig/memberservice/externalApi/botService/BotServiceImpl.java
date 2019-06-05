@@ -1,6 +1,7 @@
 package com.hedvig.memberservice.externalApi.botService;
 
 import com.hedvig.memberservice.externalApi.botService.dto.UpdateUserContextDTO;
+import com.hedvig.memberservice.externalApi.productsPricing.dto.EditMemberNameRequestDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -19,5 +20,9 @@ public class BotServiceImpl implements BotService {
   public void initBotServiceSessionWebOnBoarding(Long memberId, UpdateUserContextDTO userContext) {
     logger.info("Start updating context in bot-service");
     botServiceClient.initBotServiceSessionWebOnBoarding(memberId, userContext);
+  }
+
+  public void editMemberName(String memberId, EditMemberNameRequestDTO editMemberNameRequestDTO) {
+    botServiceClient.editMemberName(memberId, editMemberNameRequestDTO);
   }
 }

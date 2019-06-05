@@ -7,6 +7,8 @@ import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
+
 @FeignClient(name = "productPricing", url = "${hedvig.productsPricing.url:product-pricing}")
 public interface ProductClient {
 
@@ -34,10 +36,9 @@ public interface ProductClient {
   ResponseEntity<ProductToSignStatusDTO> hasProductToSign(
       @PathVariable("memberId") String memberId);
 
-  @PostMapping("/_/insurance/{memberId}/edit")
-  ResponseEntity<EditMemberNameDto> editMember(
+  @PostMapping("/_/insurance/{memberId}/editMemberName")
+  ResponseEntity<EditMemberNameRequestDTO> editMemberName(
     @PathVariable ("memberId") String memberId,
-    @RequestBody EditMemberNameDto dto,
-    @RequestHeader("Authorization") String token
+    @RequestBody @Valid EditMemberNameRequestDTO dto
   );
 }
