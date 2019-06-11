@@ -19,6 +19,7 @@ import com.hedvig.memberservice.events.NewCashbackSelectedEvent;
 import com.hedvig.memberservice.events.PhoneNumberUpdatedEvent;
 import com.hedvig.memberservice.events.SSNUpdatedEvent;
 import com.hedvig.memberservice.events.TrackingIdCreatedEvent;
+import com.hedvig.memberservice.externalApi.botService.BotService;
 import com.hedvig.memberservice.externalApi.botService.BotServiceImpl;
 import com.hedvig.memberservice.externalApi.productsPricing.ProductApi;
 import com.hedvig.memberservice.externalApi.productsPricing.dto.EditMemberNameRequestDTO;
@@ -41,7 +42,7 @@ public class MemberEventListener {
   private final SignedMemberRepository signedMemberRepository;
   private final TrackingIdRepository trackingRepo;
   private final ProductApi productApi;
-  private final BotServiceImpl botServiceImpl;
+  private final BotService botService;
 
   @Autowired
   public MemberEventListener(
@@ -49,12 +50,12 @@ public class MemberEventListener {
     SignedMemberRepository signedMemberRepository,
     TrackingIdRepository trackingRepo,
     ProductApi productApi,
-    BotServiceImpl botServiceImpl) {
+    BotService botService) {
     this.userRepo = userRepo;
     this.signedMemberRepository = signedMemberRepository;
     this.trackingRepo = trackingRepo;
     this.productApi = productApi;
-    this.botServiceImpl = botServiceImpl;
+    this.botService = botService;
   }
 
   @EventHandler
@@ -144,7 +145,7 @@ public class MemberEventListener {
     );
 
     productApi.editMemberName(String.valueOf(e.getMemberId()), editMemberNameRequestDTO);
-    botServiceImpl.editMemberName(String.valueOf(e.getMemberId()), editMemberNameRequestDTO);
+    botService.editMemberName(String.valueOf(e.getMemberId()), editMemberNameRequestDTO);
   }
 
   @EventHandler
