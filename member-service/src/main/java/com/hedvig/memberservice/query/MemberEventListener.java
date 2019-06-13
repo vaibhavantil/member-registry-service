@@ -19,6 +19,10 @@ import com.hedvig.memberservice.events.NewCashbackSelectedEvent;
 import com.hedvig.memberservice.events.PhoneNumberUpdatedEvent;
 import com.hedvig.memberservice.events.SSNUpdatedEvent;
 import com.hedvig.memberservice.events.TrackingIdCreatedEvent;
+import com.hedvig.memberservice.externalApi.botService.BotService;
+import com.hedvig.memberservice.externalApi.botService.BotServiceImpl;
+import com.hedvig.memberservice.externalApi.productsPricing.ProductApi;
+import com.hedvig.memberservice.externalApi.productsPricing.dto.EditMemberNameRequestDTO;
 import lombok.extern.slf4j.Slf4j;
 import org.axonframework.eventhandling.EventHandler;
 import org.axonframework.eventhandling.EventMessage;
@@ -26,6 +30,7 @@ import org.axonframework.eventhandling.Timestamp;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -36,15 +41,21 @@ public class MemberEventListener {
   private final MemberRepository userRepo;
   private final SignedMemberRepository signedMemberRepository;
   private final TrackingIdRepository trackingRepo;
+  private final ProductApi productApi;
+  private final BotService botService;
 
   @Autowired
   public MemberEventListener(
-      MemberRepository userRepo,
-      SignedMemberRepository signedMemberRepository,
-      TrackingIdRepository trackingRepo) {
+    MemberRepository userRepo,
+    SignedMemberRepository signedMemberRepository,
+    TrackingIdRepository trackingRepo,
+    ProductApi productApi,
+    BotService botService) {
     this.userRepo = userRepo;
     this.signedMemberRepository = signedMemberRepository;
     this.trackingRepo = trackingRepo;
+    this.productApi = productApi;
+    this.botService = botService;
   }
 
   @EventHandler
@@ -126,6 +137,15 @@ public class MemberEventListener {
     m.setLastName(e.getLastName());
 
     userRepo.save(m);
+
+    EditMemberNameRequestDTO editMemberNameRequestDTO = new EditMemberNameRequestDTO(
+      String.valueOf(e.getMemberId()),
+      e.getFirstName(),
+      e.getLastName()
+    );
+
+    productApi.editMemberName(String.valueOf(e.getMemberId()), editMemberNameRequestDTO);
+    botService.editMemberName(String.valueOf(e.getMemberId()), editMemberNameRequestDTO);
   }
 
   @EventHandler
