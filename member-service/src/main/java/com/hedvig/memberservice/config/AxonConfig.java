@@ -1,7 +1,9 @@
 package com.hedvig.memberservice.config;
 
 import com.hedvig.memberservice.aggregates.MemberAggregate;
+import com.hedvig.memberservice.sagas.MemberCreatedSaga;
 import com.hedvig.memberservice.sagas.MemberSignedSaga;
+import com.hedvig.memberservice.sagas.NameUpdateSaga;
 import lombok.val;
 import org.axonframework.config.EventProcessingConfiguration;
 import org.axonframework.config.SagaConfiguration;
@@ -25,6 +27,17 @@ public class AxonConfig {
     return springPrototypeAggregateFactory;
   }
 
+  @Bean("memberCreatedSagaSagaConfiguration")
+  public SagaConfiguration<MemberCreatedSaga> memberCreatedSagaSagaConfiguration() {
+    val config = SagaConfiguration.trackingSagaManager(MemberCreatedSaga.class);
+    config.configureTrackingProcessor(
+      x ->
+        TrackingEventProcessorConfiguration.forSingleThreadedProcessing()
+          .andInitialTrackingToken(StreamableMessageSource::createTailToken));
+
+    return config;
+  }
+
   @Bean("memberSignedSagaConfiguration")
   public SagaConfiguration<MemberSignedSaga> memberSignedSagaConfiguration() {
 
@@ -33,6 +46,17 @@ public class AxonConfig {
         x ->
             TrackingEventProcessorConfiguration.forParallelProcessing(2)
                 .andInitialTrackingToken(StreamableMessageSource::createTailToken));
+
+    return config;
+  }
+
+  @Bean("memberNameUpdateSagaConfiguration")
+  public SagaConfiguration<NameUpdateSaga> memberNameUpdateSagaConfiguration() {
+    val config = SagaConfiguration.trackingSagaManager(NameUpdateSaga.class);
+    config.configureTrackingProcessor(
+      x ->
+        TrackingEventProcessorConfiguration.forSingleThreadedProcessing()
+          .andInitialTrackingToken(StreamableMessageSource::createTailToken));
 
     return config;
   }

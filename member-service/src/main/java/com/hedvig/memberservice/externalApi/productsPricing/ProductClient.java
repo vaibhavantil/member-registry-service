@@ -1,11 +1,7 @@
 package com.hedvig.memberservice.externalApi.productsPricing;
 
-import com.hedvig.memberservice.externalApi.productsPricing.dto.ContractSignedRequest;
-import com.hedvig.memberservice.externalApi.productsPricing.dto.InsuranceNotificationDTO;
-import com.hedvig.memberservice.externalApi.productsPricing.dto.InsuranceStatusDTO;
-import com.hedvig.memberservice.externalApi.productsPricing.dto.ProductToSignStatusDTO;
-import com.hedvig.memberservice.externalApi.productsPricing.dto.SafetyIncreasersDTO;
-import com.hedvig.memberservice.externalApi.productsPricing.dto.SetCancellationDateRequest;
+import com.hedvig.memberservice.externalApi.productsPricing.dto.*;
+
 import java.util.List;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.ResponseEntity;
@@ -17,6 +13,12 @@ import org.springframework.web.bind.annotation.RequestMethod;
 
 @FeignClient(name = "productPricing", url = "${hedvig.productsPricing.url:product-pricing}")
 public interface ProductClient {
+
+  @RequestMapping(value = "/i/campaign/member/create", method = RequestMethod.POST)
+  String memberCreated(@RequestBody MemberCreatedRequest req);
+
+  @RequestMapping(value = "/i/campaign/member/create", method = RequestMethod.POST)
+  String memberNameUpdate(@RequestBody MemberNameUpdateRequest req);
 
   @RequestMapping(value = "/_/insurance/contractSigned", method = RequestMethod.POST)
   String contractSinged(@RequestBody ContractSignedRequest req);
