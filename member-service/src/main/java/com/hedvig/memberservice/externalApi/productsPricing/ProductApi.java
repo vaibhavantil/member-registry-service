@@ -1,6 +1,14 @@
 package com.hedvig.memberservice.externalApi.productsPricing;
 
-import com.hedvig.memberservice.externalApi.productsPricing.dto.*;
+import com.hedvig.memberservice.externalApi.productsPricing.dto.ContractSignedRequest;
+import com.hedvig.memberservice.externalApi.productsPricing.dto.MemberCreatedRequest;
+import com.hedvig.memberservice.externalApi.productsPricing.dto.MemberNameUpdateRequest;
+import com.hedvig.memberservice.externalApi.productsPricing.dto.InsuranceNotificationDTO;
+import com.hedvig.memberservice.externalApi.productsPricing.dto.InsuranceStatusDTO;
+import com.hedvig.memberservice.externalApi.productsPricing.dto.ProductToSignStatusDTO;
+import com.hedvig.memberservice.externalApi.productsPricing.dto.SafetyIncreasersDTO;
+import com.hedvig.memberservice.externalApi.productsPricing.dto.SetCancellationDateRequest;
+import com.hedvig.memberservice.externalApi.productsPricing.dto.EditMemberNameRequestDTO;
 import feign.FeignException;
 import java.time.Instant;
 import java.time.LocalDate;
@@ -97,6 +105,10 @@ public class ProductApi {
               responseEntity.getStatusCode(), responseEntity.getBody());
       throw new RuntimeException(message);
     }
+  }
+
+  public void editMemberName(String memberId, EditMemberNameRequestDTO editMemberNameRequestDTO) {
+      client.editMemberName(memberId, editMemberNameRequestDTO);
   }
 
   @SuppressWarnings("Duplicates")

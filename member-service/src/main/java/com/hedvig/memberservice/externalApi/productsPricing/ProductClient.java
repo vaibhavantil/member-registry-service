@@ -5,11 +5,9 @@ import com.hedvig.memberservice.externalApi.productsPricing.dto.*;
 import java.util.List;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.*;
+
+import javax.validation.Valid;
 
 @FeignClient(name = "productPricing", url = "${hedvig.productsPricing.url:product-pricing}")
 public interface ProductClient {
@@ -43,4 +41,10 @@ public interface ProductClient {
   @GetMapping("/_/insurance/{memberId}/hasProductToSign")
   ResponseEntity<ProductToSignStatusDTO> hasProductToSign(
       @PathVariable("memberId") String memberId);
+
+  @PostMapping("/_/insurance/{memberId}/editMemberName")
+  ResponseEntity<EditMemberNameRequestDTO> editMemberName(
+    @PathVariable ("memberId") String memberId,
+    @RequestBody @Valid EditMemberNameRequestDTO dto
+  );
 }
