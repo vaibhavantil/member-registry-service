@@ -3,6 +3,7 @@ package com.hedvig.memberservice.sagas;
 import com.hedvig.memberservice.events.MemberSignedEvent;
 import com.hedvig.memberservice.events.NameUpdatedEvent;
 import com.hedvig.memberservice.externalApi.productsPricing.ProductApi;
+import lombok.extern.slf4j.Slf4j;
 import org.axonframework.eventhandling.EventMessage;
 import org.axonframework.eventhandling.saga.EndSaga;
 import org.axonframework.eventhandling.saga.SagaEventHandler;
@@ -13,10 +14,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 @SuppressWarnings("SpringJavaAutowiredFieldsWarningInspection")
+@Slf4j
 @Saga(configurationBean = "memberMemberNameUpdateConfiguration")
 public class NameUpdateSaga {
-
-  private static Logger log = LoggerFactory.getLogger(NameUpdateSaga.class);
 
   @Autowired
   transient ProductApi productApi;
@@ -24,8 +24,7 @@ public class NameUpdateSaga {
   @SagaEventHandler(associationProperty = "memberId")
   @StartSaga
   @EndSaga
-  public void onMemberNameUpdate(
-    NameUpdatedEvent e, EventMessage<NameUpdatedEvent> eventMessage) {
+  public void onMemberNameUpdate(NameUpdatedEvent e) {
 
     log.debug("ON MEMBER NAME UPDATE EVENT FOR {}", e.getMemberId());
 

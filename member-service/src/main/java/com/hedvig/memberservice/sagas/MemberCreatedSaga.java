@@ -3,6 +3,7 @@ package com.hedvig.memberservice.sagas;
 import com.hedvig.memberservice.events.MemberCreatedEvent;
 import com.hedvig.memberservice.events.MemberSignedEvent;
 import com.hedvig.memberservice.externalApi.productsPricing.ProductApi;
+import lombok.extern.slf4j.Slf4j;
 import org.axonframework.eventhandling.EventMessage;
 import org.axonframework.eventhandling.saga.EndSaga;
 import org.axonframework.eventhandling.saga.SagaEventHandler;
@@ -13,10 +14,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 @SuppressWarnings("SpringJavaAutowiredFieldsWarningInspection")
+@Slf4j
 @Saga(configurationBean = "memberCreatedSagaConfiguration")
 public class MemberCreatedSaga {
-
-  private static Logger log = LoggerFactory.getLogger(MemberCreatedSaga.class);
 
   @Autowired
   transient ProductApi productApi;
@@ -24,8 +24,7 @@ public class MemberCreatedSaga {
   @SagaEventHandler(associationProperty = "id")
   @StartSaga
   @EndSaga
-  public void onMemberCreatedEvent(
-    MemberCreatedEvent e, EventMessage<MemberCreatedEvent> eventMessage) {
+  public void onMemberCreatedEvent(MemberCreatedEvent e) {
 
     log.debug("ON MEMBER CREATED EVENT FOR {}", e.getId());
 
