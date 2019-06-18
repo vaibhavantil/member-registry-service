@@ -1,6 +1,8 @@
 package com.hedvig.memberservice.externalApi.productsPricing;
 
 import com.hedvig.memberservice.externalApi.productsPricing.dto.ContractSignedRequest;
+import com.hedvig.memberservice.externalApi.productsPricing.dto.MemberCreatedRequest;
+import com.hedvig.memberservice.externalApi.productsPricing.dto.MemberNameUpdateRequest;
 import com.hedvig.memberservice.externalApi.productsPricing.dto.InsuranceNotificationDTO;
 import com.hedvig.memberservice.externalApi.productsPricing.dto.InsuranceStatusDTO;
 import com.hedvig.memberservice.externalApi.productsPricing.dto.ProductToSignStatusDTO;
@@ -31,6 +33,14 @@ public class ProductApi {
     this.client = client;
   }
 
+  public void memberCreated(
+    long memberId
+  ){
+    this.client.memberCreated(
+      new MemberCreatedRequest(
+        Objects.toString(memberId)));
+  }
+
   public void contractSinged(
       long memberId,
       String referenceToken,
@@ -42,6 +52,16 @@ public class ProductApi {
         new ContractSignedRequest(
             Objects.toString(memberId), referenceToken, signature, oscpResponse, signedOn, ssn));
   }
+
+  public void memberNameUpdate(
+    long memberId,
+    String name
+  ) {
+    this.client.memberNameUpdate(
+      new MemberNameUpdateRequest(
+        Objects.toString(memberId), name));
+  }
+
 
   public List<String> getSafetyIncreasers(long memberId) {
     try {

@@ -12,8 +12,14 @@ import javax.validation.Valid;
 @FeignClient(name = "productPricing", url = "${hedvig.productsPricing.url:product-pricing}")
 public interface ProductClient {
 
+  @RequestMapping(value = "/i/campaign/member/create", method = RequestMethod.POST)
+  ResponseEntity<Void> memberCreated(@RequestBody MemberCreatedRequest req);
+
   @RequestMapping(value = "/_/insurance/contractSigned", method = RequestMethod.POST)
   String contractSinged(@RequestBody ContractSignedRequest req);
+
+  @RequestMapping(value = "/i/campaign/member/update/name", method = RequestMethod.POST)
+  ResponseEntity<Void> memberNameUpdate(@RequestBody MemberNameUpdateRequest req);
 
   @RequestMapping(value = "/_/insurance/{memberId}/safetyIncreasers", method = RequestMethod.GET)
   ResponseEntity<SafetyIncreasersDTO> getSafetyIncreasers(@PathVariable("memberId") long memberId);
