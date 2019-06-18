@@ -23,8 +23,7 @@ public class NameUpdateSagaTest {
     saga.productApi = productApi;
 
     final NameUpdatedEvent e = new NameUpdatedEvent(1337L, "First", "Last");
-    saga.onMemberNameUpdate(
-        e, new GenericEventMessage<>(e));
+    saga.onMemberNameUpdate(e);
 
     then(productApi).should().memberNameUpdate(1337L, "First");
   }

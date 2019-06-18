@@ -29,8 +29,7 @@ public class MemberCreatedSagaTest {
     saga.productApi = productApi;
 
     final MemberCreatedEvent e = new MemberCreatedEvent(1337L, MemberStatus.INITIATED);
-    saga.onMemberCreatedEvent(
-        e, new GenericEventMessage<>(e));
+    saga.onMemberCreatedEvent(e);
 
     then(productApi).should().memberCreated(1337L);
   }
