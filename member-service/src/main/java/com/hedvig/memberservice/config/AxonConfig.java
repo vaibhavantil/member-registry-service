@@ -40,7 +40,7 @@ public class AxonConfig {
     return config;
   }
 
-  @Profile("campaign")
+
   @Bean("memberSignedSagaConfiguration")
   public SagaConfiguration<MemberSignedSaga> memberSignedSagaConfiguration() {
 
@@ -53,6 +53,7 @@ public class AxonConfig {
     return config;
   }
 
+  @Profile("campaign")
   @Bean("memberNameUpdateSagaConfiguration")
   public SagaConfiguration<NameUpdateSaga> memberNameUpdateSagaConfiguration() {
     val config = SagaConfiguration.trackingSagaManager(NameUpdateSaga.class);
