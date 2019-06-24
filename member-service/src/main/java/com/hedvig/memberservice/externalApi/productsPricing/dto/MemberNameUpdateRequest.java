@@ -5,5 +5,5 @@ import lombok.Value;
 @Value
 public class MemberNameUpdateRequest {
   String memberId;
-  String name;
+  String firstName;
 }
