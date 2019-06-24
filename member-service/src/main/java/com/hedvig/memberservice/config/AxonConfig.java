@@ -14,6 +14,7 @@ import org.axonframework.spring.eventsourcing.SpringPrototypeAggregateFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 
 @Configuration
 public class AxonConfig {
@@ -27,6 +28,7 @@ public class AxonConfig {
     return springPrototypeAggregateFactory;
   }
 
+  @Profile("campaign")
   @Bean("memberCreatedSagaSagaConfiguration")
   public SagaConfiguration<MemberCreatedSaga> memberCreatedSagaSagaConfiguration() {
     val config = SagaConfiguration.trackingSagaManager(MemberCreatedSaga.class);
@@ -38,6 +40,7 @@ public class AxonConfig {
     return config;
   }
 
+  @Profile("campaign")
   @Bean("memberSignedSagaConfiguration")
   public SagaConfiguration<MemberSignedSaga> memberSignedSagaConfiguration() {
 
