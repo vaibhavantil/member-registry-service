@@ -12,6 +12,7 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.ssl.SSLContextBuilder;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -39,6 +40,7 @@ public class Config {
   private String keyStorePassword;
 
   @Bean
+  @Qualifier("bankid")
   Jaxb2Marshaller jaxb2Marshaller() {
     Jaxb2Marshaller jaxb2Marshaller = new Jaxb2Marshaller();
     jaxb2Marshaller.setContextPath("bankid");
@@ -46,19 +48,20 @@ public class Config {
   }
 
   @Bean
+  @Qualifier("bankid")
   HttpComponentsMessageSender messageSender() {
     return new HttpComponentsMessageSender();
   }
 
   @Bean
-  FaultMessageResolver faultMessageResolver(Jaxb2Marshaller marshaller) {
+  FaultMessageResolver faultMessageResolver(@Qualifier("bankid") Jaxb2Marshaller marshaller) {
     return new RPFaultResolver(marshaller);
   }
 
   @Bean
   WebServiceTemplate webServiceTemplate(
-      HttpComponentsMessageSender httpComponentsMessageSender,
-      FaultMessageResolver faultMessageResolver)
+    @Qualifier("bankid") HttpComponentsMessageSender httpComponentsMessageSender,
+    FaultMessageResolver faultMessageResolver)
       throws IOException, CertificateException, NoSuchAlgorithmException, KeyStoreException,
       UnrecoverableKeyException, KeyManagementException {
     SSLContext sslContext =

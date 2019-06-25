@@ -13,7 +13,7 @@
     <module>member-service</module>
     <module>bisnode-bci</module>
     <module>bank-id</module>
+    <module>syna</module>
   </modules>
-
 
 </project>

@@ -1,0 +1,74 @@
+<definitions name="syn" targetNamespace="http://www.syna.se/webservice/syn" xmlns:tns="http://www.syna.se/webservice/syn" xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/" xmlns:SOAP-ENC="http://schemas.xmlsoap.org/soap/encoding/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:syn="http://www.syna.se/webservice/syn" xmlns:SOAP="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:MIME="http://schemas.xmlsoap.org/wsdl/mime/" xmlns:DIME="http://schemas.xmlsoap.org/ws/2002/04/dime/wsdl/" xmlns:WSDL="http://schemas.xmlsoap.org/wsdl/" xmlns="http://schemas.xmlsoap.org/wsdl/">
+    <types>
+        <schema targetNamespace="http://www.syna.se/webservice/syn" elementFormDefault="qualified" attributeFormDefault="qualified" xmlns="http://www.w3.org/2001/XMLSchema">
+            <import namespace="http://schemas.xmlsoap.org/soap/encoding/"/>
+            <complexType name="RecordList">
+                <sequence>
+                    <element name="record" type="xsd:string" minOccurs="0" maxOccurs="unbounded" nillable="true"/>
+                </sequence>
+            </complexType>
+            <complexType name="TableInfo">
+                <sequence>
+                    <element name="records" type="syn:RecordList" minOccurs="1" maxOccurs="1" nillable="false"/>
+                </sequence>
+                <attribute name="name" type="xsd:string" use="optional"/>
+                <attribute name="query" type="xsd:string" use="optional"/>
+                <attribute name="hitCount" type="xsd:int" use="required"/>
+            </complexType>
+            <complexType name="TableList">
+                <sequence>
+                    <element name="table" type="syn:TableInfo" minOccurs="0" maxOccurs="unbounded" nillable="true"/>
+                </sequence>
+            </complexType>
+            <!--operation request element-->
+            <element name="Query">
+                <complexType>
+                    <sequence>
+                        <element name="id" type="xsd:string" minOccurs="1" maxOccurs="1" nillable="false"/>
+                    </sequence>
+                    <attribute name="tables" type="xsd:string" use="required"/>
+                </complexType>
+            </element>
+            <!--operation response element-->
+            <element name="QueryResponse">
+                <complexType>
+                    <sequence>
+                        <element name="buildDate" type="xsd:string" minOccurs="0" maxOccurs="1" nillable="true"/>
+                        <element name="tables" type="syn:TableList" minOccurs="1" maxOccurs="1" nillable="false"/>
+                    </sequence>
+                </complexType>
+            </element>
+        </schema>
+    </types>
+    <message name="Query">
+        <part name="parameters" element="syn:Query"/>
+    </message>
+    <message name="QueryResponse">
+        <part name="parameters" element="syn:QueryResponse"/>
+    </message>
+    <portType name="synPortType">
+        <operation name="Query">
+            <documentation>Service definition of function syn__Query</documentation>
+            <input message="tns:Query"/>
+            <output message="tns:QueryResponse"/>
+        </operation>
+    </portType>
+    <binding name="syn" type="tns:synPortType">
+        <SOAP:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+        <operation name="Query">
+            <SOAP:operation soapAction=""/>
+            <input>
+                <SOAP:body parts="parameters" use="literal"/>
+            </input>
+            <output>
+                <SOAP:body parts="parameters" use="literal"/>
+            </output>
+        </operation>
+    </binding>
+    <service name="syn">
+        <documentation>gSOAP 2.7.6e generated service definition</documentation>
+        <port name="syn" binding="tns:syn">
+            <SOAP:address location="http://localhost:8091"/>
+        </port>
+    </service>
+</definitions>
