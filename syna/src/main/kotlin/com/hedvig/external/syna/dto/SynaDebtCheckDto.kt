@@ -21,13 +21,13 @@ data class SynaDebtCheckDto(
                 false -> listOf()
             }
             val debtRecord = queryResponse.tables.table[1].records.record
-            return when (debtRecord.isEmpty()) {
-                true -> SynaDebtCheckDto(
+            return when {
+                debtRecord.isEmpty() -> SynaDebtCheckDto(
                         fromDateTime = fromDateTime,
                         paymentDefaults = paymentDefaults,
                         debt = SynaDebtDto.zero()
                 )
-                false -> SynaDebtCheckDto(
+                else -> SynaDebtCheckDto(
                         fromDateTime = fromDateTime,
                         paymentDefaults = paymentDefaults,
                         debt = SynaDebtDto.from(debtRecord[0])

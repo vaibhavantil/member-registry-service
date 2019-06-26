@@ -2,12 +2,10 @@ package com.hedvig.memberservice.query;
 
 import static org.mockito.Mockito.when;
 
-import com.hedvig.memberservice.events.NameUpdatedEvent;
 import com.hedvig.memberservice.events.SSNUpdatedEvent;
 import java.time.LocalDate;
 import java.util.Optional;
 
-import com.hedvig.memberservice.externalApi.productsPricing.ProductApi;
 import org.assertj.core.api.Assertions;
 import org.junit.Before;
 import org.junit.Test;

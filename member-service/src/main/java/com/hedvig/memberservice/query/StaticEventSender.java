@@ -1,7 +1,7 @@
 package com.hedvig.memberservice.query;
 
 import com.hedvig.memberservice.events.InsuranceCancellationEvent;
-import com.hedvig.memberservice.externalApi.productsPricing.ProductApi;
+import com.hedvig.integration.productsPricing.ProductApi;
 import org.axonframework.config.ProcessingGroup;
 import org.axonframework.eventhandling.EventHandler;
 import org.slf4j.Logger;

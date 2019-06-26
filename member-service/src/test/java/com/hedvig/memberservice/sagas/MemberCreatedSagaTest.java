@@ -2,18 +2,13 @@ package com.hedvig.memberservice.sagas;
 
 import com.hedvig.memberservice.aggregates.MemberStatus;
 import com.hedvig.memberservice.events.MemberCreatedEvent;
-import com.hedvig.memberservice.events.MemberSignedEvent;
-import com.hedvig.memberservice.externalApi.productsPricing.ProductApi;
-import com.hedvig.memberservice.services.SNSNotificationService;
-import com.hedvig.memberservice.services.SigningService;
+import com.hedvig.integration.productsPricing.ProductApi;
 import lombok.val;
-import org.axonframework.eventhandling.GenericEventMessage;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.BDDMockito.then;
 import static org.mockito.BDDMockito.willThrow;
 

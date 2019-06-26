@@ -1,16 +1,12 @@
 package com.hedvig.memberservice.sagas;
 
 import com.hedvig.memberservice.events.MemberCreatedEvent;
-import com.hedvig.memberservice.events.MemberSignedEvent;
-import com.hedvig.memberservice.externalApi.productsPricing.ProductApi;
+import com.hedvig.integration.productsPricing.ProductApi;
 import lombok.extern.slf4j.Slf4j;
-import org.axonframework.eventhandling.EventMessage;
 import org.axonframework.eventhandling.saga.EndSaga;
 import org.axonframework.eventhandling.saga.SagaEventHandler;
 import org.axonframework.eventhandling.saga.StartSaga;
 import org.axonframework.spring.stereotype.Saga;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 @SuppressWarnings("SpringJavaAutowiredFieldsWarningInspection")
