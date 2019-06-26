@@ -19,12 +19,10 @@ class DebtService @Autowired constructor(
 
     fun getDebtSnapshot(ssn: String): DebtSnapshot {
         try {
-            personService.checkDebt(ssn)
-        } catch (exception: Exception) {
             personService.createPerson(ssn)
+        } finally {
             personService.checkDebt(ssn)
+            return personService.getPerson(ssn)!!.debtSnapshots.last()
         }
-        val person = personService.getPerson(ssn)
-        return person!!.debtSnapshots.last()
     }
 }
