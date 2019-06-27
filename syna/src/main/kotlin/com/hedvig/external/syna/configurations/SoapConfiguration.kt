@@ -37,9 +37,8 @@ class SoapConfiguration {
     @Qualifier("syna")
     fun httpComponentsMessageSender(usernamePasswordCredentials: UsernamePasswordCredentials): HttpComponentsMessageSender {
         val httpComponentsMessageSender = HttpComponentsMessageSender()
-
         httpComponentsMessageSender.setCredentials(usernamePasswordCredentials)
-
+        httpComponentsMessageSender.setConnectionTimeout(10)
         return httpComponentsMessageSender
     }
 
