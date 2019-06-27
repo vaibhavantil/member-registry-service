@@ -67,7 +67,7 @@ public class InternalMembersControllerTests {
         .andExpect(status().is2xxSuccessful());
 
     verify(commandGateway, times(1))
-        .sendAndWait(new MemberUpdateContactInformationCommand(1337l, request));
+        .send(new MemberUpdateContactInformationCommand(1337l, request));
   }
 
   @Test
