@@ -1,6 +1,7 @@
 package com.hedvig.config;
 
 import com.amazonaws.auth.AWSCredentialsProvider;
+import com.amazonaws.auth.DefaultAWSCredentialsProviderChain;
 import com.amazonaws.client.builder.AwsClientBuilder;
 import com.amazonaws.services.sns.AmazonSNS;
 import com.amazonaws.services.sqs.AmazonSQSAsync;
@@ -47,6 +48,11 @@ public class AWSConfig {
   @Bean
   public QueueMessagingTemplate queueMessagingTemplate(AmazonSQSAsync amazonSqs) {
     return new QueueMessagingTemplate(amazonSqs);
+  }
+
+  @Bean
+  AWSCredentialsProvider credentialsProvider() {
+    return new DefaultAWSCredentialsProviderChain();
   }
 
   @Bean

@@ -12,12 +12,12 @@ class DebtService @Autowired constructor(
         private val synaService: SynaService,
         @Lazy private val personService: PersonService
 ) {
-    fun checkDebtSnapshot(ssn: String): DebtSnapshot {
+    fun getSynaDebtSnapshot(ssn: String): DebtSnapshot {
         val synaDebtSnapshot = synaService.getDebtSnapshot(ssn)
         return DebtSnapshot.from(synaDebtSnapshot, ssn)
     }
 
-    fun getDebtSnapshot(ssn: String): DebtSnapshot {
+    fun getPersonDebtSnapshot(ssn: String): DebtSnapshot {
         try {
             personService.createPerson(ssn)
         } finally {

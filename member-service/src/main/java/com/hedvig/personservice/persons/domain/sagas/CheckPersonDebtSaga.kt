@@ -24,7 +24,7 @@ class CheckPersonDebtSaga {
     @SagaEventHandler(associationProperty = "ssn")
     @EndSaga
     fun on(event: CheckPersonDebtEvent) {
-        val debtSnapshot = debtService.checkDebtSnapshot(event.ssn)
+        val debtSnapshot = debtService.getSynaDebtSnapshot(event.ssn)
         commandGateway.sendAndWait<Void>(SynaDebtCheckedCommand(event.ssn, debtSnapshot))
     }
 }

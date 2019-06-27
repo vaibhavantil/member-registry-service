@@ -32,11 +32,14 @@ class PersonService @Autowired constructor(
     }
 
     fun getFlag(ssn: String): Flag {
-        val debt = debtService.getDebtSnapshot(ssn).debt
+        val debtSnapshot = debtService.getPersonDebtSnapshot(ssn)
+        val debt = debtSnapshot.debt
         val totalDebt = debt.totalAmountPrivateDebt + debt.totalAmountPrivateDebt
+        val paymentDefaults = debtSnapshot.paymentDefaults
         return when {
-            totalDebt > BigDecimal.valueOf(10_000) -> Flag.RED
-            totalDebt > BigDecimal.ZERO -> Flag.AMBER
+            totalDebt > BigDecimal.ZERO -> Flag.RED
+            paymentDefaults.size > 3 -> Flag.RED
+            paymentDefaults.isNotEmpty() -> Flag.AMBER
             else -> Flag.GREEN
         }
     }

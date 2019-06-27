@@ -13,6 +13,6 @@ class DebtController @Autowired constructor(
 ){
     @GetMapping("/{ssn}")
     fun check(@PathVariable ssn: String): ResponseEntity<DebtSnapshot> {
-        return ResponseEntity.ok(debtService.getDebtSnapshot(ssn))
+        return ResponseEntity.ok(debtService.getPersonDebtSnapshot(ssn))
     }
 }
