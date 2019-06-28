@@ -84,7 +84,7 @@ public class InternalMembersController {
     MemberUpdateContactInformationCommand finalizeOnBoardingCommand =
       new MemberUpdateContactInformationCommand(memberId, body);
 
-    commandBus.send(finalizeOnBoardingCommand);
+    commandBus.sendAndWait(finalizeOnBoardingCommand);
 
     return ResponseEntity.noContent().build();
   }

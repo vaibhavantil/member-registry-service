@@ -1,11 +1,6 @@
 package com.hedvig.memberservice.query;
 
 import com.hedvig.memberservice.aggregates.MemberStatus;
-
-import java.time.Instant;
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
-
 import com.hedvig.memberservice.events.EmailUpdatedEvent;
 import com.hedvig.memberservice.events.FraudulentStatusUpdatedEvent;
 import com.hedvig.memberservice.events.LivingAddressUpdatedEvent;
@@ -20,7 +15,6 @@ import com.hedvig.memberservice.events.PhoneNumberUpdatedEvent;
 import com.hedvig.memberservice.events.SSNUpdatedEvent;
 import com.hedvig.memberservice.events.TrackingIdCreatedEvent;
 import com.hedvig.memberservice.externalApi.botService.BotService;
-import com.hedvig.memberservice.externalApi.botService.BotServiceImpl;
 import com.hedvig.memberservice.externalApi.productsPricing.ProductApi;
 import com.hedvig.memberservice.externalApi.productsPricing.dto.EditMemberNameRequestDTO;
 import lombok.extern.slf4j.Slf4j;
@@ -30,8 +24,12 @@ import org.axonframework.eventhandling.Timestamp;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
+
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.util.concurrent.CompletableFuture;
 
 @Component
 @Slf4j
@@ -144,8 +142,8 @@ public class MemberEventListener {
       e.getLastName()
     );
 
-    productApi.editMemberName(String.valueOf(e.getMemberId()), editMemberNameRequestDTO);
-    botService.editMemberName(String.valueOf(e.getMemberId()), editMemberNameRequestDTO);
+    CompletableFuture.runAsync(() -> productApi.editMemberName(String.valueOf(e.getMemberId()), editMemberNameRequestDTO));
+    CompletableFuture.runAsync(() -> botService.editMemberName(String.valueOf(e.getMemberId()), editMemberNameRequestDTO));
   }
 
   @EventHandler
