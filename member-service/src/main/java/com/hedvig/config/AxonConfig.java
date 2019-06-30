@@ -64,7 +64,7 @@ public class AxonConfig {
     return config;
   }
 
-  @Profile("campaign")
+  @Profile("campaign") // FIXME: This should be included in production I guess?
   @Bean("memberNameUpdateSagaConfiguration")
   public SagaConfiguration<NameUpdateSaga> memberNameUpdateSagaConfiguration() {
     val config = SagaConfiguration.trackingSagaManager(NameUpdateSaga.class);
