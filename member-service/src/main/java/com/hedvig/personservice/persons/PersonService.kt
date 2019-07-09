@@ -38,7 +38,7 @@ class PersonService @Autowired constructor(
         val paymentDefaults = debtSnapshot.paymentDefaults
         return when {
             totalDebt > BigDecimal.ZERO -> Flag.RED
-            paymentDefaults.size > 3 -> Flag.RED
+            paymentDefaults.size > 2 -> Flag.RED
             paymentDefaults.isNotEmpty() -> Flag.AMBER
             else -> Flag.GREEN
         }
