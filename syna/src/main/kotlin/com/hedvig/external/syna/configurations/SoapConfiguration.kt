@@ -38,7 +38,7 @@ class SoapConfiguration {
     fun httpComponentsMessageSender(usernamePasswordCredentials: UsernamePasswordCredentials): HttpComponentsMessageSender {
         val httpComponentsMessageSender = HttpComponentsMessageSender()
         httpComponentsMessageSender.setCredentials(usernamePasswordCredentials)
-        httpComponentsMessageSender.setConnectionTimeout(10)
+        httpComponentsMessageSender.setConnectionTimeout(5_000)
         return httpComponentsMessageSender
     }
 
