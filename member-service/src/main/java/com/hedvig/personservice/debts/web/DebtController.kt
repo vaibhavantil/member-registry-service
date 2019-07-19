@@ -12,8 +12,14 @@ import org.springframework.web.bind.annotation.*
 class DebtController @Autowired constructor(
         private val debtService: DebtService
 ){
+    @PostMapping("/check/{ssn}")
+    fun check(@PathVariable ssn: String): ResponseEntity<Void> {
+        debtService.checkPersonDebt(ssn)
+        return ResponseEntity.noContent().build()
+    }
+
     @GetMapping("/{ssn}")
-    fun check(@PathVariable ssn: String): ResponseEntity<DebtSnapshot> {
+    fun debt(@PathVariable ssn: String): ResponseEntity<DebtSnapshot> {
         return ResponseEntity.ok(debtService.getPersonDebtSnapshot(ssn))
     }
 

@@ -28,8 +28,10 @@ class PersonService @Autowired constructor(
         commandGateway.sendAndWait<Void>(CheckPersonDebtCommand(ssn))
     }
 
-    fun getPerson(ssn: String): Person? {
-        return personRepository.findById(ssn).orElse(null)
+    fun getPersonOrNull(ssn: String): Person? {
+        val person = personRepository.findById(ssn)
+        if (person.isPresent) return person.get()
+        return null
     }
 
     fun getFlags(ssn: String): PersonFlags {

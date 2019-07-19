@@ -5,6 +5,7 @@ import com.hedvig.personservice.persons.domain.commands.CreatePersonCommand
 import com.hedvig.personservice.persons.domain.commands.SynaDebtCheckedCommand
 import com.hedvig.personservice.persons.domain.events.*
 import com.hedvig.personservice.persons.model.Person
+import com.hedvig.personservice.safeSsn
 import mu.KotlinLogging
 import org.axonframework.commandhandling.CommandHandler
 import org.axonframework.commandhandling.model.AggregateIdentifier
@@ -30,7 +31,7 @@ class PersonAggregate() {
 
     @CommandHandler
     constructor(command: CreatePersonCommand): this() {
-        logger.info { "Person CREATED with ssn=${command.ssn}" }
+        logger.info { "Person CREATED with ssn=${safeSsn(command.ssn)}" }
         AggregateLifecycle.apply(PersonCreatedEvent(command.ssn))
     }
 
@@ -43,7 +44,7 @@ class PersonAggregate() {
     @CommandHandler
     fun handle(command: CheckPersonDebtCommand) {
         if (isBeforeFirstFridayOfMonth(lastDebtCheckedAt)) {
-            logger.info { "CHECKING debt for ssn=${command.ssn}" }
+            logger.info { "CHECKING debt for ssn=${safeSsn(command.ssn)}" }
             AggregateLifecycle.apply(CheckPersonDebtEvent(command.ssn))
             return
         }
@@ -52,17 +53,17 @@ class PersonAggregate() {
             AggregateLifecycle.apply(PersonDebtAlreadyCheckedEvent(command.ssn))
             return
         }
-        logger.info { "CHECKING debt for ssn=${command.ssn}" }
+        logger.info { "CHECKING debt for ssn=${safeSsn(command.ssn)}" }
         AggregateLifecycle.apply(CheckPersonDebtEvent(command.ssn))
     }
 
     @CommandHandler
     fun handle(command: SynaDebtCheckedCommand) {
         if (!command.debtSnapshot.fromDateTime.isEqual(latestDateSnapShotFrom)) {
-            logger.info { "Debt CHECKED on SYNA-ARKIV for ssn ${command.ssn}" }
+            logger.info { "Debt CHECKED on SYNA-ARKIV for ssn=${safeSsn(command.ssn)}" }
             AggregateLifecycle.apply(SynaDebtCheckedEvent(command.ssn, command.debtSnapshot))
         } else {
-            logger.info { "Debt ALREADY checked with SYNA-ARKIV for ssn ${command.ssn} from=${command.debtSnapshot.fromDateTime}" }
+            logger.info { "Debt ALREADY checked with SYNA-ARKIV for ssn=${safeSsn(command.ssn)} from=${command.debtSnapshot.fromDateTime}" }
             AggregateLifecycle.apply(SameSynaDebtCheckedEvent(command.ssn))
         }
     }

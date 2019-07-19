@@ -13,7 +13,7 @@ data class DebtSnapshot(
     @Id
     val id: UUID,
     @ManyToOne @JsonIgnore
-    val person: Person,
+    var person: Person,
     @ElementCollection
     val paymentDefaults: List<PaymentDefault>,
     @Embedded
