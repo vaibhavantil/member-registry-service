@@ -4,7 +4,6 @@ import com.hedvig.memberservice.aggregates.MemberAggregate;
 import com.hedvig.memberservice.sagas.MemberCreatedSaga;
 import com.hedvig.memberservice.sagas.MemberSignedSaga;
 import com.hedvig.memberservice.sagas.NameUpdateSaga;
-import com.hedvig.personservice.persons.domain.sagas.PersonSignedSaga;
 import lombok.val;
 import org.axonframework.config.EventProcessingConfiguration;
 import org.axonframework.config.SagaConfiguration;
@@ -51,16 +50,6 @@ public class AxonConfig {
         TrackingEventProcessorConfiguration.forParallelProcessing(2)
           .andInitialTrackingToken(StreamableMessageSource::createTailToken));
 
-    return config;
-  }
-
-  @Bean("personSignedSagaConfiguration")
-  public SagaConfiguration<PersonSignedSaga> personSignedSagaConfiguration() {
-    val config = SagaConfiguration.trackingSagaManager(PersonSignedSaga.class);
-    config.configureTrackingProcessor(
-      x ->
-        TrackingEventProcessorConfiguration.forSingleThreadedProcessing()
-          .andInitialTrackingToken(StreamableMessageSource::createTailToken));
     return config;
   }
 
