@@ -9,9 +9,14 @@ import mu.KotlinLogging
 import org.axonframework.commandhandling.CommandHandler
 import org.axonframework.commandhandling.model.AggregateIdentifier
 import org.axonframework.commandhandling.model.AggregateLifecycle
+import org.axonframework.eventhandling.Timestamp
 import org.axonframework.eventsourcing.EventSourcingHandler
 import org.axonframework.spring.stereotype.Aggregate
+import java.time.DayOfWeek
+import java.time.Instant
 import java.time.LocalDateTime
+import java.time.ZoneId
+import java.time.temporal.TemporalAdjusters
 
 @Aggregate
 class PersonAggregate() {
@@ -19,6 +24,7 @@ class PersonAggregate() {
     private lateinit var ssn: String
     private lateinit var person: Person
     private var latestDateSnapShotFrom: LocalDateTime = LocalDateTime.MIN
+    private var lastDebtCheckedAt: Instant = Instant.MIN
 
     private val logger = KotlinLogging.logger { }
 
@@ -36,6 +42,11 @@ class PersonAggregate() {
 
     @CommandHandler
     fun handle(command: CheckPersonDebtCommand) {
+        if (isBeforeFirstFridayOfMonth(lastDebtCheckedAt)) {
+            logger.info { "CHECKING debt for ssn=${command.ssn}" }
+            AggregateLifecycle.apply(CheckPersonDebtEvent(command.ssn))
+            return
+        }
         if (latestDateSnapShotFrom.isAfter(LocalDateTime.now().minusWeeks(4))) {
             logger.error { "Person debt ALREADY checked within 4 week period" }
             AggregateLifecycle.apply(PersonDebtAlreadyCheckedEvent(command.ssn))
@@ -57,8 +68,18 @@ class PersonAggregate() {
     }
 
     @EventSourcingHandler
-    fun on(event: SynaDebtCheckedEvent) {
+    fun on(event: SynaDebtCheckedEvent, @Timestamp timestamp: Instant) {
         this.person.debtSnapshots.add(event.debtSnapshot)
         this.latestDateSnapShotFrom = event.debtSnapshot.fromDateTime
+        this.lastDebtCheckedAt = timestamp
+    }
+
+
+    fun isBeforeFirstFridayOfMonth(now: Instant): Boolean {
+        return now < getFirstFridayOfMonth().atZone(ZoneId.of("Europe/Stockholm")).toInstant()
+    }
+
+    fun getFirstFridayOfMonth(): LocalDateTime {
+        return LocalDateTime.now().withDayOfMonth(1).with(TemporalAdjusters.next(DayOfWeek.FRIDAY))
     }
 }
