@@ -49,7 +49,7 @@ class SoapConfiguration {
     ): SynaClient {
         val client = SynaClient()
         client.webServiceTemplate = WebServiceTemplate()
-        client.defaultUri = synaUrl
+        client.defaultUri = "https://$synaUrl"
         client.marshaller = marshaller
         client.unmarshaller = marshaller
         client.messageSenders = arrayOf(messageSender)
