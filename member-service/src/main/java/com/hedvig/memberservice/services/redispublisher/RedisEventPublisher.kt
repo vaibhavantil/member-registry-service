@@ -11,21 +11,18 @@ import org.springframework.transaction.event.TransactionalEventListener
 
 @Component
 class RedisEventPublisher(
-        private val redisTemplate: RedisTemplate<String, Any>) {
+    private val redisTemplate: RedisTemplate<String, Any>
+) {
 
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     fun onSignSessionComplete(e: SignSessionCompleteEvent) {
-        val message = SignSessionUpdatedEvent(
-                SignSessionUpdatedEventStatus.UPDATED)
-        redisTemplate.convertAndSend(String.format("%s.%s", "SIGN_EVENTS", e.memberId),
-                SignEvent(message))
+        val message = SignSessionUpdatedEvent(SignSessionUpdatedEventStatus.UPDATED)
+        redisTemplate.convertAndSend("SIGN_EVENTS.${e.memberId}", SignEvent(message))
     }
 
     fun onAuthSessionComplete(e: AuthSessionCompleteEvent) {
-        val message = AuthSessionUpdatedEvent(
-                AuthSessionUpdatedEventStatus.UPDATED)
-        redisTemplate.convertAndSend(String.format("%s.%s", "AUTH_EVENTS", e.memberId),
-                AuthEvent(message))
+        val message = AuthSessionUpdatedEvent(AuthSessionUpdatedEventStatus.UPDATED)
+        redisTemplate.convertAndSend("AUTH_EVENTS.${e.memberId}", AuthEvent(message))
     }
 }
 
