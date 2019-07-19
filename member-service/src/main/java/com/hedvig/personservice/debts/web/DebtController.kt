@@ -2,6 +2,7 @@ package com.hedvig.personservice.debts.web
 
 import com.hedvig.personservice.debts.DebtService
 import com.hedvig.personservice.debts.model.DebtSnapshot
+import com.hedvig.personservice.persons.model.Flag
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
@@ -14,5 +15,10 @@ class DebtController @Autowired constructor(
     @GetMapping("/{ssn}")
     fun check(@PathVariable ssn: String): ResponseEntity<DebtSnapshot> {
         return ResponseEntity.ok(debtService.getPersonDebtSnapshot(ssn))
+    }
+
+    @GetMapping("/flag/{ssn}")
+    fun flag(@PathVariable ssn: String) : ResponseEntity<Flag> {
+        return ResponseEntity.ok(debtService.getDebtFlag(ssn))
     }
 }

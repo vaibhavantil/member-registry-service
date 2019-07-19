@@ -2,12 +2,11 @@ package com.hedvig.personservice.debts.model
 
 import com.hedvig.external.syna.dto.SynaPaymentDefaultDto
 import java.math.BigDecimal
-import java.time.Year
 import javax.persistence.Embeddable
 
 @Embeddable
 data class PaymentDefault(
-    val year: Year,
+    val year: Int,
     val week: Int,
     val paymentDefaultType: String,
     val amount: BigDecimal,
@@ -16,7 +15,7 @@ data class PaymentDefault(
 ) {
     companion object {
         fun from(synaPaymentDefault: SynaPaymentDefaultDto): PaymentDefault = PaymentDefault(
-                year = synaPaymentDefault.year,
+                year = synaPaymentDefault.year.value,
                 week = synaPaymentDefault.week,
                 paymentDefaultType = synaPaymentDefault.paymentDefaultType,
                 amount = synaPaymentDefault.amount.number.doubleValueExact().toBigDecimal(),
