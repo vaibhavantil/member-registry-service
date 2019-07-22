@@ -9,6 +9,6 @@ import org.springframework.web.bind.annotation.RequestMethod
 
 @FeignClient(name = "api-gateway", url = "\${hedvig.api-gateway.url:api-gateway}", configuration = [FeignConfig::class])
 interface ApiGatewayClient {
-    @RequestMapping(value = ["/_/reassignMember"], method = [RequestMethod.POST])
+    @RequestMapping(value = ["/_/reassign"], method = [RequestMethod.POST])
     fun reassignMember(@RequestHeader token: String, @RequestBody dto: ReassignMemberDto)
 }
