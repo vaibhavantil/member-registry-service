@@ -61,7 +61,7 @@ class BankIdServiceV2(
                     if (signedMember.isPresent) {
                         commandGateway.sendAndWait<Any>(InactivateMemberCommand(memberId))
                         apiGatewayService.reassignMember(memberId, signedMember.get().id)
-                        redisEventPublisher.onAuthSessionUpdated(memberId, AuthSessionUpdatedEventStatus.COMPLETED)
+                        redisEventPublisher.onAuthSessionUpdated(memberId, AuthSessionUpdatedEventStatus.SUCCESS)
                     } else {
                         redisEventPublisher.onAuthSessionUpdated(memberId, AuthSessionUpdatedEventStatus.FAILED)
                     }

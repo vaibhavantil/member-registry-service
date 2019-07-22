@@ -4,5 +4,5 @@ enum class AuthSessionUpdatedEventStatus {
     INITIATED,
     IN_PROGRESS,
     FAILED,
-    COMPLETED,
+    SUCCESS,
 }
