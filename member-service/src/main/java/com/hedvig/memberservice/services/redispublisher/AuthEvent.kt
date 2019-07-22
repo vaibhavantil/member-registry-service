@@ -1,3 +1,3 @@
 package com.hedvig.memberservice.services.redispublisher
 
-data class AuthEvent(val status: AuthSessionUpdatedEvent)
+data class AuthEvent(val status: AuthSessionUpdatedEventStatus)

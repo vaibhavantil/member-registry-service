@@ -71,6 +71,7 @@ class BankIdServiceV2(
             }
         } catch (e: Exception) {
             logger.error(e.toString())
+            redisEventPublisher.onAuthSessionUpdated(memberId, AuthSessionUpdatedEventStatus.FAILED)
             return true
         }
 

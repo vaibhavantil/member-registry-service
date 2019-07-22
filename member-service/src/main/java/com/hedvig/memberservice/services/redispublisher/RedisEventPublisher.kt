@@ -21,8 +21,7 @@ class RedisEventPublisher(
     }
 
     fun onAuthSessionUpdated(memberId: Long, status: AuthSessionUpdatedEventStatus) {
-        val message = AuthSessionUpdatedEvent(status)
-        redisTemplate.convertAndSend("AUTH_EVENTS.$memberId", AuthEvent(message))
+        redisTemplate.convertAndSend("AUTH_EVENTS.$memberId", AuthEvent(status))
     }
 }
 
