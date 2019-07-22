@@ -4,25 +4,12 @@ import com.hedvig.memberservice.query.CollectType.RequestType
 
 import com.hedvig.external.bankID.bankidTypes.CollectResponse
 import com.hedvig.external.bankID.bankidTypes.OrderResponse
-import com.hedvig.external.bankID.bankidTypes.ProgressStatus
-import com.hedvig.memberservice.commands.InactivateMemberCommand
-import com.hedvig.memberservice.jobs.BankIdAuthCollector
 import com.hedvig.memberservice.query.CollectRepository
 import com.hedvig.memberservice.query.CollectType
-import com.hedvig.memberservice.query.SignedMemberRepository
 import com.hedvig.memberservice.services.bankid.BankIdSOAPApi
-import com.hedvig.memberservice.services.events.AuthSessionCompleteEvent
-import com.hedvig.memberservice.services.redispublisher.RedisEventPublisher
-import org.axonframework.commandhandling.gateway.CommandGateway
-import org.quartz.JobBuilder
-import org.quartz.Scheduler
-import org.quartz.SimpleScheduleBuilder
-import org.quartz.TriggerBuilder
 import java.io.UnsupportedEncodingException
-import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
-import javax.transaction.Transactional
 
 @Service
 class BankIdService(
