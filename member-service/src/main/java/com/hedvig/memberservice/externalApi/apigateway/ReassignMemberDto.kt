@@ -1,4 +1,4 @@
-package com.hedvig.memberservice.services.apigateway
+package com.hedvig.memberservice.externalApi.apigateway
 
 data class ReassignMemberDto(
     val oldMemberId: String,

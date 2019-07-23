@@ -1,4 +1,4 @@
-package com.hedvig.memberservice.services.apigateway
+package com.hedvig.memberservice.externalApi.apigateway
 
 import com.hedvig.memberservice.config.FeignConfig
 import org.springframework.cloud.openfeign.FeignClient

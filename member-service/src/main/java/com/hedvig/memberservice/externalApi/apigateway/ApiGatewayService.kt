@@ -1,4 +1,4 @@
-package com.hedvig.memberservice.services.apigateway
+package com.hedvig.memberservice.externalApi.apigateway
 
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
