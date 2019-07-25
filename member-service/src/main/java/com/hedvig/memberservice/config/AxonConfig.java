@@ -28,7 +28,7 @@ public class AxonConfig {
     return springPrototypeAggregateFactory;
   }
 
-  @Profile("campaign")
+
   @Bean("memberCreatedSagaSagaConfiguration")
   public SagaConfiguration<MemberCreatedSaga> memberCreatedSagaSagaConfiguration() {
     val config = SagaConfiguration.trackingSagaManager(MemberCreatedSaga.class);
@@ -53,7 +53,6 @@ public class AxonConfig {
     return config;
   }
 
-  @Profile("campaign")
   @Bean("memberNameUpdateSagaConfiguration")
   public SagaConfiguration<NameUpdateSaga> memberNameUpdateSagaConfiguration() {
     val config = SagaConfiguration.trackingSagaManager(NameUpdateSaga.class);
