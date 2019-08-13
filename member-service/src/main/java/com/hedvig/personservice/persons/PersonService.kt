@@ -30,9 +30,13 @@ class PersonService @Autowired constructor(
         commandGateway.sendAndWait<Void>(CheckPersonDebtCommand(ssn))
     }
 
+    fun whitelistPerson(ssn: String, whitelistedBy: String) {
+        commandGateway.sendAndWait<Void>(WhitelistPersonCommand(ssn, whitelistedBy))
+    }
+
     fun whitelistPersonByMemberId(memberId: String, whitelistedBy: String) {
         val member = memberRepository.findById(memberId.toLong()).get()
-        commandGateway.sendAndWait<Void>(WhitelistPersonCommand(member.ssn, whitelistedBy))
+        whitelistPerson(member.ssn, whitelistedBy)
     }
 
     fun getPersonOrNull(ssn: String): Person? {

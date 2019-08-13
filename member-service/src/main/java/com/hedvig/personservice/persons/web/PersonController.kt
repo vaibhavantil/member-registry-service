@@ -10,15 +10,8 @@ import org.springframework.web.bind.annotation.*
 @RestController
 @RequestMapping("/_/person")
 class PersonController @Autowired constructor(
-        private val personService: PersonService
+    private val personService: PersonService
 ) {
-    @GetMapping("/member/{memberId}")
-    fun getPersonByMemberId(@PathVariable memberId: String): ResponseEntity<PersonDto> {
-        val person = personService.getPersonOrNullByMemberId(memberId)
-            ?: return ResponseEntity.notFound().build()
-        return ResponseEntity.ok(PersonDto.from(person))
-    }
-
     @GetMapping("/{ssn}")
     fun getPerson(@PathVariable ssn: String): ResponseEntity<PersonDto> {
         val person = personService.getPersonOrNull(ssn)
@@ -26,8 +19,24 @@ class PersonController @Autowired constructor(
         return ResponseEntity.ok(PersonDto.from(person))
     }
 
+    @GetMapping("/member/{memberId}")
+    fun getPersonByMemberId(@PathVariable memberId: String): ResponseEntity<PersonDto> {
+        val person = personService.getPersonOrNullByMemberId(memberId)
+            ?: return ResponseEntity.notFound().build()
+        return ResponseEntity.ok(PersonDto.from(person))
+    }
+
+    @PostMapping("/whitelist/{ssn}")
+    fun whitelistPerson(
+        @PathVariable ssn: String,
+        @RequestParam whitelistedBy: String
+    ): ResponseEntity<Void> {
+        personService.whitelistPerson(ssn, whitelistedBy)
+        return ResponseEntity.noContent().build()
+    }
+
     @PostMapping("/member/whitelist/{memberId}")
-    fun whitelistMember(
+    fun whitelistPersonByMemberId(
         @PathVariable memberId: String,
         @RequestParam whitelistedBy: String
     ): ResponseEntity<Void> {
@@ -35,8 +44,15 @@ class PersonController @Autowired constructor(
         return ResponseEntity.noContent().build()
     }
 
+    @GetMapping("/status/{ssn}")
+    fun getPersonStatus(@PathVariable ssn: String): ResponseEntity<PersonStatusDto> {
+        val person = personService.getPersonOrNull(ssn)
+            ?: return ResponseEntity.notFound().build()
+        return ResponseEntity.ok(PersonStatusDto.from(person))
+    }
+
     @PostMapping("/member/status/{memberId}")
-    fun getPersonStatus(@PathVariable memberId: String): ResponseEntity<PersonStatusDto> {
+    fun getPersonStatusByMemberId(@PathVariable memberId: String): ResponseEntity<PersonStatusDto> {
         val person = personService.getPersonOrNullByMemberId(memberId)
             ?: return ResponseEntity.notFound().build()
         return ResponseEntity.ok(PersonStatusDto.from(person))
