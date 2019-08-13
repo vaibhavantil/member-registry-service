@@ -32,12 +32,6 @@ class DebtService @Autowired constructor(
         return DebtSnapshot.from(synaDebtSnapshot, ssn)
     }
 
-    fun getDebtFlagBySsn(ssn: String): Flag {
-        val person = personService.getPersonOrNull(ssn)
-            ?: throw IllegalStateException("Could not get debt flag of person since it does not exist(ssn=${safeSsn(ssn)})")
-        return getDebtFlagByPerson(person)
-    }
-
     companion object {
         fun getDebtFlagByPerson(person: Person): Flag {
             val debtSnapshot = person.debtSnapshots.last()

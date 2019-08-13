@@ -16,10 +16,4 @@ class DebtController @Autowired constructor(
         debtService.checkPersonDebt(ssn)
         return ResponseEntity.noContent().build()
     }
-
-    @GetMapping("/flag/{ssn}")
-    fun getDebtFlag(@PathVariable ssn: String) : ResponseEntity<Flag> {
-        val flag = debtService.getDebtFlagBySsn(ssn)
-        return ResponseEntity.ok(flag)
-    }
 }

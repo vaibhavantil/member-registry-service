@@ -2,7 +2,8 @@ package com.hedvig.personservice.persons.domain.commands
 
 import org.axonframework.commandhandling.TargetAggregateIdentifier
 
-data class CreatePersonCommand(
+data class WhitelistPersonCommand(
     @TargetAggregateIdentifier
-    val ssn: String
+    val ssn: String,
+    val whitelistedBy: String
 )

@@ -10,5 +10,6 @@ class Person(
     @Id
     val ssn: String,
     @OneToMany(mappedBy = "person")
-    val debtSnapshots: MutableList<DebtSnapshot>
+    val debtSnapshots: MutableList<DebtSnapshot>,
+    var whitelisted: Whitelisted? = null
 )

@@ -3,8 +3,10 @@ package com.hedvig.personservice.persons.domain
 import com.hedvig.personservice.persons.domain.commands.CheckPersonDebtCommand
 import com.hedvig.personservice.persons.domain.commands.CreatePersonCommand
 import com.hedvig.personservice.persons.domain.commands.SynaDebtCheckedCommand
+import com.hedvig.personservice.persons.domain.commands.WhitelistPersonCommand
 import com.hedvig.personservice.persons.domain.events.*
 import com.hedvig.personservice.persons.model.Person
+import com.hedvig.personservice.persons.model.Whitelisted
 import com.hedvig.personservice.safeSsn
 import mu.KotlinLogging
 import org.axonframework.commandhandling.CommandHandler
@@ -26,6 +28,7 @@ class PersonAggregate() {
     private lateinit var person: Person
     private var latestDateSnapShotFrom: LocalDateTime = LocalDateTime.MIN
     private var lastDebtCheckedAt: Instant = Instant.MIN
+    private var whitelisted: Whitelisted? = null
 
     private val logger = KotlinLogging.logger { }
 
@@ -61,7 +64,10 @@ class PersonAggregate() {
     fun handle(command: SynaDebtCheckedCommand) {
         if (!command.debtSnapshot.fromDateTime.isEqual(latestDateSnapShotFrom)) {
             logger.info { "Debt CHECKED on SYNA-ARKIV for ssn=${safeSsn(command.ssn)}" }
-            AggregateLifecycle.apply(SynaDebtCheckedEvent(command.ssn, command.debtSnapshot))
+            AggregateLifecycle.apply(SynaDebtCheckedEvent(
+                ssn = command.ssn,
+                debtSnapshot = command.debtSnapshot
+            ))
         } else {
             logger.info { "Debt ALREADY checked with SYNA-ARKIV for ssn=${safeSsn(command.ssn)} from=${command.debtSnapshot.fromDateTime}" }
             AggregateLifecycle.apply(SameSynaDebtCheckedEvent(command.ssn))
@@ -75,6 +81,21 @@ class PersonAggregate() {
         this.lastDebtCheckedAt = timestamp
     }
 
+    @CommandHandler
+    fun handle(command: WhitelistPersonCommand) {
+        AggregateLifecycle.apply(PersonWhitelistedEvent(
+            command.ssn,
+            command.whitelistedBy
+        ))
+    }
+
+    @EventSourcingHandler
+    fun on(event: PersonWhitelistedEvent, @Timestamp timestamp: Instant) {
+        this.whitelisted = Whitelisted(
+            whitelistedAt = timestamp,
+            whitelistedBy = event.whitelistedBy
+        )
+    }
 
     fun isBeforeFirstFridayOfMonth(now: Instant): Boolean {
         return now < getFirstFridayOfMonth().atZone(ZoneId.of("Europe/Stockholm")).toInstant()

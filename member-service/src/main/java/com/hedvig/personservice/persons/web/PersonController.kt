@@ -1,16 +1,11 @@
 package com.hedvig.personservice.persons.web
 
-import com.hedvig.memberservice.query.MemberRepository
 import com.hedvig.personservice.persons.PersonService
-import com.hedvig.personservice.persons.model.Flag
-import com.hedvig.personservice.persons.model.PersonFlags
 import com.hedvig.personservice.persons.web.dtos.PersonDto
+import com.hedvig.personservice.persons.web.dtos.PersonStatusDto
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.ResponseEntity
-import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.PathVariable
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.bind.annotation.*
 
 @RestController
 @RequestMapping("/_/person")
@@ -29,5 +24,21 @@ class PersonController @Autowired constructor(
         val person = personService.getPersonOrNull(ssn)
             ?: return ResponseEntity.notFound().build()
         return ResponseEntity.ok(PersonDto.from(person))
+    }
+
+    @PostMapping("/whitelist/{memberId}")
+    fun whitelistMember(
+        @PathVariable memberId: String,
+        @RequestParam whitelistedBy: String
+    ): ResponseEntity<Void> {
+        personService.whitelistPersonByMemberId(memberId, whitelistedBy)
+        return ResponseEntity.noContent().build()
+    }
+
+    @PostMapping("/member/status/{memberId}")
+    fun getPersonStatus(@PathVariable memberId: String): ResponseEntity<PersonStatusDto> {
+        val person = personService.getPersonOrNullByMemberId(memberId)
+            ?: return ResponseEntity.notFound().build()
+        return ResponseEntity.ok(PersonStatusDto.from(person))
     }
 }

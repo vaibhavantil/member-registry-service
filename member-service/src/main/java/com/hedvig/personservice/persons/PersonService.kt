@@ -4,17 +4,15 @@ import com.hedvig.memberservice.query.MemberRepository
 import com.hedvig.personservice.debts.DebtService
 import com.hedvig.personservice.persons.domain.commands.CheckPersonDebtCommand
 import com.hedvig.personservice.persons.domain.commands.CreatePersonCommand
+import com.hedvig.personservice.persons.domain.commands.WhitelistPersonCommand
 import com.hedvig.personservice.persons.model.Flag
 import com.hedvig.personservice.persons.model.Person
 import com.hedvig.personservice.persons.model.PersonFlags
 import com.hedvig.personservice.persons.query.PersonRepository
-import com.hedvig.personservice.safeSsn
 import org.axonframework.commandhandling.gateway.CommandGateway
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Lazy
 import org.springframework.stereotype.Service
-import java.lang.IllegalStateException
-import java.math.BigDecimal
 
 @Service
 class PersonService @Autowired constructor(
@@ -32,6 +30,11 @@ class PersonService @Autowired constructor(
         commandGateway.sendAndWait<Void>(CheckPersonDebtCommand(ssn))
     }
 
+    fun whitelistPersonByMemberId(memberId: String, whitelistedBy: String) {
+        val member = memberRepository.findById(memberId.toLong()).get()
+        commandGateway.sendAndWait<Void>(WhitelistPersonCommand(member.ssn, whitelistedBy))
+    }
+
     fun getPersonOrNull(ssn: String): Person? {
         val person = personRepository.findById(ssn)
         if (person.isPresent) return person.get()
@@ -44,15 +47,18 @@ class PersonService @Autowired constructor(
         return getPersonOrNull(member.get().ssn)
     }
 
-    fun getFlagsByMemberId(memberId: String): PersonFlags {
-        val person = getPersonOrNullByMemberId(memberId)
-            ?: throw IllegalStateException("Could not get flags of member since no person exist for it (memberId=$memberId)")
-        return getFlags(person)
-    }
-
     companion object {
-        fun getFlags(person: Person): PersonFlags = PersonFlags(
+        fun getAllFlags(person: Person): PersonFlags = PersonFlags(
             debtFlag = DebtService.getDebtFlagByPerson(person)
         )
+
+        fun getFlag(person: Person): Flag {
+            val personFlags = getAllFlags(person)
+            return when(personFlags.debtFlag) {
+                Flag.GREEN -> Flag.GREEN
+                Flag.AMBER -> Flag.GREEN
+                Flag.RED -> Flag.RED
+            }
+        }
     }
 }

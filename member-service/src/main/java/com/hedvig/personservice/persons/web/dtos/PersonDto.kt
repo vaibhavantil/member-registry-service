@@ -4,15 +4,20 @@ import com.hedvig.personservice.debts.web.dtos.DebtDto
 import com.hedvig.personservice.persons.PersonService
 import com.hedvig.personservice.persons.model.Person
 import com.hedvig.personservice.persons.model.PersonFlags
+import com.hedvig.personservice.persons.model.Whitelisted
 
 data class PersonDto(
     val flags: PersonFlags,
-    val debt: DebtDto
+    val debt: DebtDto,
+    val whitelisted: Whitelisted?,
+    val status: PersonStatusDto
 ) {
     companion object {
         fun from(person: Person): PersonDto = PersonDto(
-            flags = PersonService.getFlags(person),
-            debt = DebtDto.from(person.debtSnapshots.last())
+            flags = PersonService.getAllFlags(person),
+            debt = DebtDto.from(person.debtSnapshots.last()),
+            whitelisted = person.whitelisted,
+            status = PersonStatusDto.from(person)
         )
     }
 }
