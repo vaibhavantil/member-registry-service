@@ -26,7 +26,7 @@ class PersonController @Autowired constructor(
         return ResponseEntity.ok(PersonDto.from(person))
     }
 
-    @PostMapping("/whitelist/{memberId}")
+    @PostMapping("/member/whitelist/{memberId}")
     fun whitelistMember(
         @PathVariable memberId: String,
         @RequestParam whitelistedBy: String
