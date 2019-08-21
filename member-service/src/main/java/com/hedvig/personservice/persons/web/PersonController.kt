@@ -51,7 +51,7 @@ class PersonController @Autowired constructor(
         return ResponseEntity.ok(PersonStatusDto.from(person))
     }
 
-    @PostMapping("/member/status/{memberId}")
+    @GetMapping("/member/status/{memberId}")
     fun getPersonStatusByMemberId(@PathVariable memberId: String): ResponseEntity<PersonStatusDto> {
         val person = personService.getPersonOrNullByMemberId(memberId)
             ?: return ResponseEntity.notFound().build()
