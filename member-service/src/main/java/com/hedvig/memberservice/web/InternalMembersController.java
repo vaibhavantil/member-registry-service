@@ -189,11 +189,11 @@ public class InternalMembersController {
   }
 
   @PostMapping(value = "/{memberId}/updateSSN")
-  public ResponseEntity<?> updateSSN(
-    @PathVariable Long memberId, @RequestBody UpdateSSNRequest request) {
-
+  public ResponseEntity<Void> updateSSN(
+    @PathVariable Long memberId,
+    @RequestBody UpdateSSNRequest request
+  ) {
     commandBus.sendAndWait(new UpdateSSNCommand(memberId, request.getSsn()));
-
     return ResponseEntity.noContent().build();
   }
 }
