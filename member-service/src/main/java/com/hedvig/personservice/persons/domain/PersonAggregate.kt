@@ -7,7 +7,7 @@ import com.hedvig.personservice.persons.domain.commands.WhitelistPersonCommand
 import com.hedvig.personservice.persons.domain.events.*
 import com.hedvig.personservice.persons.model.Person
 import com.hedvig.personservice.persons.model.Whitelisted
-import com.hedvig.personservice.safeSsn
+import com.hedvig.personservice.maskLastDigitsOfSsn
 import mu.KotlinLogging
 import org.axonframework.commandhandling.CommandHandler
 import org.axonframework.commandhandling.model.AggregateIdentifier
@@ -20,6 +20,7 @@ import java.time.Instant
 import java.time.LocalDateTime
 import java.time.ZoneId
 import java.time.temporal.TemporalAdjusters
+import java.util.*
 
 @Aggregate
 class PersonAggregate() {
@@ -34,20 +35,20 @@ class PersonAggregate() {
 
     @CommandHandler
     constructor(command: CreatePersonCommand): this() {
-        logger.info { "Person CREATED with ssn=${safeSsn(command.ssn)}" }
-        AggregateLifecycle.apply(PersonCreatedEvent(command.ssn))
+        logger.info { "Person CREATED with ssn=${maskLastDigitsOfSsn(command.ssn)}" }
+        AggregateLifecycle.apply(PersonCreatedEvent(UUID.randomUUID(), command.ssn))
     }
 
     @EventSourcingHandler
     fun on(event: PersonCreatedEvent) {
         this.ssn = event.ssn
-        this.person = Person(event.ssn, mutableListOf())
+        this.person = Person(event.id, event.ssn, mutableListOf())
     }
 
     @CommandHandler
     fun handle(command: CheckPersonDebtCommand) {
         if (isBeforeFirstFridayOfMonth(lastDebtCheckedAt)) {
-            logger.info { "CHECKING debt for ssn=${safeSsn(command.ssn)}" }
+            logger.info { "CHECKING debt for ssn=${maskLastDigitsOfSsn(command.ssn)}" }
             AggregateLifecycle.apply(CheckPersonDebtEvent(command.ssn))
             return
         }
@@ -56,20 +57,20 @@ class PersonAggregate() {
             AggregateLifecycle.apply(PersonDebtAlreadyCheckedEvent(command.ssn))
             return
         }
-        logger.info { "CHECKING debt for ssn=${safeSsn(command.ssn)}" }
+        logger.info { "CHECKING debt for ssn=${maskLastDigitsOfSsn(command.ssn)}" }
         AggregateLifecycle.apply(CheckPersonDebtEvent(command.ssn))
     }
 
     @CommandHandler
     fun handle(command: SynaDebtCheckedCommand) {
         if (!command.debtSnapshot.fromDateTime.isEqual(latestDateSnapShotFrom)) {
-            logger.info { "Debt CHECKED on SYNA-ARKIV for ssn=${safeSsn(command.ssn)}" }
+            logger.info { "Debt CHECKED on SYNA-ARKIV for ssn=${maskLastDigitsOfSsn(command.ssn)}" }
             AggregateLifecycle.apply(SynaDebtCheckedEvent(
                 ssn = command.ssn,
                 debtSnapshot = command.debtSnapshot
             ))
         } else {
-            logger.info { "Debt ALREADY checked with SYNA-ARKIV for ssn=${safeSsn(command.ssn)} from=${command.debtSnapshot.fromDateTime}" }
+            logger.info { "Debt ALREADY checked with SYNA-ARKIV for ssn=${maskLastDigitsOfSsn(command.ssn)} from=${command.debtSnapshot.fromDateTime}" }
             AggregateLifecycle.apply(SameSynaDebtCheckedEvent(command.ssn))
         }
     }

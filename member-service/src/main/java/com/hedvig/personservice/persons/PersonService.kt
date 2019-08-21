@@ -40,9 +40,7 @@ class PersonService @Autowired constructor(
     }
 
     fun getPersonOrNull(ssn: String): Person? {
-        val person = personRepository.findById(ssn)
-        if (person.isPresent) return person.get()
-        return null
+        return personRepository.findBySsn(ssn)
     }
 
     fun getPersonOrNullByMemberId(memberId: String): Person? {

@@ -1,3 +1,5 @@
 package com.hedvig.personservice.persons.domain.events
 
-data class PersonCreatedEvent(val ssn: String)
+import java.util.*
+
+data class PersonCreatedEvent(val id: UUID, val ssn: String)

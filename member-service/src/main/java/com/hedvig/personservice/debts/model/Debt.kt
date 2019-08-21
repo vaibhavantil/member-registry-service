@@ -16,9 +16,9 @@ data class Debt(
     companion object {
         fun from(synaDebt: SynaDebtDto): Debt = Debt(
                 debtDate = synaDebt.debtDate,
-                totalAmountPublicDebt = synaDebt.totalAmountPublicDebt.number.doubleValueExact().toBigDecimal(),
+                totalAmountPublicDebt = synaDebt.totalAmountPublicDebt.number.numberValue(BigDecimal::class.java),
                 numberPublicDebts = synaDebt.numberPublicDebts,
-                totalAmountPrivateDebt = synaDebt.totalAmountPrivateDebt.number.doubleValueExact().toBigDecimal(),
+                totalAmountPrivateDebt = synaDebt.totalAmountPrivateDebt.number.numberValue(BigDecimal::class.java),
                 numberPrivateDebts = synaDebt.numberPrivateDebts
         )
     }

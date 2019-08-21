@@ -21,7 +21,7 @@ data class PaymentDefault(
             year = synaPaymentDefault.year.value,
             week = synaPaymentDefault.week,
             paymentDefaultType = PaymentDefaultType.valueOf(synaPaymentDefault.paymentDefaultType),
-            amount = synaPaymentDefault.amount.number.doubleValueExact().toBigDecimal(),
+            amount = synaPaymentDefault.amount.number.numberValue(BigDecimal::class.java),
             caseId = synaPaymentDefault.caseId,
             claimant = synaPaymentDefault.claimant
         )

@@ -1,16 +1,13 @@
 package com.hedvig.personservice.debts
 
 import com.hedvig.external.syna.SynaService
-import com.hedvig.memberservice.query.MemberRepository
 import com.hedvig.personservice.debts.model.DebtSnapshot
 import com.hedvig.personservice.persons.PersonService
 import com.hedvig.personservice.persons.model.Flag
 import com.hedvig.personservice.persons.model.Person
-import com.hedvig.personservice.safeSsn
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Lazy
 import org.springframework.stereotype.Service
-import java.lang.IllegalStateException
 import java.math.BigDecimal
 
 @Service

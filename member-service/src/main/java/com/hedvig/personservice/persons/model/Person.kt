@@ -1,14 +1,15 @@
 package com.hedvig.personservice.persons.model
 
 import com.hedvig.personservice.debts.model.DebtSnapshot
-import javax.persistence.Embedded
-import javax.persistence.Entity
-import javax.persistence.Id
-import javax.persistence.OneToMany
+import org.hibernate.validator.constraints.UniqueElements
+import java.util.*
+import javax.persistence.*
 
 @Entity
 class Person(
     @Id
+    val id: UUID,
+    @Column(unique = true)
     val ssn: String,
     @OneToMany(mappedBy = "person")
     val debtSnapshots: MutableList<DebtSnapshot>,

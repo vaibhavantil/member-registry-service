@@ -12,6 +12,7 @@ import org.axonframework.eventhandling.Timestamp
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 import java.time.Instant
+import java.util.*
 
 @Component
 class PersonAggregateEventListener @Autowired constructor(
@@ -20,7 +21,7 @@ class PersonAggregateEventListener @Autowired constructor(
 ) {
     @EventHandler
     fun on(event: PersonCreatedEvent) {
-        val person = Person(event.ssn, mutableListOf())
+        val person = Person(event.id, event.ssn, mutableListOf())
         personRepository.save(person)
     }
 
@@ -31,7 +32,7 @@ class PersonAggregateEventListener @Autowired constructor(
 
     @EventHandler
     fun on(event: PersonWhitelistedEvent, @Timestamp timestamp: Instant) {
-        val person = personRepository.findById(event.ssn).get()
+        val person = personRepository.findBySsn(event.ssn)!!
         person.whitelisted = Whitelisted(
             whitelistedAt = timestamp,
             whitelistedBy = event.whitelistedBy
