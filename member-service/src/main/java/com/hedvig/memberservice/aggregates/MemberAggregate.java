@@ -340,6 +340,12 @@ public class MemberAggregate {
   }
 
   @CommandHandler
+  public void on(UpdateSSNCommand cmd) {
+    log.debug("Updating ssn for member {}, ssn: {}", cmd.getMemberId(), cmd.getSSN());
+    apply(new SSNUpdatedEvent(cmd.getMemberId(), cmd.getSSN()));
+  }
+
+  @CommandHandler
   public void on(InitializeAppleUserCommand cmd) {
     apply(
       new MemberCreatedEvent(
