@@ -51,7 +51,7 @@ class PersonAggregate() {
     fun handle(command: CheckPersonDebtCommand) {
         if (isBeforeFirstFridayOfMonth(lastDebtCheckedAt)) {
             logger.info { "CHECKING debt for ssn=${maskLastDigitsOfSsn(command.ssn)}" }
-            AggregateLifecycle.apply(CheckPersonDebtEvent(id, command.ssn))
+            AggregateLifecycle.apply(CheckPersonDebtEvent(command.ssn))
             return
         }
         if (latestDateSnapShotFrom.isAfter(LocalDateTime.now().minusWeeks(4))) {
@@ -60,7 +60,7 @@ class PersonAggregate() {
             return
         }
         logger.info { "CHECKING debt for ssn=${maskLastDigitsOfSsn(command.ssn)}" }
-        AggregateLifecycle.apply(CheckPersonDebtEvent(id, command.ssn))
+        AggregateLifecycle.apply(CheckPersonDebtEvent(command.ssn))
     }
 
     @CommandHandler
