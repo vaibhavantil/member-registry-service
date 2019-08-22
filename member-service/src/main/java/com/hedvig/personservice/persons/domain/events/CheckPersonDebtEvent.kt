@@ -1,3 +1,5 @@
 package com.hedvig.personservice.persons.domain.events
 
-data class CheckPersonDebtEvent(val ssn: String)
+import java.util.*
+
+data class CheckPersonDebtEvent(val personId: UUID, val ssn: String)

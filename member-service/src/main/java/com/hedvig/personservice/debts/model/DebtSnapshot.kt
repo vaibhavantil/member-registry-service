@@ -22,12 +22,12 @@ data class DebtSnapshot(
     val fromDateTime: LocalDateTime
 ) {
     companion object {
-        fun from(synaDebtCheck: SynaDebtCheckDto, ssn: String): DebtSnapshot {
+        fun from(personId: UUID, ssn: String, synaDebtCheck: SynaDebtCheckDto): DebtSnapshot {
             val debt = Debt.from(synaDebtCheck.debt)
             val paymentDefaults = synaDebtCheck.paymentDefaults.map((PaymentDefault)::from)
             return DebtSnapshot(
                     id = UUID.randomUUID(),
-                    person = Person(ssn, mutableListOf()),
+                    person = Person(personId, ssn, mutableListOf()),
                     paymentDefaults = paymentDefaults,
                     debt = debt,
                     checkedAt = Instant.now(),

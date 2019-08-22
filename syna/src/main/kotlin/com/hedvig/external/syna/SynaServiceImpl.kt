@@ -8,7 +8,7 @@ import org.springframework.stereotype.Service
 class SynaServiceImpl @Autowired constructor(
     private val synaClient: SynaClient
 ): SynaService {
-    override fun getDebtSnapshot(ssn: String): SynaDebtCheckDto {
+    override fun getDebtCheck(ssn: String): SynaDebtCheckDto {
         val synaQueryResponse = synaClient.getSynaResponse(ssn)
         return SynaDebtCheckDto.from(synaQueryResponse)
     }

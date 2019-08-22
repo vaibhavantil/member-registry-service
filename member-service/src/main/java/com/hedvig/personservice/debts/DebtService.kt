@@ -1,6 +1,5 @@
 package com.hedvig.personservice.debts
 
-import com.hedvig.external.syna.SynaService
 import com.hedvig.personservice.debts.model.DebtSnapshot
 import com.hedvig.personservice.persons.PersonService
 import com.hedvig.personservice.persons.model.Flag
@@ -12,7 +11,6 @@ import java.math.BigDecimal
 
 @Service
 class DebtService @Autowired constructor(
-        private val synaService: SynaService,
         @Lazy private val personService: PersonService
 ) {
     fun checkPersonDebt(ssn: String) {
@@ -22,11 +20,6 @@ class DebtService @Autowired constructor(
             personService.checkDebt(ssn)
             return
         }
-    }
-
-    fun getSynaDebtSnapshot(ssn: String): DebtSnapshot {
-        val synaDebtSnapshot = synaService.getDebtSnapshot(ssn)
-        return DebtSnapshot.from(synaDebtSnapshot, ssn)
     }
 
     companion object {

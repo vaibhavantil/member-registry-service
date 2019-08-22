@@ -1,6 +1,7 @@
 package com.hedvig.personservice.persons.domain.sagas
 
-import com.hedvig.personservice.debts.DebtService
+import com.hedvig.external.syna.SynaService
+import com.hedvig.personservice.debts.model.DebtSnapshot
 import com.hedvig.personservice.persons.domain.commands.SynaDebtCheckedCommand
 import com.hedvig.personservice.persons.domain.events.CheckPersonDebtEvent
 import org.axonframework.commandhandling.gateway.CommandGateway
@@ -14,7 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired
 class CheckPersonDebtSaga {
     @Transient
     @Autowired
-    lateinit var debtService: DebtService
+    lateinit var synaService: SynaService
 
     @Transient
     @Autowired
@@ -24,7 +25,11 @@ class CheckPersonDebtSaga {
     @SagaEventHandler(associationProperty = "ssn")
     @EndSaga
     fun on(event: CheckPersonDebtEvent) {
-        val debtSnapshot = debtService.getSynaDebtSnapshot(event.ssn)
-        commandGateway.sendAndWait<Void>(SynaDebtCheckedCommand(event.ssn, debtSnapshot))
+        val synaDebtCheck = synaService.getDebtCheck(event.ssn)
+        commandGateway.sendAndWait<Void>(SynaDebtCheckedCommand(event.ssn, DebtSnapshot.from(
+            personId = event.personId,
+            ssn = event.ssn,
+            synaDebtCheck = synaDebtCheck
+        )))
     }
 }

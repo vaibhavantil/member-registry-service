@@ -26,6 +26,7 @@ import java.util.*
 class PersonAggregate() {
     @AggregateIdentifier
     private lateinit var ssn: String
+    private lateinit var id: UUID
     private lateinit var person: Person
     private var latestDateSnapShotFrom: LocalDateTime = LocalDateTime.MIN
     private var lastDebtCheckedAt: Instant = Instant.MIN
@@ -42,6 +43,7 @@ class PersonAggregate() {
     @EventSourcingHandler
     fun on(event: PersonCreatedEvent) {
         this.ssn = event.ssn
+        this.id = event.id
         this.person = Person(event.id, event.ssn, mutableListOf())
     }
 
@@ -49,7 +51,7 @@ class PersonAggregate() {
     fun handle(command: CheckPersonDebtCommand) {
         if (isBeforeFirstFridayOfMonth(lastDebtCheckedAt)) {
             logger.info { "CHECKING debt for ssn=${maskLastDigitsOfSsn(command.ssn)}" }
-            AggregateLifecycle.apply(CheckPersonDebtEvent(command.ssn))
+            AggregateLifecycle.apply(CheckPersonDebtEvent(id, command.ssn))
             return
         }
         if (latestDateSnapShotFrom.isAfter(LocalDateTime.now().minusWeeks(4))) {
@@ -58,7 +60,7 @@ class PersonAggregate() {
             return
         }
         logger.info { "CHECKING debt for ssn=${maskLastDigitsOfSsn(command.ssn)}" }
-        AggregateLifecycle.apply(CheckPersonDebtEvent(command.ssn))
+        AggregateLifecycle.apply(CheckPersonDebtEvent(id, command.ssn))
     }
 
     @CommandHandler
