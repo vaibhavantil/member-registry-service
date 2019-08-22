@@ -4,7 +4,7 @@ import com.hedvig.personservice.debts.model.DebtSnapshot
 import org.axonframework.commandhandling.TargetAggregateIdentifier
 
 data class SynaDebtCheckedCommand(
-        @TargetAggregateIdentifier
-        val ssn: String,
-        val debtSnapshot: DebtSnapshot
+    @TargetAggregateIdentifier
+    val ssn: String,
+    val debtSnapshot: DebtSnapshot
 )

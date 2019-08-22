@@ -4,6 +4,7 @@ import com.hedvig.external.syna.SynaService
 import com.hedvig.personservice.debts.model.DebtSnapshot
 import com.hedvig.personservice.persons.domain.commands.SynaDebtCheckedCommand
 import com.hedvig.personservice.persons.domain.events.CheckPersonDebtEvent
+import com.hedvig.personservice.persons.query.PersonRepository
 import org.axonframework.commandhandling.gateway.CommandGateway
 import org.axonframework.eventhandling.saga.EndSaga
 import org.axonframework.eventhandling.saga.SagaEventHandler
@@ -19,6 +20,10 @@ class CheckPersonDebtSaga {
 
     @Transient
     @Autowired
+    lateinit var personRepository: PersonRepository
+
+    @Transient
+    @Autowired
     lateinit var commandGateway: CommandGateway
 
     @StartSaga
@@ -26,9 +31,9 @@ class CheckPersonDebtSaga {
     @EndSaga
     fun on(event: CheckPersonDebtEvent) {
         val synaDebtCheck = synaService.getDebtCheck(event.ssn)
+        val person = personRepository.findBySsn(event.ssn)!!
         commandGateway.sendAndWait<Void>(SynaDebtCheckedCommand(event.ssn, DebtSnapshot.from(
-            personId = event.personId,
-            ssn = event.ssn,
+            person = person,
             synaDebtCheck = synaDebtCheck
         )))
     }

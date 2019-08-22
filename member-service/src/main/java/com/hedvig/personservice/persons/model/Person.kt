@@ -1,7 +1,6 @@
 package com.hedvig.personservice.persons.model
 
 import com.hedvig.personservice.debts.model.DebtSnapshot
-import org.hibernate.validator.constraints.UniqueElements
 import java.util.*
 import javax.persistence.*
 

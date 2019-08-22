@@ -1,5 +1,6 @@
 package com.hedvig.personservice.persons.domain
 
+import com.hedvig.personservice.debts.model.DebtSnapshot
 import com.hedvig.personservice.persons.domain.commands.CheckPersonDebtCommand
 import com.hedvig.personservice.persons.domain.commands.CreatePersonCommand
 import com.hedvig.personservice.persons.domain.commands.SynaDebtCheckedCommand
@@ -27,7 +28,7 @@ class PersonAggregate() {
     @AggregateIdentifier
     private lateinit var ssn: String
     private lateinit var id: UUID
-    private lateinit var person: Person
+    private lateinit var debt: DebtSnapshot
     private var latestDateSnapShotFrom: LocalDateTime = LocalDateTime.MIN
     private var lastDebtCheckedAt: Instant = Instant.MIN
     private var whitelisted: Whitelisted? = null
@@ -44,7 +45,6 @@ class PersonAggregate() {
     fun on(event: PersonCreatedEvent) {
         this.ssn = event.ssn
         this.id = event.id
-        this.person = Person(event.id, event.ssn, mutableListOf())
     }
 
     @CommandHandler
@@ -79,7 +79,7 @@ class PersonAggregate() {
 
     @EventSourcingHandler
     fun on(event: SynaDebtCheckedEvent, @Timestamp timestamp: Instant) {
-        this.person.debtSnapshots.add(event.debtSnapshot)
+        this.debt = event.debtSnapshot
         this.latestDateSnapShotFrom = event.debtSnapshot.fromDateTime
         this.lastDebtCheckedAt = timestamp
     }
