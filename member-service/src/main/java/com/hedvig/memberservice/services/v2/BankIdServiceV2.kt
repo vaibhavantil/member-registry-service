@@ -7,7 +7,7 @@ import com.hedvig.memberservice.jobs.BankIdAuthCollector
 import com.hedvig.memberservice.query.CollectRepository
 import com.hedvig.memberservice.query.CollectType
 import com.hedvig.memberservice.query.SignedMemberRepository
-import com.hedvig.memberservice.externalApi.apigateway.ApiGatewayService
+import com.hedvig.integration.apigateway.ApiGatewayService
 import com.hedvig.memberservice.services.bankid.BankIdSOAPApi
 import com.hedvig.memberservice.services.redispublisher.AuthSessionUpdatedEventStatus
 import com.hedvig.memberservice.services.redispublisher.RedisEventPublisher

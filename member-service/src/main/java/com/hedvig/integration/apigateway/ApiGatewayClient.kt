@@ -1,6 +1,7 @@
-package com.hedvig.memberservice.externalApi.apigateway
+package com.hedvig.integration.apigateway
 
-import com.hedvig.memberservice.config.FeignConfig
+import com.hedvig.config.FeignConfig
+import com.hedvig.integration.apigateway.ReassignMemberDto
 import org.springframework.cloud.openfeign.FeignClient
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestHeader

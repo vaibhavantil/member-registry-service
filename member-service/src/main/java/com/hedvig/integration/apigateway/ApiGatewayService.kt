@@ -1,5 +1,6 @@
-package com.hedvig.memberservice.externalApi.apigateway
+package com.hedvig.integration.apigateway
 
+import com.hedvig.integration.apigateway.ReassignMemberDto
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 
