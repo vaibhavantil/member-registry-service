@@ -1,0 +1,1 @@
+export MAVEN_OPTS="-Xmx512m --add-modules=javax.activation,javax.xml.bind"

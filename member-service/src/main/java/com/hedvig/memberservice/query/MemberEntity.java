@@ -32,38 +32,38 @@ import org.hibernate.annotations.Formula;
 @AllArgsConstructor
 public class MemberEntity {
 
-  @Id private Long id;
+  @Id public Long id;
 
   String zipCode;
-  private String apartment;
+  public String apartment;
 
   @Enumerated(EnumType.STRING)
-  private MemberStatus status;
-  private String ssn;
-  private String firstName;
-  private String lastName;
-  private LocalDate birthDate;
-  private String street;
-  private String city;
+  public MemberStatus status;
+  public String ssn;
+  public String firstName;
+  public String lastName;
+  public LocalDate birthDate;
+  public String street;
+  public String city;
 
-  private String phoneNumber;
+  public String phoneNumber;
 
-  private String email;
+  public String email;
 
-  private String cashbackId;
+  public String cashbackId;
 
-  private Integer floor;
+  public Integer floor;
 
-  private Instant signedOn;
+  public Instant signedOn;
 
-  private Instant createdOn;
+  public Instant createdOn;
 
   @Enumerated(EnumType.STRING)
-  private FraudulentStatus fraudulentStatus = FraudulentStatus.NOT_FRAUD;
-  private String fraudulentDescription;
+  public FraudulentStatus fraudulentStatus = FraudulentStatus.NOT_FRAUD;
+  public String fraudulentDescription;
 
   @Formula("first_name || ' ' || last_name")
-  private String fullName;
+  public String fullName;
 
   public static final EnumMap<MembersSortColumn, String> SORT_COLUMN_MAPPING = new EnumMap<MembersSortColumn, String>(MembersSortColumn.class) {{
     put(MembersSortColumn.CREATED, "createdOn");

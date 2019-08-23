@@ -187,6 +187,12 @@
       <artifactId>bank-id</artifactId>
       <version>0.0.1-SNAPSHOT</version>
     </dependency>
+    <dependency>
+      <groupId>com.hedvig.external.syna</groupId>
+      <artifactId>syna</artifactId>
+      <version>0.0.1-SNAPSHOT</version>
+      <scope>compile</scope>
+    </dependency>
 
     <dependency>
       <groupId>org.springframework.cloud</groupId>
@@ -269,6 +275,11 @@
       <groupId>com.fasterxml.jackson.module</groupId>
       <artifactId>jackson-module-kotlin</artifactId>
     </dependency>
+    <dependency>
+      <groupId>org.zalando</groupId>
+      <artifactId>jackson-datatype-money</artifactId>
+      <version>1.0.0</version>
+    </dependency>
 
     <dependency>
       <groupId>org.springframework.boot</groupId>
@@ -315,7 +326,8 @@
             </executions>
             <configuration>
                 <compilerPlugins>
-                    <plugin>spring</plugin>
+                  <plugin>jpa</plugin>
+                  <plugin>spring</plugin>
                 </compilerPlugins>
                 <jvmTarget>1.8</jvmTarget>
             </configuration>
@@ -323,6 +335,11 @@
             <dependency>
               <groupId>org.jetbrains.kotlin</groupId>
               <artifactId>kotlin-maven-allopen</artifactId>
+              <version>${kotlin.version}</version>
+            </dependency>
+            <dependency>
+              <groupId>org.jetbrains.kotlin</groupId>
+              <artifactId>kotlin-maven-noarg</artifactId>
               <version>${kotlin.version}</version>
             </dependency>
           </dependencies>

@@ -1,6 +1,6 @@
 package com.hedvig.memberservice.entities;
 
-import com.hedvig.memberservice.BeanUtil;
+import com.hedvig.memberservice.util.BeanUtil;
 import com.hedvig.memberservice.services.events.SignSessionCompleteEvent;
 import javax.persistence.PostUpdate;
 import lombok.val;

@@ -1,7 +1,7 @@
 package com.hedvig.memberservice.sagas;
 
 import com.hedvig.memberservice.events.MemberSignedEvent;
-import com.hedvig.memberservice.externalApi.productsPricing.ProductApi;
+import com.hedvig.integration.productsPricing.ProductApi;
 import com.hedvig.memberservice.services.SNSNotificationService;
 import com.hedvig.memberservice.services.SigningService;
 import org.axonframework.eventhandling.EventMessage;

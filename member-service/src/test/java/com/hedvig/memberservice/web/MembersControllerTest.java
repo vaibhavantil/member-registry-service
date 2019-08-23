@@ -2,7 +2,7 @@ package com.hedvig.memberservice.web;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hedvig.memberservice.commands.AssignTrackingIdCommand;
-import com.hedvig.memberservice.externalApi.productsPricing.ProductApi;
+import com.hedvig.integration.productsPricing.ProductApi;
 import com.hedvig.memberservice.query.MemberEntity;
 import com.hedvig.memberservice.query.MemberRepository;
 import com.hedvig.memberservice.query.TrackingIdRepository;

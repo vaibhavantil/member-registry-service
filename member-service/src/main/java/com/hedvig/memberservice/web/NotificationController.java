@@ -1,8 +1,8 @@
 package com.hedvig.memberservice.web;
 
-import com.hedvig.memberservice.externalApi.notificationService.NotificationService;
-import com.hedvig.memberservice.externalApi.notificationService.dto.CancellationEmailSentToInsurerRequest;
-import com.hedvig.memberservice.externalApi.notificationService.dto.InsuranceActivationDateUpdatedRequest;
+import com.hedvig.integration.notificationService.NotificationService;
+import com.hedvig.integration.notificationService.dto.CancellationEmailSentToInsurerRequest;
+import com.hedvig.integration.notificationService.dto.InsuranceActivationDateUpdatedRequest;
 import java.util.Objects;
 import javax.validation.Valid;
 import org.slf4j.Logger;
