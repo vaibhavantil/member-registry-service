@@ -24,6 +24,12 @@ public class BotServiceImpl implements BotService {
     botServiceClient.initBotServiceSessionWebOnBoarding(memberId, userContext);
   }
 
+  @Override
+  public void initBotService(Long memberId) {
+    logger.info("Initializing bot-service by helloHedvig request");
+    botServiceClient.initBotService(memberId);
+  }
+
   public void editMemberName(String memberId, EditMemberNameRequestDTO editMemberNameRequestDTO) {
     botServiceClient.editMemberName(memberId, editMemberNameRequestDTO);
   }
