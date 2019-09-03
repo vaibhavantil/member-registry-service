@@ -8,5 +8,5 @@ public interface BotService {
 
   void editMemberName(String memberId, EditMemberNameRequestDTO editMemberNameRequestDTO);
 
-  void initBotService(Long memberId);
+  void initBotService(Long memberId, String json);
 }

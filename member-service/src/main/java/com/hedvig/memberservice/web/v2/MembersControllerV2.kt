@@ -12,6 +12,7 @@ import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.retry.support.RetryTemplate
 import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 import java.security.SecureRandom
@@ -22,13 +23,12 @@ import java.util.*
 class MembersControllerV2 @Autowired constructor(
     val retryTemplate: RetryTemplate,
     val memberRepository: MemberRepository,
-    val randomGenerator: SecureRandom,
+    val randomGenerator: SecureRandom = SecureRandom.getInstance("SHA1PRNG"),
     val commandGateway: CommandGateway,
     val botService: BotService
 ) {
-
     @PostMapping("/helloHedvig")
-    fun helloHedvig(): ResponseEntity<String> {
+    fun helloHedvig(@RequestBody json: String?): ResponseEntity<String> {
         val id = retryTemplate.execute<Long, Exception> {
             var memberId: Long?
             var member: Optional<MemberEntity>
@@ -44,7 +44,7 @@ class MembersControllerV2 @Autowired constructor(
             return@execute memberId
         }
 
-        botService.initBotService(id)
+        botService.initBotService(id, json)
 
         log.info("New member created with id: " + id!!)
         return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON)
@@ -54,5 +54,4 @@ class MembersControllerV2 @Autowired constructor(
     companion object {
         val log: Logger = LoggerFactory.getLogger(this.javaClass.simpleName)
     }
-
 }

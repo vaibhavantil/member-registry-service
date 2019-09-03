@@ -25,5 +25,5 @@ public interface BotServiceClient {
   );
 
   @PostMapping("/_/messages/init")
-  ResponseEntity<?> initBotService(@RequestHeader(name = "hedvig.token") Long memberId);
+  ResponseEntity<?> initBotService(@RequestHeader(name = "hedvig.token") Long memberId, @RequestBody String json);
 }
