@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RequestHeader;
 
 @FeignClient(
   name = "bot-service",
-  url = "${hedvig.botservice.baseurl:bot-service}"
+  url = "${hedvig.bot-service.url:bot-service}"
 )
 public interface BotServiceClient {
 
@@ -25,5 +25,8 @@ public interface BotServiceClient {
   );
 
   @PostMapping("/_/messages/init")
-  ResponseEntity<?> initBotService(@RequestHeader(name = "hedvig.token") Long memberId, @RequestBody String json);
+  ResponseEntity<?> initBotService(@RequestHeader(name = "hedvig.token") Long memberId, @RequestBody(required = false) String json);
+
+  @PostMapping("/_/messages/init")
+  ResponseEntity<?> initBotService(@RequestHeader(name = "hedvig.token") Long memberId);
 }

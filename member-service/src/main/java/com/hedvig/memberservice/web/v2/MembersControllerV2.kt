@@ -4,6 +4,7 @@ import com.hedvig.integration.botService.BotService
 import com.hedvig.memberservice.commands.CreateMemberCommand
 import com.hedvig.memberservice.query.MemberEntity
 import com.hedvig.memberservice.query.MemberRepository
+import com.hedvig.memberservice.web.v2.dto.HelloHedvigResponse
 import org.axonframework.commandhandling.gateway.CommandGateway
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -27,8 +28,8 @@ class MembersControllerV2 @Autowired constructor(
     val commandGateway: CommandGateway,
     val botService: BotService
 ) {
-    @PostMapping("/helloHedvig")
-    fun helloHedvig(@RequestBody json: String?): ResponseEntity<String> {
+    @PostMapping("/helloHedvig", produces = ["application/json"])
+    fun helloHedvig(@RequestBody(required = false) json: String?): ResponseEntity<HelloHedvigResponse> {
         val id = retryTemplate.execute<Long, Exception> {
             var memberId: Long?
             var member: Optional<MemberEntity>
@@ -38,17 +39,14 @@ class MembersControllerV2 @Autowired constructor(
                 member = memberRepository.findById(memberId)
             } while (member.isPresent)
 
-            val a = commandGateway.send<CreateMemberCommand>(CreateMemberCommand(memberId))
-            val ret = a.get()
-            log.info(ret.toString())
+            commandGateway.send<CreateMemberCommand>(CreateMemberCommand(memberId!!))
             return@execute memberId
         }
 
         botService.initBotService(id, json)
 
         log.info("New member created with id: " + id!!)
-        return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON)
-            .body("{\"memberId\":$id}")
+        return ResponseEntity.ok().body(HelloHedvigResponse(id))
     }
 
     companion object {
