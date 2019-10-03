@@ -1,9 +1,7 @@
 package com.hedvig.memberservice.web.v2;
 
 import com.hedvig.memberservice.services.SigningService;
-import com.hedvig.memberservice.web.v2.dto.SignStatusResponse;
-import com.hedvig.memberservice.web.v2.dto.WebSignResponse;
-import com.hedvig.memberservice.web.v2.dto.WebsignRequest;
+import com.hedvig.memberservice.web.v2.dto.*;
 import lombok.val;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -34,9 +32,16 @@ public class SignController {
     return ResponseEntity.ok(new WebSignResponse(result.getSignId(),result.getStatus(), result.getBankIdOrderResponse()));
   }
 
+  @PostMapping("signQuotesFromUnderwriter")
+  public ResponseEntity<UnderwriterQuoteSignResponse> signQuotesFromUnderwriter(
+    @RequestHeader("hedvig.token") final long hedvigToken, @RequestBody UnderwriterQuoteSignRequest underwriterQuoteSignRequest
+  ) {
+     val result = signingService.signUnderwriterQuote(hedvigToken, underwriterQuoteSignRequest);
+    return ResponseEntity.ok(new UnderwriterQuoteSignResponse(result.getSignId(),result.getMemberIsSigned()));
+  }
+
   @GetMapping("signStatus")
   public ResponseEntity<SignStatusResponse> signStatus(@RequestHeader("hedvig.token") final long memberId) {
-
 
     val session = signingService.getSignStatus(memberId);
 

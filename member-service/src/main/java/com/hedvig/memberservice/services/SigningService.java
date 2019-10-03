@@ -7,6 +7,8 @@ import static org.quartz.TriggerBuilder.newTrigger;
 import com.hedvig.external.bankID.bankIdRestTypes.BankIdRestError;
 import com.hedvig.external.bankID.bankIdRestTypes.CollectStatus;
 import com.hedvig.external.bankID.bankIdRestTypes.OrderResponse;
+import com.hedvig.integration.productsPricing.dto.ProductToSignStatusDTO;
+import com.hedvig.memberservice.commands.SignMemberCommandFromUnderwriter;
 import com.hedvig.memberservice.commands.UpdateWebOnBoardingInfoCommand;
 import com.hedvig.memberservice.entities.CollectResponse;
 import com.hedvig.memberservice.entities.SignSession;
@@ -18,10 +20,13 @@ import com.hedvig.integration.productsPricing.ProductApi;
 import com.hedvig.memberservice.jobs.BankIdCollector;
 import com.hedvig.memberservice.query.MemberEntity;
 import com.hedvig.memberservice.query.MemberRepository;
+import com.hedvig.memberservice.query.SignedMemberEntity;
 import com.hedvig.memberservice.query.SignedMemberRepository;
 import com.hedvig.memberservice.services.member.CannotSignInsuranceException;
 import com.hedvig.memberservice.services.member.MemberService;
 import com.hedvig.memberservice.services.member.dto.MemberSignResponse;
+import com.hedvig.memberservice.services.member.dto.MemberSignResponseFromUnderwriter;
+import com.hedvig.memberservice.web.v2.dto.UnderwriterQuoteSignRequest;
 import com.hedvig.memberservice.web.v2.dto.WebsignRequest;
 import java.util.Optional;
 import javax.transaction.Transactional;
@@ -114,6 +119,29 @@ public class SigningService {
 
       return new MemberSignResponse(session.getSessionId(), SignStatus.IN_PROGRESS,
           session.getOrderResponse());
+
+    } else {
+      throw new CannotSignInsuranceException();
+    }
+  }
+
+  @Transactional
+  public MemberSignResponseFromUnderwriter signUnderwriterQuote(final long memberId, final UnderwriterQuoteSignRequest request) {
+
+    Optional<SignedMemberEntity> existing = signedMemberRepository.findBySsn(request.getSsn());
+
+    if (existing.isPresent()) {
+      throw new MemberHasExistingInsuranceException();
+    }
+
+    ProductToSignStatusDTO productStatus = productApi.hasProductToSign(memberId);
+    if (productStatus.isEligibleToSign()) {
+
+      val signMember = commandGateway.send(
+        new SignMemberCommandFromUnderwriter(memberId, "", "rapioSign", "", request.getSsn())
+      );
+
+      return new MemberSignResponseFromUnderwriter(memberId, signMember.isDone());
 
     } else {
       throw new CannotSignInsuranceException();
