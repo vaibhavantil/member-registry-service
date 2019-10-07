@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 import java.security.SecureRandom
 import java.util.*
+import kotlin.math.abs
 
 @RestController
 @RequestMapping("/v2/member")
@@ -35,11 +36,11 @@ class MembersControllerV2 @Autowired constructor(
             var member: Optional<MemberEntity>
 
             do {
-                memberId = Math.abs(this.randomGenerator.nextLong() % 1000000000)
+                memberId = abs(this.randomGenerator.nextLong() % 1000000000)
                 member = memberRepository.findById(memberId)
             } while (member.isPresent)
 
-            commandGateway.send<CreateMemberCommand>(CreateMemberCommand(memberId!!))
+            commandGateway.send<Void>(CreateMemberCommand(memberId!!))
             return@execute memberId
         }
 
@@ -50,6 +51,6 @@ class MembersControllerV2 @Autowired constructor(
     }
 
     companion object {
-        val log: Logger = LoggerFactory.getLogger(this.javaClass.simpleName)
+        val log: Logger = LoggerFactory.getLogger(MembersControllerV2::class.java)
     }
 }
