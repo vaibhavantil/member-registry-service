@@ -2,7 +2,7 @@ package com.hedvig.memberservice.sagas;
 
 import com.hedvig.memberservice.events.MemberSignedEvent;
 import com.hedvig.integration.productsPricing.ProductApi;
-import com.hedvig.memberservice.events.MemberSignedFromUnderwriterEvent;
+import com.hedvig.memberservice.events.MemberSignedWithoutBankId;
 import com.hedvig.memberservice.services.SNSNotificationService;
 import com.hedvig.memberservice.services.SigningService;
 import org.axonframework.eventhandling.EventMessage;
@@ -51,7 +51,7 @@ public class MemberSignedSaga {
 
 
   public void onMemberSignedFromUnderwriterEvent(
-    MemberSignedFromUnderwriterEvent e, EventMessage<MemberSignedFromUnderwriterEvent> eventMessage) {
+    MemberSignedWithoutBankId e, EventMessage<MemberSignedWithoutBankId> eventMessage) {
 
     log.debug("Product has already been signed");
 

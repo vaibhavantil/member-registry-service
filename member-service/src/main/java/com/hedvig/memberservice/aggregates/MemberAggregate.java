@@ -259,7 +259,7 @@ public class MemberAggregate {
 
   @CommandHandler
   public void on(SignMemberFromUnderwriterCommand signMemberFromUnderwriterCommand) {
-    apply(new MemberSignedFromUnderwriterEvent(signMemberFromUnderwriterCommand.getId(), signMemberFromUnderwriterCommand.getSsn()));
+    apply(new MemberSignedWithoutBankId(signMemberFromUnderwriterCommand.getId(), signMemberFromUnderwriterCommand.getSsn()));
   }
 
   @CommandHandler

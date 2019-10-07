@@ -174,7 +174,7 @@ public class MemberEventListener {
   }
 
   @EventHandler
-  void on(MemberSignedFromUnderwriterEvent e, @Timestamp Instant timestamp) {
+  void on(MemberSignedWithoutBankId e, @Timestamp Instant timestamp) {
     MemberEntity m = userRepo.findById(e.getMemberId()).get();
     m.setStatus(MemberStatus.SIGNED);
     m.setSignedOn(timestamp);
