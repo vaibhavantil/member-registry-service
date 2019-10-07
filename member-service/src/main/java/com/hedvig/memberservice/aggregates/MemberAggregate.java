@@ -258,6 +258,11 @@ public class MemberAggregate {
   }
 
   @CommandHandler
+  public void on(SignMemberFromUnderwriterCommand signMemberFromUnderwriterCommand) {
+    apply(new MemberSignedWithoutBankId(signMemberFromUnderwriterCommand.getId(), signMemberFromUnderwriterCommand.getSsn()));
+  }
+
+  @CommandHandler
   void selectNewCashback(SelectNewCashbackCommand cmd) {
     apply(new NewCashbackSelectedEvent(this.id, cmd.getOptionId().toString()));
   }
