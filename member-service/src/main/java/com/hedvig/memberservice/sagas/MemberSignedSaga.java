@@ -2,6 +2,7 @@ package com.hedvig.memberservice.sagas;
 
 import com.hedvig.memberservice.events.MemberSignedEvent;
 import com.hedvig.integration.productsPricing.ProductApi;
+import com.hedvig.memberservice.events.MemberSignedFromUnderwriterEvent;
 import com.hedvig.memberservice.services.SNSNotificationService;
 import com.hedvig.memberservice.services.SigningService;
 import org.axonframework.eventhandling.EventMessage;
@@ -28,7 +29,7 @@ public class MemberSignedSaga {
   @StartSaga
   @EndSaga
   public void onMemberSignedEvent(
-      MemberSignedEvent e, EventMessage<MemberSignedEvent> eventMessage) {
+    MemberSignedEvent e, EventMessage<MemberSignedEvent> eventMessage) {
 
     log.debug("ON MEMBER SIGNED EVENT FOR {}", e.getId());
 
@@ -44,9 +45,17 @@ public class MemberSignedSaga {
       log.error("Could not notify product-pricing about signed member for memberId: {}", e.getId(), ex);
     }
 
-
     signingService.productSignConfirmed(e.getReferenceId());
     snsNotificationService.sendMemberSignedNotification(e.getId());
   }
 
+
+  public void onMemberSignedFromUnderwriterEvent(
+    MemberSignedFromUnderwriterEvent e, EventMessage<MemberSignedFromUnderwriterEvent> eventMessage) {
+
+    log.debug("Product has already been signed");
+
+    signingService.productSignConfirmed(String.valueOf(e.getMemberId()));
+    snsNotificationService.sendMemberSignedNotification(e.getMemberId());
+  }
 }

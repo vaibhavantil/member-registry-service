@@ -258,9 +258,8 @@ public class MemberAggregate {
   }
 
   @CommandHandler
-  public void on(SignMemberCommandFromUnderwriter signMemberCommandFromUnderwriter) {
-    apply(new MemberSignedEvent(signMemberCommandFromUnderwriter.getId(), signMemberCommandFromUnderwriter.getReferenceId(), signMemberCommandFromUnderwriter.getSignature(),
-      signMemberCommandFromUnderwriter.getOscpResponse(), signMemberCommandFromUnderwriter.getSsn()));
+  public void on(SignMemberFromUnderwriterCommand signMemberFromUnderwriterCommand) {
+    apply(new MemberSignedFromUnderwriterEvent(signMemberFromUnderwriterCommand.getId(), signMemberFromUnderwriterCommand.getSsn()));
   }
 
   @CommandHandler

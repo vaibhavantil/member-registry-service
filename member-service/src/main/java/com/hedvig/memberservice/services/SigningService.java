@@ -8,7 +8,7 @@ import com.hedvig.external.bankID.bankIdRestTypes.BankIdRestError;
 import com.hedvig.external.bankID.bankIdRestTypes.CollectStatus;
 import com.hedvig.external.bankID.bankIdRestTypes.OrderResponse;
 import com.hedvig.integration.productsPricing.dto.ProductToSignStatusDTO;
-import com.hedvig.memberservice.commands.SignMemberCommandFromUnderwriter;
+import com.hedvig.memberservice.commands.SignMemberFromUnderwriterCommand;
 import com.hedvig.memberservice.commands.UpdateWebOnBoardingInfoCommand;
 import com.hedvig.memberservice.entities.CollectResponse;
 import com.hedvig.memberservice.entities.SignSession;
@@ -25,9 +25,11 @@ import com.hedvig.memberservice.query.SignedMemberRepository;
 import com.hedvig.memberservice.services.member.CannotSignInsuranceException;
 import com.hedvig.memberservice.services.member.MemberService;
 import com.hedvig.memberservice.services.member.dto.MemberSignResponse;
-import com.hedvig.memberservice.services.member.dto.MemberSignResponseFromUnderwriter;
+import com.hedvig.memberservice.services.member.dto.MemberSignUnderwriterQuoteResponse;
 import com.hedvig.memberservice.web.v2.dto.UnderwriterQuoteSignRequest;
 import com.hedvig.memberservice.web.v2.dto.WebsignRequest;
+
+import java.time.LocalDate;
 import java.util.Optional;
 import javax.transaction.Transactional;
 import lombok.val;
@@ -126,7 +128,7 @@ public class SigningService {
   }
 
   @Transactional
-  public MemberSignResponseFromUnderwriter signUnderwriterQuote(final long memberId, final UnderwriterQuoteSignRequest request) {
+  public MemberSignUnderwriterQuoteResponse signUnderwriterQuote(final long memberId, final UnderwriterQuoteSignRequest request) {
 
     Optional<SignedMemberEntity> existing = signedMemberRepository.findBySsn(request.getSsn());
 
@@ -134,16 +136,13 @@ public class SigningService {
       throw new MemberHasExistingInsuranceException();
     }
 
-    ProductToSignStatusDTO productStatus = productApi.hasProductToSign(memberId);
-    if (productStatus.isEligibleToSign()) {
+    try {
+    val signMember = commandGateway.send(
+      new SignMemberFromUnderwriterCommand(memberId, request.getSsn()));
 
-      val signMember = commandGateway.send(
-        new SignMemberCommandFromUnderwriter(memberId, "", "rapioSign", "", request.getSsn())
-      );
+    return new MemberSignUnderwriterQuoteResponse(memberId, signMember.isDone());
 
-      return new MemberSignResponseFromUnderwriter(memberId, signMember.isDone());
-
-    } else {
+    } catch(Exception exception) {
       throw new CannotSignInsuranceException();
     }
   }
