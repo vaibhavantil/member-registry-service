@@ -1,19 +1,7 @@
 package com.hedvig.memberservice.query;
 
 import com.hedvig.memberservice.aggregates.MemberStatus;
-import com.hedvig.memberservice.events.EmailUpdatedEvent;
-import com.hedvig.memberservice.events.FraudulentStatusUpdatedEvent;
-import com.hedvig.memberservice.events.LivingAddressUpdatedEvent;
-import com.hedvig.memberservice.events.MemberCancellationEvent;
-import com.hedvig.memberservice.events.MemberCreatedEvent;
-import com.hedvig.memberservice.events.MemberInactivatedEvent;
-import com.hedvig.memberservice.events.MemberSignedEvent;
-import com.hedvig.memberservice.events.MemberStartedOnBoardingEvent;
-import com.hedvig.memberservice.events.NameUpdatedEvent;
-import com.hedvig.memberservice.events.NewCashbackSelectedEvent;
-import com.hedvig.memberservice.events.PhoneNumberUpdatedEvent;
-import com.hedvig.memberservice.events.SSNUpdatedEvent;
-import com.hedvig.memberservice.events.TrackingIdCreatedEvent;
+import com.hedvig.memberservice.events.*;
 import com.hedvig.integration.botService.BotService;
 import com.hedvig.integration.productsPricing.ProductApi;
 import com.hedvig.integration.productsPricing.dto.EditMemberNameRequestDTO;
@@ -179,6 +167,20 @@ public class MemberEventListener {
 
     SignedMemberEntity sme = new SignedMemberEntity();
     sme.setId(e.getId());
+    sme.setSsn(e.getSsn());
+
+    userRepo.save(m);
+    signedMemberRepository.save(sme);
+  }
+
+  @EventHandler
+  void on(MemberSignedWithoutBankId e, @Timestamp Instant timestamp) {
+    MemberEntity m = userRepo.findById(e.getMemberId()).get();
+    m.setStatus(MemberStatus.SIGNED);
+    m.setSignedOn(timestamp);
+
+    SignedMemberEntity sme = new SignedMemberEntity();
+    sme.setId(e.getMemberId());
     sme.setSsn(e.getSsn());
 
     userRepo.save(m);
