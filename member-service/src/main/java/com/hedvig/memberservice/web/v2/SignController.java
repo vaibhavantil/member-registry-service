@@ -1,6 +1,7 @@
 package com.hedvig.memberservice.web.v2;
 
 import com.hedvig.memberservice.services.SigningService;
+import com.hedvig.memberservice.services.member.dto.ErrorResponseDto;
 import com.hedvig.memberservice.web.v2.dto.*;
 import lombok.val;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,11 +34,16 @@ public class SignController {
   }
 
   @PostMapping("underwriter")
-  public ResponseEntity<UnderwriterQuoteSignResponse> signQuotesFromUnderwriter(
-    @RequestHeader("hedvig.token") final long memberId, @RequestBody UnderwriterQuoteSignRequest underwriterQuoteSignRequest
-  ) {
-     val result = signingService.signUnderwriterQuote(memberId, underwriterQuoteSignRequest);
-    return ResponseEntity.ok(new UnderwriterQuoteSignResponse(result.getSignId(),result.getMemberIsSigned()));
+  public ResponseEntity<?> signQuotesFromUnderwriter(
+    @RequestHeader("hedvig.token") final long memberId,
+    @RequestBody UnderwriterQuoteSignRequest underwriterQuoteSignRequest) {
+
+    try {
+      val result = signingService.signUnderwriterQuote(memberId, underwriterQuoteSignRequest);
+      return ResponseEntity.ok(new UnderwriterQuoteSignResponse(result.getSignId(),result.getMemberIsSigned()));
+    } catch(Exception exception) {
+      return ResponseEntity.status(402).body(new ErrorResponseDto("Member already has an existing product"));
+    }
   }
 
   @GetMapping("signStatus")
