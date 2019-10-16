@@ -1,6 +1,8 @@
 package com.hedvig.memberservice.web.v2;
 
 import com.hedvig.memberservice.services.SigningService;
+import com.hedvig.memberservice.services.member.dto.ErrorCodes;
+import com.hedvig.memberservice.services.member.dto.ErrorResponseDto;
 import com.hedvig.memberservice.web.v2.dto.*;
 import lombok.val;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,11 +35,16 @@ public class SignController {
   }
 
   @PostMapping("underwriter")
-  public ResponseEntity<UnderwriterQuoteSignResponse> signQuotesFromUnderwriter(
-    @RequestHeader("hedvig.token") final long memberId, @RequestBody UnderwriterQuoteSignRequest underwriterQuoteSignRequest
-  ) {
-     val result = signingService.signUnderwriterQuote(memberId, underwriterQuoteSignRequest);
-    return ResponseEntity.ok(new UnderwriterQuoteSignResponse(result.getSignId(),result.getMemberIsSigned()));
+  public ResponseEntity<?> signQuotesFromUnderwriter(
+    @RequestHeader("hedvig.token") final long memberId,
+    @RequestBody UnderwriterQuoteSignRequest underwriterQuoteSignRequest) {
+
+    try {
+      val result = signingService.signUnderwriterQuote(memberId, underwriterQuoteSignRequest);
+      return ResponseEntity.ok(new UnderwriterQuoteSignResponse(result.getSignId(),result.getMemberIsSigned()));
+    } catch(Exception exception) {
+      return ResponseEntity.status(422).body(new ErrorResponseDto(ErrorCodes.MEMBER_HAS_EXISTING_INSURANCE, "Not able to sign quote, the social security given is already associated with a signed product"));
+    }
   }
 
   @GetMapping("signStatus")
@@ -49,5 +56,4 @@ public class SignController {
         .map(x -> ResponseEntity.ok(SignStatusResponse.CreateFromEntity(x)))
         .orElseGet(() -> ResponseEntity.notFound().build());
   }
-
 }
