@@ -7,7 +7,6 @@ import static org.quartz.TriggerBuilder.newTrigger;
 import com.hedvig.external.bankID.bankIdRestTypes.BankIdRestError;
 import com.hedvig.external.bankID.bankIdRestTypes.CollectStatus;
 import com.hedvig.external.bankID.bankIdRestTypes.OrderResponse;
-import com.hedvig.integration.productsPricing.dto.ProductToSignStatusDTO;
 import com.hedvig.memberservice.commands.SignMemberFromUnderwriterCommand;
 import com.hedvig.memberservice.commands.UpdateWebOnBoardingInfoCommand;
 import com.hedvig.memberservice.entities.CollectResponse;
@@ -26,7 +25,6 @@ import com.hedvig.memberservice.services.member.CannotSignInsuranceException;
 import com.hedvig.memberservice.services.member.MemberService;
 import com.hedvig.memberservice.services.member.dto.MemberSignResponse;
 import com.hedvig.memberservice.services.member.dto.MemberSignUnderwriterQuoteResponse;
-import com.hedvig.memberservice.web.v2.dto.UnderwriterQuoteSignRequest;
 import com.hedvig.memberservice.web.v2.dto.WebsignRequest;
 
 import java.time.LocalDate;
@@ -128,23 +126,30 @@ public class SigningService {
   }
 
   @Transactional
-  public MemberSignUnderwriterQuoteResponse signUnderwriterQuote(final long memberId, final UnderwriterQuoteSignRequest request) {
+  public MemberSignUnderwriterQuoteResponse signUnderwriterQuote(final long memberId) {
 
-    Optional<SignedMemberEntity> existing = signedMemberRepository.findBySsn(request.getSsn());
+    Optional<MemberEntity> member = memberRepository.findById(memberId);
 
-    if (existing.isPresent()) {
-      throw new MemberHasExistingInsuranceException();
+    String ssn = null;
+
+    if (member.isPresent()) {
+      ssn = member.get().ssn;
     }
+      Optional<SignedMemberEntity> existing = signedMemberRepository.findBySsn(ssn);
 
-    try {
-    val signMember = commandGateway.send(
-      new SignMemberFromUnderwriterCommand(memberId, request.getSsn()));
+      if (existing.isPresent()) {
+        throw new MemberHasExistingInsuranceException();
+      }
 
-    return new MemberSignUnderwriterQuoteResponse(memberId, signMember.isDone());
+      try {
+        val signMember = commandGateway.send(
+          new SignMemberFromUnderwriterCommand(memberId, ssn));
 
-    } catch(Exception exception) {
-      throw new CannotSignInsuranceException();
-    }
+        return new MemberSignUnderwriterQuoteResponse(memberId, signMember.isDone());
+
+      } catch (Exception exception) {
+        throw new CannotSignInsuranceException();
+      }
   }
 
   @Transactional

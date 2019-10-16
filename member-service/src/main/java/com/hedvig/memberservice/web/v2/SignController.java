@@ -34,9 +34,8 @@ public class SignController {
 
   @PostMapping("underwriter")
   public ResponseEntity<UnderwriterQuoteSignResponse> signQuotesFromUnderwriter(
-    @RequestHeader("hedvig.token") final long memberId, @RequestBody UnderwriterQuoteSignRequest underwriterQuoteSignRequest
-  ) {
-     val result = signingService.signUnderwriterQuote(memberId, underwriterQuoteSignRequest);
+    @RequestHeader("hedvig.token") final long memberId) {
+     val result = signingService.signUnderwriterQuote(memberId);
     return ResponseEntity.ok(new UnderwriterQuoteSignResponse(result.getSignId(),result.getMemberIsSigned()));
   }
 
