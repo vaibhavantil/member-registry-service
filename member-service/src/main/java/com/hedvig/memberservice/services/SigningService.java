@@ -130,26 +130,27 @@ public class SigningService {
 
     Optional<MemberEntity> member = memberRepository.findById(memberId);
 
-    String ssn = null;
-
-    if (member.isPresent()) {
-      ssn = member.get().ssn;
+    if(!member.isPresent()) {
+      throw new RuntimeException("No member exists with member id " + memberId);
     }
-      Optional<SignedMemberEntity> existing = signedMemberRepository.findBySsn(ssn);
 
-      if (existing.isPresent()) {
-        throw new MemberHasExistingInsuranceException();
-      }
+    String ssn = member.get().ssn;
 
-      try {
-        val signMember = commandGateway.send(
-          new SignMemberFromUnderwriterCommand(memberId, ssn));
+    Optional<SignedMemberEntity> existing = signedMemberRepository.findBySsn(ssn);
 
-        return new MemberSignUnderwriterQuoteResponse(memberId, signMember.isDone());
+    if (existing.isPresent()) {
+      throw new MemberHasExistingInsuranceException();
+    }
 
-      } catch (Exception exception) {
-        throw new CannotSignInsuranceException();
-      }
+    try {
+      val signMember = commandGateway.send(
+        new SignMemberFromUnderwriterCommand(memberId, ssn));
+
+      return new MemberSignUnderwriterQuoteResponse(memberId, signMember.isDone());
+
+    } catch (Exception exception) {
+      throw new CannotSignInsuranceException();
+    }
   }
 
   @Transactional
