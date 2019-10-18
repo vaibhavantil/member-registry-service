@@ -1,10 +1,7 @@
 package com.hedvig.memberservice.web;
 
 import com.google.common.collect.Lists;
-import com.hedvig.memberservice.commands.AssignTrackingIdCommand;
-import com.hedvig.memberservice.commands.CreateMemberCommand;
-import com.hedvig.memberservice.commands.UpdateEmailCommand;
-import com.hedvig.memberservice.commands.UpdatePhoneNumberCommand;
+import com.hedvig.memberservice.commands.*;
 import com.hedvig.integration.productsPricing.ProductApi;
 import com.hedvig.integration.productsPricing.dto.InsuranceStatusDTO;
 import com.hedvig.memberservice.query.MemberEntity;
@@ -12,13 +9,7 @@ import com.hedvig.memberservice.query.MemberRepository;
 import com.hedvig.memberservice.query.TrackingIdEntity;
 import com.hedvig.memberservice.query.TrackingIdRepository;
 import com.hedvig.memberservice.services.CashbackService;
-import com.hedvig.memberservice.web.dto.CashbackOption;
-import com.hedvig.memberservice.web.dto.CounterDTO;
-import com.hedvig.memberservice.web.dto.Member;
-import com.hedvig.memberservice.web.dto.MemberMeDTO;
-import com.hedvig.memberservice.web.dto.PostEmailRequestDTO;
-import com.hedvig.memberservice.web.dto.PostPhoneNumberRequestDTO;
-import com.hedvig.memberservice.web.dto.TrackingIdDto;
+import com.hedvig.memberservice.web.dto.*;
 import lombok.val;
 import org.axonframework.commandhandling.gateway.CommandGateway;
 import org.slf4j.Logger;
@@ -101,7 +92,7 @@ public class MembersController {
     }
 
     @PostMapping("/helloHedvig")
-    public ResponseEntity<String> helloHedvig() throws Exception {
+    public ResponseEntity<String> helloHedvig(@RequestHeader(required = false) String attributionCode) throws Exception {
 
         Long id = retryTemplate.execute(arg -> {
             Long memberId;
@@ -116,6 +107,10 @@ public class MembersController {
             log.info(ret.toString());
             return memberId;
         });
+
+        if (attributionCode != null && !attributionCode.isEmpty()) {
+            commandGateway.send(new AssignAttributionCodeCommand(id, attributionCode));
+        }
 
         log.info("New member created with id: " + id);
         return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON)

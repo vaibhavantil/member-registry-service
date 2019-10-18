@@ -319,6 +319,18 @@ public class MemberAggregate {
   }
 
   @CommandHandler
+  public void on(AssignAttributionCodeCommand cmd) {
+    log.info("Assign attributionCode for member {}, new attributionCode: {}", cmd.getMemberId(),
+      cmd.getAttributionCode());
+
+    if (cmd.getAttributionCode() != null
+      && !Objects.equals(member.getAttributionCode(), cmd.getAttributionCode())) {
+      apply(new AssignAttributionCodeEvent(cmd.getMemberId(), cmd.getAttributionCode()));
+    }
+  }
+
+
+  @CommandHandler
   public void on(SetFraudulentStatusCommand cmd) {
     apply(new FraudulentStatusUpdatedEvent(cmd.getMemberId(), cmd.getFraudulentStatus(), cmd.getFraudulentDescription()), MetaData.with("token", cmd.getToken()));
   }
@@ -470,5 +482,10 @@ public class MemberAggregate {
   @EventSourcingHandler
   public void on(SSNUpdatedEvent e) {
     this.member.setSsn(e.getSsn());
+  }
+
+  @EventSourcingHandler
+  public void on(AssignAttributionCodeEvent e) {
+    this.member.setAttributionCode(e.getAttributionCode());
   }
 }
