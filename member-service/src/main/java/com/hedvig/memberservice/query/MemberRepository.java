@@ -15,6 +15,8 @@ public interface MemberRepository extends JpaRepository<MemberEntity, Long> {
 
   List<MemberEntity> findAllByIdIn(List<Long> ids);
 
+  List<MemberEntity> findBySsnOrEmail(String ssn, String email);
+
   @Query("select count(*) from MemberEntity m where m.status = 'SIGNED'")
   Long countSignedMembers();
 
