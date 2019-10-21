@@ -21,23 +21,23 @@ class CustomerIOEventListener @Autowired constructor(
     @EventHandler
     fun on(event: MemberSignedEvent) {
         val member = memberRepository.findById(event.id).get()
-        val membersToRemoveFromCustomerIO = getNonSignedMembersWithSameSsnOrEmail(
+        val membersToDeleteFromCustomerIO = getNonSignedMembersWithSameSsnOrEmail(
             memberId = member.id,
             ssn = member.ssn,
             email = member.email
         )
-        membersToRemoveFromCustomerIO.forEach { memberToRemove ->
+        membersToDeleteFromCustomerIO.forEach { memberToRemove ->
             try {
-                customerIO.deleteCustomerIOUser(userId = memberToRemove.id.toString())
+                customerIO.deleteUser(userId = memberToRemove.id.toString())
                 logger.info { "Deleted member=${memberToRemove.id} from customer.io" }
             } catch (exception: Exception) {
-                logger.info { "Failed to delete member=${memberToRemove.id} from customer.io" }
+                logger.error { "Failed to delete member=${memberToRemove.id} from customer.io (exception=$exception)" }
             }
         }
     }
 
     private fun getNonSignedMembersWithSameSsnOrEmail(memberId: Long, ssn: String, email: String): List<MemberEntity> =
         memberRepository.findBySsnOrEmail(ssn, email)
-            .filter { it.id != memberId } // To avoid race condition
-            .filter { it.status != MemberStatus.SIGNED }
+            .filter { member -> member.id != memberId } // To avoid race condition
+            .filter { member -> member.status != MemberStatus.SIGNED }
 }

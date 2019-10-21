@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component
 class CustomerIO @Autowired constructor(
     private val customerIOClient: CustomerIOClient
 ){
-    fun deleteCustomerIOUser(userId: String) {
+    fun deleteUser(userId: String) {
         this.customerIOClient.delete(userId)
     }
 }
