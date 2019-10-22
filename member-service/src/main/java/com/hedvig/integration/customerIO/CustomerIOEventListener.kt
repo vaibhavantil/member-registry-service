@@ -28,7 +28,7 @@ class CustomerIOEventListener(
         membersToDeleteFromCustomerIO.forEach { memberToRemove ->
             try {
                 customerIO.deleteUser(userId = memberToRemove.id.toString())
-                logger.info { "Deleted member=${memberToRemove.id} from customer.io" }
+                logger.info { "Deleted member=${memberToRemove.id} from customer.io since member=${member.id} signed" }
             } catch (exception: Exception) {
                 logger.error { "Failed to delete member=${memberToRemove.id} from customer.io (exception=$exception)" }
             }
