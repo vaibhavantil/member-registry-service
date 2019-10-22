@@ -10,7 +10,7 @@ import java.util.*
 
 interface MemberRepository : JpaRepository<MemberEntity, Long> {
 
-  fun findBySsn(s: String): Optional<MemberEntity>
+  fun findBySsn(ssn: String): Optional<MemberEntity>
 
   fun findAllByIdIn(ids: List<Long>): List<MemberEntity>
 
@@ -31,20 +31,36 @@ interface MemberRepository : JpaRepository<MemberEntity, Long> {
   fun searchAll(p: Pageable): Page<MemberEntity>
 
   @Query("SELECT m FROM MemberEntity m WHERE lower(m.firstName) LIKE lower(concat('%', :query, '%')) " + "OR lower(m.lastName) LIKE lower(concat('%', :query, '%'))")
-  fun searchByQuery(@Param("query") query: String, p: Pageable): Page<MemberEntity>
+  fun searchByQuery(
+    @Param("query") query: String,
+    p: Pageable
+  ): Page<MemberEntity>
 
   @Query("SELECT m FROM MemberEntity m WHERE status = :status")
-  fun searchByStatus(@Param("status") status: MemberStatus, p: Pageable): Page<MemberEntity>
+  fun searchByStatus(
+    @Param("status") status: MemberStatus,
+    p: Pageable
+  ): Page<MemberEntity>
 
   @Query("SELECT m FROM MemberEntity m WHERE status = :status "
     + "AND (lower(m.firstName) LIKE lower(concat('%', :query, '%')) "
     + "OR lower(m.lastName) LIKE lower(concat('%', :query, '%')))")
   fun searchByStatusAndQuery(
-    @Param("status") status: MemberStatus, @Param("query") query: String, p: Pageable): Page<MemberEntity>
+    @Param("status") status: MemberStatus,
+    @Param("query") query: String,
+    p: Pageable
+  ): Page<MemberEntity>
 
   @Query("select m from MemberEntity m where m.id = :id")
-  fun searchById(@Param("id") id: Long?, p: Pageable): Page<MemberEntity>
+  fun searchById(
+    @Param("id") id: Long?,
+    p: Pageable
+  ): Page<MemberEntity>
 
   @Query("select m from MemberEntity m where m.id = :id and m.status = :status")
-  fun searchByIdAndStatus(@Param("id") id: Long?, @Param("status") status: MemberStatus, p: Pageable): Page<MemberEntity>
+  fun searchByIdAndStatus(
+    @Param("id") id: Long?,
+    @Param("status") status: MemberStatus,
+    p: Pageable
+  ): Page<MemberEntity>
 }
