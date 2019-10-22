@@ -5,11 +5,11 @@ import lombok.Value;
 @Value
 public class MemberSignedEvent {
 
-  private final Long id;
-  private final String referenceId;
-  private final String signature;
-  private final String oscpResponse;
-  private final String ssn;
+  public final Long id;
+  public final String referenceId;
+  public final String signature;
+  public final String oscpResponse;
+  public final String ssn;
 
 
   /**
