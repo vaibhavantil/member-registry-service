@@ -71,8 +71,8 @@ class MemberRepositoryTests {
         )
 
         assertThat(members).size().isEqualTo(3)
-        assertThat(members[0].id).isEqualTo(234L)
-        assertThat(members[1].id).isEqualTo(345L)
-        assertThat(members[2].id).isEqualTo(456L)
+        assertThat(members[0].id).isEqualTo(nonSignedMemberWithSameEmailAndSsn.id)
+        assertThat(members[1].id).isEqualTo(nonSignedMemberWithSameEmail.id)
+        assertThat(members[2].id).isEqualTo(nonSignedMemberWithSameSsn.id)
     }
 }
