@@ -92,7 +92,7 @@ public class MembersController {
     }
 
     @PostMapping("/helloHedvig")
-    public ResponseEntity<String> helloHedvig(@RequestHeader(required = false, name = "x-attribution-code") String attributionCode) throws Exception {
+    public ResponseEntity<String> helloHedvig(@RequestHeader(required = false, name = "X-Attribution-Code") String attributionCode) throws Exception {
 
         Long id = retryTemplate.execute(arg -> {
             Long memberId;
