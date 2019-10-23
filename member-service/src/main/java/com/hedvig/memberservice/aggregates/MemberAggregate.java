@@ -65,13 +65,13 @@ public class MemberAggregate {
 
   @CommandHandler
   public MemberAggregate(CreateMemberCommand command) {
-    apply(new MemberCreatedEvent(command.getMemberId(), MemberStatus.INITIATED));
-
     if (command.getAttributionCode() != null) {
-      log.info("Assign attributionCode for member {}, new attributionCode: {}", command.getMemberId(),
-              command.getAttributionCode());
-
-      apply(new AssignAttributionCodeEvent(command.getMemberId(), command.getAttributionCode()));
+      apply(new MemberCreatedEvent(command.getMemberId(), MemberStatus.INITIATED))
+        .andThenApply(() ->
+          new AssignAttributionCodeEvent(command.getMemberId(), command.getAttributionCode())
+        );
+    } else {
+      apply(new MemberCreatedEvent(command.getMemberId(), MemberStatus.INITIATED));
     }
   }
 
