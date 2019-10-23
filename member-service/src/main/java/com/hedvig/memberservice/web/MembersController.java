@@ -102,15 +102,16 @@ public class MembersController {
                 member = repo.findById(memberId);
             } while (member.isPresent());
 
-            CompletableFuture<Object> a = commandGateway.send(new CreateMemberCommand(memberId));
+            String attribution = null;
+            if (attributionCode != null && !attributionCode.isEmpty()) {
+                attribution = attributionCode;
+            }
+
+            CompletableFuture<Object> a = commandGateway.send(new CreateMemberCommand(memberId, attribution));
             Object ret = a.get();
             log.info(ret.toString());
             return memberId;
         });
-
-        if (attributionCode != null && !attributionCode.isEmpty()) {
-            commandGateway.send(new AssignAttributionCodeCommand(id, attributionCode));
-        }
 
         log.info("New member created with id: " + id);
         return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON)

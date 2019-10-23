@@ -66,6 +66,13 @@ public class MemberAggregate {
   @CommandHandler
   public MemberAggregate(CreateMemberCommand command) {
     apply(new MemberCreatedEvent(command.getMemberId(), MemberStatus.INITIATED));
+
+    if (command.getAttributionCode() != null) {
+      log.info("Assign attributionCode for member {}, new attributionCode: {}", command.getMemberId(),
+              command.getAttributionCode());
+
+      apply(new AssignAttributionCodeEvent(command.getMemberId(), command.getAttributionCode()));
+    }
   }
 
   @CommandHandler
@@ -317,18 +324,6 @@ public class MemberAggregate {
       apply(new PhoneNumberUpdatedEvent(cmd.getMemberId(), cmd.getPhoneNumber()));
     }
   }
-
-  @CommandHandler
-  public void on(AssignAttributionCodeCommand cmd) {
-    log.info("Assign attributionCode for member {}, new attributionCode: {}", cmd.getMemberId(),
-      cmd.getAttributionCode());
-
-    if (cmd.getAttributionCode() != null
-      && !Objects.equals(member.getAttributionCode(), cmd.getAttributionCode())) {
-      apply(new AssignAttributionCodeEvent(cmd.getMemberId(), cmd.getAttributionCode()));
-    }
-  }
-
 
   @CommandHandler
   public void on(SetFraudulentStatusCommand cmd) {

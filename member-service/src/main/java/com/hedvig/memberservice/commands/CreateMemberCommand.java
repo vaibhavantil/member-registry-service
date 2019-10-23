@@ -5,4 +5,5 @@ import lombok.Value;
 @Value
 public class CreateMemberCommand {
   private Long memberId;
+  private String attributionCode;
 }
