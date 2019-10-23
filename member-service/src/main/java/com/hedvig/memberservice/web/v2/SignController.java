@@ -3,6 +3,7 @@ package com.hedvig.memberservice.web.v2;
 import com.hedvig.memberservice.services.SigningService;
 import com.hedvig.memberservice.services.member.dto.ErrorCodes;
 import com.hedvig.memberservice.services.member.dto.ErrorResponseDto;
+import com.hedvig.memberservice.web.dto.SsnAlreadySignedMemberResponse;
 import com.hedvig.memberservice.web.v2.dto.*;
 import lombok.val;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,6 +46,13 @@ public class SignController {
     } catch(Exception exception) {
       return ResponseEntity.status(422).body(new ErrorResponseDto(ErrorCodes.MEMBER_HAS_EXISTING_INSURANCE, "Not able to sign quote, the social security given is already associated with a signed product"));
     }
+  }
+
+  @GetMapping("signedSSN")
+  public ResponseEntity<SsnAlreadySignedMemberResponse> ssnAlreadySigned(@RequestHeader String ssn) {
+
+    val alreadySigned = signingService.ssnAlreadySignedMember(ssn);
+    return ResponseEntity.ok(alreadySigned);
   }
 
   @GetMapping("signStatus")

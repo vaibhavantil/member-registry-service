@@ -26,6 +26,7 @@ import com.hedvig.memberservice.services.member.CannotSignInsuranceException;
 import com.hedvig.memberservice.services.member.MemberService;
 import com.hedvig.memberservice.services.member.dto.MemberSignResponse;
 import com.hedvig.memberservice.services.member.dto.MemberSignUnderwriterQuoteResponse;
+import com.hedvig.memberservice.web.dto.SsnAlreadySignedMemberResponse;
 import com.hedvig.memberservice.web.v2.dto.UnderwriterQuoteSignRequest;
 import com.hedvig.memberservice.web.v2.dto.WebsignRequest;
 
@@ -145,6 +146,15 @@ public class SigningService {
     } catch(Exception exception) {
       throw new CannotSignInsuranceException();
     }
+  }
+
+  @Transactional
+  public SsnAlreadySignedMemberResponse ssnAlreadySignedMember(final String ssn) {
+
+    Optional<SignedMemberEntity> existing = signedMemberRepository.findBySsn(ssn);
+    return existing.isPresent()
+      ? new SsnAlreadySignedMemberResponse(true)
+      : new SsnAlreadySignedMemberResponse(false);
   }
 
   @Transactional
