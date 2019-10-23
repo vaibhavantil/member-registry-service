@@ -44,9 +44,11 @@ class PersonService @Autowired constructor(
     }
 
     fun getPersonOrNullByMemberId(memberId: String): Person? {
-        val member = memberRepository.findById(memberId.toLong())
-        if (!member.isPresent) return null
-        return getPersonOrNull(member.get().ssn)
+        val memberMaybe = memberRepository.findById(memberId.toLong())
+        if (!memberMaybe.isPresent) return null
+        val member = memberMaybe.get()
+        if (member.ssn == null) return null
+        return getPersonOrNull(member.ssn)
     }
 
     companion object {

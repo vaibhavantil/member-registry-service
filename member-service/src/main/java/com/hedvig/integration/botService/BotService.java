@@ -7,4 +7,6 @@ public interface BotService {
   void initBotServiceSessionWebOnBoarding(Long memberId, UpdateUserContextDTO userContext);
 
   void editMemberName(String memberId, EditMemberNameRequestDTO editMemberNameRequestDTO);
+
+  void initBotService(Long memberId, String json);
 }
