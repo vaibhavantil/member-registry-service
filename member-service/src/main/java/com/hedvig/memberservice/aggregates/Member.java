@@ -10,5 +10,7 @@ public class Member {
   private String email;
   private String phoneNumber;
 
+  private String attributionCode;
+
   private LivingAddress livingAddress;
 }

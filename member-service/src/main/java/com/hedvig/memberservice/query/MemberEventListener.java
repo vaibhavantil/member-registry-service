@@ -211,4 +211,11 @@ public class MemberEventListener {
     userRepo.save(m);
   }
 
+  @EventHandler
+  public void on(AssignAttributionCodeEvent e) {
+    MemberEntity m = userRepo.findById(e.getId()).get();
+
+    m.attributionCode = e.getAttributionCode();
+    userRepo.save(m);
+  }
 }
