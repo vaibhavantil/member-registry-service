@@ -58,8 +58,6 @@ public class MemberEntity {
 
   public Instant createdOn;
 
-  public String attributionCode;
-
   @Enumerated(EnumType.STRING)
   public FraudulentStatus fraudulentStatus = FraudulentStatus.NOT_FRAUD;
   public String fraudulentDescription;

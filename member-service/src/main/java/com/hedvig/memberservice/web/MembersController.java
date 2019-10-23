@@ -1,7 +1,10 @@
 package com.hedvig.memberservice.web;
 
 import com.google.common.collect.Lists;
-import com.hedvig.memberservice.commands.*;
+import com.hedvig.memberservice.commands.AssignTrackingIdCommand;
+import com.hedvig.memberservice.commands.CreateMemberCommand;
+import com.hedvig.memberservice.commands.UpdateEmailCommand;
+import com.hedvig.memberservice.commands.UpdatePhoneNumberCommand;
 import com.hedvig.integration.productsPricing.ProductApi;
 import com.hedvig.integration.productsPricing.dto.InsuranceStatusDTO;
 import com.hedvig.memberservice.query.MemberEntity;
@@ -9,7 +12,13 @@ import com.hedvig.memberservice.query.MemberRepository;
 import com.hedvig.memberservice.query.TrackingIdEntity;
 import com.hedvig.memberservice.query.TrackingIdRepository;
 import com.hedvig.memberservice.services.CashbackService;
-import com.hedvig.memberservice.web.dto.*;
+import com.hedvig.memberservice.web.dto.CashbackOption;
+import com.hedvig.memberservice.web.dto.CounterDTO;
+import com.hedvig.memberservice.web.dto.Member;
+import com.hedvig.memberservice.web.dto.MemberMeDTO;
+import com.hedvig.memberservice.web.dto.PostEmailRequestDTO;
+import com.hedvig.memberservice.web.dto.PostPhoneNumberRequestDTO;
+import com.hedvig.memberservice.web.dto.TrackingIdDto;
 import lombok.val;
 import org.axonframework.commandhandling.gateway.CommandGateway;
 import org.slf4j.Logger;
@@ -92,7 +101,7 @@ public class MembersController {
     }
 
     @PostMapping("/helloHedvig")
-    public ResponseEntity<String> helloHedvig(@RequestHeader(required = false, name = "X-Attribution-Code") String attributionCode) throws Exception {
+    public ResponseEntity<String> helloHedvig() throws Exception {
 
         Long id = retryTemplate.execute(arg -> {
             Long memberId;
@@ -102,12 +111,7 @@ public class MembersController {
                 member = repo.findById(memberId);
             } while (member.isPresent());
 
-            String attribution = null;
-            if (attributionCode != null && !attributionCode.isEmpty()) {
-                attribution = attributionCode;
-            }
-
-            CompletableFuture<Object> a = commandGateway.send(new CreateMemberCommand(memberId, attribution));
+            CompletableFuture<Object> a = commandGateway.send(new CreateMemberCommand(memberId));
             Object ret = a.get();
             log.info(ret.toString());
             return memberId;
