@@ -148,7 +148,6 @@ public class SigningService {
     }
   }
 
-  @Transactional
   public SsnAlreadySignedMemberResponse ssnAlreadySignedMember(final String ssn) {
 
     Optional<SignedMemberEntity> existing = signedMemberRepository.findBySsn(ssn);
