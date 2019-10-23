@@ -3,7 +3,7 @@ package com.hedvig.memberservice.web.v2;
 import com.hedvig.memberservice.services.SigningService;
 import com.hedvig.memberservice.services.member.dto.ErrorCodes;
 import com.hedvig.memberservice.services.member.dto.ErrorResponseDto;
-import com.hedvig.memberservice.web.dto.SsnAlreadySignedMemberResponse;
+import com.hedvig.memberservice.web.dto.IsSsnAlreadySignedMemberResponse;
 import com.hedvig.memberservice.web.v2.dto.*;
 import lombok.val;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,10 +49,10 @@ public class SignController {
   }
 
   @GetMapping("signedSSN")
-  public ResponseEntity<SsnAlreadySignedMemberResponse> ssnAlreadySigned(@RequestHeader String ssn) {
+  public ResponseEntity<IsSsnAlreadySignedMemberResponse> isSsnAlreadySigned(@RequestHeader String ssn) {
 
-    val alreadySigned = signingService.ssnAlreadySignedMember(ssn);
-    return ResponseEntity.ok(alreadySigned);
+    val isSsnAlreadySignedMember = signingService.IsSsnAlreadySignedMember(ssn);
+    return ResponseEntity.ok(isSsnAlreadySignedMember);
   }
 
   @GetMapping("signStatus")
