@@ -65,14 +65,7 @@ public class MemberAggregate {
 
   @CommandHandler
   public MemberAggregate(CreateMemberCommand command) {
-    if (command.getAttributionCode() != null) {
-      apply(new MemberCreatedEvent(command.getMemberId(), MemberStatus.INITIATED))
-        .andThenApply(() ->
-          new AssignAttributionCodeEvent(command.getMemberId(), command.getAttributionCode())
-        );
-    } else {
-      apply(new MemberCreatedEvent(command.getMemberId(), MemberStatus.INITIATED));
-    }
+    apply(new MemberCreatedEvent(command.getMemberId(), MemberStatus.INITIATED));
   }
 
   @CommandHandler
@@ -482,10 +475,5 @@ public class MemberAggregate {
   @EventSourcingHandler
   public void on(SSNUpdatedEvent e) {
     this.member.setSsn(e.getSsn());
-  }
-
-  @EventSourcingHandler
-  public void on(AssignAttributionCodeEvent e) {
-    this.member.setAttributionCode(e.getAttributionCode());
   }
 }
