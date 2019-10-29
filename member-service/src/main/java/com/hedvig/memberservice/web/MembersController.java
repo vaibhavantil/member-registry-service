@@ -195,7 +195,7 @@ public class MembersController {
         return ResponseEntity.accepted().build();
     }
 
-    @PostMapping("/language")
+    @PostMapping("/language/update")
     public ResponseEntity<?> postLanguage(@RequestHeader(value = "hedvig.token") Long hid, @RequestBody @Valid PostLanguageRequestDTO body) {
 
         commandGateway.sendAndWait(new UpdateAcceptLanguageCommand(hid, body.getAcceptLanguage()));
