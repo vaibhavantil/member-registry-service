@@ -40,15 +40,7 @@ class MembersControllerV2 @Autowired constructor(
                 member = memberRepository.findById(memberId)
             } while (member.isPresent)
 
-
-            var language: String? = null
-            acceptLanguage?.let {
-                if (acceptLanguage.isNotEmpty()) {
-                    language = acceptLanguage
-                }
-            }
-
-            commandGateway.send<Void>(CreateMemberCommand(memberId!!, language))
+            commandGateway.send<Void>(CreateMemberCommand(memberId!!, acceptLanguage))
             return@execute memberId
         }
 

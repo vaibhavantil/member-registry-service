@@ -102,12 +102,7 @@ public class MembersController {
                 member = repo.findById(memberId);
             } while (member.isPresent());
 
-            String language = null;
-            if (acceptLanguage != null && !acceptLanguage.isEmpty()) {
-                language = acceptLanguage;
-            }
-
-            CompletableFuture<Object> a = commandGateway.send(new CreateMemberCommand(memberId, language));
+            CompletableFuture<Object> a = commandGateway.send(new CreateMemberCommand(memberId, acceptLanguage));
             Object ret = a.get();
             log.info(ret.toString());
             return memberId;

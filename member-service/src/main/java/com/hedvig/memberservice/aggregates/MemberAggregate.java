@@ -67,7 +67,7 @@ public class MemberAggregate {
   public MemberAggregate(CreateMemberCommand command) {
     apply(new MemberCreatedEvent(command.getMemberId(), MemberStatus.INITIATED))
       .andThenApply(() -> {
-        if (command.getAcceptLanguage() != null) {
+        if (command.getAcceptLanguage() != null && !command.getAcceptLanguage().isEmpty()) {
           return new AcceptLanguageUpdatedEvent(command.getMemberId(), command.getAcceptLanguage());
         }
         return null;
@@ -414,7 +414,8 @@ public class MemberAggregate {
     log.info("Updating accept language for member {}, new number: {}", cmd.getMemberId(),
             cmd.getAcceptLanguage());
 
-    if (!Objects.equals(member.getAcceptLanguage(), cmd.getAcceptLanguage())) {
+    if (!cmd.getAcceptLanguage().isEmpty() &&
+        !Objects.equals(member.getAcceptLanguage(), cmd.getAcceptLanguage())) {
       apply(new AcceptLanguageUpdatedEvent(cmd.getMemberId(), cmd.getAcceptLanguage()));
     }
   }
