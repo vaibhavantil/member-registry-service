@@ -409,6 +409,16 @@ public class MemberAggregate {
     );
   }
 
+  @CommandHandler
+  public void on(UpdateAcceptLanguageCommand cmd) {
+    log.info("Updating accept language for member {}, new number: {}", cmd.getMemberId(),
+            cmd.getAcceptLanguage());
+
+    if (!Objects.equals(member.getAcceptLanguage(), cmd.getAcceptLanguage())) {
+      apply(new AcceptLanguageUpdatedEvent(cmd.getMemberId(), cmd.getAcceptLanguage()));
+    }
+  }
+
 
   @EventSourcingHandler
   public void on(MemberCreatedEvent e) {
