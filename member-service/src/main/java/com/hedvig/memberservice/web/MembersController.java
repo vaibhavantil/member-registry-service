@@ -101,7 +101,7 @@ public class MembersController {
     }
 
     @PostMapping("/helloHedvig")
-    public ResponseEntity<String> helloHedvig() throws Exception {
+    public ResponseEntity<String> helloHedvig(@RequestHeader(value = "Accept-Language", required = false) final String acceptLanguage) throws Exception {
 
         Long id = retryTemplate.execute(arg -> {
             Long memberId;
@@ -111,7 +111,12 @@ public class MembersController {
                 member = repo.findById(memberId);
             } while (member.isPresent());
 
-            CompletableFuture<Object> a = commandGateway.send(new CreateMemberCommand(memberId));
+            String language = null;
+            if (acceptLanguage != null && !acceptLanguage.isEmpty()) {
+                language = acceptLanguage;
+            }
+
+            CompletableFuture<Object> a = commandGateway.send(new CreateMemberCommand(memberId, language));
             Object ret = a.get();
             log.info(ret.toString());
             return memberId;

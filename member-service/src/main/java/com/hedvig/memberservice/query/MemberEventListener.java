@@ -211,4 +211,10 @@ public class MemberEventListener {
     userRepo.save(m);
   }
 
+  @EventHandler
+  void on(AcceptLanguageUpdatedEvent e) {
+    MemberEntity m = userRepo.findById(e.getMemberId()).get();
+    m.setAcceptLanguage(e.getAcceptLanguage());
+    userRepo.save(m);
+  }
 }

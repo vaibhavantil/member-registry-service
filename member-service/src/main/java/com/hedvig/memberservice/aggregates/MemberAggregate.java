@@ -65,7 +65,13 @@ public class MemberAggregate {
 
   @CommandHandler
   public MemberAggregate(CreateMemberCommand command) {
-    apply(new MemberCreatedEvent(command.getMemberId(), MemberStatus.INITIATED));
+    apply(new MemberCreatedEvent(command.getMemberId(), MemberStatus.INITIATED))
+      .andThenApply(() -> {
+        if (command.getAcceptLanguage() != null) {
+          return new AcceptLanguageUpdatedEvent(command.getMemberId(), command.getAcceptLanguage());
+        }
+        return null;
+        });
   }
 
   @CommandHandler
@@ -475,5 +481,10 @@ public class MemberAggregate {
   @EventSourcingHandler
   public void on(SSNUpdatedEvent e) {
     this.member.setSsn(e.getSsn());
+  }
+
+  @EventSourcingHandler
+  public void on(AcceptLanguageUpdatedEvent e) {
+      this.member.setAcceptLanguage(e.getAcceptLanguage());
   }
 }

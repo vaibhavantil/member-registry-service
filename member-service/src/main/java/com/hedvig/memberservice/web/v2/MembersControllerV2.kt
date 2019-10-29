@@ -12,10 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.retry.support.RetryTemplate
-import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.RequestBody
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.bind.annotation.*
 import java.security.SecureRandom
 import java.util.*
 import kotlin.math.abs
@@ -30,7 +27,10 @@ class MembersControllerV2 @Autowired constructor(
     val botService: BotService
 ) {
     @PostMapping("/helloHedvig", produces = ["application/json"])
-    fun helloHedvig(@RequestBody(required = false) json: String?): ResponseEntity<HelloHedvigResponse> {
+    fun helloHedvig(
+        @RequestBody(required = false) json: String?,
+        @RequestHeader(value = "Accept-Language", required = false) acceptLanguage: String?
+    ): ResponseEntity<HelloHedvigResponse> {
         val id = retryTemplate.execute<Long, Exception> {
             var memberId: Long?
             var member: Optional<MemberEntity>
@@ -40,7 +40,15 @@ class MembersControllerV2 @Autowired constructor(
                 member = memberRepository.findById(memberId)
             } while (member.isPresent)
 
-            commandGateway.send<Void>(CreateMemberCommand(memberId!!))
+
+            var language: String? = null
+            acceptLanguage?.let {
+                if (acceptLanguage.isNotEmpty()) {
+                    language = acceptLanguage
+                }
+            }
+
+            commandGateway.send<Void>(CreateMemberCommand(memberId!!, language))
             return@execute memberId
         }
 
