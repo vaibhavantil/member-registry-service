@@ -5,10 +5,12 @@ import com.hedvig.memberservice.query.MemberRepository
 import mu.KotlinLogging
 import org.axonframework.config.ProcessingGroup
 import org.axonframework.eventhandling.EventHandler
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Component
 
 @Profile("customer.io")
+@ConditionalOnProperty(value = ["customerio.siteId", "customerio.apiKey"], matchIfMissing = false)
 @ProcessingGroup("CustomerIO")
 @Component
 class CustomerIOEventListener(

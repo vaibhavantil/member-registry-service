@@ -17,7 +17,7 @@ class MemberRepositoryTests {
     lateinit var memberRepository: MemberRepository
 
     @Test
-    fun findNonSignedBySsnOrEmailAndNotId() {
+    fun findNonSignedMembersBySsnOrEmailAndNotId() {
         val memberThatSigns = MemberEntity()
         memberThatSigns.id = 123L
         memberThatSigns.email = "signed@email.com"
