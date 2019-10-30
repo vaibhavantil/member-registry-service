@@ -7,9 +7,9 @@ import java.util.Map;
 
 @Value
 public class NameUpdatedEvent implements Traceable {
-  private final Long memberId;
-  private final String firstName;
-  private final String lastName;
+  public final Long memberId;
+  public final String firstName;
+  public final String lastName;
 
   public NameUpdatedEvent(Long memberId, String firstName, String lastName) {
 

@@ -7,8 +7,8 @@ import java.util.Map;
 
 @Value
 public class EmailUpdatedEvent implements Traceable {
-  private final Long id;
-  private final String email;
+  public final Long id;
+  public final String email;
 
   @Override
   public Long getMemberId() {

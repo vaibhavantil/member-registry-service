@@ -72,5 +72,11 @@ public class AxonConfig {
         x ->
             TrackingEventProcessorConfiguration.forSingleThreadedProcessing()
                 .andInitialTrackingToken(StreamableMessageSource::createTailToken));
+
+    config.registerTrackingEventProcessor(
+        "CustomerIO",
+        x ->
+            TrackingEventProcessorConfiguration.forSingleThreadedProcessing()
+                .andInitialTrackingToken(StreamableMessageSource::createTailToken));
   }
 }
