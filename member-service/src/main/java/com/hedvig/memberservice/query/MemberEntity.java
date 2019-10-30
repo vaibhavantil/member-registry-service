@@ -52,6 +52,8 @@ public class MemberEntity {
 
   public String cashbackId;
 
+  public String acceptLanguage;
+
   public Integer floor;
 
   public Instant signedOn;

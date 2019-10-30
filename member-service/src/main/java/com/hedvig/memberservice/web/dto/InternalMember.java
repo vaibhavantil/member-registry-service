@@ -49,6 +49,8 @@ public class InternalMember {
 
   private String fraudulentDescription;
 
+  private String acceptLanguage;
+
   private List<TraceMemberDTO> traceMemberInfo = new ArrayList<>();
 
   public static InternalMember fromEntity(MemberEntity entity) {
@@ -71,6 +73,7 @@ public class InternalMember {
     dto.setCreatedOn(entity.getCreatedOn());
     dto.setFraudulentStatus(entity.getFraudulentStatus() != null ? entity.getFraudulentStatus().name() : "");
     dto.setFraudulentDescription(entity.getFraudulentDescription());
+    dto.setAcceptLanguage(entity.getAcceptLanguage());
     return dto;
   }
 }
