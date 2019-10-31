@@ -1,6 +1,7 @@
 package com.hedvig.memberservice.web;
 
 import com.google.common.collect.Lists;
+import com.hedvig.integration.productsPricing.ProductClient;
 import com.hedvig.memberservice.commands.*;
 import com.hedvig.integration.productsPricing.ProductApi;
 import com.hedvig.integration.productsPricing.dto.InsuranceStatusDTO;
@@ -10,6 +11,8 @@ import com.hedvig.memberservice.query.TrackingIdEntity;
 import com.hedvig.memberservice.query.TrackingIdRepository;
 import com.hedvig.memberservice.services.CashbackService;
 import com.hedvig.memberservice.web.dto.*;
+import java.nio.file.AccessDeniedException;
+import java.util.List;
 import lombok.val;
 import org.axonframework.commandhandling.gateway.CommandGateway;
 import org.slf4j.Logger;
@@ -50,15 +53,19 @@ public class MembersController {
     private final ProductApi productApi;
     private final CashbackService cashbackService;
     private final Logger log = LoggerFactory.getLogger(this.getClass());
+    private final ProductClient productClient;
+
+  @Value("${hedvig.powner.api.key}")
+  private String POWNER_API_KEY;
 
     @Value("${hedvig.counterkey:123}")
     public String counterKey;
 
     @Autowired
     public MembersController(MemberRepository repo, CommandGateway commandGateway,
-                             RetryTemplate retryTemplate,
-                             ProductApi productApi, CashbackService cashbackService, TrackingIdRepository trackingRepo)
-            throws NoSuchAlgorithmException {
+                             RetryTemplate retryTemplate, ProductApi productApi, CashbackService cashbackService,
+                             TrackingIdRepository trackingRepo, ProductClient productClient)
+      throws NoSuchAlgorithmException {
         this.repo = repo;
         this.commandGateway = commandGateway;
         this.retryTemplate = retryTemplate;
@@ -66,6 +73,7 @@ public class MembersController {
         this.cashbackService = cashbackService;
         this.randomGenerator = SecureRandom.getInstance("SHA1PRNG");
         this.trackingRepo = trackingRepo;
+        this.productClient = productClient;
     }
 
     @RequestMapping(path = "/counter/321432", method = RequestMethod.GET)
@@ -202,4 +210,34 @@ public class MembersController {
 
         return ResponseEntity.accepted().build();
     }
+
+  @GetMapping("/isActiveMember/{ssn}")
+  public boolean isActiveMember(
+    @PathVariable String ssn,
+    @RequestHeader("Authorization") String token) throws AccessDeniedException {
+
+    if (!token.equals(POWNER_API_KEY)) {
+      throw new AccessDeniedException("Cannot be authenticated, API Key is incorrect");
+    }
+
+    List<MemberEntity> members = repo.findAllBySsn(ssn);
+
+    if (members.isEmpty()) return false;
+
+    ArrayList<String> status = new ArrayList<>();
+
+    for(MemberEntity member: members) {
+      Long memberId = member.id;
+
+      InsuranceStatusDTO insuranceStatusDTO = this.productClient.getInsuranceStatus(memberId).getBody();
+
+      if (insuranceStatusDTO != null) {
+        boolean insuranceStatus = insuranceStatusDTO.getInsuranceStatus().equals("ACTIVE");
+        status.add(insuranceStatusDTO.getInsuranceStatus());
+        if (insuranceStatus) return true;
+      }
+      return status.contains("ACTIVE");
+    }
+    return false;
+  }
 }

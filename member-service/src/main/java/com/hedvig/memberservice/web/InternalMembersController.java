@@ -1,7 +1,6 @@
 package com.hedvig.memberservice.web;
 
 import com.hedvig.integration.productsPricing.ProductClient;
-import com.hedvig.integration.productsPricing.dto.InsuranceStatusDTO;
 import com.hedvig.memberservice.aggregates.MemberStatus;
 import com.hedvig.memberservice.commands.*;
 import com.hedvig.memberservice.query.MemberEntity;
@@ -9,8 +8,6 @@ import com.hedvig.memberservice.query.MemberRepository;
 import com.hedvig.memberservice.services.member.MemberQueryService;
 import com.hedvig.memberservice.services.trace.TraceMemberService;
 import com.hedvig.memberservice.web.dto.*;
-import java.nio.file.AccessDeniedException;
-import java.util.ArrayList;
 import lombok.val;
 import org.axonframework.commandhandling.gateway.CommandGateway;
 import org.slf4j.Logger;
@@ -26,7 +23,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.beans.factory.annotation.Value;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -35,25 +31,18 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping({"/i/member", "/_/member"})
 public class InternalMembersController {
-
-  @Value("${hedvig.powner.api.key}")
-  private String POWNER_API_KEY;
-
   private final Logger log = LoggerFactory.getLogger(InternalMembersController.class);
   private final CommandGateway commandBus;
   private final MemberRepository memberRepository;
   private final MemberQueryService memberQueryService;
   private final TraceMemberService traceMemberService;
-  private final ProductClient productClient;
 
   public InternalMembersController(CommandGateway commandBus, MemberRepository memberRepository,
-                                   MemberQueryService memberQueryService, TraceMemberService traceMemberService,
-                                   ProductClient productClient) {
+                                   MemberQueryService memberQueryService, TraceMemberService traceMemberService) {
     this.commandBus = commandBus;
     this.memberRepository = memberRepository;
     this.memberQueryService = memberQueryService;
     this.traceMemberService = traceMemberService;
-    this.productClient = productClient;
   }
 
   @GetMapping("/{memberId}")
@@ -206,36 +195,5 @@ public class InternalMembersController {
     commandBus.sendAndWait(new UpdateSSNCommand(memberId, request.getSsn()));
     return ResponseEntity.noContent().build();
   }
-
-  @GetMapping("/isActiveMember/{ssn}")
-  public boolean isActiveMember(
-    @PathVariable String ssn,
-    @RequestHeader("Authorization") String token) throws AccessDeniedException {
-
-    if (!token.equals(POWNER_API_KEY)) {
-      throw new AccessDeniedException("Cannot be authenticated, API Key is incorrect");
-    }
-
-    List<MemberEntity> members = memberRepository.findAllBySsn(ssn);
-
-    if (members.isEmpty()) return false;
-
-    ArrayList<String> status = new ArrayList<>();
-
-    for(MemberEntity member: members) {
-      Long memberId = member.id;
-
-      InsuranceStatusDTO insuranceStatusDTO = this.productClient.getInsuranceStatus(memberId).getBody();
-
-      if (insuranceStatusDTO != null) {
-        boolean insuranceStatus = insuranceStatusDTO.getInsuranceStatus().equals("ACTIVE");
-        status.add(insuranceStatusDTO.getInsuranceStatus());
-        if (insuranceStatus) return true;
-      }
-      return status.contains("ACTIVE");
-    }
-      return false;
-  }
-
 }
 
