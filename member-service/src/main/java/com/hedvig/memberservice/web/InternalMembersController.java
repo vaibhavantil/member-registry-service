@@ -9,6 +9,7 @@ import com.hedvig.memberservice.query.MemberRepository;
 import com.hedvig.memberservice.services.member.MemberQueryService;
 import com.hedvig.memberservice.services.trace.TraceMemberService;
 import com.hedvig.memberservice.web.dto.*;
+import java.nio.file.AccessDeniedException;
 import java.util.ArrayList;
 import lombok.val;
 import org.axonframework.commandhandling.gateway.CommandGateway;
@@ -25,7 +26,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-
+import org.springframework.beans.factory.annotation.Value;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -34,6 +35,9 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping({"/i/member", "/_/member"})
 public class InternalMembersController {
+
+  @Value("${hedvig.powner.api.key}")
+  private String POWNER_API_KEY;
 
   private final Logger log = LoggerFactory.getLogger(InternalMembersController.class);
   private final CommandGateway commandBus;
@@ -205,8 +209,13 @@ public class InternalMembersController {
 
   @GetMapping("/isActiveMember/{ssn}")
   public boolean isActiveMember(
-    @PathVariable String ssn
-  ) {
+    @PathVariable String ssn,
+    @RequestHeader("Authorization") String token) throws AccessDeniedException {
+
+    if (!token.equals(POWNER_API_KEY)) {
+      throw new AccessDeniedException("Cannot be authenticated, API Key is incorrect");
+    }
+
     List<MemberEntity> members = memberRepository.findAllBySsn(ssn);
 
     if (members.isEmpty()) return false;
