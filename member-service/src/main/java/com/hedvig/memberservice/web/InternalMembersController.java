@@ -1,5 +1,7 @@
 package com.hedvig.memberservice.web;
 
+import com.hedvig.integration.productsPricing.ProductClient;
+import com.hedvig.integration.productsPricing.dto.InsuranceStatusDTO;
 import com.hedvig.memberservice.aggregates.MemberStatus;
 import com.hedvig.memberservice.commands.*;
 import com.hedvig.memberservice.query.MemberEntity;
@@ -7,6 +9,7 @@ import com.hedvig.memberservice.query.MemberRepository;
 import com.hedvig.memberservice.services.member.MemberQueryService;
 import com.hedvig.memberservice.services.trace.TraceMemberService;
 import com.hedvig.memberservice.web.dto.*;
+import java.util.ArrayList;
 import lombok.val;
 import org.axonframework.commandhandling.gateway.CommandGateway;
 import org.slf4j.Logger;
@@ -37,13 +40,16 @@ public class InternalMembersController {
   private final MemberRepository memberRepository;
   private final MemberQueryService memberQueryService;
   private final TraceMemberService traceMemberService;
+  private final ProductClient productClient;
 
   public InternalMembersController(CommandGateway commandBus, MemberRepository memberRepository,
-                                   MemberQueryService memberQueryService, TraceMemberService traceMemberService) {
+                                   MemberQueryService memberQueryService, TraceMemberService traceMemberService,
+                                   ProductClient productClient) {
     this.commandBus = commandBus;
     this.memberRepository = memberRepository;
     this.memberQueryService = memberQueryService;
     this.traceMemberService = traceMemberService;
+    this.productClient = productClient;
   }
 
   @GetMapping("/{memberId}")
@@ -196,5 +202,31 @@ public class InternalMembersController {
     commandBus.sendAndWait(new UpdateSSNCommand(memberId, request.getSsn()));
     return ResponseEntity.noContent().build();
   }
+
+  @GetMapping("/isActiveMember/{ssn}")
+  public boolean isActiveMember(
+    @PathVariable String ssn
+  ) {
+    List<MemberEntity> members = memberRepository.findAllBySsn(ssn);
+
+    if (members.isEmpty()) return false;
+
+    ArrayList<String> status = new ArrayList<>();
+
+    for(MemberEntity member: members) {
+      Long memberId = member.id;
+
+      InsuranceStatusDTO insuranceStatusDTO = this.productClient.getInsuranceStatus(memberId).getBody();
+
+      if (insuranceStatusDTO != null) {
+        boolean insuranceStatus = insuranceStatusDTO.getInsuranceStatus().equals("ACTIVE");
+        status.add(insuranceStatusDTO.getInsuranceStatus());
+        if (insuranceStatus) return true;
+      }
+      return status.contains("ACTIVE");
+    }
+      return false;
+  }
+
 }
 
