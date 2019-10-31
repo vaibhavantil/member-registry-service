@@ -10,9 +10,11 @@ import java.util.*
 
 interface MemberRepository : JpaRepository<MemberEntity, Long> {
 
-  fun findBySsn(ssn: String): Optional<MemberEntity>
+    fun findBySsn(ssn: String): Optional<MemberEntity>
 
-  fun findAllByIdIn(ids: List<Long>): List<MemberEntity>
+    fun findAllBySsn(ssn: String): List<MemberEntity>
+
+    fun findAllByIdIn(ids: List<Long>): List<MemberEntity>
 
   @Query("""
       FROM MemberEntity
