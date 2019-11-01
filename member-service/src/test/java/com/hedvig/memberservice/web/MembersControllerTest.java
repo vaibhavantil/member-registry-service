@@ -1,7 +1,6 @@
 package com.hedvig.memberservice.web;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.hedvig.integration.productsPricing.ProductClient;
 import com.hedvig.memberservice.commands.AssignTrackingIdCommand;
 import com.hedvig.integration.productsPricing.ProductApi;
 import com.hedvig.memberservice.query.MemberEntity;
@@ -44,8 +43,6 @@ public class MembersControllerTest {
   CashbackService cashbackService;
   @MockBean
   TrackingIdRepository trackingIdRepository;
-  @MockBean
-  ProductClient productClient;
 
   @Autowired
   ObjectMapper objectMapper;

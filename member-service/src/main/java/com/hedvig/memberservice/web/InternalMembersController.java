@@ -1,6 +1,5 @@
 package com.hedvig.memberservice.web;
 
-import com.hedvig.integration.productsPricing.ProductClient;
 import com.hedvig.memberservice.aggregates.MemberStatus;
 import com.hedvig.memberservice.commands.*;
 import com.hedvig.memberservice.query.MemberEntity;
@@ -23,6 +22,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -31,6 +31,7 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping({"/i/member", "/_/member"})
 public class InternalMembersController {
+
   private final Logger log = LoggerFactory.getLogger(InternalMembersController.class);
   private final CommandGateway commandBus;
   private final MemberRepository memberRepository;
