@@ -1,7 +1,6 @@
 package com.hedvig.personservice.debts.web
 
 import com.hedvig.personservice.debts.DebtService
-import com.hedvig.personservice.persons.model.Flag
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
@@ -14,6 +13,12 @@ class DebtController @Autowired constructor(
     @PostMapping("/check/{ssn}")
     fun checkDebt(@PathVariable ssn: String): ResponseEntity<Void> {
         debtService.checkPersonDebt(ssn)
+        return ResponseEntity.noContent().build()
+    }
+
+    @PostMapping("/backfill/all")
+    fun backfillAllDebt(): ResponseEntity<Void> {
+        debtService.checkAllPersonDebts()
         return ResponseEntity.noContent().build()
     }
 }
