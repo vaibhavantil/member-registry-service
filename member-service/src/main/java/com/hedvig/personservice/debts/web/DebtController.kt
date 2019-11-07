@@ -17,8 +17,14 @@ class DebtController @Autowired constructor(
     }
 
     @PostMapping("/check/all/signed")
-    fun backfillAllDebt(): ResponseEntity<Void> {
+    fun checkAllDebt(): ResponseEntity<Void> {
         debtService.checkAllPersonDebts()
+        return ResponseEntity.noContent().build()
+    }
+
+    @PostMapping("/check/nonchecked/signed")
+    fun checkNonCheckedDebt(): ResponseEntity<Void> {
+        debtService.checkNonCheckedPersonDebts()
         return ResponseEntity.noContent().build()
     }
 }

@@ -6,6 +6,7 @@ import com.hedvig.personservice.debts.model.DebtSnapshot
 import com.hedvig.personservice.persons.PersonService
 import com.hedvig.personservice.persons.model.Flag
 import com.hedvig.personservice.persons.model.Person
+import com.hedvig.personservice.persons.query.PersonRepository
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Lazy
 import org.springframework.stereotype.Service
@@ -14,6 +15,7 @@ import java.math.BigDecimal
 @Service
 class DebtService @Autowired constructor(
     private val memberRepository: MemberRepository,
+    private val personRepository: PersonRepository,
     @Lazy private val personService: PersonService
 ) {
     fun checkPersonDebt(ssn: String) {
@@ -22,6 +24,18 @@ class DebtService @Autowired constructor(
         } finally {
             personService.checkDebt(ssn)
             return
+        }
+    }
+
+    fun checkNonCheckedPersonDebts() {
+        val checkedSsn = personRepository.findAll()
+            .filter { person -> person.debtSnapshots.isNotEmpty() }
+            .map { person -> person.ssn }
+        val nonCheckedSsn = memberRepository.findAllByStatusAndSsnNotIn(MemberStatus.SIGNED, checkedSsn)
+            .mapNotNull { member -> member.ssn }
+            .toSet()
+        nonCheckedSsn.forEach { ssn ->
+            checkPersonDebt(ssn)
         }
     }
 
