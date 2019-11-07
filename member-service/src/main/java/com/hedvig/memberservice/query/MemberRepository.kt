@@ -65,4 +65,6 @@ interface MemberRepository : JpaRepository<MemberEntity, Long> {
     ): Page<MemberEntity>
 
     fun findByStatus(status: MemberStatus): List<MemberEntity>
+
+    fun findAllByStatusAndSsnNotIn(status:MemberStatus, ssns: List<String>): List<MemberEntity>
 }
