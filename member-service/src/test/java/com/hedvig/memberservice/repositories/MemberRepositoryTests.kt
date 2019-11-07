@@ -75,4 +75,38 @@ class MemberRepositoryTests {
         assertThat(members[1].id).isEqualTo(nonSignedMemberWithSameEmail.id)
         assertThat(members[2].id).isEqualTo(nonSignedMemberWithSameSsn.id)
     }
+
+    @Test
+    fun findAllSignedMembers() {
+
+        val signedMember1 = MemberEntity()
+        signedMember1.id = 234L
+        signedMember1.email = "signed1@email.com"
+        signedMember1.status = MemberStatus.SIGNED
+
+        val signedMember2 = MemberEntity()
+        signedMember2.id = 345L
+        signedMember2.email = "signed2@email.com"
+        signedMember2.status = MemberStatus.SIGNED
+
+        val nonSignedMember = MemberEntity()
+        nonSignedMember.id = 456L
+        nonSignedMember.email = "nonsigned@email.com"
+        nonSignedMember.status = MemberStatus.ONBOARDING
+
+        memberRepository.saveAll(
+            listOf(
+                signedMember1,
+                signedMember2,
+                nonSignedMember
+            )
+        )
+
+        val result = memberRepository.findByStatus(MemberStatus.SIGNED)
+        assertThat(result).hasSize(2)
+        assertThat(result[0].id).isEqualTo(signedMember1.id)
+        assertThat(result[0].status).isEqualTo(MemberStatus.SIGNED)
+        assertThat(result[1].id).isEqualTo(signedMember2.id)
+        assertThat(result[1].status).isEqualTo(MemberStatus.SIGNED)
+    }
 }

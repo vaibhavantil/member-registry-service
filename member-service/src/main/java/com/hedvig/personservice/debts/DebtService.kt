@@ -1,5 +1,7 @@
 package com.hedvig.personservice.debts
 
+import com.hedvig.memberservice.aggregates.MemberStatus
+import com.hedvig.memberservice.query.MemberRepository
 import com.hedvig.personservice.debts.model.DebtSnapshot
 import com.hedvig.personservice.persons.PersonService
 import com.hedvig.personservice.persons.model.Flag
@@ -11,7 +13,8 @@ import java.math.BigDecimal
 
 @Service
 class DebtService @Autowired constructor(
-        @Lazy private val personService: PersonService
+    private val memberRepository: MemberRepository,
+    @Lazy private val personService: PersonService
 ) {
     fun checkPersonDebt(ssn: String) {
         try {
@@ -19,6 +22,15 @@ class DebtService @Autowired constructor(
         } finally {
             personService.checkDebt(ssn)
             return
+        }
+    }
+
+    fun checkAllPersonDebts() {
+        val allSignedSsn = memberRepository.findByStatus(MemberStatus.SIGNED)
+            .mapNotNull { member -> member.ssn }
+            .toSet()
+        allSignedSsn.forEach { ssn ->
+            checkPersonDebt(ssn)
         }
     }
 
