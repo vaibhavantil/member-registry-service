@@ -27,8 +27,7 @@ class DebtService @Autowired constructor(
 
     fun checkAllPersonDebts() {
         val allSignedSsn = memberRepository.findByStatus(MemberStatus.SIGNED)
-            .filter { member -> member.ssn != null }
-            .map { member -> member.ssn }
+            .mapNotNull { member -> member.ssn }
             .toSet()
         allSignedSsn.forEach { ssn ->
             checkPersonDebt(ssn)
