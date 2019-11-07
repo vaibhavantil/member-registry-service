@@ -104,9 +104,9 @@ class MemberRepositoryTests {
 
         val result = memberRepository.findByStatus(MemberStatus.SIGNED)
         assertThat(result).hasSize(2)
-        assertThat(result[0].id).isEqualTo(234L)
+        assertThat(result[0].id).isEqualTo(signedMember1.id)
         assertThat(result[0].status).isEqualTo(MemberStatus.SIGNED)
-        assertThat(result[1].id).isEqualTo(345L)
+        assertThat(result[1].id).isEqualTo(signedMember2.id)
         assertThat(result[1].status).isEqualTo(MemberStatus.SIGNED)
     }
 }
