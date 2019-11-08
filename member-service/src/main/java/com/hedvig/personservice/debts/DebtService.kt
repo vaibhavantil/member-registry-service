@@ -10,6 +10,7 @@ import com.hedvig.personservice.persons.query.PersonRepository
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Lazy
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 import java.math.BigDecimal
 
 @Service
@@ -27,25 +28,19 @@ class DebtService @Autowired constructor(
         }
     }
 
+    @Transactional(readOnly = true)
     fun checkNonCheckedPersonDebts() {
         val checkedSsn = personRepository.findAll()
             .filter { person -> person.debtSnapshots.isNotEmpty() }
             .map { person -> person.ssn }
-        val nonCheckedSsn = memberRepository.findAllByStatusAndSsnNotIn(MemberStatus.SIGNED, checkedSsn)
-            .mapNotNull { member -> member.ssn }
-            .toSet()
-        nonCheckedSsn.forEach { ssn ->
-            checkPersonDebt(ssn)
-        }
+        val nonCheckedSSn = memberRepository.streamSsnByMemberStatusAndSsnNotIn(MemberStatus.SIGNED, checkedSsn)
+        nonCheckedSSn.forEach { ssn -> checkPersonDebt(ssn) }
     }
 
+    @Transactional(readOnly = true)
     fun checkAllPersonDebts() {
-        val allSignedSsn = memberRepository.findByStatus(MemberStatus.SIGNED)
-            .mapNotNull { member -> member.ssn }
-            .toSet()
-        allSignedSsn.forEach { ssn ->
-            checkPersonDebt(ssn)
-        }
+        val allSignedSsn = memberRepository.streamSsnByMemberStatusAndSsnNotIn(MemberStatus.SIGNED, listOf())
+        allSignedSsn.forEach { ssn -> checkPersonDebt(ssn) }
     }
 
     companion object {

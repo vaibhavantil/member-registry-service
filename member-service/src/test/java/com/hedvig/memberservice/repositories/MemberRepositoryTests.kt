@@ -9,6 +9,7 @@ import org.junit.runner.RunWith
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest
 import org.springframework.test.context.junit4.SpringRunner
+import kotlin.streams.toList
 
 @DataJpaTest
 @RunWith(SpringRunner::class)
@@ -139,9 +140,9 @@ class MemberRepositoryTests {
             )
         )
 
-        val result = memberRepository.findAllByStatusAndSsnNotIn(MemberStatus.SIGNED, listOf(signedMember1.ssn))
+        val result = memberRepository.streamSsnByMemberStatusAndSsnNotIn(MemberStatus.SIGNED, listOf(signedMember1.ssn)).toList()
+
         assertThat(result).hasSize(1)
-        assertThat(result[0].id).isEqualTo(signedMember2.id)
-        assertThat(result[0].status).isEqualTo(MemberStatus.SIGNED)
+        assertThat(result[0]).isEqualTo(signedMember2.ssn)
     }
 }

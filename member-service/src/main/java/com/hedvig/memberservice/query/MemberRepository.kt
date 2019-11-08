@@ -1,12 +1,18 @@
 package com.hedvig.memberservice.query
 
 import com.hedvig.memberservice.aggregates.MemberStatus
+import org.hibernate.annotations.QueryHints.READ_ONLY
+import org.hibernate.jpa.QueryHints.HINT_CACHEABLE
+import org.hibernate.jpa.QueryHints.HINT_FETCH_SIZE
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Query
+import org.springframework.data.jpa.repository.QueryHints
 import org.springframework.data.repository.query.Param
 import java.util.*
+import java.util.stream.Stream
+import javax.persistence.QueryHint
 
 interface MemberRepository : JpaRepository<MemberEntity, Long> {
 
@@ -66,5 +72,11 @@ interface MemberRepository : JpaRepository<MemberEntity, Long> {
 
     fun findByStatus(status: MemberStatus): List<MemberEntity>
 
-    fun findAllByStatusAndSsnNotIn(status:MemberStatus, ssns: List<String>): List<MemberEntity>
+    @QueryHints(value = [
+        QueryHint(name = HINT_FETCH_SIZE, value = "" + 100),
+        QueryHint(name = HINT_CACHEABLE, value = "false"),
+        QueryHint(name = READ_ONLY, value = "true")
+    ])
+    @Query("SELECT DISTINCT ssn FROM MemberEntity WHERE status=:status AND ssn IS NOT NULL AND ssn NOT IN :ssns")
+    fun streamSsnByMemberStatusAndSsnNotIn(status: MemberStatus, ssns: List<String>): Stream<String>
 }
