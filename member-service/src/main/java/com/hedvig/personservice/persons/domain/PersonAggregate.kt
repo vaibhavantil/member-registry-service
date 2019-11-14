@@ -1,14 +1,11 @@
 package com.hedvig.personservice.persons.domain
 
 import com.hedvig.personservice.debts.model.DebtSnapshot
-import com.hedvig.personservice.persons.domain.commands.CheckPersonDebtCommand
-import com.hedvig.personservice.persons.domain.commands.CreatePersonCommand
-import com.hedvig.personservice.persons.domain.commands.SynaDebtCheckedCommand
-import com.hedvig.personservice.persons.domain.commands.WhitelistPersonCommand
 import com.hedvig.personservice.persons.domain.events.*
 import com.hedvig.personservice.persons.model.Person
 import com.hedvig.personservice.persons.model.Whitelisted
 import com.hedvig.personservice.maskLastDigitsOfSsn
+import com.hedvig.personservice.persons.domain.commands.*
 import mu.KotlinLogging
 import org.axonframework.commandhandling.CommandHandler
 import org.axonframework.commandhandling.model.AggregateIdentifier
@@ -88,6 +85,9 @@ class PersonAggregate() {
 
     @CommandHandler
     fun handle(command: WhitelistPersonCommand) {
+        if (whitelisted != null) {
+            throw Exception("Cannot whitelist person since it is already whitelisted (ssn=${maskLastDigitsOfSsn(ssn)})")
+        }
         AggregateLifecycle.apply(PersonWhitelistedEvent(
             command.ssn,
             command.whitelistedBy
@@ -100,6 +100,22 @@ class PersonAggregate() {
             whitelistedAt = timestamp,
             whitelistedBy = event.whitelistedBy
         )
+    }
+
+    @CommandHandler
+    fun handle(command: BlacklistPersonCommand) {
+        if (whitelisted == null) {
+            throw Exception("Cannot blacklist person since it is not whitelisted (ssn=${maskLastDigitsOfSsn(ssn)})")
+        }
+        AggregateLifecycle.apply(PersonBlacklistedEvent(
+            command.ssn,
+            command.blacklistedBy
+        ))
+    }
+
+    @EventSourcingHandler
+    fun on(event: PersonBlacklistedEvent) {
+        this.whitelisted = null
     }
 
     fun isBeforeFirstFridayOfMonth(now: Instant): Boolean {

@@ -1,6 +1,7 @@
 package com.hedvig.personservice.persons.domain
 
 import com.hedvig.personservice.debts.query.DebtSnapshotRepository
+import com.hedvig.personservice.persons.domain.events.PersonBlacklistedEvent
 import com.hedvig.personservice.persons.domain.events.PersonCreatedEvent
 import com.hedvig.personservice.persons.domain.events.PersonWhitelistedEvent
 import com.hedvig.personservice.persons.domain.events.SynaDebtCheckedEvent
@@ -37,6 +38,13 @@ class PersonAggregateEventListener @Autowired constructor(
             whitelistedAt = timestamp,
             whitelistedBy = event.whitelistedBy
         )
+        personRepository.save(person)
+    }
+
+    @EventHandler
+    fun on(event: PersonBlacklistedEvent) {
+        val person = personRepository.findBySsn(event.ssn)!!
+        person.whitelisted = null
         personRepository.save(person)
     }
 }

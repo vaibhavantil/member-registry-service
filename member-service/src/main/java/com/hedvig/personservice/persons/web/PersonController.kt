@@ -44,6 +44,15 @@ class PersonController @Autowired constructor(
         return ResponseEntity.noContent().build()
     }
 
+    @PostMapping("/member/blacklist/{memberId}")
+    fun blacklistPersonByMemberId(
+        @PathVariable memberId: String,
+        @RequestParam blacklistedBy: String
+    ): ResponseEntity<Void> {
+        personService.blacklistPersonByMemberId(memberId, blacklistedBy)
+        return ResponseEntity.noContent().build()
+    }
+
     @GetMapping("/status/{ssn}")
     fun getPersonStatus(@PathVariable ssn: String): ResponseEntity<PersonStatusDto> {
         val person = personService.getPersonOrNull(ssn)
