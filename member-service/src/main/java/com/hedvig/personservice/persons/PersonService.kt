@@ -2,6 +2,7 @@ package com.hedvig.personservice.persons
 
 import com.hedvig.memberservice.query.MemberRepository
 import com.hedvig.personservice.debts.DebtService
+import com.hedvig.personservice.persons.domain.commands.BlacklistPersonCommand
 import com.hedvig.personservice.persons.domain.commands.CheckPersonDebtCommand
 import com.hedvig.personservice.persons.domain.commands.CreatePersonCommand
 import com.hedvig.personservice.persons.domain.commands.WhitelistPersonCommand
@@ -34,9 +35,18 @@ class PersonService @Autowired constructor(
         commandGateway.sendAndWait<Void>(WhitelistPersonCommand(ssn, whitelistedBy))
     }
 
+    fun blacklistPerson(ssn: String, blacklistedBy: String) {
+        commandGateway.sendAndWait<Void>(BlacklistPersonCommand(ssn, blacklistedBy))
+    }
+
     fun whitelistPersonByMemberId(memberId: String, whitelistedBy: String) {
         val member = memberRepository.findById(memberId.toLong()).get()
         whitelistPerson(member.ssn, whitelistedBy)
+    }
+
+    fun blacklistPersonByMemberId(memberId: String, blacklistedBy: String) {
+        val member = memberRepository.findById(memberId.toLong()).get()
+        blacklistPerson(member.ssn, blacklistedBy)
     }
 
     fun getPersonOrNull(ssn: String): Person? {
