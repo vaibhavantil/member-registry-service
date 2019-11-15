@@ -2,8 +2,8 @@ package com.hedvig.personservice.persons.domain.commands
 
 import org.axonframework.commandhandling.TargetAggregateIdentifier
 
-data class BlacklistPersonCommand(
+data class RemoveWhitelistCommand(
     @TargetAggregateIdentifier
     val ssn: String,
-    val blacklistedBy: String
+    val removedBy: String
 )

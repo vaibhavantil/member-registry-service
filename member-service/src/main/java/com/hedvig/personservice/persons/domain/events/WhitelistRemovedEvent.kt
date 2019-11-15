@@ -1,6 +1,6 @@
 package com.hedvig.personservice.persons.domain.events
 
-data class PersonBlacklistedEvent(
+data class WhitelistRemovedEvent(
     val ssn: String,
-    val blacklistedBy: String
+    val removedBy: String
 )
