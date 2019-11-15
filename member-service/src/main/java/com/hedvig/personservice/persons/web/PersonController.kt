@@ -44,12 +44,12 @@ class PersonController @Autowired constructor(
         return ResponseEntity.noContent().build()
     }
 
-    @PostMapping("/member/blacklist/{memberId}")
-    fun blacklistPersonByMemberId(
+    @PostMapping("/member/whitelist/{memberId}/remove")
+    fun removeWhitelistByMemberId(
         @PathVariable memberId: String,
-        @RequestParam blacklistedBy: String
+        @RequestParam removedBy: String
     ): ResponseEntity<Void> {
-        personService.blacklistPersonByMemberId(memberId, blacklistedBy)
+        personService.removeWhitelistByMemberId(memberId, removedBy)
         return ResponseEntity.noContent().build()
     }
 

@@ -1,7 +1,7 @@
 package com.hedvig.personservice.persons.domain
 
 import com.hedvig.personservice.debts.query.DebtSnapshotRepository
-import com.hedvig.personservice.persons.domain.events.PersonBlacklistedEvent
+import com.hedvig.personservice.persons.domain.events.WhitelistRemovedEvent
 import com.hedvig.personservice.persons.domain.events.PersonCreatedEvent
 import com.hedvig.personservice.persons.domain.events.PersonWhitelistedEvent
 import com.hedvig.personservice.persons.domain.events.SynaDebtCheckedEvent
@@ -13,7 +13,6 @@ import org.axonframework.eventhandling.Timestamp
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 import java.time.Instant
-import java.util.*
 
 @Component
 class PersonAggregateEventListener @Autowired constructor(
@@ -42,7 +41,7 @@ class PersonAggregateEventListener @Autowired constructor(
     }
 
     @EventHandler
-    fun on(event: PersonBlacklistedEvent) {
+    fun on(event: WhitelistRemovedEvent) {
         val person = personRepository.findBySsn(event.ssn)!!
         person.whitelisted = null
         personRepository.save(person)

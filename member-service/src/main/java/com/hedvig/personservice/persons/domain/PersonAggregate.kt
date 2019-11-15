@@ -2,7 +2,6 @@ package com.hedvig.personservice.persons.domain
 
 import com.hedvig.personservice.debts.model.DebtSnapshot
 import com.hedvig.personservice.persons.domain.events.*
-import com.hedvig.personservice.persons.model.Person
 import com.hedvig.personservice.persons.model.Whitelisted
 import com.hedvig.personservice.maskLastDigitsOfSsn
 import com.hedvig.personservice.persons.domain.commands.*
@@ -103,18 +102,18 @@ class PersonAggregate() {
     }
 
     @CommandHandler
-    fun handle(command: BlacklistPersonCommand) {
+    fun handle(command: RemoveWhitelistCommand) {
         if (whitelisted == null) {
-            throw Exception("Cannot blacklist person since it is not whitelisted (ssn=${maskLastDigitsOfSsn(ssn)})")
+            throw Exception("Cannot remove whitelist from person since it is not whitelisted (ssn=${maskLastDigitsOfSsn(ssn)})")
         }
-        AggregateLifecycle.apply(PersonBlacklistedEvent(
-            command.ssn,
-            command.blacklistedBy
+        AggregateLifecycle.apply(WhitelistRemovedEvent(
+            ssn = command.ssn,
+            removedBy = command.removedBy
         ))
     }
 
     @EventSourcingHandler
-    fun on(event: PersonBlacklistedEvent) {
+    fun on(event: WhitelistRemovedEvent) {
         this.whitelisted = null
     }
 
