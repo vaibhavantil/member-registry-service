@@ -9,8 +9,8 @@ data class PersonStatusDto(
     val isWhitelisted: Boolean
 ) {
     companion object {
-        fun from(person: Person) = PersonStatusDto(
-            flag = PersonService.getFlag(person),
+        fun from(person: Person, personFlag: Flag) = PersonStatusDto(
+            flag = personFlag,
             isWhitelisted = person.whitelisted != null
         )
     }

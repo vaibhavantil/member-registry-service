@@ -49,7 +49,7 @@ class DebtService @Autowired constructor(
     }
 
     companion object {
-        fun getDebtFlagByPerson(person: Person): Flag {
+        fun calculateDebtFlagByPerson(person: Person): Flag {
             val debtSnapshot = person.debtSnapshots.last()
             return getDebtFlag(debtSnapshot)
         }
