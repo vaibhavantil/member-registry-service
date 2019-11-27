@@ -27,4 +27,10 @@ class PersonServiceTest {
         val fraudFlag = PersonService.calculateFraudFlag(members)
         assertThat(fraudFlag).isEqualTo(Flag.RED)
     }
+
+    @Test
+    fun fraudFlagTestNoMembers() {
+        val fraudFlag = PersonService.calculateFraudFlag(listOf())
+        assertThat(fraudFlag).isEqualTo(Flag.GREEN)
+    }
 }
