@@ -13,7 +13,7 @@ class PersonServiceTest {
     fun fraudFlagTest() {
         val member1 = MemberEntity()
         member1.ssn = "9901019999"
-        member1.fraudulentStatus = FraudulentStatus.NOT_FRAUD
+        member1.fraudulentStatus = null
         val member2 = MemberEntity()
         member2.ssn = "9901019999"
         member2.fraudulentStatus = FraudulentStatus.CONFIRMED_FRAUD
