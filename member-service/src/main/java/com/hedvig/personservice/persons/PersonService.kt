@@ -88,7 +88,7 @@ class PersonService @Autowired constructor(
         }
 
         fun calculateFraudFlag(members: List<MemberEntity>): Flag {
-            return when (members.maxBy { member -> member.fraudulentStatus?.severity ?: -1 }!!.fraudulentStatus) {
+            return when (members.maxBy { member -> member.fraudulentStatus?.severity ?: -1 }?.fraudulentStatus) {
                 FraudulentStatus.CONFIRMED_FRAUD -> Flag.RED
                 FraudulentStatus.SUSPECTED_FRAUD -> Flag.AMBER
                 FraudulentStatus.NOT_FRAUD -> Flag.GREEN
