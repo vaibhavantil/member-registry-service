@@ -1,6 +1,7 @@
 package com.hedvig.personservice.persons.web
 
 import com.hedvig.personservice.persons.PersonService
+import com.hedvig.personservice.persons.model.PersonFlags
 import com.hedvig.personservice.persons.web.dtos.PersonDto
 import com.hedvig.personservice.persons.web.dtos.PersonStatusDto
 import org.springframework.beans.factory.annotation.Autowired
@@ -16,14 +17,16 @@ class PersonController @Autowired constructor(
     fun getPerson(@PathVariable ssn: String): ResponseEntity<PersonDto> {
         val person = personService.getPersonOrNull(ssn)
             ?: return ResponseEntity.notFound().build()
-        return ResponseEntity.ok(PersonDto.from(person))
+        val personFlags = personService.getAllPersonFlags(person)
+        return ResponseEntity.ok(PersonDto.from(person, personFlags))
     }
 
     @GetMapping("/member/{memberId}")
     fun getPersonByMemberId(@PathVariable memberId: String): ResponseEntity<PersonDto> {
         val person = personService.getPersonOrNullByMemberId(memberId)
             ?: return ResponseEntity.notFound().build()
-        return ResponseEntity.ok(PersonDto.from(person))
+        val personFlags = personService.getAllPersonFlags(person)
+        return ResponseEntity.ok(PersonDto.from(person, personFlags))
     }
 
     @PostMapping("/whitelist/{ssn}")
@@ -57,13 +60,23 @@ class PersonController @Autowired constructor(
     fun getPersonStatus(@PathVariable ssn: String): ResponseEntity<PersonStatusDto> {
         val person = personService.getPersonOrNull(ssn)
             ?: return ResponseEntity.notFound().build()
-        return ResponseEntity.ok(PersonStatusDto.from(person))
+        val personFlag = personService.getPersonFlag(person)
+        return ResponseEntity.ok(PersonStatusDto.from(person, personFlag))
     }
 
     @GetMapping("/member/status/{memberId}")
     fun getPersonStatusByMemberId(@PathVariable memberId: String): ResponseEntity<PersonStatusDto> {
         val person = personService.getPersonOrNullByMemberId(memberId)
             ?: return ResponseEntity.notFound().build()
-        return ResponseEntity.ok(PersonStatusDto.from(person))
+        val personFlag = personService.getPersonFlag(person)
+        return ResponseEntity.ok(PersonStatusDto.from(person, personFlag))
+    }
+
+    @GetMapping("/member/flags/{memberId}")
+    fun getPersonFlagsByMemberId(@PathVariable memberId: String): ResponseEntity<PersonFlags> {
+        val person = personService.getPersonOrNullByMemberId(memberId)
+            ?: return ResponseEntity.notFound().build()
+        val personFlags = personService.getAllPersonFlags(person)
+        return ResponseEntity.ok(personFlags)
     }
 }

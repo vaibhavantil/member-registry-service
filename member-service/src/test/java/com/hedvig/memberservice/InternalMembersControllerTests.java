@@ -75,7 +75,7 @@ public class InternalMembersControllerTests {
     final String ssn = "190304059999";
     StartOnboardingWithSSNRequest request = new StartOnboardingWithSSNRequest(ssn);
 
-    when(memberRepo.findBySsn(ssn)).thenReturn(Optional.empty());
+    when(memberRepo.findBySsn(ssn)).thenReturn(Collections.emptyList());
 
     ObjectMapper jsonMapper = new ObjectMapper();
 
@@ -97,7 +97,7 @@ public class InternalMembersControllerTests {
     MemberEntity member = new MemberEntity();
     member.setId(memberId);
 
-    when(memberRepo.findBySsn(ssn)).thenReturn(Optional.of(member));
+    when(memberRepo.findBySsn(ssn)).thenReturn(Collections.emptyList());
 
     StartOnboardingWithSSNRequest request = new StartOnboardingWithSSNRequest(ssn);
     ObjectMapper jsonMapper = new ObjectMapper();

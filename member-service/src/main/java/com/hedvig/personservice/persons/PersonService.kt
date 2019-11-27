@@ -1,5 +1,7 @@
 package com.hedvig.personservice.persons
 
+import com.hedvig.memberservice.aggregates.FraudulentStatus
+import com.hedvig.memberservice.query.MemberEntity
 import com.hedvig.memberservice.query.MemberRepository
 import com.hedvig.personservice.debts.DebtService
 import com.hedvig.personservice.persons.domain.commands.RemoveWhitelistCommand
@@ -61,17 +63,36 @@ class PersonService @Autowired constructor(
         return getPersonOrNull(member.ssn)
     }
 
+    fun getPersonFlag(person: Person): Flag {
+        val personFlags = getAllPersonFlags(person)
+        return calculateOverallFlag(personFlags)
+    }
+
+    fun getAllPersonFlags(person: Person): PersonFlags {
+        val membersOfPerson = memberRepository.findBySsn(person.ssn)
+        return calculateAllFlags(person, membersOfPerson)
+    }
+
     companion object {
-        fun getAllFlags(person: Person): PersonFlags = PersonFlags(
-            debtFlag = DebtService.getDebtFlagByPerson(person)
+        fun calculateAllFlags(person: Person, members: List<MemberEntity>): PersonFlags = PersonFlags(
+            debtFlag = DebtService.calculateDebtFlagByPerson(person),
+            fraudFlag = calculateFraudFlag(members)
         )
 
-        fun getFlag(person: Person): Flag {
-            val personFlags = getAllFlags(person)
+        fun calculateOverallFlag(personFlags: PersonFlags): Flag {
             return when(personFlags.debtFlag) {
                 Flag.GREEN -> Flag.GREEN
                 Flag.AMBER -> Flag.GREEN
                 Flag.RED -> Flag.RED
+            }
+        }
+
+        fun calculateFraudFlag(members: List<MemberEntity>): Flag {
+            return when (members.maxBy { member -> member.fraudulentStatus.severity }!!.fraudulentStatus) {
+                FraudulentStatus.CONFIRMED_FRAUD -> Flag.RED
+                FraudulentStatus.SUSPECTED_FRAUD -> Flag.AMBER
+                FraudulentStatus.NOT_FRAUD -> Flag.GREEN
+                else -> Flag.GREEN
             }
         }
     }

@@ -13,11 +13,14 @@ data class PersonDto(
     val status: PersonStatusDto
 ) {
     companion object {
-        fun from(person: Person): PersonDto = PersonDto(
-            flags = PersonService.getAllFlags(person),
+        fun from(person: Person, personFlags: PersonFlags): PersonDto = PersonDto(
+            flags = personFlags,
             debt = DebtDto.from(person.debtSnapshots.last()),
             whitelisted = person.whitelisted,
-            status = PersonStatusDto.from(person)
+            status = PersonStatusDto.from(
+                person = person,
+                personFlag = PersonService.calculateOverallFlag(personFlags)
+            )
         )
     }
 }
