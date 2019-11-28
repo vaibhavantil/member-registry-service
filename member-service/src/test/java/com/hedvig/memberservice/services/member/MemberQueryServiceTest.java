@@ -5,6 +5,7 @@ import com.hedvig.memberservice.query.MemberEntity;
 import com.hedvig.memberservice.web.dto.InternalMemberSearchRequestDTO;
 import com.hedvig.memberservice.web.dto.InternalMemberSearchResultDTO;
 import com.hedvig.memberservice.web.dto.MembersSortColumn;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,15 +37,20 @@ public class MemberQueryServiceTest {
   @Autowired
   MemberQueryService memberQueryService;
 
-
-  private void init() {
+  @Before
+  public void init() {
     createMember(10001, "John", "Doe", TERMINATED, "23-09-2018 14:12:01", b ->
       b.signedOn(parseToInstant("23-09-2018 23:41:25"))
+      .ssn("20121212-1212")
     );
-    createMember(10002, "Lois", "Ester", INITIATED, "23-09-2018 15:13:02");
+    createMember(10002, "Lois", "Ester", INITIATED, "23-09-2018 15:13:02", b ->
+      b.email("louis.ester@hedvig.com")
+    );
     createMember(10003, "Janna", "Kristen", INITIATED, "23-09-2018 15:17:22");
     createMember(10004, "Henrik", "Ester", SIGNED, "23-09-2018 17:45:25", b ->
       b.signedOn(parseToInstant("23-09-2018 21:43:25"))
+        .email("henrik.ester@hedvig.com")
+        .ssn("19010101-0101")
     );
     createMember(10005, "Coty", "Oneida", INACTIVATED, "24-09-2018 10:09:53", b ->
       b.signedOn(parseToInstant("25-09-2018 09:10:14"))
@@ -53,105 +59,60 @@ public class MemberQueryServiceTest {
   }
 
   @Test
-  public void nullPageGivesUnpagedSearch() {
-    init();
-    InternalMemberSearchResultDTO res = search("", null, null, 2, null, null);
+  public void emptyQueryGivesEmptyResult() {
+    InternalMemberSearchResultDTO res = search("", true, null, 2, null, null);
     assertThat(res.getPage()).isNull();
     assertThat(res.getTotalPages()).isNull();
-    assertThat(res.getMembers().size()).isEqualTo(6);
+    assertThat(res.getMembers().size()).isEqualTo(0);
   }
 
   @Test
-  public void nullPageSizeGivesUnpagedSearch() {
-    init();
-    InternalMemberSearchResultDTO res = search("", null, 1, null, null, null);
-    assertThat(res.getPage()).isNull();
-    assertThat(res.getTotalPages()).isNull();
-    assertThat(res.getMembers().size()).isEqualTo(6);
+  public void searchesByLastName() {
+    InternalMemberSearchResultDTO res = search("Ester", true, null, null, MembersSortColumn.NAME, null);
+    assertThat(res.getMembers().size()).isEqualTo(2);
+    assertThat(res.getMembers().get(0).getFirstName()).isEqualTo("Henrik");
+    assertThat(res.getMembers().get(1).getFirstName()).isEqualTo("Lois");
   }
 
   @Test
-  public void unpagedSortByNameAsc() {
-    init();
-    InternalMemberSearchResultDTO res = search("", null, null, null, MembersSortColumn.NAME, Sort.Direction.ASC);
-    assertThat(res.getMembers().size()).isEqualTo(6);
-    assertThat(res.getMembers().get(0).getLastName()).isEqualTo("Oneida");
-    assertThat(res.getMembers().get(5).getLastName()).isEqualTo("Ester");
-  }
-
-  @Test
-  public void unpagedSortByNameDesc() {
-    init();
-    InternalMemberSearchResultDTO res = search("", null, null, null, MembersSortColumn.NAME, Sort.Direction.DESC);
-    assertThat(res.getMembers().size()).isEqualTo(6);
-    assertThat(res.getMembers().get(0).getLastName()).isEqualTo("Ester");
-    assertThat(res.getMembers().get(5).getLastName()).isEqualTo("Oneida");
-  }
-
-  @Test
-  public void unpagedSortBySignUpAsc() {
-    init();
-    InternalMemberSearchResultDTO res = search("", null, null, null, MembersSortColumn.SIGN_UP, Sort.Direction.ASC);
-    assertThat(res.getMembers().size()).isEqualTo(6);
-    assertThat(dateFromInstant(res.getMembers().get(0).getSignedOn())).isEqualTo("23-09-2018 21:43:25");
-    assertThat(dateFromInstant(res.getMembers().get(2).getSignedOn())).isEqualTo("25-09-2018 09:10:14");
-    assertThat(dateFromInstant(res.getMembers().get(3).getSignedOn())).isNull();
-  }
-
-  @Test
-  public void unpagedSortBySignUpDesc() {
-    init();
-    InternalMemberSearchResultDTO res = search("", null, null, null, MembersSortColumn.SIGN_UP, Sort.Direction.DESC);
-    assertThat(res.getMembers().size()).isEqualTo(6);
-    assertThat(dateFromInstant(res.getMembers().get(0).getSignedOn())).isEqualTo("25-09-2018 09:10:14");
-    assertThat(dateFromInstant(res.getMembers().get(2).getSignedOn())).isEqualTo("23-09-2018 21:43:25");
-    assertThat(dateFromInstant(res.getMembers().get(3).getSignedOn())).isNull();
-  }
-
-  @Test
-  public void pagedSortByNameDesc() {
-    init();
-    InternalMemberSearchResultDTO res = search(null, null, 1, 3, MembersSortColumn.NAME, Sort.Direction.DESC);
-    assertThat(res.getMembers().size()).isEqualTo(3);
-    assertThat(res.getMembers().get(0).getLastName()).isEqualTo("Ester");
-    assertThat(res.getMembers().get(1).getLastName()).isEqualTo("Eldred");
-    assertThat(res.getMembers().get(2).getLastName()).isEqualTo("Oneida");
-    assertThat(res.getTotalPages()).isEqualTo(2);
-  }
-
-  public void unpagedFirstNameQuerySortedByNameDesc() {
-    init();
-    InternalMemberSearchResultDTO res = search("Henrik", null, null, null, MembersSortColumn.NAME, Sort.Direction.DESC);
+  public void searchesByFirstName() {
+    InternalMemberSearchResultDTO res = search("Henrik", true, null, null, null, null);
     assertThat(res.getMembers().size()).isEqualTo(2);
     assertThat(res.getMembers().get(0).getLastName()).isEqualTo("Ester");
     assertThat(res.getMembers().get(1).getLastName()).isEqualTo("Eldred");
   }
 
-  public void unpagedLastNameQuerySortedByNameDesc() {
-    init();
-    InternalMemberSearchResultDTO res = search("Ester", null, null, null, MembersSortColumn.NAME, Sort.Direction.DESC);
-    assertThat(res.getMembers().size()).isEqualTo(2);
-    assertThat(res.getMembers().get(0).getFirstName()).isEqualTo("Lois");
-    assertThat(res.getMembers().get(1).getFirstName()).isEqualTo("Henrik");
-  }
-
-  public void unpagedMemberIdQuerySortedByNameDesc() {
-    init();
-    InternalMemberSearchResultDTO res = search("10003", null, null, null, MembersSortColumn.NAME, Sort.Direction.DESC);
+  @Test
+  public void searchesMemberId() {
+    InternalMemberSearchResultDTO res = search("10003", true, null, null, null, null);
     assertThat(res.getMembers().size()).isEqualTo(1);
     assertThat(res.getMembers().get(0).getMemberId()).isEqualTo(10003);
   }
 
-  public void unpagedInitiatedStatusSortedByCreatedDesc() {
-    init();
-    InternalMemberSearchResultDTO res = search(null, INITIATED, null, null, MembersSortColumn.CREATED, Sort.Direction.DESC);
-    assertThat(res.getMembers().size()).isEqualTo(1);
-    assertThat(res.getMembers().get(0).getMemberId()).isEqualTo(10003);
-    assertThat(res.getMembers().get(1).getMemberId()).isEqualTo(10002);
+  @Test
+  public void searchesBySsn() {
+    InternalMemberSearchResultDTO result = search("19010101-0101", null, null, null, null, null);
+    assertThat(result.getMembers()).hasSize(1);
+    assertThat(result.getMembers().get(0).getMemberId()).isEqualTo(10004);
   }
 
-  private InternalMemberSearchResultDTO search(String query, MemberStatus status, Integer page, Integer pageSize, MembersSortColumn sortBy, Sort.Direction sortDir) {
-    return memberQueryService.search(new InternalMemberSearchRequestDTO(query, status, page, pageSize, sortBy, sortDir));
+  @Test
+  public void searchesByEmail() {
+    InternalMemberSearchResultDTO result = search("louis.ester@hedvig.com", true, null, null, null, null);
+    assertThat(result.getMembers()).hasSize(1);
+    assertThat(result.getMembers().get(0).getMemberId()).isEqualTo(10002);
+  }
+
+
+  @Test
+  public void searchesLikeEmail() {
+    InternalMemberSearchResultDTO result = search("ester@hedvig.com", true, null, null, null, null);
+    assertThat(result.getMembers()).hasSize(2);
+  }
+
+
+  private InternalMemberSearchResultDTO search(String query, Boolean searchAll, Integer page, Integer pageSize, MembersSortColumn sortBy, Sort.Direction sortDir) {
+    return memberQueryService.search(new InternalMemberSearchRequestDTO(query, searchAll, page, pageSize, sortBy, sortDir));
   }
 
   static MemberEntity.MemberEntityBuilder memberBuilder(long id, String firstName, String lastName, MemberStatus status, String createdOn) {

@@ -53,38 +53,14 @@ public class MemberQueryService {
 
     Pageable pageReq = pageableBuilder.build();
 
-
-    boolean haveQuery = StringUtils.hasText(request.getQuery());
-    boolean haveStatus = request.getStatus() != null;
-    if (haveQuery) {
-      Long memberId = parseMemberId(request.getQuery().trim());
-      if (memberId != null) {
-        if (haveStatus) {
-          return memberRepository.searchByIdAndStatus(memberId, request.getStatus(), pageReq);
-        } else {
-          return memberRepository.searchById(memberId, pageReq);
-        }
-      }
+    if (StringUtils.isEmpty(request.getQuery())) {
+      return Page.empty();
     }
 
-    if (haveStatus && haveQuery) {
-      return memberRepository.searchByStatusAndQuery(request.getStatus(), request.getQuery().trim(), pageReq);
-    }
-    if (haveStatus) {
-      return memberRepository.searchByStatus(request.getStatus(), pageReq);
-    }
-    if (haveQuery) {
-      return memberRepository.searchByQuery(request.getQuery().trim(), pageReq);
-    }
-
-    return memberRepository.searchAll(pageReq);
-  }
-
-  private Long parseMemberId(String query) {
-    try {
-      return Long.parseLong(query);
-    } catch (NumberFormatException e) {
-      return null;
+    if (request.getIncludeAll() != null && request.getIncludeAll()) {
+      return memberRepository.searchAllByIdAndSsnAndNameAndEmail(request.getQuery().trim(), pageReq);
+    } else {
+      return memberRepository.searchSignedOrTerminatedByIdAndSsnAndNameAndEmail(request.getQuery().trim(), pageReq);
     }
   }
 }

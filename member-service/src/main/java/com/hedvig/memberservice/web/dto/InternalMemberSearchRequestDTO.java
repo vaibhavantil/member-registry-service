@@ -1,6 +1,5 @@
 package com.hedvig.memberservice.web.dto;
 
-import com.hedvig.memberservice.aggregates.MemberStatus;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -11,7 +10,7 @@ import org.springframework.data.domain.Sort;
 @NoArgsConstructor
 public class InternalMemberSearchRequestDTO {
   String query;
-  MemberStatus status;
+  Boolean includeAll;
   Integer page;
   Integer pageSize;
   MembersSortColumn sortBy;
