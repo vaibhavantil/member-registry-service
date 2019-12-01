@@ -1,5 +1,4 @@
-FROM openjdk:11
-
+FROM amazoncorretto:11
 
 ADD server_cert.pem /
 RUN keytool -import -alias bankid -file /server_cert.pem -cacerts -storePass changeit -noprompt
