@@ -69,6 +69,7 @@ interface MemberRepository : JpaRepository<MemberEntity, Long> {
                 OR lower(m.firstName || ' ' || m.lastName) LIKE ('%' || lower(:query) || '%')
                 OR m.ssn LIKE ('%' || :query || '%')
                 OR lower(m.email) LIKE ('%' || lower(:query) || '%')
+                OR m.phoneNumber LIKE ('%' || :query || '%')
             )
     """)
     fun searchSignedOrTerminatedByIdAndSsnAndNameAndEmail(
@@ -83,8 +84,10 @@ interface MemberRepository : JpaRepository<MemberEntity, Long> {
             CAST(m.id as text) = :query
             OR lower(m.firstName) LIKE ('%' || lower(:query) || '%')
             OR lower(m.lastName) LIKE ('%' || lower(:query) || '%')
+            OR lower(m.firstName || ' ' || m.lastName) LIKE ('%' || lower(:query) || '%')
             OR m.ssn LIKE ('%' || :query || '%')
             OR lower(m.email) LIKE ('%' || lower(:query) || '%')
+            OR m.phoneNumber LIKE ('%' || :query || '%')
     """)
     fun searchAllByIdAndSsnAndNameAndEmail(
         @Param("query") query: String,

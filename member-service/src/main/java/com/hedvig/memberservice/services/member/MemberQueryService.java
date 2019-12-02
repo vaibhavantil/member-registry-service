@@ -48,7 +48,7 @@ public class MemberQueryService {
 
     if (request.getSortBy() != null) {
       String entSortProp = MemberEntity.SORT_COLUMN_MAPPING.get(request.getSortBy());
-      pageableBuilder = pageableBuilder.orderBy(entSortProp, request.getSortDirection(), Sort.NullHandling.NULLS_LAST);
+      pageableBuilder = pageableBuilder.orderBy(entSortProp, request.getSortDirection(), Sort.NullHandling.NULLS_FIRST);
     }
 
     Pageable pageReq = pageableBuilder.build();
