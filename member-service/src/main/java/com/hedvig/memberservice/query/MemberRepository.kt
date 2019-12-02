@@ -27,35 +27,6 @@ interface MemberRepository : JpaRepository<MemberEntity, Long> {
     @Query("select count(*) from MemberEntity m where m.status = 'SIGNED'")
     fun countSignedMembers(): Long?
 
-    @Query("SELECT m FROM MemberEntity m")
-    fun searchAll(p: Pageable): Page<MemberEntity>
-
-    @Query("SELECT m FROM MemberEntity m WHERE lower(m.firstName) LIKE lower(concat('%', :query, '%')) " + "OR lower(m.lastName) LIKE lower(concat('%', :query, '%'))")
-    fun searchByQuery(
-        @Param("query") query: String,
-        p: Pageable
-    ): Page<MemberEntity>
-
-    @Query("SELECT m FROM MemberEntity m WHERE status = :status")
-    fun searchByStatus(
-        @Param("status") status: MemberStatus,
-        p: Pageable
-    ): Page<MemberEntity>
-
-    @Query("""
-        SELECT m FROM MemberEntity m
-        WHERE status = :status
-        AND (
-            lower(m.firstName) LIKE lower(concat('%', :query, '%'))
-            OR lower(m.lastName) LIKE lower(concat('%', :query, '%'))
-        )
-    """)
-    fun searchByStatusAndQuery(
-        @Param("status") status: MemberStatus,
-        @Param("query") query: String,
-        p: Pageable
-    ): Page<MemberEntity>
-
     @Query("""
         SELECT m
         FROM MemberEntity m
@@ -72,7 +43,7 @@ interface MemberRepository : JpaRepository<MemberEntity, Long> {
                 OR m.phoneNumber LIKE ('%' || :query || '%')
             )
     """)
-    fun searchSignedOrTerminatedByIdAndSsnAndNameAndEmail(
+    fun searchSignedOrTerminated(
         @Param("query") query: String,
         p: Pageable
     ): Page<MemberEntity>
@@ -89,21 +60,8 @@ interface MemberRepository : JpaRepository<MemberEntity, Long> {
             OR lower(m.email) LIKE ('%' || lower(:query) || '%')
             OR m.phoneNumber LIKE ('%' || :query || '%')
     """)
-    fun searchAllByIdAndSsnAndNameAndEmail(
+    fun searchAll(
         @Param("query") query: String,
-        p: Pageable
-    ): Page<MemberEntity>
-
-    @Query("select m from MemberEntity m where m.id = :id")
-    fun searchById(
-        @Param("id") id: Long?,
-        p: Pageable
-    ): Page<MemberEntity>
-
-    @Query("select m from MemberEntity m where m.id = :id and m.status = :status")
-    fun searchByIdAndStatus(
-        @Param("id") id: Long?,
-        @Param("status") status: MemberStatus,
         p: Pageable
     ): Page<MemberEntity>
 

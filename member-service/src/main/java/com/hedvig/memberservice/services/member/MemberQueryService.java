@@ -58,9 +58,9 @@ public class MemberQueryService {
     }
 
     if (request.getIncludeAll() != null && request.getIncludeAll()) {
-      return memberRepository.searchAllByIdAndSsnAndNameAndEmail(request.getQuery().trim(), pageReq);
+      return memberRepository.searchAll(request.getQuery().trim(), pageReq);
     } else {
-      return memberRepository.searchSignedOrTerminatedByIdAndSsnAndNameAndEmail(request.getQuery().trim(), pageReq);
+      return memberRepository.searchSignedOrTerminated(request.getQuery().trim(), pageReq);
     }
   }
 }
