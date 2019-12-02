@@ -27,40 +27,41 @@ interface MemberRepository : JpaRepository<MemberEntity, Long> {
     @Query("select count(*) from MemberEntity m where m.status = 'SIGNED'")
     fun countSignedMembers(): Long?
 
-    @Query("SELECT m FROM MemberEntity m")
-    fun searchAll(p: Pageable): Page<MemberEntity>
-
-    @Query("SELECT m FROM MemberEntity m WHERE lower(m.firstName) LIKE lower(concat('%', :query, '%')) " + "OR lower(m.lastName) LIKE lower(concat('%', :query, '%'))")
-    fun searchByQuery(
+    @Query("""
+        SELECT m
+        FROM MemberEntity m
+        WHERE
+            m.status IN ('SIGNED', 'TERMINATED')
+        AND
+            (
+                CAST(m.id as text) = :query
+                OR lower(m.firstName) LIKE ('%' || lower(:query) || '%')
+                OR lower(m.lastName) LIKE ('%' || lower(:query) || '%')
+                OR lower(m.firstName || ' ' || m.lastName) LIKE ('%' || lower(:query) || '%')
+                OR m.ssn LIKE ('%' || :query || '%')
+                OR lower(m.email) LIKE ('%' || lower(:query) || '%')
+                OR m.phoneNumber LIKE ('%' || :query || '%')
+            )
+    """)
+    fun searchSignedOrTerminated(
         @Param("query") query: String,
         p: Pageable
     ): Page<MemberEntity>
 
-    @Query("SELECT m FROM MemberEntity m WHERE status = :status")
-    fun searchByStatus(
-        @Param("status") status: MemberStatus,
-        p: Pageable
-    ): Page<MemberEntity>
-
-    @Query("SELECT m FROM MemberEntity m WHERE status = :status "
-        + "AND (lower(m.firstName) LIKE lower(concat('%', :query, '%')) "
-        + "OR lower(m.lastName) LIKE lower(concat('%', :query, '%')))")
-    fun searchByStatusAndQuery(
-        @Param("status") status: MemberStatus,
+    @Query("""
+        SELECT m
+        FROM MemberEntity m
+        WHERE
+            CAST(m.id as text) = :query
+            OR lower(m.firstName) LIKE ('%' || lower(:query) || '%')
+            OR lower(m.lastName) LIKE ('%' || lower(:query) || '%')
+            OR lower(m.firstName || ' ' || m.lastName) LIKE ('%' || lower(:query) || '%')
+            OR m.ssn LIKE ('%' || :query || '%')
+            OR lower(m.email) LIKE ('%' || lower(:query) || '%')
+            OR m.phoneNumber LIKE ('%' || :query || '%')
+    """)
+    fun searchAll(
         @Param("query") query: String,
-        p: Pageable
-    ): Page<MemberEntity>
-
-    @Query("select m from MemberEntity m where m.id = :id")
-    fun searchById(
-        @Param("id") id: Long?,
-        p: Pageable
-    ): Page<MemberEntity>
-
-    @Query("select m from MemberEntity m where m.id = :id and m.status = :status")
-    fun searchByIdAndStatus(
-        @Param("id") id: Long?,
-        @Param("status") status: MemberStatus,
         p: Pageable
     ): Page<MemberEntity>
 

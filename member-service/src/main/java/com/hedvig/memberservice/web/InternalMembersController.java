@@ -1,18 +1,35 @@
 package com.hedvig.memberservice.web;
 
-import com.hedvig.memberservice.aggregates.MemberStatus;
-import com.hedvig.memberservice.commands.*;
+import com.hedvig.memberservice.commands.EditMemberInformationCommand;
+import com.hedvig.memberservice.commands.InsurnaceCancellationCommand;
+import com.hedvig.memberservice.commands.MemberCancelInsuranceCommand;
+import com.hedvig.memberservice.commands.MemberUpdateContactInformationCommand;
+import com.hedvig.memberservice.commands.SetFraudulentStatusCommand;
+import com.hedvig.memberservice.commands.StartOnboardingWithSSNCommand;
+import com.hedvig.memberservice.commands.UpdateEmailCommand;
+import com.hedvig.memberservice.commands.UpdatePhoneNumberCommand;
+import com.hedvig.memberservice.commands.UpdateSSNCommand;
 import com.hedvig.memberservice.query.MemberEntity;
 import com.hedvig.memberservice.query.MemberRepository;
 import com.hedvig.memberservice.services.member.MemberQueryService;
 import com.hedvig.memberservice.services.trace.TraceMemberService;
-import com.hedvig.memberservice.web.dto.*;
+import com.hedvig.memberservice.web.dto.ChargeMembersDTO;
+import com.hedvig.memberservice.web.dto.InsuranceCancellationDTO;
+import com.hedvig.memberservice.web.dto.InternalMember;
+import com.hedvig.memberservice.web.dto.InternalMemberSearchRequestDTO;
+import com.hedvig.memberservice.web.dto.InternalMemberSearchResultDTO;
+import com.hedvig.memberservice.web.dto.MemberCancelInsurance;
+import com.hedvig.memberservice.web.dto.MemberFraudulentStatusDTO;
+import com.hedvig.memberservice.web.dto.StartOnboardingWithSSNRequest;
+import com.hedvig.memberservice.web.dto.UpdateContactInformationRequest;
+import com.hedvig.memberservice.web.dto.UpdateEmailRequest;
+import com.hedvig.memberservice.web.dto.UpdatePhoneNumberRequest;
+import com.hedvig.memberservice.web.dto.UpdateSSNRequest;
 import lombok.val;
 import org.axonframework.commandhandling.gateway.CommandGateway;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
-import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -23,7 +40,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.Collections;
+import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -103,20 +120,15 @@ public class InternalMembersController {
 
   @RequestMapping(value = "/search", method = RequestMethod.GET)
   public List<InternalMember> searchMembers(
-    @RequestParam(name = "status", defaultValue = "", required = false) String status,
+    @RequestParam(name = "includeAll", defaultValue = "", required = false) @Nullable Boolean includeAll,
     @RequestParam(name = "query", defaultValue = "", required = false) String query) {
 
     query = query.trim();
 
     InternalMemberSearchRequestDTO req = new InternalMemberSearchRequestDTO();
     req.setQuery(query);
-    try {
-      if (StringUtils.hasText(status)) {
-        req.setStatus(MemberStatus.valueOf(status.trim()));
-      }
-    } catch (Exception e) {
-      //for backward compatibility
-      return Collections.emptyList();
+    if (includeAll != null) {
+      req.setIncludeAll(includeAll);
     }
 
     return memberQueryService.search(req).getMembers();
