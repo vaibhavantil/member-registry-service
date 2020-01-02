@@ -28,11 +28,11 @@ public class BotServiceImpl implements BotService {
   public void initBotService(Long memberId, String json) {
     logger.info("Initializing bot-service by helloHedvig request");
 
-    if (json == null) {
+    /*if (json == null) {
       botServiceClient.initBotService(memberId);
     } else {
       botServiceClient.initBotService(memberId, json);
-    }
+    }*/
   }
 
   public void editMemberName(String memberId, EditMemberNameRequestDTO editMemberNameRequestDTO) {

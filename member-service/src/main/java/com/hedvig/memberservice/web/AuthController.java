@@ -2,8 +2,9 @@ package com.hedvig.memberservice.web;
 
 import static net.logstash.logback.argument.StructuredArguments.value;
 
-import com.hedvig.external.bankID.bankidTypes.CollectResponse;
-import com.hedvig.external.bankID.bankidTypes.OrderResponse;
+import com.hedvig.external.bankID.bankIdRestTypes.CollectResponse;
+import com.hedvig.external.bankID.bankIdRestTypes.CollectStatus;
+import com.hedvig.external.bankID.bankIdRestTypes.OrderResponse;
 import com.hedvig.external.bankID.bankidTypes.ProgressStatus;
 import com.hedvig.memberservice.aggregates.exceptions.BankIdReferenceUsedException;
 import com.hedvig.memberservice.commands.AuthenticationAttemptCommand;
@@ -66,14 +67,14 @@ public class AuthController {
   }
 
   @PostMapping(path = "auth")
-  public ResponseEntity<BankIdAuthResponse> auth(@RequestBody BankIdAuthRequest request) {
+  public ResponseEntity<BankIdAuthResponse> auth(@RequestHeader(value = "x-forwarded-for", required = false) String forwardFor, @RequestBody BankIdAuthRequest request) {
 
     log.info(
         "Auth request for with memberId: {}", request.getMemberId(), value("memberId", request.getMemberId()));
 
     long memberId = convertMemberId(request.getMemberId());
 
-    OrderResponse status = bankIdService.auth(memberId);
+    OrderResponse status = bankIdService.auth(memberId, forwardFor);
     BankIdAuthResponse response =
         new BankIdAuthResponse(status.getAutoStartToken(), status.getOrderRef());
 
@@ -81,14 +82,14 @@ public class AuthController {
   }
 
   @PostMapping(path = "sign")
-  public ResponseEntity<BankIdSignResponse> sign(@RequestBody BankIdSignRequest request)
+  public ResponseEntity<BankIdSignResponse> sign(@RequestHeader(value = "x-forwarded-for", required = false) String forwardFor, @RequestBody BankIdSignRequest request)
       throws UnsupportedEncodingException {
     long memberId = convertMemberId(request.getMemberId());
 
     log.info(
         "Sign request for ssn: {}", request.getSsn(), value("memberId", request.getMemberId()));
 
-    OrderResponse status = bankIdService.sign(request.getSsn(), request.getUserMessage(), memberId);
+    OrderResponse status = bankIdService.sign(request.getSsn(), request.getUserMessage(), memberId, forwardFor);
     BankIdSignResponse response =
         new BankIdSignResponse(status.getAutoStartToken(), status.getOrderRef());
 
@@ -103,6 +104,7 @@ public class AuthController {
     }
   }
 
+  @Deprecated
   @PostMapping(path = "collect")
   public ResponseEntity<?> collect(
       @RequestParam String referenceToken,
@@ -122,8 +124,8 @@ public class AuthController {
     if (collectType.type.equals(CollectType.RequestType.AUTH)) {
       CollectResponse status = bankIdService.authCollect(referenceToken);
 
-      if (status.getProgressStatus() == ProgressStatus.COMPLETE) {
-        String ssn = status.getUserInfo().getPersonalNumber();
+      if (status.getStatus() == CollectStatus.complete) {
+        String ssn = status.getCompletionData().getUser().getPersonalNumber();
 
         Optional<SignedMemberEntity> member = signedMemberRepository.findBySsn(ssn);
 
@@ -138,9 +140,9 @@ public class AuthController {
 
         try {
           BankIdAuthenticationStatus authStatus = new BankIdAuthenticationStatus();
-          authStatus.setSSN(status.getUserInfo().getPersonalNumber());
-          authStatus.setGivenName(status.getUserInfo().getGivenName());
-          authStatus.setSurname(status.getUserInfo().getSurname());
+          authStatus.setSSN(status.getCompletionData().getUser().getPersonalNumber());
+          authStatus.setGivenName(status.getCompletionData().getUser().getGivenName());
+          authStatus.setSurname(status.getCompletionData().getUser().getSurname());
           authStatus.setReferenceToken(referenceToken);
           this.commandGateway.sendAndWait(
               new AuthenticationAttemptCommand(currentMemberId, authStatus));
@@ -152,7 +154,7 @@ public class AuthController {
 
         response =
             new BankIdCollectResponse(
-                BankIdProgressStatus.valueOf(status.getProgressStatus().name()),
+                BankIdProgressStatus.Companion.valueOf(status),
                 referenceToken,
                 Objects.toString(currentMemberId));
 
@@ -161,26 +163,26 @@ public class AuthController {
 
       return ResponseEntity.ok(
           new BankIdCollectResponse(
-              BankIdProgressStatus.valueOf(status.getProgressStatus().name()),
+              BankIdProgressStatus.Companion.valueOf(status),
               referenceToken,
               hid.toString()));
 
     } else if (collectType.type.equals(CollectType.RequestType.SIGN)) {
       CollectResponse status = bankIdService.signCollect(referenceToken);
-      if (status.getProgressStatus() == ProgressStatus.COMPLETE) {
+      if (status.getStatus() == CollectStatus.complete) {
         Optional<MemberEntity> memberEntity = memberRepo.findById(hid);
         if (memberEntity.isPresent()) {
           this.commandGateway.sendAndWait(
               new
                   BankIdSignCommand(
-                  hid, referenceToken, status.getSignature(), status.getOcspResponse(),
-                  status.getUserInfo().getPersonalNumber()));
+                  hid, referenceToken, status.getCompletionData().getSignature(), status.getCompletionData().getOcspResponse(),
+                  status.getCompletionData().getUser().getPersonalNumber()));
         }
       }
 
       return ResponseEntity.ok(
           new BankIdCollectResponse(
-              BankIdProgressStatus.valueOf(status.getProgressStatus().name()),
+              BankIdProgressStatus.Companion.valueOf(status),
               referenceToken,
               hid.toString()));
     } else {

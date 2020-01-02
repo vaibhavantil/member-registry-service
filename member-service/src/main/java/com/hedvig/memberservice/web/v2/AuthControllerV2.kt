@@ -16,8 +16,8 @@ class AuthControllerV2(
         private val bankIdService: BankIdServiceV2
 ) {
     @PostMapping("auth")
-    fun auth(@RequestHeader("hedvig.token") memberId: Long): ResponseEntity<AuthResponse> {
-        val status = bankIdService.auth(memberId)
+    fun auth(@RequestHeader("hedvig.token") memberId: Long, @RequestHeader(value = "x-forwarded-for", required = false) forwardFor: String): ResponseEntity<AuthResponse> {
+        val status = bankIdService.auth(memberId, forwardFor)
         return ResponseEntity.ok(AuthResponse(status.autoStartToken))
     }
 }

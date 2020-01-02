@@ -1,7 +1,7 @@
 package com.hedvig.memberservice.services.bankid;
 
-import com.hedvig.external.bankID.bankidTypes.CollectResponse;
-import com.hedvig.external.bankID.bankidTypes.OrderResponse;
+import com.hedvig.external.bankID.bankIdRestTypes.CollectResponse;
+import com.hedvig.external.bankID.bankIdRestTypes.OrderResponse;
 import java.io.UnsupportedEncodingException;
 
 public interface BankIdSOAPApi {
