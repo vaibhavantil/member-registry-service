@@ -9,7 +9,6 @@ import com.hedvig.external.bankID.bankIdRestTypes.CollectResponse
 import com.hedvig.external.bankID.bankIdRestTypes.OrderResponse
 import com.hedvig.memberservice.query.CollectRepository
 import com.hedvig.memberservice.query.CollectType
-import com.hedvig.memberservice.services.bankid.BankIdSOAPApi
 import java.io.UnsupportedEncodingException
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service

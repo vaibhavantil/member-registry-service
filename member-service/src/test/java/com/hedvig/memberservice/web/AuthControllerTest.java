@@ -2,9 +2,10 @@ package com.hedvig.memberservice.web;
 
 import bankid.FaultStatusType;
 import bankid.RpFaultType;
-import com.hedvig.external.bankID.bankidTypes.CollectResponse;
-import com.hedvig.external.bankID.bankidTypes.ProgressStatus;
-import com.hedvig.external.bankID.bankidTypes.UserInfo;
+import com.hedvig.external.bankID.bankIdRestTypes.Collect.User;
+import com.hedvig.external.bankID.bankIdRestTypes.CollectResponse;
+import com.hedvig.external.bankID.bankIdRestTypes.CollectStatus;
+import com.hedvig.external.bankID.bankIdRestTypes.CompletionData;
 import com.hedvig.external.bankID.exceptions.BankIDError;
 import com.hedvig.memberservice.commands.AuthenticationAttemptCommand;
 import com.hedvig.memberservice.commands.BankIdAuthenticationStatus;
@@ -88,9 +89,7 @@ public class AuthControllerTest {
 
         when(collectRepo.findById(someReferenceValue)).thenReturn(Optional.of(collectType));
 
-        CollectResponse collectResponse = createCollectResponse(
-                ssn,
-                ProgressStatus.COMPLETE);
+        CollectResponse collectResponse = createCompletCollecteResponse(ssn, someReferenceValue);
 
         when(bankIdService.authCollect(someReferenceValue)).thenReturn(collectResponse);
         when(signedMemberRepository.findBySsn(ssn)).thenReturn(Optional.empty());
@@ -134,9 +133,7 @@ public class AuthControllerTest {
 
         when(collectRepo.findById(someReferenceValue)).thenReturn(Optional.of(collectType));
 
-        CollectResponse collectResponse = createCollectResponse(
-                ssn,
-                ProgressStatus.COMPLETE);
+        CollectResponse collectResponse = createCompletCollecteResponse(ssn, someReferenceValue);
 
         when(bankIdService.authCollect(someReferenceValue)).thenReturn(collectResponse);
 
@@ -210,9 +207,7 @@ public class AuthControllerTest {
 
         when(collectRepo.findById(someReferenceValue)).thenReturn(Optional.of(collectType));
 
-        CollectResponse collectResponse = createCollectResponse(
-                ssn,
-                ProgressStatus.STARTED);
+        CollectResponse collectResponse = createStartedCollectResponse(ssn, someReferenceValue);
 
         when(bankIdService.authCollect(someReferenceValue)).thenReturn(collectResponse);
 
@@ -245,9 +240,7 @@ public class AuthControllerTest {
 
         when(collectRepo.findById(someReferenceValue)).thenReturn(Optional.of(collectType));
 
-        CollectResponse collectResponse = createCollectResponse(
-                ssn,
-                ProgressStatus.STARTED);
+        CollectResponse collectResponse = createStartedCollectResponse(ssn, someReferenceValue);
 
         when(bankIdService.signCollect(someReferenceValue)).thenReturn(collectResponse);
 
@@ -279,9 +272,7 @@ public class AuthControllerTest {
 
         when(collectRepo.findById(someReferenceValue)).thenReturn(Optional.of(collectType));
 
-        CollectResponse collectResponse = createCollectResponse(
-                ssn,
-                ProgressStatus.COMPLETE);
+        CollectResponse collectResponse = createCompletCollecteResponse(ssn, someReferenceValue);
 
         when(bankIdService.signCollect(someReferenceValue)).thenReturn(collectResponse);
 
@@ -301,18 +292,25 @@ public class AuthControllerTest {
                 andExpect(jsonPath("$.referenceToken", is(someReferenceValue))).
                 andExpect(jsonPath("$.newMemberId", is(memberId.toString())));
 
-        verify(commandGateway).sendAndWait(new BankIdSignCommand(memberId, someReferenceValue, "", "", ssn));
+        verify(commandGateway).sendAndWait(new BankIdSignCommand(memberId, someReferenceValue, "signature", "oscpResponse", ssn));
 
     }
 
-    private CollectResponse createCollectResponse(String ssn, ProgressStatus started) throws DatatypeConfigurationException {
+    private CollectResponse createCompletCollecteResponse(String ssn, String orderReference) throws DatatypeConfigurationException {
 
-        UserInfo ui = new UserInfo("Name","GivenName", "Surname", ssn, "127.0.0.1",  createXMLGregorian(ZonedDateTime.now()), createXMLGregorian(ZonedDateTime.now().plusDays(10)));
+        User user = new User(ssn,"Name","GivenName", "Surname");
 
-        return new CollectResponse(started, "", ui, "");
+        CompletionData completionData = new CompletionData(user, null, null, "signature","oscpResponse");
+
+        return new CollectResponse(orderReference, CollectStatus.complete, null, completionData);
     }
 
-    private XMLGregorianCalendar createXMLGregorian(ZonedDateTime dateTime) throws DatatypeConfigurationException {
+  private CollectResponse createStartedCollectResponse(String ssn, String orderReference) throws DatatypeConfigurationException {
+    return new CollectResponse(orderReference, CollectStatus.pending, "started", null);
+  }
+
+
+  private XMLGregorianCalendar createXMLGregorian(ZonedDateTime dateTime) throws DatatypeConfigurationException {
         return DatatypeFactory.newInstance().newXMLGregorianCalendar(GregorianCalendar.from(dateTime));
     }
 

@@ -5,7 +5,6 @@ import static net.logstash.logback.argument.StructuredArguments.value;
 import com.hedvig.external.bankID.bankIdRestTypes.CollectResponse;
 import com.hedvig.external.bankID.bankIdRestTypes.CollectStatus;
 import com.hedvig.external.bankID.bankIdRestTypes.OrderResponse;
-import com.hedvig.external.bankID.bankidTypes.ProgressStatus;
 import com.hedvig.memberservice.aggregates.exceptions.BankIdReferenceUsedException;
 import com.hedvig.memberservice.commands.AuthenticationAttemptCommand;
 import com.hedvig.memberservice.commands.BankIdAuthenticationStatus;

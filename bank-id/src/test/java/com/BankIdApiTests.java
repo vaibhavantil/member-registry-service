@@ -4,41 +4,46 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 
 import bankid.*;
-import com.hedvig.external.bankID.BankIdApi;
 import com.hedvig.external.bankID.BankIdClient;
-import com.hedvig.external.bankID.bankidTypes.CollectResponse;
-import com.hedvig.external.bankID.bankidTypes.OrderResponse;
-import com.hedvig.external.bankID.bankidTypes.ProgressStatus;
+import com.hedvig.external.bankID.bankIdRest.BankIdRestApi;
+import com.hedvig.external.bankID.bankIdRest.BankIdRestApiImpl;
+import com.hedvig.external.bankID.bankIdRest.BankIdRestClient;
+import com.hedvig.external.bankID.bankIdRestTypes.*;
+import com.hedvig.external.bankID.bankIdRestTypes.Collect.User;
 import com.hedvig.external.bankID.exceptions.BankIDError;
+
 import java.io.UnsupportedEncodingException;
 import java.time.ZonedDateTime;
 import java.util.GregorianCalendar;
 import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.XMLGregorianCalendar;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.junit4.SpringRunner;
 
 @RunWith(SpringRunner.class)
 public class BankIdApiTests {
 
-  @MockBean BankIdClient bankIdClient;
+  @MockBean
+  BankIdRestClient bankIdClient;
 
   @Test
   public void TestAuth() {
 
-    OrderResponseType orderResponseType = new OrderResponseType();
     final String orderReference = "orderReference";
-    orderResponseType.setOrderRef(orderReference);
     final String autostartToken = "autostartToken";
-    orderResponseType.setAutoStartToken(autostartToken);
+    OrderResponse orderResponse = new OrderResponse(orderReference, autostartToken);
 
-    when(bankIdClient.auth(null)).thenReturn(orderResponseType);
+    OrderAuthRequest orderAuthRequest = new OrderAuthRequest("0.0.0.0");
 
-    BankIdApi api = new BankIdApi(bankIdClient);
-    OrderResponse response = api.auth();
+    when(bankIdClient.auth(orderAuthRequest)).thenReturn(ResponseEntity.ok(orderResponse));
+
+    BankIdRestApi api = new BankIdRestApiImpl(bankIdClient);
+    OrderResponse response = api.auth(orderAuthRequest);
 
     assertThat(response).isNotNull();
     assertThat(response.getAutoStartToken()).isEqualTo(autostartToken);
@@ -48,20 +53,20 @@ public class BankIdApiTests {
   @Test
   public void TestSign() throws UnsupportedEncodingException {
 
-    OrderResponseType orderResponseType = new OrderResponseType();
     final String orderReference = "orderReference";
-    orderResponseType.setOrderRef(orderReference);
     final String autostartToken = "autostartToken";
-    orderResponseType.setAutoStartToken(autostartToken);
+    OrderResponse orderResponse = new OrderResponse(orderReference, autostartToken);
 
     final String ssn = "1212121212";
 
     final String message = "A short but nice message!";
 
-    when(bankIdClient.sign(ssn, message)).thenReturn(orderResponseType);
+    final String endUserIp = "0.0.0.0";
 
-    BankIdApi api = new BankIdApi(bankIdClient);
-    OrderResponse response = api.sign(ssn, message);
+    when(bankIdClient.sign(new OrderSignRequest(ssn, endUserIp, message))).thenReturn(ResponseEntity.ok(orderResponse));
+
+    BankIdRestApi api = new BankIdRestApiImpl(bankIdClient);
+    OrderResponse response = api.sign(ssn, endUserIp, message);
 
     assertThat(response).isNotNull();
     assertThat(response.getAutoStartToken()).isEqualTo(autostartToken);
@@ -77,59 +82,57 @@ public class BankIdApiTests {
 
     final String ssn = "1212121212";
     final String message = "A short but nice message!";
+    final String endUserIp = "0.0.0.0";
 
-    when(bankIdClient.sign(ssn, message)).thenThrow(new BankIDError(rpFaultType));
+    when(bankIdClient.sign(new OrderSignRequest(ssn, endUserIp, message))).thenThrow(new BankIDError(rpFaultType));
 
-    BankIdApi api = new BankIdApi(bankIdClient);
-    api.sign(ssn, message);
+    BankIdRestApi api = new BankIdRestApiImpl(bankIdClient);
+    api.sign(ssn, endUserIp, message);
   }
 
   @Test
   public void Collect() throws DatatypeConfigurationException {
     final String orderReference = "orderReference";
+    final String ssn = "1212121212";
+    final String firstName = "FirstName";
+    final String lastName = "LastName";
+    final String name = "FirstName LastName";
 
-    CollectResponseType crt = new CollectResponseType();
-    crt.setOcspResponse("oscpResponse");
-    crt.setProgressStatus(ProgressStatusType.COMPLETE);
-    crt.setSignature("signature");
+    User user = new User(ssn, firstName, lastName, name);
 
-    UserInfoType uit = new UserInfoType();
-    uit.setGivenName("FirstName");
-    uit.setSurname("LastName");
-    uit.setName("FirstName LastName");
-    ZonedDateTime today = ZonedDateTime.now();
+    CompletionData completionData = new CompletionData(user, null, null, "signature","oscpResponse");
 
-    uit.setNotBefore(createXMLGregorian(today));
-    uit.setNotAfter(createXMLGregorian(today.plusDays(10)));
-    crt.setUserInfo(uit);
+    CollectResponse collectResponse = new CollectResponse(orderReference, CollectStatus.complete, null, completionData);
+    CollectRequest collectRequest = new CollectRequest(orderReference);
 
-    when(bankIdClient.collect(orderReference)).thenReturn(crt);
+    when(bankIdClient.collect(collectRequest)).thenReturn(ResponseEntity.ok(collectResponse));
 
-    BankIdApi api = new BankIdApi(bankIdClient);
-    CollectResponse response = api.collect(orderReference);
+    BankIdRestApi api = new BankIdRestApiImpl(bankIdClient);
+    CollectResponse response = api.collect(collectRequest);
 
     assertThat(response).isNotNull();
-    assertThat(response.getProgressStatus()).isEqualTo(ProgressStatus.COMPLETE);
+    assertThat(response.getStatus()).isEqualTo(CollectStatus.complete);
   }
 
   @Test
   public void Collect_BankIdSession_Pending() throws DatatypeConfigurationException {
     final String orderReference = "orderReference";
 
-    CollectResponseType crt = new CollectResponseType();
-    crt.setProgressStatus(ProgressStatusType.OUTSTANDING_TRANSACTION);
+    CollectResponse collectResponse = new CollectResponse(orderReference, CollectStatus.pending, "outstandingTransaction", null);
+    CollectRequest collectRequest = new CollectRequest(orderReference);
 
-    when(bankIdClient.collect(orderReference)).thenReturn(crt);
+    when(bankIdClient.collect(collectRequest)).thenReturn(ResponseEntity.ok(collectResponse));
 
-    BankIdApi api = new BankIdApi(bankIdClient);
-    CollectResponse response = api.collect(orderReference);
+    BankIdRestApi api = new BankIdRestApiImpl(bankIdClient);
+    CollectResponse response = api.collect(collectRequest);
 
     assertThat(response).isNotNull();
-    assertThat(response.getProgressStatus()).isEqualTo(ProgressStatus.OUTSTANDING_TRANSACTION);
+    assertThat(response.getStatus()).isEqualTo(CollectStatus.pending);
+    assertThat(response.getHintCode()).isEqualTo("outstandingTransaction");
   }
 
   private XMLGregorianCalendar createXMLGregorian(ZonedDateTime dateTime)
-      throws DatatypeConfigurationException {
+    throws DatatypeConfigurationException {
     return DatatypeFactory.newInstance().newXMLGregorianCalendar(GregorianCalendar.from(dateTime));
   }
 }
