@@ -106,9 +106,7 @@ public class AuthControllerTest {
                 andExpect(jsonPath("$.referenceToken", is(someReferenceValue))).
                 andExpect(jsonPath("$.newMemberId", is(memberId.toString())));
 
-        BankIdAuthenticationStatus authStatus = new BankIdAuthenticationStatus();
-        authStatus.setSSN(ssn);
-        authStatus.setReferenceToken(someReferenceValue);
+        BankIdAuthenticationStatus authStatus = new BankIdAuthenticationStatus(ssn, someReferenceValue, "", "");
         verify(commandGateway).sendAndWait(captor.capture());
 
         AuthenticationAttemptCommand sentCommand = captor.getValue();

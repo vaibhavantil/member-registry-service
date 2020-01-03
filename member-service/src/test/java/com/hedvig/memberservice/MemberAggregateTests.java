@@ -129,12 +129,7 @@ public class MemberAggregateTests {
 
   private BankIdAuthenticationStatus makeBankIdAuthenticationStatus(
       String ssn, String referenceTokenValue, String firstName, String lastName) {
-    BankIdAuthenticationStatus authStatus = new BankIdAuthenticationStatus();
-    authStatus.setSSN(ssn);
-    authStatus.setReferenceToken(referenceTokenValue);
-    authStatus.setSurname(lastName);
-    authStatus.setGivenName(firstName);
-    return authStatus;
+    return new BankIdAuthenticationStatus(ssn, referenceTokenValue, firstName, lastName);
   }
 
   @Test

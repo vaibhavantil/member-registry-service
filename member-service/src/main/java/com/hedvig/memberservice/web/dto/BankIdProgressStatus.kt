@@ -10,12 +10,7 @@ enum class BankIdProgressStatus {
     STARTED,
     USER_SIGN,
     USER_REQ,
-    COMPLETE,
-    EXPIRED_TRANSACTION,
-    CERTIFICATE_ERROR,
-    USER_CANCEL,
-    CANCELLED,
-    START_FAILED;
+    COMPLETE;
 
     companion object {
         fun valueOf(collectResponse: CollectResponse): BankIdProgressStatus =
@@ -30,16 +25,6 @@ enum class BankIdProgressStatus {
                         "started" -> STARTED
                         "userSign" -> USER_SIGN
                         else -> throw IllegalArgumentException("Unknown collect pending hint code: ${collectResponse.hintCode}")
-                    }
-                }
-                CollectStatus.failed -> {
-                    when (collectResponse.hintCode) {
-                        "expiredTransaction" -> EXPIRED_TRANSACTION
-                        "certificateErr" -> CERTIFICATE_ERROR
-                        "userCancel" -> USER_CANCEL
-                        "cancelled" -> CANCELLED
-                        "startFailed" -> START_FAILED
-                        else -> throw IllegalArgumentException("Unknown collect failed hint code: ${collectResponse.hintCode}")
                     }
                 }
                 else -> {
