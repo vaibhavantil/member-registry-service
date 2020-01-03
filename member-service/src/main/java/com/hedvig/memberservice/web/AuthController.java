@@ -103,7 +103,6 @@ public class AuthController {
     }
   }
 
-  @Deprecated
   @PostMapping(path = "collect")
   public ResponseEntity<?> collect(
       @RequestParam String referenceToken,
