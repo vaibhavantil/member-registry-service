@@ -28,9 +28,9 @@ public class BisnodeInformation {
 
   private List<Telephone> phoneList;
 
-  public BisnodeInformation() {};
+  public BisnodeInformation() {}
 
-  public BisnodeInformation(String ssn, Person bisnodePerson) {
+    public BisnodeInformation(String ssn, Person bisnodePerson) {
     this.ssn = ssn;
     this.bisnodeGEDI = bisnodePerson.getGedi();
     this.preferredFirstName = bisnodePerson.getPreferredFirstName();

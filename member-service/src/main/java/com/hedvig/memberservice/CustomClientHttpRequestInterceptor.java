@@ -34,7 +34,7 @@ public class CustomClientHttpRequestInterceptor implements ClientHttpRequestInte
     LOGGER.trace("URI         : {}", request.getURI());
     LOGGER.trace("Method      : {}", request.getMethod());
     LOGGER.trace("Headers     : {}", request.getHeaders());
-    LOGGER.trace("Request body: {}", new String(body, "UTF-8"));
+    LOGGER.trace("Request body: {}", new String(body, StandardCharsets.UTF_8));
     LOGGER.trace(
         "=============================request end================================================");
   }

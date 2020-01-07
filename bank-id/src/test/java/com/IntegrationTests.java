@@ -6,6 +6,8 @@ import com.hedvig.external.bankID.configuration.Config;
 import com.hedvig.external.bankID.exceptions.BankIDError;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,7 +25,7 @@ public class IntegrationTests {
   public static final String emoji_closed_lock_with_key =
       new String(
           new byte[] {(byte) 0xF0, (byte) 0x9F, (byte) 0x94, (byte) 0x90},
-          Charset.forName("UTF-8"));
+              StandardCharsets.UTF_8);
 
   @Autowired WebServiceTemplate webServiceTemplate;
 

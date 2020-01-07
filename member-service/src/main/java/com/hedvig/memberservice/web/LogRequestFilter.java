@@ -25,7 +25,7 @@ public class LogRequestFilter implements Filter {
     try {
       // Setup MDC data:
 
-      if (HttpServletRequest.class.isInstance(request)) {
+      if (request instanceof HttpServletRequest) {
         HttpServletRequest httpRequest = (HttpServletRequest) request;
 
         String hedvigToken = httpRequest.getHeader("hedvig.token");

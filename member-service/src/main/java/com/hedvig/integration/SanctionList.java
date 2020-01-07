@@ -11,7 +11,7 @@ public class SanctionList {
   static String listURL =
       "https://webgate.ec.europa.eu/europeaid/fsd/fsf/public/files/dtdFullSanctionsList/content?token=dG9rZW4tMjAxNw";
 
-  public static void main(String args[]) {
+  public static void main(String[] args) {
     System.out.println(SanctionList.isOnSanctionList("john ardelius"));
   }
 

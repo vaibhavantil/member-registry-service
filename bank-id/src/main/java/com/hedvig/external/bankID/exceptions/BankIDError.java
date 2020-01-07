@@ -28,7 +28,7 @@ public class BankIDError extends RuntimeException {
         REQ_PRECOND,
         REQ_ERROR,
         REQ_BLOCKED,
-        START_FAILED;
+        START_FAILED
     }
 
     public ErrorType errorType;

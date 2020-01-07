@@ -2,6 +2,7 @@ package com.hedvig.external.bankID;
 
 import bankid.*;
 import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 import javax.xml.bind.JAXBElement;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Base64Utils;
@@ -37,7 +38,7 @@ public class BankIdClient {
     ObjectFactory factory = new ObjectFactory();
     SignRequestType t = factory.createSignRequestType();
     t.setPersonalNumber(ssn);
-    String encodedMessage = Base64Utils.encodeToString(message.getBytes("UTF-8"));
+    String encodedMessage = Base64Utils.encodeToString(message.getBytes(StandardCharsets.UTF_8));
     System.out.println(encodedMessage.length());
 
     t.setUserVisibleData(encodedMessage);
