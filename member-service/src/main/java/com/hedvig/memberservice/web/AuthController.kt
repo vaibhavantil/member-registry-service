@@ -45,13 +45,19 @@ class AuthController @Autowired constructor(
     private val bankIdService: BankIdService) {
 
     @PostMapping(path = ["auth"])
-    fun auth(@RequestHeader(value = "x-forwarded-for", required = false) forwardFor: String?, @RequestBody request: BankIdAuthRequest): ResponseEntity<BankIdAuthResponse> {
+    fun auth(@RequestHeader(value = "x-forwarded-for", required = false) forwardedIp: String?, @RequestBody request: BankIdAuthRequest): ResponseEntity<BankIdAuthResponse> {
         log.info(
             "Auth request for with memberId: ${request.memberId}", StructuredArguments.value("memberId", request.memberId))
 
         val memberId = convertMemberId(request.memberId)
 
-        val status = bankIdService.auth(memberId, forwardFor)
+        val endUserIp = if (forwardedIp?.contains(",") == true) {
+            forwardedIp.split(",").firstOrNull()
+        } else {
+            forwardedIp
+        }
+
+        val status = bankIdService.auth(memberId, endUserIp)
 
         val response = BankIdAuthResponse(
             autoStartToken = status.autoStartToken,
@@ -63,13 +69,19 @@ class AuthController @Autowired constructor(
 
     @PostMapping(path = ["sign"])
     @Throws(UnsupportedEncodingException::class)
-    fun sign(@RequestHeader(value = "x-forwarded-for", required = false) forwardFor: String?, @RequestBody request: BankIdSignRequest): ResponseEntity<BankIdSignResponse> {
+    fun sign(@RequestHeader(value = "x-forwarded-for", required = false) forwardedIp: String?, @RequestBody request: BankIdSignRequest): ResponseEntity<BankIdSignResponse> {
         val memberId = convertMemberId(request.memberId)
 
         log.info(
             "Sign request for ssn: ${request.ssn}", StructuredArguments.value("memberId", request.memberId))
 
-        val status = bankIdService.sign(request.ssn, request.userMessage, memberId, forwardFor)
+        val endUserIp = if (forwardedIp?.contains(",") == true) {
+            forwardedIp.split(",").firstOrNull()
+        } else {
+            forwardedIp
+        }
+
+        val status = bankIdService.sign(request.ssn, request.userMessage, memberId, endUserIp)
 
         val response = BankIdSignResponse(
             autoStartToken = status.autoStartToken,
