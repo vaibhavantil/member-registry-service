@@ -3,8 +3,8 @@ package com.hedvig.memberservice.entities;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.hedvig.external.bankID.bankIdRestTypes.CollectStatus;
-import com.hedvig.external.bankID.bankIdRestTypes.OrderResponse;
+import com.hedvig.external.bankID.bankIdTypes.CollectStatus;
+import com.hedvig.external.bankID.bankIdTypes.OrderResponse;
 import lombok.val;
 import org.junit.Test;
 import org.junit.runner.RunWith;

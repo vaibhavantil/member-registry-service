@@ -2,7 +2,7 @@ package com.hedvig.memberservice.entities;
 
 import static javax.persistence.GenerationType.SEQUENCE;
 
-import com.hedvig.external.bankID.bankIdRestTypes.OrderResponse;
+import com.hedvig.external.bankID.bankIdTypes.OrderResponse;
 import java.time.Instant;
 import javax.persistence.Column;
 import javax.persistence.Embedded;

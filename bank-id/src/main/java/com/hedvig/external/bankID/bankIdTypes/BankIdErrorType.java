@@ -1,6 +1,6 @@
-package com.hedvig.external.bankID.bankIdRestTypes;
+package com.hedvig.external.bankID.bankIdTypes;
 
-public enum BankIdRestErrorType {
+public enum BankIdErrorType {
   UNKNOWN,
   ALREADY_IN_PROGRESS,
   INVALID_PARAMETERS,

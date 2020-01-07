@@ -1,6 +1,6 @@
 package com.hedvig.memberservice.web.v2.dto;
 
-import com.hedvig.external.bankID.bankIdRestTypes.CollectStatus;
+import com.hedvig.external.bankID.bankIdTypes.CollectStatus;
 import javax.validation.constraints.NotNull;
 import lombok.Value;
 

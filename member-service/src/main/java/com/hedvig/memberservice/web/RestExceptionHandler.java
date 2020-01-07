@@ -1,6 +1,6 @@
 package com.hedvig.memberservice.web;
 
-import com.hedvig.external.bankID.bankIdRestTypes.BankIdRestError;
+import com.hedvig.external.bankID.bankIdTypes.BankIdError;
 import com.hedvig.external.bankID.exceptions.BankIDError;
 import com.hedvig.memberservice.web.dto.APIErrorDTO;
 import org.springframework.core.Ordered;
@@ -22,8 +22,8 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
     return ResponseEntity.status(code).body(apiError);
   }
 
-  @ExceptionHandler(BankIdRestError.class)
-  protected ResponseEntity<?> handleException(BankIdRestError error) {
+  @ExceptionHandler(BankIdError.class)
+  protected ResponseEntity<?> handleException(BankIdError error) {
     HttpStatus code = HttpStatus.INTERNAL_SERVER_ERROR;
     APIErrorDTO apiErrorDTO = new APIErrorDTO(code, error.getType().toString(), "Caling bankID failed");
     return ResponseEntity.status(code).body(apiErrorDTO);

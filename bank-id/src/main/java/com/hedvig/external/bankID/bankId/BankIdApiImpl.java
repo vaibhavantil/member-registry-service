@@ -1,12 +1,12 @@
-package com.hedvig.external.bankID.bankIdRest;
+package com.hedvig.external.bankID.bankId;
 
-import com.hedvig.external.bankID.bankIdRestTypes.BankIdRestError;
-import com.hedvig.external.bankID.bankIdRestTypes.BankIdRestErrorType;
-import com.hedvig.external.bankID.bankIdRestTypes.CollectRequest;
-import com.hedvig.external.bankID.bankIdRestTypes.CollectResponse;
-import com.hedvig.external.bankID.bankIdRestTypes.OrderAuthRequest;
-import com.hedvig.external.bankID.bankIdRestTypes.OrderResponse;
-import com.hedvig.external.bankID.bankIdRestTypes.OrderSignRequest;
+import com.hedvig.external.bankID.bankIdTypes.BankIdError;
+import com.hedvig.external.bankID.bankIdTypes.BankIdErrorType;
+import com.hedvig.external.bankID.bankIdTypes.CollectRequest;
+import com.hedvig.external.bankID.bankIdTypes.CollectResponse;
+import com.hedvig.external.bankID.bankIdTypes.OrderAuthRequest;
+import com.hedvig.external.bankID.bankIdTypes.OrderResponse;
+import com.hedvig.external.bankID.bankIdTypes.OrderSignRequest;
 import feign.FeignException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,25 +14,25 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 
 @Component
-public class BankIdRestApiImpl implements BankIdRestApi {
+public class BankIdApiImpl implements BankIdApi {
 
-  private final BankIdRestClient bankIdRestClient;
-  private Logger logger = LoggerFactory.getLogger(BankIdRestApiImpl.class);
+  private final BankIdClient bankIdClient;
+  private Logger logger = LoggerFactory.getLogger(BankIdApiImpl.class);
 
-  public BankIdRestApiImpl(BankIdRestClient bankIdRestClient) {
-    this.bankIdRestClient = bankIdRestClient;
+  public BankIdApiImpl(BankIdClient bankIdClient) {
+    this.bankIdClient = bankIdClient;
   }
 
   @Override
   public OrderResponse auth(OrderAuthRequest request) {
     try {
-      ResponseEntity<?> response = bankIdRestClient.auth(request);
+      ResponseEntity<?> response = bankIdClient.auth(request);
       return (OrderResponse) response.getBody();
     } catch (FeignException ex) {
       logger.error(
           "Auth - Something went wrong that wasn't mapped with the BankIdRestErrorDecoder. Status: {} , Message: {}",
           ex.status(), ex.getMessage());
-      throw new BankIdRestError(BankIdRestErrorType.UNKNOWN, String.valueOf(ex.status()),
+      throw new BankIdError(BankIdErrorType.UNKNOWN, String.valueOf(ex.status()),
           ex.getMessage());
     }
   }
@@ -40,13 +40,13 @@ public class BankIdRestApiImpl implements BankIdRestApi {
   @Override
   public OrderResponse sign(String personalNumber, String endUserIp, String userVisibleData) {
     try {
-      ResponseEntity<?> response = bankIdRestClient.sign(new OrderSignRequest(personalNumber, endUserIp, userVisibleData));
+      ResponseEntity<?> response = bankIdClient.sign(new OrderSignRequest(personalNumber, endUserIp, userVisibleData));
       return (OrderResponse) response.getBody();
     } catch (FeignException ex) {
       logger.error(
           "Sign - Something went wrong that wasn't mapped with the BankIdRestErrorDecoder. Status: {} , Message: {}",
           ex.status(), ex.getMessage());
-      throw new BankIdRestError(BankIdRestErrorType.UNKNOWN, String.valueOf(ex.status()),
+      throw new BankIdError(BankIdErrorType.UNKNOWN, String.valueOf(ex.status()),
           ex.getMessage());
     }
   }
@@ -54,13 +54,13 @@ public class BankIdRestApiImpl implements BankIdRestApi {
   @Override
   public CollectResponse collect(CollectRequest request) {
     try {
-      ResponseEntity<?> response = bankIdRestClient.collect(request);
+      ResponseEntity<?> response = bankIdClient.collect(request);
       return (CollectResponse) response.getBody();
     } catch (FeignException ex) {
       logger.error(
           "Collect - Something went wrong that wasn't mapped with the BankIdRestErrorDecoder. Status: {} , Message: {}",
           ex.status(), ex.getMessage());
-      throw new BankIdRestError(BankIdRestErrorType.UNKNOWN, String.valueOf(ex.status()),
+      throw new BankIdError(BankIdErrorType.UNKNOWN, String.valueOf(ex.status()),
           ex.getMessage());
     }
   }

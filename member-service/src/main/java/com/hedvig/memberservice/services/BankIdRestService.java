@@ -1,7 +1,7 @@
 package com.hedvig.memberservice.services;
 
-import com.hedvig.external.bankID.bankIdRestTypes.CollectResponse;
-import com.hedvig.external.bankID.bankIdRestTypes.OrderResponse;
+import com.hedvig.external.bankID.bankIdTypes.CollectResponse;
+import com.hedvig.external.bankID.bankIdTypes.OrderResponse;
 import org.springframework.lang.NonNull;
 
 public interface BankIdRestService {

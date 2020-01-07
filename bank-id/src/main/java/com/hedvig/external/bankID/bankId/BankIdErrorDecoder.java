@@ -1,24 +1,24 @@
-package com.hedvig.external.bankID.bankIdRest;
+package com.hedvig.external.bankID.bankId;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.hedvig.external.bankID.bankIdRestTypes.BankIdRestError;
-import com.hedvig.external.bankID.bankIdRestTypes.BankIdRestErrorResponse;
-import com.hedvig.external.bankID.bankIdRestTypes.BankIdRestErrorType;
+import com.hedvig.external.bankID.bankIdTypes.BankIdError;
+import com.hedvig.external.bankID.bankIdTypes.BankIdErrorResponse;
+import com.hedvig.external.bankID.bankIdTypes.BankIdErrorType;
 import feign.Response;
 import feign.codec.ErrorDecoder;
 import java.io.IOException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class BankIdRestErrorDecoder implements ErrorDecoder {
+public class BankIdErrorDecoder implements ErrorDecoder {
 
   private static final String ALREADY_IN_PROGRESS_LOWER_CASE = "alreadyinprogress";
   private static final String INVALID_PARAMETERS_LOWER_CASE = "invalidparameters";
 
-  private Logger logger = LoggerFactory.getLogger(BankIdRestErrorDecoder.class);
+  private Logger logger = LoggerFactory.getLogger(BankIdErrorDecoder.class);
   private ObjectMapper objectMapper;
 
-  public BankIdRestErrorDecoder(ObjectMapper objectMapper) {
+  public BankIdErrorDecoder(ObjectMapper objectMapper) {
     this.objectMapper = objectMapper;
   }
 
@@ -29,21 +29,21 @@ public class BankIdRestErrorDecoder implements ErrorDecoder {
         methodKey, response.status(), response);
     switch (response.status()) {
       case 400: {
-        BankIdRestErrorResponse res = null;
+        BankIdErrorResponse res = null;
         try {
-          res = objectMapper.readValue(response.body().asReader(), BankIdRestErrorResponse.class);
+          res = objectMapper.readValue(response.body().asReader(), BankIdErrorResponse.class);
 
           switch (res.getErrorCode().toLowerCase()) {
             case ALREADY_IN_PROGRESS_LOWER_CASE:
-              return new BankIdRestError(BankIdRestErrorType.ALREADY_IN_PROGRESS,
+              return new BankIdError(BankIdErrorType.ALREADY_IN_PROGRESS,
                   res.getErrorCode(),
                   res.getDetails());
             case INVALID_PARAMETERS_LOWER_CASE:
-              return new BankIdRestError(BankIdRestErrorType.INVALID_PARAMETERS,
+              return new BankIdError(BankIdErrorType.INVALID_PARAMETERS,
                   res.getErrorCode(),
                   res.getDetails());
             default:
-              return new BankIdRestError(BankIdRestErrorType.UNMAPPED_400, res.getErrorCode(),
+              return new BankIdError(BankIdErrorType.UNMAPPED_400, res.getErrorCode(),
                   res.getDetails());
           }
         }
@@ -53,21 +53,21 @@ public class BankIdRestErrorDecoder implements ErrorDecoder {
         }
       }
       case 401:
-        return new BankIdRestError(BankIdRestErrorType.UNAUTHORIZED);
+        return new BankIdError(BankIdErrorType.UNAUTHORIZED);
       case 404:
-        return new BankIdRestError(BankIdRestErrorType.NOT_FOUND);
+        return new BankIdError(BankIdErrorType.NOT_FOUND);
       case 408:
-        return new BankIdRestError(BankIdRestErrorType.REQUEST_TIMEOUT);
+        return new BankIdError(BankIdErrorType.REQUEST_TIMEOUT);
       case 415:
-        return new BankIdRestError(BankIdRestErrorType.UNSUPPORTED_MEDIA_TYPE);
+        return new BankIdError(BankIdErrorType.UNSUPPORTED_MEDIA_TYPE);
 
       case 500:
-        return new BankIdRestError(BankIdRestErrorType.INTERNAL_ERROR);
+        return new BankIdError(BankIdErrorType.INTERNAL_ERROR);
       case 503:
-        return new BankIdRestError(BankIdRestErrorType.MAINTENTANCE);
+        return new BankIdError(BankIdErrorType.MAINTENTANCE);
 
       default:
-        return new BankIdRestError(BankIdRestErrorType.UNKNOWN);
+        return new BankIdError(BankIdErrorType.UNKNOWN);
     }
   }
 

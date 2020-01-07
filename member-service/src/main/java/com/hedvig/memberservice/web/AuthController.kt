@@ -1,7 +1,7 @@
 package com.hedvig.memberservice.web
 
-import com.hedvig.external.bankID.bankIdRestTypes.CollectResponse
-import com.hedvig.external.bankID.bankIdRestTypes.CollectStatus
+import com.hedvig.external.bankID.bankIdTypes.CollectResponse
+import com.hedvig.external.bankID.bankIdTypes.CollectStatus
 import com.hedvig.memberservice.aggregates.exceptions.BankIdReferenceUsedException
 import com.hedvig.memberservice.commands.AuthenticationAttemptCommand
 import com.hedvig.memberservice.commands.BankIdAuthenticationStatus
@@ -34,7 +34,6 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 import java.io.UnsupportedEncodingException
-import java.util.*
 
 @RestController
 @RequestMapping("/member/bankid/")

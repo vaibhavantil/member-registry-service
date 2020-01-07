@@ -2,10 +2,10 @@ package com.hedvig.memberservice.web;
 
 import bankid.FaultStatusType;
 import bankid.RpFaultType;
-import com.hedvig.external.bankID.bankIdRestTypes.Collect.User;
-import com.hedvig.external.bankID.bankIdRestTypes.CollectResponse;
-import com.hedvig.external.bankID.bankIdRestTypes.CollectStatus;
-import com.hedvig.external.bankID.bankIdRestTypes.CompletionData;
+import com.hedvig.external.bankID.bankIdTypes.Collect.User;
+import com.hedvig.external.bankID.bankIdTypes.CollectResponse;
+import com.hedvig.external.bankID.bankIdTypes.CollectStatus;
+import com.hedvig.external.bankID.bankIdTypes.CompletionData;
 import com.hedvig.external.bankID.exceptions.BankIDError;
 import com.hedvig.memberservice.commands.AuthenticationAttemptCommand;
 import com.hedvig.memberservice.commands.BankIdAuthenticationStatus;

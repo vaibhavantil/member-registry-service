@@ -1,4 +1,4 @@
-package com.hedvig.external.bankID.bankIdRestTypes;
+package com.hedvig.external.bankID.bankIdTypes;
 
 public class OrderResponse {
   protected String orderRef;

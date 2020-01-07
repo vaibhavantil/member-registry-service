@@ -4,12 +4,11 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 
 import bankid.*;
-import com.hedvig.external.bankID.BankIdClient;
-import com.hedvig.external.bankID.bankIdRest.BankIdRestApi;
-import com.hedvig.external.bankID.bankIdRest.BankIdRestApiImpl;
-import com.hedvig.external.bankID.bankIdRest.BankIdRestClient;
-import com.hedvig.external.bankID.bankIdRestTypes.*;
-import com.hedvig.external.bankID.bankIdRestTypes.Collect.User;
+import com.hedvig.external.bankID.bankId.BankIdApi;
+import com.hedvig.external.bankID.bankId.BankIdApiImpl;
+import com.hedvig.external.bankID.bankId.BankIdClient;
+import com.hedvig.external.bankID.bankIdTypes.*;
+import com.hedvig.external.bankID.bankIdTypes.Collect.User;
 import com.hedvig.external.bankID.exceptions.BankIDError;
 
 import java.io.UnsupportedEncodingException;
@@ -29,7 +28,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 public class BankIdApiTests {
 
   @MockBean
-  BankIdRestClient bankIdClient;
+  BankIdClient bankIdClient;
 
   @Test
   public void TestAuth() {
@@ -42,7 +41,7 @@ public class BankIdApiTests {
 
     when(bankIdClient.auth(orderAuthRequest)).thenReturn(ResponseEntity.ok(orderResponse));
 
-    BankIdRestApi api = new BankIdRestApiImpl(bankIdClient);
+    BankIdApi api = new BankIdApiImpl(bankIdClient);
     OrderResponse response = api.auth(orderAuthRequest);
 
     assertThat(response).isNotNull();
@@ -65,7 +64,7 @@ public class BankIdApiTests {
 
     when(bankIdClient.sign(new OrderSignRequest(ssn, endUserIp, message))).thenReturn(ResponseEntity.ok(orderResponse));
 
-    BankIdRestApi api = new BankIdRestApiImpl(bankIdClient);
+    BankIdApi api = new BankIdApiImpl(bankIdClient);
     OrderResponse response = api.sign(ssn, endUserIp, message);
 
     assertThat(response).isNotNull();
@@ -86,7 +85,7 @@ public class BankIdApiTests {
 
     when(bankIdClient.sign(new OrderSignRequest(ssn, endUserIp, message))).thenThrow(new BankIDError(rpFaultType));
 
-    BankIdRestApi api = new BankIdRestApiImpl(bankIdClient);
+    BankIdApi api = new BankIdApiImpl(bankIdClient);
     api.sign(ssn, endUserIp, message);
   }
 
@@ -107,7 +106,7 @@ public class BankIdApiTests {
 
     when(bankIdClient.collect(collectRequest)).thenReturn(ResponseEntity.ok(collectResponse));
 
-    BankIdRestApi api = new BankIdRestApiImpl(bankIdClient);
+    BankIdApi api = new BankIdApiImpl(bankIdClient);
     CollectResponse response = api.collect(collectRequest);
 
     assertThat(response).isNotNull();
@@ -123,7 +122,7 @@ public class BankIdApiTests {
 
     when(bankIdClient.collect(collectRequest)).thenReturn(ResponseEntity.ok(collectResponse));
 
-    BankIdRestApi api = new BankIdRestApiImpl(bankIdClient);
+    BankIdApi api = new BankIdApiImpl(bankIdClient);
     CollectResponse response = api.collect(collectRequest);
 
     assertThat(response).isNotNull();

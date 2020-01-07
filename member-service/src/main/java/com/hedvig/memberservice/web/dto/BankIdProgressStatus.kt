@@ -1,7 +1,7 @@
 package com.hedvig.memberservice.web.dto
 
-import com.hedvig.external.bankID.bankIdRestTypes.CollectResponse
-import com.hedvig.external.bankID.bankIdRestTypes.CollectStatus
+import com.hedvig.external.bankID.bankIdTypes.CollectResponse
+import com.hedvig.external.bankID.bankIdTypes.CollectStatus
 import java.lang.IllegalArgumentException
 
 enum class BankIdProgressStatus {

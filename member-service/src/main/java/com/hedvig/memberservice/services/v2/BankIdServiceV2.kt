@@ -1,10 +1,10 @@
 package com.hedvig.memberservice.services.v2
 
-import com.hedvig.external.bankID.bankIdRest.BankIdRestApi
-import com.hedvig.external.bankID.bankIdRestTypes.CollectRequest
-import com.hedvig.external.bankID.bankIdRestTypes.CollectStatus
-import com.hedvig.external.bankID.bankIdRestTypes.OrderAuthRequest
-import com.hedvig.external.bankID.bankIdRestTypes.OrderResponse
+import com.hedvig.external.bankID.bankId.BankIdApi
+import com.hedvig.external.bankID.bankIdTypes.CollectRequest
+import com.hedvig.external.bankID.bankIdTypes.CollectStatus
+import com.hedvig.external.bankID.bankIdTypes.OrderAuthRequest
+import com.hedvig.external.bankID.bankIdTypes.OrderResponse
 import com.hedvig.memberservice.commands.InactivateMemberCommand
 import com.hedvig.memberservice.jobs.BankIdAuthCollector
 import com.hedvig.memberservice.query.CollectRepository
@@ -25,7 +25,7 @@ import javax.transaction.Transactional
 
 @Service
 class BankIdServiceV2(
-    private val bankIdRestApi: BankIdRestApi,
+    private val bankIdApi: BankIdApi,
     private val signedMemberRepository: SignedMemberRepository,
     private val commandGateway: CommandGateway,
     private val redisEventPublisher: RedisEventPublisher,
@@ -38,7 +38,7 @@ class BankIdServiceV2(
 
     @Transactional
     fun auth(memberId: Long, endUserIp: String): OrderResponse {
-        val status = bankIdRestApi.auth(OrderAuthRequest(endUserIp))
+        val status = bankIdApi.auth(OrderAuthRequest(endUserIp))
 
         trackAuthToken(status.orderRef, memberId)
         scheduleCollectJob(status.orderRef)
@@ -48,7 +48,7 @@ class BankIdServiceV2(
 
     fun authCollect(referenceToken: String, memberId: Long): Boolean {
         try {
-            val bankIdRes = bankIdRestApi.collect(CollectRequest(referenceToken))
+            val bankIdRes = bankIdApi.collect(CollectRequest(referenceToken))
             when (bankIdRes.status) {
                 CollectStatus.pending -> {
                     when (bankIdRes.hintCode) {

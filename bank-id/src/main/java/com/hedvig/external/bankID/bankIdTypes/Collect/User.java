@@ -1,4 +1,4 @@
-package com.hedvig.external.bankID.bankIdRestTypes.Collect;
+package com.hedvig.external.bankID.bankIdTypes.Collect;
 
 import lombok.Value;
 
