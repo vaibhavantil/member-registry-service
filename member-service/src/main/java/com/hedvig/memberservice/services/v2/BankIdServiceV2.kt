@@ -37,7 +37,7 @@ class BankIdServiceV2(
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     @Transactional
-    fun auth(memberId: Long, endUserIp: String?): OrderResponse {
+    fun auth(memberId: Long, endUserIp: String): OrderResponse {
         val status = bankIdApi.auth(OrderAuthRequest(endUserIp))
 
         trackAuthToken(status.orderRef, memberId)

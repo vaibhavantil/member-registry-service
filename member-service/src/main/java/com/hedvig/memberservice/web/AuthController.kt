@@ -12,6 +12,7 @@ import com.hedvig.memberservice.query.CollectType
 import com.hedvig.memberservice.query.MemberRepository
 import com.hedvig.memberservice.query.SignedMemberRepository
 import com.hedvig.memberservice.services.BankIdService
+import com.hedvig.memberservice.util.getEndUserIp
 import com.hedvig.memberservice.web.dto.APIErrorDTO
 import com.hedvig.memberservice.web.dto.BankIdAuthRequest
 import com.hedvig.memberservice.web.dto.BankIdAuthResponse
@@ -51,11 +52,8 @@ class AuthController @Autowired constructor(
 
         val memberId = convertMemberId(request.memberId)
 
-        val endUserIp = if (forwardedIp?.contains(",") == true) {
-            forwardedIp.split(",").firstOrNull()
-        } else {
-            forwardedIp
-        }
+        val endUserIp = forwardedIp
+            ?.getEndUserIp("Header 'x-forwarded-for' was not included when calling AuthController auth! MemberId:$memberId")
 
         val status = bankIdService.auth(memberId, endUserIp)
 
@@ -75,11 +73,8 @@ class AuthController @Autowired constructor(
         log.info(
             "Sign request for ssn: ${request.ssn}", StructuredArguments.value("memberId", request.memberId))
 
-        val endUserIp = if (forwardedIp?.contains(",") == true) {
-            forwardedIp.split(",").firstOrNull()
-        } else {
-            forwardedIp
-        }
+        val endUserIp = forwardedIp
+            ?.getEndUserIp("Header 'x-forwarded-for' was not included when calling AuthController sign! MemberId:$memberId")
 
         val status = bankIdService.sign(request.ssn, request.userMessage, memberId, endUserIp)
 
