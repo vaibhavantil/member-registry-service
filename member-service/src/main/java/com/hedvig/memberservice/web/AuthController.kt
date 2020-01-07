@@ -141,7 +141,7 @@ class AuthController @Autowired constructor(
                     return ResponseEntity.ok().header("Hedvig.Id", currentMemberId.toString()).body(response)
                 }
 
-                pendingOrFailed(status, referenceToken, hid)
+                createResponse(status, referenceToken, hid)
             }
             CollectType.RequestType.SIGN -> {
                 val status = bankIdService.signCollect(referenceToken)
@@ -160,7 +160,7 @@ class AuthController @Autowired constructor(
                     }
                 }
 
-                pendingOrFailed(status, referenceToken, hid)
+                createResponse(status, referenceToken, hid)
             }
             else -> {
                 ResponseEntity.noContent().build<Any>()
@@ -168,7 +168,7 @@ class AuthController @Autowired constructor(
         }
     }
 
-    private fun pendingOrFailed(collectResponse: CollectResponse, referenceToken: String, hid: Long): ResponseEntity<*> {
+    private fun createResponse(collectResponse: CollectResponse, referenceToken: String, hid: Long): ResponseEntity<*> {
         return when (collectResponse.status) {
             CollectStatus.failed -> {
                 ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
@@ -186,7 +186,8 @@ class AuthController @Autowired constructor(
                     )
                 )
             }
-            CollectStatus.pending -> {
+            CollectStatus.pending,
+            CollectStatus.complete -> {
                 ResponseEntity.ok(
                     BankIdCollectResponse(
                         bankIdStatus = valueOf(collectResponse),
@@ -194,7 +195,6 @@ class AuthController @Autowired constructor(
                         newMemberId = hid.toString())
                 )
             }
-            CollectStatus.complete -> throw IllegalCallerException("Pending or failed should never be called in collection complete state!")
             else -> throw RuntimeException("BankId collection response with no status! Collect response: $collectResponse")
         }
     }
