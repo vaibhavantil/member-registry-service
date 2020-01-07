@@ -16,8 +16,14 @@ class AuthControllerV2(
         private val bankIdService: BankIdServiceV2
 ) {
     @PostMapping("auth")
-    fun auth(@RequestHeader("hedvig.token") memberId: Long, @RequestHeader(value = "x-forwarded-for", required = false) forwardFor: String): ResponseEntity<AuthResponse> {
-        val status = bankIdService.auth(memberId, forwardFor)
+    fun auth(@RequestHeader("hedvig.token") memberId: Long, @RequestHeader(value = "x-forwarded-for", required = false) forwardedIp: String?): ResponseEntity<AuthResponse> {
+        val endUserIp = if (forwardedIp?.contains(",") == true) {
+            forwardedIp.split(",").firstOrNull()
+        } else {
+            forwardedIp
+        }
+
+        val status = bankIdService.auth(memberId, endUserIp)
         return ResponseEntity.ok(AuthResponse(status.autoStartToken))
     }
 }
