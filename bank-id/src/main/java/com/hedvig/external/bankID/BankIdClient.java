@@ -1,9 +1,14 @@
 package com.hedvig.external.bankID;
 
-import bankid.*;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
 import javax.xml.bind.JAXBElement;
+
+import bankid.AuthenticateRequestType;
+import bankid.ObjectFactory;
+import bankid.OrderResponseType;
+import bankid.SignRequestType;
+import bankid.CollectResponseType;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Base64Utils;
 import org.springframework.ws.client.core.WebServiceTemplate;
