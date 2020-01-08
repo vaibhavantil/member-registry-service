@@ -1,6 +1,6 @@
 package com.hedvig.memberservice.web.v2.dto;
 
-import com.hedvig.external.bankID.bankIdRestTypes.OrderResponse;
+import com.hedvig.external.bankID.bankIdTypes.OrderResponse;
 import com.hedvig.memberservice.entities.SignStatus;
 import lombok.NonNull;
 import lombok.Value;

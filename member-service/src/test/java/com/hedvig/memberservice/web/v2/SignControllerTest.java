@@ -1,7 +1,7 @@
 package com.hedvig.memberservice.web.v2;
 
-import com.hedvig.external.bankID.bankIdRestTypes.CollectStatus;
-import com.hedvig.external.bankID.bankIdRestTypes.OrderResponse;
+import com.hedvig.external.bankID.bankIdTypes.CollectStatus;
+import com.hedvig.external.bankID.bankIdTypes.OrderResponse;
 import com.hedvig.memberservice.entities.CollectResponse;
 import com.hedvig.memberservice.entities.SignSession;
 import com.hedvig.memberservice.entities.SignStatus;

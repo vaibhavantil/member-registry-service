@@ -1,9 +1,9 @@
 package com.hedvig.memberservice.services;
 
-import com.hedvig.external.bankID.bankIdRest.BankIdRestApi;
-import com.hedvig.external.bankID.bankIdRestTypes.CollectRequest;
-import com.hedvig.external.bankID.bankIdRestTypes.CollectResponse;
-import com.hedvig.external.bankID.bankIdRestTypes.OrderResponse;
+import com.hedvig.external.bankID.bankId.BankIdApi;
+import com.hedvig.external.bankID.bankIdTypes.CollectRequest;
+import com.hedvig.external.bankID.bankIdTypes.CollectResponse;
+import com.hedvig.external.bankID.bankIdTypes.OrderResponse;
 import java.util.Base64;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
@@ -11,22 +11,22 @@ import org.springframework.stereotype.Service;
 @Service
 public class BankIdRestServiceImpl implements BankIdRestService {
 
-  private final BankIdRestApi bankIdRestApi;
+  private final BankIdApi bankIdApi;
 
 
-  public BankIdRestServiceImpl(BankIdRestApi bankIdRestApi) {
-    this.bankIdRestApi = bankIdRestApi;
+  public BankIdRestServiceImpl(BankIdApi bankIdApi) {
+    this.bankIdApi = bankIdApi;
   }
 
   @Override
   public OrderResponse startSign(@NonNull final String ssn,
       @NonNull final String userVisibleMessage, @NonNull final String ipNumber) {
-    return bankIdRestApi.sign(ssn, ipNumber, Base64.getEncoder().encodeToString(userVisibleMessage.getBytes()));
+    return bankIdApi.sign(ssn, ipNumber, Base64.getEncoder().encodeToString(userVisibleMessage.getBytes()));
   }
 
   @Override
   public CollectResponse collect(@NonNull final String orderRef) {
 
-    return bankIdRestApi.collect(new CollectRequest(orderRef));
+    return bankIdApi.collect(new CollectRequest(orderRef));
   }
 }

@@ -11,14 +11,14 @@ import static org.mockito.BDDMockito.then;
 import static org.mockito.BDDMockito.willThrow;
 import static org.mockito.Mockito.times;
 
-import com.hedvig.external.bankID.bankIdRestTypes.BankIdRestError;
-import com.hedvig.external.bankID.bankIdRestTypes.Collect.Cert;
-import com.hedvig.external.bankID.bankIdRestTypes.Collect.Device;
-import com.hedvig.external.bankID.bankIdRestTypes.Collect.User;
-import com.hedvig.external.bankID.bankIdRestTypes.CollectResponse;
-import com.hedvig.external.bankID.bankIdRestTypes.CollectStatus;
-import com.hedvig.external.bankID.bankIdRestTypes.CompletionData;
-import com.hedvig.external.bankID.bankIdRestTypes.OrderResponse;
+import com.hedvig.external.bankID.bankIdTypes.BankIdError;
+import com.hedvig.external.bankID.bankIdTypes.Collect.Cert;
+import com.hedvig.external.bankID.bankIdTypes.Collect.Device;
+import com.hedvig.external.bankID.bankIdTypes.Collect.User;
+import com.hedvig.external.bankID.bankIdTypes.CollectResponse;
+import com.hedvig.external.bankID.bankIdTypes.CollectStatus;
+import com.hedvig.external.bankID.bankIdTypes.CompletionData;
+import com.hedvig.external.bankID.bankIdTypes.OrderResponse;
 import com.hedvig.memberservice.commands.UpdateWebOnBoardingInfoCommand;
 import com.hedvig.memberservice.entities.SignSession;
 import com.hedvig.memberservice.entities.SignSessionRepository;
@@ -182,9 +182,9 @@ public class SigningServiceTest {
     given(productApi.hasProductToSign(MEMBER_ID)).willReturn(
         makeProductToSignStatusEligibleSwitching());
     given(bankIdRestService.startSign(any(), any(), anyString()))
-        .willThrow(BankIdRestError.class);
+        .willThrow(BankIdError.class);
 
-    thrown.expect(BankIdRestError.class);
+    thrown.expect(BankIdError.class);
     sut.startWebSign(MEMBER_ID, new WebsignRequest(EMAIL, SSN, IP_ADDRESS));
 
   }

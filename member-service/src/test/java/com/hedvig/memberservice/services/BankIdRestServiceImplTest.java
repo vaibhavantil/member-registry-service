@@ -4,8 +4,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 
-import com.hedvig.external.bankID.bankIdRest.BankIdRestApi;
-import com.hedvig.external.bankID.bankIdRestTypes.OrderResponse;
+import com.hedvig.external.bankID.bankId.BankIdApi;
+import com.hedvig.external.bankID.bankIdTypes.OrderResponse;
 import lombok.val;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -16,7 +16,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 public class BankIdRestServiceImplTest {
 
   @Mock
-  BankIdRestApi api;
+  BankIdApi api;
 
   @Test
   public void startSign_givenMemberIdAndSSNAndMessage_startsSign(){

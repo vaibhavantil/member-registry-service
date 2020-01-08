@@ -1,14 +1,16 @@
 package com.hedvig.memberservice.services.v2
 
-import com.hedvig.external.bankID.bankidTypes.OrderResponse
-import com.hedvig.external.bankID.bankidTypes.ProgressStatus
+import com.hedvig.external.bankID.bankId.BankIdApi
+import com.hedvig.external.bankID.bankIdTypes.CollectRequest
+import com.hedvig.external.bankID.bankIdTypes.CollectStatus
+import com.hedvig.external.bankID.bankIdTypes.OrderAuthRequest
+import com.hedvig.external.bankID.bankIdTypes.OrderResponse
 import com.hedvig.memberservice.commands.InactivateMemberCommand
 import com.hedvig.memberservice.jobs.BankIdAuthCollector
 import com.hedvig.memberservice.query.CollectRepository
 import com.hedvig.memberservice.query.CollectType
 import com.hedvig.memberservice.query.SignedMemberRepository
 import com.hedvig.integration.apigateway.ApiGatewayService
-import com.hedvig.memberservice.services.bankid.BankIdSOAPApi
 import com.hedvig.memberservice.services.redispublisher.AuthSessionUpdatedEventStatus
 import com.hedvig.memberservice.services.redispublisher.RedisEventPublisher
 import org.axonframework.commandhandling.gateway.CommandGateway
@@ -23,7 +25,7 @@ import javax.transaction.Transactional
 
 @Service
 class BankIdServiceV2(
-    private val bankIdSOAPApi: BankIdSOAPApi,
+    private val bankIdApi: BankIdApi,
     private val signedMemberRepository: SignedMemberRepository,
     private val commandGateway: CommandGateway,
     private val redisEventPublisher: RedisEventPublisher,
@@ -35,8 +37,8 @@ class BankIdServiceV2(
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     @Transactional
-    fun auth(memberId: Long): OrderResponse {
-        val status = bankIdSOAPApi.auth()
+    fun auth(memberId: Long, endUserIp: String): OrderResponse {
+        val status = bankIdApi.auth(OrderAuthRequest(endUserIp))
 
         trackAuthToken(status.orderRef, memberId)
         scheduleCollectJob(status.orderRef)
@@ -46,16 +48,35 @@ class BankIdServiceV2(
 
     fun authCollect(referenceToken: String, memberId: Long): Boolean {
         try {
-            val bankIdRes = bankIdSOAPApi.authCollect(referenceToken)
-            when (bankIdRes.progressStatus) {
-                ProgressStatus.OUTSTANDING_TRANSACTION, ProgressStatus.NO_CLIENT -> {
-                    redisEventPublisher.onAuthSessionUpdated(memberId, AuthSessionUpdatedEventStatus.INITIATED)
+            val bankIdRes = bankIdApi.collect(CollectRequest(referenceToken))
+            when (bankIdRes.status) {
+                CollectStatus.pending -> {
+                    when (bankIdRes.hintCode) {
+                        "outstandingTransaction", "noClient" -> {
+                            redisEventPublisher.onAuthSessionUpdated(memberId, AuthSessionUpdatedEventStatus.INITIATED)
+                        }
+                        "started", "userSign" -> {
+                            redisEventPublisher.onAuthSessionUpdated(memberId, AuthSessionUpdatedEventStatus.IN_PROGRESS)
+                        }
+                        else -> {
+                            logger.error("Got unknown hint code on auth collect. Is pending. Hint code: ${bankIdRes.hintCode}")
+                            redisEventPublisher.onAuthSessionUpdated(memberId, AuthSessionUpdatedEventStatus.UNKNOWN)
+                        }
+                    }
                 }
-                ProgressStatus.STARTED, ProgressStatus.USER_SIGN -> {
-                    redisEventPublisher.onAuthSessionUpdated(memberId, AuthSessionUpdatedEventStatus.IN_PROGRESS)
+                CollectStatus.failed -> {
+                    when (bankIdRes.hintCode) {
+                        "expiredTransaction", "certificateErr", "userCancel", "cancelled", "startFailed" -> {
+                            redisEventPublisher.onAuthSessionUpdated(memberId, AuthSessionUpdatedEventStatus.FAILED)
+                        }
+                        else -> {
+                            logger.error("Got unknown hint code on auth collect. Failed. Hint code: ${bankIdRes.hintCode}")
+                            redisEventPublisher.onAuthSessionUpdated(memberId, AuthSessionUpdatedEventStatus.FAILED)
+                        }
+                    }
                 }
-                ProgressStatus.COMPLETE -> {
-                    val personalNumber = bankIdRes.userInfo.personalNumber
+                CollectStatus.complete -> {
+                    val personalNumber = bankIdRes.completionData.user.personalNumber
                     val signedMember = signedMemberRepository.findBySsn(personalNumber)
                     if (signedMember.isPresent) {
                         commandGateway.sendAndWait<Any>(InactivateMemberCommand(memberId))

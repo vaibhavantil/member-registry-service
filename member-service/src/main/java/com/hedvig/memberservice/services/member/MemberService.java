@@ -1,6 +1,6 @@
 package com.hedvig.memberservice.services.member;
 
-import com.hedvig.external.bankID.bankIdRestTypes.CollectResponse;
+import com.hedvig.external.bankID.bankIdTypes.CollectResponse;
 import com.hedvig.memberservice.commands.BankIdSignCommand;
 import org.axonframework.commandhandling.gateway.CommandGateway;
 import org.springframework.lang.NonNull;

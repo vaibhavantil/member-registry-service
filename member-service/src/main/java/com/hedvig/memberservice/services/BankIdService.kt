@@ -1,25 +1,27 @@
 package com.hedvig.memberservice.services
 
+import com.hedvig.external.bankID.bankId.BankIdApi
+import com.hedvig.external.bankID.bankIdTypes.CollectRequest
+import com.hedvig.external.bankID.bankIdTypes.OrderAuthRequest
 import com.hedvig.memberservice.query.CollectType.RequestType
 
-import com.hedvig.external.bankID.bankidTypes.CollectResponse
-import com.hedvig.external.bankID.bankidTypes.OrderResponse
+import com.hedvig.external.bankID.bankIdTypes.CollectResponse
+import com.hedvig.external.bankID.bankIdTypes.OrderResponse
 import com.hedvig.memberservice.query.CollectRepository
 import com.hedvig.memberservice.query.CollectType
-import com.hedvig.memberservice.services.bankid.BankIdSOAPApi
 import java.io.UnsupportedEncodingException
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 
 @Service
 class BankIdService(
-    private val bankIdSOAPApi: BankIdSOAPApi,
+    private val bankIdApi: BankIdApi,
     private val collectRepository: CollectRepository
 ) {
     private val log = LoggerFactory.getLogger(BankIdService::class.java)
 
-    fun auth(memberId: Long?): OrderResponse {
-        val status = bankIdSOAPApi.auth()
+    fun auth(memberId: Long?, endUserIp: String?): OrderResponse {
+        val status = bankIdApi.auth(OrderAuthRequest(endUserIp))
         log.info(
             "Started bankId AUTH autostart:{}, reference:{}",
             status.autoStartToken,
@@ -29,8 +31,8 @@ class BankIdService(
     }
 
     @Throws(UnsupportedEncodingException::class)
-    fun sign(ssn: String, userMessage: String, memberId: Long?): OrderResponse {
-        val status = bankIdSOAPApi.sign(ssn, userMessage)
+    fun sign(ssn: String, userMessage: String, memberId: Long?, endUserIp: String?): OrderResponse {
+        val status = bankIdApi.sign(ssn, endUserIp, userMessage)
         trackSignToken(status.orderRef, memberId)
         return status
     }
@@ -52,11 +54,11 @@ class BankIdService(
     }
 
     fun authCollect(referenceToken: String): CollectResponse {
-        return bankIdSOAPApi.authCollect(referenceToken)
+        return bankIdApi.collect(CollectRequest(referenceToken))
     }
 
     fun signCollect(referenceToken: String): CollectResponse {
-        return bankIdSOAPApi.signCollect(referenceToken)
+        return bankIdApi.collect(CollectRequest(referenceToken))
     }
 
 }

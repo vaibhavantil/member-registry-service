@@ -5,4 +5,5 @@ enum class AuthSessionUpdatedEventStatus {
     IN_PROGRESS,
     FAILED,
     SUCCESS,
+    UNKNOWN
 }

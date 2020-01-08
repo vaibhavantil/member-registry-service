@@ -1,6 +1,6 @@
 package com.hedvig.memberservice.entities;
 
-import com.hedvig.external.bankID.bankIdRestTypes.CollectStatus;
+import com.hedvig.external.bankID.bankIdTypes.CollectStatus;
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
 import javax.persistence.EnumType;

@@ -4,9 +4,9 @@ import static org.quartz.JobBuilder.newJob;
 import static org.quartz.SimpleScheduleBuilder.simpleSchedule;
 import static org.quartz.TriggerBuilder.newTrigger;
 
-import com.hedvig.external.bankID.bankIdRestTypes.BankIdRestError;
-import com.hedvig.external.bankID.bankIdRestTypes.CollectStatus;
-import com.hedvig.external.bankID.bankIdRestTypes.OrderResponse;
+import com.hedvig.external.bankID.bankIdTypes.BankIdError;
+import com.hedvig.external.bankID.bankIdTypes.CollectStatus;
+import com.hedvig.external.bankID.bankIdTypes.OrderResponse;
 import com.hedvig.memberservice.commands.SignMemberFromUnderwriterCommand;
 import com.hedvig.memberservice.commands.UpdateWebOnBoardingInfoCommand;
 import com.hedvig.memberservice.entities.CollectResponse;
@@ -207,7 +207,7 @@ public class SigningService {
                   signSessionRepository.save(s);
 
                   return response.getStatus() == CollectStatus.pending;
-                } catch (BankIdRestError e) {
+                } catch (BankIdError e) {
                   s.setStatus(SignStatus.FAILED);
                   signSessionRepository.save(s);
                 }
