@@ -6,6 +6,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.then;
 import static org.mockito.BDDMockito.willThrow;
 
+import com.hedvig.integration.underwritter.UnderwriterApi;
 import com.hedvig.memberservice.events.MemberSignedEvent;
 import com.hedvig.integration.productsPricing.ProductApi;
 import com.hedvig.memberservice.services.SNSNotificationService;
@@ -21,7 +22,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 public class MemberSignedSagaTest {
 
   @Mock
-  ProductApi productApi;
+  UnderwriterApi underwriterApi;
   @Mock
   SigningService signingService;
   @Mock
@@ -30,12 +31,12 @@ public class MemberSignedSagaTest {
   @Test
   public void onMemberSignedEvent_whenProductApiThrowsRuntimeException_willCallSigningService() {
 
-    willThrow(RuntimeException.class).given(productApi).contractSinged(anyLong(), anyString(), anyString(), anyString(), any(), anyString());
+    willThrow(RuntimeException.class).given(underwriterApi).memberSigned(anyString(), anyString(), anyString(), anyString());
 
     val saga = new MemberSignedSaga();
-    saga.productApi = productApi;
-    saga.signingService = signingService;
-    saga.snsNotificationService = snsNotificationService;
+    saga.setUnderwriterApi(underwriterApi);
+    saga.setSigningService(signingService);
+    saga.setSnsNotificationService(snsNotificationService);
 
     final MemberSignedEvent e = new MemberSignedEvent(1337L, "referenceId", "signature",
         "oscpResponse", "19121212121212");
