@@ -53,7 +53,7 @@ class AuthController @Autowired constructor(
         val memberId = convertMemberId(request.memberId)
 
         val endUserIp = forwardedIp
-            ?.getEndUserIp("Header 'x-forwarded-for' was not included when calling AuthController auth! MemberId:$memberId")
+            .getEndUserIp("Header 'x-forwarded-for' was not included when calling AuthController auth! MemberId:$memberId")
 
         val status = bankIdService.auth(memberId, endUserIp)
 
@@ -74,7 +74,7 @@ class AuthController @Autowired constructor(
             "Sign request for ssn: ${request.ssn}", StructuredArguments.value("memberId", request.memberId))
 
         val endUserIp = forwardedIp
-            ?.getEndUserIp("Header 'x-forwarded-for' was not included when calling AuthController sign! MemberId:$memberId")
+            .getEndUserIp("Header 'x-forwarded-for' was not included when calling AuthController sign! MemberId:$memberId")
 
         val status = bankIdService.sign(request.ssn, request.userMessage, memberId, endUserIp)
 
