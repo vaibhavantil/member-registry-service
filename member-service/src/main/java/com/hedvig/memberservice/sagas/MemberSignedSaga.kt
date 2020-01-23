@@ -35,7 +35,7 @@ class MemberSignedSaga {
         try {
             underwriterApi.memberSigned(e.getId().toString(), e.getReferenceId(), e.getSignature(), e.getOscpResponse())
         } catch (ex: RuntimeException) {
-            log.error("Could not notify underwriter about signed member for memberId: {}", e.getId(), ex)
+            log.error("Could not notify underwriter about signed member [MemberId: ${e.id}] Exception $ex")
         }
 
         signingService.productSignConfirmed(e.getReferenceId())
@@ -49,8 +49,7 @@ class MemberSignedSaga {
         e: MemberSignedWithoutBankId,
         eventMessage: EventMessage<MemberSignedWithoutBankId>
     ) {
-
-        log.debug("Product has already been signed")
+        log.debug("Product has already been signed [MemberId: ${e.memberId}]")
 
         signingService.productSignConfirmed(e.memberId.toString())
         snsNotificationService.sendMemberSignedNotification(e.memberId)
