@@ -9,6 +9,6 @@ import org.springframework.web.bind.annotation.RequestBody
 
 @FeignClient(name = "underwriter", url = "\${hedvig.underwriter.url:underwriter}")
 interface UnderwriterClient {
-    @PostMapping("/member/{memberId}/signed")
+    @PostMapping("/_/v1/quotes/member/{memberId}/signed")
     fun memberSigned(@PathVariable memberId: String, @RequestBody signRequest: SignRequest): ResponseEntity<Void>
 }
