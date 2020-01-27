@@ -29,11 +29,8 @@ public class BankIdApiImpl implements BankIdApi {
       ResponseEntity<?> response = bankIdClient.auth(request);
       return (OrderResponse) response.getBody();
     } catch (FeignException ex) {
-      logger.error(
-          "Auth - Something went wrong that wasn't mapped with the BankIdRestErrorDecoder. Status: {} , Message: {}",
-          ex.status(), ex.getMessage());
-      throw new BankIdError(BankIdErrorType.UNKNOWN, String.valueOf(ex.status()),
-          ex.getMessage());
+      logger.error("Auth - Something went wrong that wasn't mapped with the BankIdRestErrorDecoder", ex);
+      throw new BankIdError(BankIdErrorType.UNKNOWN, String.valueOf(ex.status()), ex.getMessage());
     }
   }
 
@@ -43,11 +40,8 @@ public class BankIdApiImpl implements BankIdApi {
       ResponseEntity<?> response = bankIdClient.sign(new OrderSignRequest(personalNumber, endUserIp, userVisibleData));
       return (OrderResponse) response.getBody();
     } catch (FeignException ex) {
-      logger.error(
-          "Sign - Something went wrong that wasn't mapped with the BankIdRestErrorDecoder. Status: {} , Message: {}",
-          ex.status(), ex.getMessage());
-      throw new BankIdError(BankIdErrorType.UNKNOWN, String.valueOf(ex.status()),
-          ex.getMessage());
+      logger.error("Sign - Something went wrong that wasn't mapped with the BankIdRestErrorDecoder", ex);
+      throw new BankIdError(BankIdErrorType.UNKNOWN, String.valueOf(ex.status()), ex.getMessage());
     }
   }
 
@@ -57,11 +51,8 @@ public class BankIdApiImpl implements BankIdApi {
       ResponseEntity<?> response = bankIdClient.collect(request);
       return (CollectResponse) response.getBody();
     } catch (FeignException ex) {
-      logger.error(
-          "Collect - Something went wrong that wasn't mapped with the BankIdRestErrorDecoder. Status: {} , Message: {}",
-          ex.status(), ex.getMessage());
-      throw new BankIdError(BankIdErrorType.UNKNOWN, String.valueOf(ex.status()),
-          ex.getMessage());
+      logger.error("Collect - Something went wrong that wasn't mapped with the BankIdRestErrorDecoder.", ex);
+      throw new BankIdError(BankIdErrorType.UNKNOWN, String.valueOf(ex.status()), ex.getMessage());
     }
   }
 }

@@ -66,10 +66,13 @@ class BankIdServiceV2(
                 }
                 CollectStatus.failed -> {
                     when (bankIdRes.hintCode) {
-                        "expiredTransaction", "certificateErr", "userCancel", "cancelled", "startFailed" -> {
+                        "userCancel", "cancelled"-> {
                             redisEventPublisher.onAuthSessionUpdated(memberId, AuthSessionUpdatedEventStatus.FAILED)
                         }
-                        else -> {
+                        "expiredTransaction", "certificateErr", "startFailed" -> {
+                            logger.error("BankId auth failed. With known error. Hint code: ${bankIdRes.hintCode}. Reference token: $referenceToken")
+                            redisEventPublisher.onAuthSessionUpdated(memberId, AuthSessionUpdatedEventStatus.FAILED)
+                        } else -> {
                             logger.error("Got unknown hint code on auth collect. Failed. Hint code: ${bankIdRes.hintCode}")
                             redisEventPublisher.onAuthSessionUpdated(memberId, AuthSessionUpdatedEventStatus.FAILED)
                         }

@@ -4,6 +4,7 @@ import com.hedvig.memberservice.services.v2.BankIdServiceV2
 import com.hedvig.memberservice.util.getEndUserIp
 import com.hedvig.memberservice.web.v2.dto.AuthResponse
 import org.axonframework.commandhandling.gateway.CommandGateway
+import org.slf4j.MDC
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestHeader
@@ -18,6 +19,8 @@ class AuthControllerV2(
 ) {
     @PostMapping("auth")
     fun auth(@RequestHeader("hedvig.token") memberId: Long, @RequestHeader(value = "x-forwarded-for", required = false) forwardedIp: String?): ResponseEntity<AuthResponse> {
+        MDC.put("memberId", memberId.toString())
+
         val endUserIp = forwardedIp
             .getEndUserIp("Header 'x-forwarded-for' was not included when calling AuthControllerV2 auth! MemberId:$memberId")
 
