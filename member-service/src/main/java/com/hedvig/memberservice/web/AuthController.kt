@@ -24,6 +24,7 @@ import com.hedvig.memberservice.web.dto.BankIdSignResponse
 import net.logstash.logback.argument.StructuredArguments
 import org.axonframework.commandhandling.gateway.CommandGateway
 import org.slf4j.LoggerFactory
+import org.slf4j.MDC
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
@@ -47,6 +48,7 @@ class AuthController @Autowired constructor(
 
     @PostMapping(path = ["auth"])
     fun auth(@RequestHeader(value = "x-forwarded-for", required = false) forwardedIp: String?, @RequestBody request: BankIdAuthRequest): ResponseEntity<BankIdAuthResponse> {
+        MDC.put("memberId", request.memberId)
         log.info(
             "Auth request for with memberId: ${request.memberId}", StructuredArguments.value("memberId", request.memberId))
 
@@ -68,6 +70,8 @@ class AuthController @Autowired constructor(
     @PostMapping(path = ["sign"])
     @Throws(UnsupportedEncodingException::class)
     fun sign(@RequestHeader(value = "x-forwarded-for", required = false) forwardedIp: String?, @RequestBody request: BankIdSignRequest): ResponseEntity<BankIdSignResponse> {
+        MDC.put("memberId", request.memberId)
+
         val memberId = convertMemberId(request.memberId)
 
         log.info(
@@ -99,6 +103,7 @@ class AuthController @Autowired constructor(
     fun collect(
         @RequestParam referenceToken: String,
         @RequestHeader(value = "hedvig.token") hid: Long): ResponseEntity<*> {
+        MDC.put("memberId", hid.toString())
 
         log.info("Start collect")
 
