@@ -122,11 +122,6 @@ public class MemberAggregate {
   }
 
   @CommandHandler
-  public void on(AssignTrackingIdCommand assignTrackingIdCommand) {
-    apply(new TrackingIdCreatedEvent(this.id, assignTrackingIdCommand.getTrackingId()));
-  }
-
-  @CommandHandler
   public void on(MemberCancelInsuranceCommand memberCommand) {
     val localCancellationDate =
       memberCommand.getInactivationDate().atStartOfDay(ZoneId.of("Europe/Stockholm"));

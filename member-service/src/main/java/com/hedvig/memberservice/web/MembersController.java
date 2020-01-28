@@ -83,18 +83,6 @@ public class MembersController {
         return ResponseEntity.notFound().build();
     }
 
-    @PostMapping("/trackingId")
-    public ResponseEntity<Void> setTrackingId(
-            @RequestHeader(value = "hedvig.token", required = true) Long hid,
-            @RequestBody TrackingIdDto trackingIdDto) {
-        val member = repo.findById(hid);
-        if (!member.isPresent()) {
-            return ResponseEntity.notFound().build();
-        }
-        commandGateway.sendAndWait(new AssignTrackingIdCommand(hid, trackingIdDto.getTrackingId()));
-        return ResponseEntity.ok().build();
-    }
-
     @GetMapping("/me")
     public ResponseEntity<?> me(@RequestHeader(value = "hedvig.token") Long hid) {
         Optional<MemberEntity> m = repo.findById(hid);
