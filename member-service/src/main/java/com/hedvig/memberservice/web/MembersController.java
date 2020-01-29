@@ -16,9 +16,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.retry.support.RetryTemplate;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -30,13 +28,10 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.validation.Valid;
-import java.security.NoSuchAlgorithmException;
-import java.security.SecureRandom;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.concurrent.CompletableFuture;
 
 @RestController()
 @RequestMapping("/member/")
@@ -45,8 +40,6 @@ public class MembersController {
     private final MemberRepository repo;
     private final TrackingIdRepository trackingRepo;
     private final CommandGateway commandGateway;
-    private final RetryTemplate retryTemplate;
-    private final SecureRandom randomGenerator;
     private final ProductApi productApi;
     private final CashbackService cashbackService;
     private final Logger log = LoggerFactory.getLogger(this.getClass());
@@ -55,16 +48,15 @@ public class MembersController {
     public String counterKey;
 
     @Autowired
-    public MembersController(MemberRepository repo, CommandGateway commandGateway,
-                             RetryTemplate retryTemplate,
-                             ProductApi productApi, CashbackService cashbackService, TrackingIdRepository trackingRepo)
-            throws NoSuchAlgorithmException {
+    public MembersController(MemberRepository repo,
+                             CommandGateway commandGateway,
+                             ProductApi productApi,
+                             CashbackService cashbackService,
+                             TrackingIdRepository trackingRepo) {
         this.repo = repo;
         this.commandGateway = commandGateway;
-        this.retryTemplate = retryTemplate;
         this.productApi = productApi;
         this.cashbackService = cashbackService;
-        this.randomGenerator = SecureRandom.getInstance("SHA1PRNG");
         this.trackingRepo = trackingRepo;
     }
 
@@ -89,40 +81,6 @@ public class MembersController {
         }
 
         return ResponseEntity.notFound().build();
-    }
-
-    @PostMapping("/helloHedvig")
-    public ResponseEntity<String> helloHedvig(@RequestHeader(value = "Accept-Language", required = false) final String acceptLanguage) throws Exception {
-
-        Long id = retryTemplate.execute(arg -> {
-            Long memberId;
-            Optional<MemberEntity> member;
-            do {
-                memberId = Math.abs(this.randomGenerator.nextLong() % 1000000000);
-                member = repo.findById(memberId);
-            } while (member.isPresent());
-
-            CompletableFuture<Object> a = commandGateway.send(new CreateMemberCommand(memberId, acceptLanguage));
-            Object ret = a.get();
-            log.info(ret.toString());
-            return memberId;
-        });
-
-        log.info("New member created with id: " + id);
-        return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON)
-                .body("{\"memberId\":" + id + "}");
-    }
-
-    @PostMapping("/trackingId")
-    public ResponseEntity<Void> setTrackingId(
-            @RequestHeader(value = "hedvig.token", required = true) Long hid,
-            @RequestBody TrackingIdDto trackingIdDto) {
-        val member = repo.findById(hid);
-        if (!member.isPresent()) {
-            return ResponseEntity.notFound().build();
-        }
-        commandGateway.sendAndWait(new AssignTrackingIdCommand(hid, trackingIdDto.getTrackingId()));
-        return ResponseEntity.ok().build();
     }
 
     @GetMapping("/me")
