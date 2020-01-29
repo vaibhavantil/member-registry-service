@@ -100,10 +100,6 @@ public class ProductApi {
     }
   }
 
-  public void editMemberName(String memberId, EditMemberNameRequestDTO editMemberNameRequestDTO) {
-      client.editMemberName(memberId, editMemberNameRequestDTO);
-  }
-
   @SuppressWarnings("Duplicates")
   public List<InsuranceNotificationDTO> getInsurancesByActivationDate(LocalDate activationDate) {
     try {

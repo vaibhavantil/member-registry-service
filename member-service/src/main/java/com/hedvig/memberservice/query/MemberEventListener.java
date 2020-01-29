@@ -130,7 +130,6 @@ public class MemberEventListener {
       e.getLastName()
     );
 
-    CompletableFuture.runAsync(() -> productApi.editMemberName(String.valueOf(e.getMemberId()), editMemberNameRequestDTO));
     CompletableFuture.runAsync(() -> botService.editMemberName(String.valueOf(e.getMemberId()), editMemberNameRequestDTO));
   }
 

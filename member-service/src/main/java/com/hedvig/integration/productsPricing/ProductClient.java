@@ -41,10 +41,4 @@ public interface ProductClient {
   @GetMapping("/_/insurance/{memberId}/hasProductToSign")
   ResponseEntity<ProductToSignStatusDTO> hasProductToSign(
       @PathVariable("memberId") String memberId);
-
-  @PostMapping("/_/insurance/{memberId}/editMemberName")
-  ResponseEntity<EditMemberNameRequestDTO> editMemberName(
-    @PathVariable ("memberId") String memberId,
-    @RequestBody @Valid EditMemberNameRequestDTO dto
-  );
 }
