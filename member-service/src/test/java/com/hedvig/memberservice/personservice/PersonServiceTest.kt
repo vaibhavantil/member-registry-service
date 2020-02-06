@@ -10,7 +10,7 @@ import org.junit.Test
 class PersonServiceTest {
 
     @Test
-    fun fraudFlagTest() {
+    fun fraudFlagShouldReturnRedWhenSuspectedFraud() {
         val member1 = MemberEntity()
         member1.ssn = "9901019999"
         member1.fraudulentStatus = null
@@ -29,7 +29,7 @@ class PersonServiceTest {
     }
 
     @Test
-    fun fraudFlagTestNoMembers() {
+    fun fraudFlagWhenNoMembersShouldReturnGreen() {
         val fraudFlag = PersonService.calculateFraudFlag(listOf())
         assertThat(fraudFlag).isEqualTo(Flag.GREEN)
     }
