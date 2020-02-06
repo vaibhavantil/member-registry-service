@@ -56,7 +56,7 @@ class DebtService @Autowired constructor(
 
         private fun getDebtFlag(debtSnapshot: DebtSnapshot): Flag {
             val debt = debtSnapshot.debt
-            val totalDebt = debt.totalAmountPrivateDebt + debt.totalAmountPrivateDebt
+            val totalDebt = debt.totalAmountPrivateDebt + debt.totalAmountPublicDebt
             val paymentDefaults = debtSnapshot.paymentDefaults
             return when {
                 totalDebt > BigDecimal.ZERO -> Flag.RED
