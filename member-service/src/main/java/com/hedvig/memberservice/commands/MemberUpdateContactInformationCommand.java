@@ -28,11 +28,20 @@ public class MemberUpdateContactInformationCommand {
     this.lastName = body.getLastName();
     this.email = body.getEmail();
 
-    this.street = body.getAddress().getStreet();
-    this.city = body.getAddress().getCity();
-    this.zipCode = body.getAddress().getZipCode();
-    this.apartmentNo = body.getAddress().getApartmentNo();
-    this.floor = body.getAddress().getFloor();
+    if (body.getAddress() != null) {
+      this.street = body.getAddress().getStreet();
+      this.city = body.getAddress().getCity();
+      this.zipCode = body.getAddress().getZipCode();
+      this.apartmentNo = body.getAddress().getApartmentNo();
+      this.floor = body.getAddress().getFloor();
+    } else {
+      street = null;
+      city = null;
+      zipCode = null;
+      apartmentNo = null;
+      floor = null;
+    }
+
     this.phoneNumber = body.getPhoneNumber();
   }
 }

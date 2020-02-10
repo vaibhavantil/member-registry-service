@@ -16,6 +16,9 @@ public class LivingAddress {
 
   public boolean needsUpdate(
       String street, String city, String zipCode, String apartmentNo, Integer floor) {
+    if (street == null && city == null && zipCode == null && apartmentNo == null && floor == null) {
+      return false;
+    }
     return !Objects.equals(this.street, street)
         || !Objects.equals(this.city, city)
         || !Objects.equals(this.zip, zipCode)
