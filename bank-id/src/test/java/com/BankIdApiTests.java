@@ -1,7 +1,5 @@
 package com;
 
-import bankid.FaultStatusType;
-import bankid.RpFaultType;
 import com.hedvig.external.bankID.bankId.BankIdApi;
 import com.hedvig.external.bankID.bankId.BankIdApiImpl;
 import com.hedvig.external.bankID.bankId.BankIdClient;
@@ -57,7 +55,7 @@ public class BankIdApiTests {
   }
 
   @Test
-  public void TestSign(){
+  public void TestSign() {
 
     final String orderReference = "orderReference";
     final String autostartToken = "autostartToken";
@@ -81,11 +79,7 @@ public class BankIdApiTests {
 
   @Test(expected = BankIdError.class)
   public void TestSignWithError() throws UnsupportedEncodingException {
-
-    RpFaultType rpFaultType = new RpFaultType();
-    rpFaultType.setFaultStatus(FaultStatusType.INVALID_PARAMETERS);
-    rpFaultType.setDetailedDescription("Invalid SSN");
-
+    
     final String ssn = "1212121212";
     final String message = "A short but nice message!";
     final String endUserIp = "0.0.0.0";
