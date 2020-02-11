@@ -9,7 +9,6 @@ import com.hedvig.external.bankID.bankId.BankIdApiImpl;
 import com.hedvig.external.bankID.bankId.BankIdClient;
 import com.hedvig.external.bankID.bankIdTypes.*;
 import com.hedvig.external.bankID.bankIdTypes.Collect.User;
-import com.hedvig.external.bankID.exceptions.BankIDError;
 
 import java.io.UnsupportedEncodingException;
 import java.time.ZonedDateTime;
@@ -18,9 +17,11 @@ import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.XMLGregorianCalendar;
 
+import com.hedvig.external.bankID.exceptions.BankIDError;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.junit4.SpringRunner;
 
