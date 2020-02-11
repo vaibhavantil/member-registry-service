@@ -4,5 +4,6 @@ import java.util.*
 
 data class NorwegianAuthenticationResponse(
     val id: UUID,
-    val errors: List<NorwegianAuthenticationResponseError>
+    val errors: List<NorwegianAuthenticationResponseError>,
+    val redirectUrl: String?
 )
