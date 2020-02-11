@@ -1,16 +1,20 @@
 package com.hedvig.memberservice.web;
 
-import bankid.FaultStatusType;
-import bankid.RpFaultType;
+import com.hedvig.external.bankID.bankIdTypes.BankIdError;
+import com.hedvig.external.bankID.bankIdTypes.BankIdErrorType;
 import com.hedvig.external.bankID.bankIdTypes.Collect.User;
 import com.hedvig.external.bankID.bankIdTypes.CollectResponse;
 import com.hedvig.external.bankID.bankIdTypes.CollectStatus;
 import com.hedvig.external.bankID.bankIdTypes.CompletionData;
-import com.hedvig.external.bankID.exceptions.BankIDError;
 import com.hedvig.memberservice.commands.AuthenticationAttemptCommand;
 import com.hedvig.memberservice.commands.BankIdAuthenticationStatus;
 import com.hedvig.memberservice.commands.BankIdSignCommand;
-import com.hedvig.memberservice.query.*;
+import com.hedvig.memberservice.query.CollectRepository;
+import com.hedvig.memberservice.query.CollectType;
+import com.hedvig.memberservice.query.MemberEntity;
+import com.hedvig.memberservice.query.MemberRepository;
+import com.hedvig.memberservice.query.SignedMemberEntity;
+import com.hedvig.memberservice.query.SignedMemberRepository;
 import com.hedvig.memberservice.services.BankIdService;
 import org.axonframework.commandhandling.gateway.CommandGateway;
 import org.junit.Test;
@@ -42,266 +46,258 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @WebMvcTest(controllers = AuthController.class)
 public class AuthControllerTest {
 
-    @Autowired
-    private MockMvc mockMvc;
+  @Autowired
+  private MockMvc mockMvc;
 
-    @MockBean
-    MemberRepository memberRepo;
-
-    @MockBean
-    CommandGateway commandGateway;
-
-    @MockBean
-    BankIdService bankIdService;
-
-    @MockBean
-    CollectRepository collectRepo;
+  @MockBean
+  MemberRepository memberRepo;
+
+  @MockBean
+  CommandGateway commandGateway;
+
+  @MockBean
+  BankIdService bankIdService;
+
+  @MockBean
+  CollectRepository collectRepo;
 
-    @MockBean
-    SignedMemberRepository signedMemberRepository;
+  @MockBean
+  SignedMemberRepository signedMemberRepository;
 
-    @Test
-    public void collect_referenceTokenNotFound_results_in_500() throws Exception {
-        mockMvc.
-            perform(
-                    post("/member/bankid/collect", "").
-                    param("referenceToken", "someReferenceValue").
-                    header("hedvig.token", "1337")
-            ).
-            andExpect(status().isInternalServerError());
+  @Test
+  public void collect_referenceTokenNotFound_results_in_500() throws Exception {
+    mockMvc.
+      perform(
+        post("/member/bankid/collect", "").
+          param("referenceToken", "someReferenceValue").
+          header("hedvig.token", "1337")
+      ).
+      andExpect(status().isInternalServerError());
 
-    }
+  }
 
-    @Captor
-    private ArgumentCaptor<AuthenticationAttemptCommand> captor;
+  @Captor
+  private ArgumentCaptor<AuthenticationAttemptCommand> captor;
 
-    @Test
-    public void collect_Auth_status_COMPLETE() throws Exception {
+  @Test
+  public void collect_Auth_status_COMPLETE() throws Exception {
 
-        final Long memberId = 1337L;
-        final String someReferenceValue = "someReferenceValue";
-        final String ssn = "1212121212";
+    final Long memberId = 1337L;
+    final String someReferenceValue = "someReferenceValue";
+    final String ssn = "1212121212";
+
+    CollectType collectType = new CollectType();
+    collectType.type = CollectType.RequestType.AUTH;
+    collectType.token = someReferenceValue;
+    collectType.memberId = memberId;
 
-        CollectType collectType = new CollectType();
-        collectType.type = CollectType.RequestType.AUTH;
-        collectType.token = someReferenceValue;
-        collectType.memberId = memberId;
+    when(collectRepo.findById(someReferenceValue)).thenReturn(Optional.of(collectType));
 
-        when(collectRepo.findById(someReferenceValue)).thenReturn(Optional.of(collectType));
-
-        CollectResponse collectResponse = createCompletCollecteResponse(ssn, someReferenceValue);
+    CollectResponse collectResponse = createCompletCollecteResponse(ssn, someReferenceValue);
 
-        when(bankIdService.authCollect(someReferenceValue)).thenReturn(collectResponse);
-        when(signedMemberRepository.findBySsn(ssn)).thenReturn(Optional.empty());
+    when(bankIdService.authCollect(someReferenceValue)).thenReturn(collectResponse);
+    when(signedMemberRepository.findBySsn(ssn)).thenReturn(Optional.empty());
 
-        mockMvc.
-                perform(
-                        post("/member/bankid/collect", "").
-                        param("referenceToken", someReferenceValue).
-                        header("hedvig.token", memberId.toString())
-                ).
-                andExpect(
-                        status().is2xxSuccessful()).
-                andExpect(jsonPath("$.bankIdStatus", is("COMPLETE"))).
-                andExpect(jsonPath("$.referenceToken", is(someReferenceValue))).
-                andExpect(jsonPath("$.newMemberId", is(memberId.toString())));
+    mockMvc.
+      perform(
+        post("/member/bankid/collect", "").
+          param("referenceToken", someReferenceValue).
+          header("hedvig.token", memberId.toString())
+      ).
+      andExpect(
+        status().is2xxSuccessful()).
+      andExpect(jsonPath("$.bankIdStatus", is("COMPLETE"))).
+      andExpect(jsonPath("$.referenceToken", is(someReferenceValue))).
+      andExpect(jsonPath("$.newMemberId", is(memberId.toString())));
 
-        BankIdAuthenticationStatus authStatus = new BankIdAuthenticationStatus(ssn, someReferenceValue, "", "");
-        verify(commandGateway).sendAndWait(captor.capture());
+    BankIdAuthenticationStatus authStatus = new BankIdAuthenticationStatus(ssn, someReferenceValue, "", "");
+    verify(commandGateway).sendAndWait(captor.capture());
 
-        AuthenticationAttemptCommand sentCommand = captor.getValue();
-        assertThat(sentCommand.getId()).isEqualTo(memberId);
-        assertThat(sentCommand.getBankIdAuthResponse().getReferenceToken()).isEqualTo(someReferenceValue);
-        assertThat(sentCommand.getBankIdAuthResponse().getSSN()).isEqualTo(ssn);
-    }
+    AuthenticationAttemptCommand sentCommand = captor.getValue();
+    assertThat(sentCommand.getId()).isEqualTo(memberId);
+    assertThat(sentCommand.getBankIdAuthResponse().getReferenceToken()).isEqualTo(someReferenceValue);
+    assertThat(sentCommand.getBankIdAuthResponse().getSSN()).isEqualTo(ssn);
+  }
 
-    @Test
-    public void collect_Auth_ExistingMember_returnsNew_memberId() throws Exception {
+  @Test
+  public void collect_Auth_ExistingMember_returnsNew_memberId() throws Exception {
 
-        final Long memberId = 1337L;
-        final String someReferenceValue = "someReferenceValue";
-        final String ssn = "1212121212";
+    final Long memberId = 1337L;
+    final String someReferenceValue = "someReferenceValue";
+    final String ssn = "1212121212";
 
-        final Long existingMemberId = 1338L;
+    final Long existingMemberId = 1338L;
 
-        CollectType collectType = new CollectType();
-        collectType.type = CollectType.RequestType.AUTH;
-        collectType.token = someReferenceValue;
-        collectType.memberId = memberId;
+    CollectType collectType = new CollectType();
+    collectType.type = CollectType.RequestType.AUTH;
+    collectType.token = someReferenceValue;
+    collectType.memberId = memberId;
 
-        when(collectRepo.findById(someReferenceValue)).thenReturn(Optional.of(collectType));
+    when(collectRepo.findById(someReferenceValue)).thenReturn(Optional.of(collectType));
 
-        CollectResponse collectResponse = createCompletCollecteResponse(ssn, someReferenceValue);
+    CollectResponse collectResponse = createCompletCollecteResponse(ssn, someReferenceValue);
 
-        when(bankIdService.authCollect(someReferenceValue)).thenReturn(collectResponse);
+    when(bankIdService.authCollect(someReferenceValue)).thenReturn(collectResponse);
 
-        SignedMemberEntity signedMemberEntity = new SignedMemberEntity();
-        signedMemberEntity.setSsn(ssn);
-        signedMemberEntity.setId(existingMemberId);
-        when(signedMemberRepository.findBySsn(ssn)).thenReturn(Optional.of(signedMemberEntity));
+    SignedMemberEntity signedMemberEntity = new SignedMemberEntity();
+    signedMemberEntity.setSsn(ssn);
+    signedMemberEntity.setId(existingMemberId);
+    when(signedMemberRepository.findBySsn(ssn)).thenReturn(Optional.of(signedMemberEntity));
 
-        mockMvc.
-                perform(
-                        post("/member/bankid/collect", "").
-                                param("referenceToken", someReferenceValue).
-                                header("hedvig.token", memberId.toString())
-                ).
-                andExpect(
-                        status().is2xxSuccessful()).
-                andExpect(jsonPath("$.bankIdStatus", is("COMPLETE"))).
-                andExpect(jsonPath("$.referenceToken", is(someReferenceValue))).
-                andExpect(jsonPath("$.newMemberId", is(existingMemberId.toString())));
+    mockMvc.
+      perform(
+        post("/member/bankid/collect", "").
+          param("referenceToken", someReferenceValue).
+          header("hedvig.token", memberId.toString())
+      ).
+      andExpect(
+        status().is2xxSuccessful()).
+      andExpect(jsonPath("$.bankIdStatus", is("COMPLETE"))).
+      andExpect(jsonPath("$.referenceToken", is(someReferenceValue))).
+      andExpect(jsonPath("$.newMemberId", is(existingMemberId.toString())));
 
-    }
+  }
 
 
-    @Test
-    public void collect_Auth_BankIDError() throws Exception {
+  @Test
+  public void collect_Auth_BankIDError() throws Exception {
 
-        final Long memberId = 1337L;
-        final String someReferenceValue = "someReferenceValue";
+    final Long memberId = 1337L;
+    final String someReferenceValue = "someReferenceValue";
 
-        CollectType collectType = new CollectType();
-        collectType.type = CollectType.RequestType.AUTH;
-        collectType.token = someReferenceValue;
-        collectType.memberId = memberId;
+    CollectType collectType = new CollectType();
+    collectType.type = CollectType.RequestType.AUTH;
+    collectType.token = someReferenceValue;
+    collectType.memberId = memberId;
 
-        when(collectRepo.findById(someReferenceValue)).thenReturn(Optional.of(collectType));
+    when(collectRepo.findById(someReferenceValue)).thenReturn(Optional.of(collectType));
 
+    when(bankIdService.authCollect(someReferenceValue)).thenThrow(new BankIdError(BankIdErrorType.INTERNAL_ERROR));
 
-        RpFaultType faultType = new RpFaultType();
-        faultType.setFaultStatus(FaultStatusType.EXPIRED_TRANSACTION);
-        faultType.setDetailedDescription("Some description");
-        BankIDError error = new BankIDError(faultType);
+    mockMvc.
+      perform(
+        post("/member/bankid/collect", "").
+          param("referenceToken", someReferenceValue).
+          header("hedvig.token", memberId.toString())
+      ).
+      andExpect(
+        status().is5xxServerError()).
+      andExpect(jsonPath("$.apiError").exists()).
+      andExpect(jsonPath("$.apiError.code").value("INTERNAL_ERROR"));
+  }
+
 
-        when(bankIdService.authCollect(someReferenceValue)).thenThrow(error);
+  @Test
+  public void collect_Auth_status_STARTED() throws Exception {
 
-        mockMvc.
-                perform(
-                        post("/member/bankid/collect", "").
-                                param("referenceToken", someReferenceValue).
-                                header("hedvig.token", memberId.toString())
-                ).
-                andExpect(
-                        status().is5xxServerError()).
-                andExpect(jsonPath("$.apiError").exists()).
-                andExpect(jsonPath("$.apiError.code").value("EXPIRED_TRANSACTION")).
-                andExpect(jsonPath("$.apiError.message").value("Some description"));
-    }
+    final Long memberId = 1337L;
+    final String someReferenceValue = "someReferenceValue";
+    final String ssn = "1212121212";
 
+    CollectType collectType = new CollectType();
+    collectType.type = CollectType.RequestType.AUTH;
+    collectType.token = someReferenceValue;
+    collectType.memberId = memberId;
 
+    when(collectRepo.findById(someReferenceValue)).thenReturn(Optional.of(collectType));
 
-    @Test
-    public void collect_Auth_status_STARTED() throws Exception {
+    CollectResponse collectResponse = createStartedCollectResponse(ssn, someReferenceValue);
 
-        final Long memberId = 1337L;
-        final String someReferenceValue = "someReferenceValue";
-        final String ssn = "1212121212";
+    when(bankIdService.authCollect(someReferenceValue)).thenReturn(collectResponse);
 
-        CollectType collectType = new CollectType();
-        collectType.type = CollectType.RequestType.AUTH;
-        collectType.token = someReferenceValue;
-        collectType.memberId = memberId;
+    mockMvc.
+      perform(
+        post("/member/bankid/collect", "").
+          param("referenceToken", someReferenceValue).
+          header("hedvig.token", memberId.toString())
+      ).
+      andExpect(
+        status().is2xxSuccessful()).
+      andExpect(jsonPath("$.bankIdStatus", is("STARTED"))).
+      andExpect(jsonPath("$.referenceToken", is(someReferenceValue))).
+      andExpect(jsonPath("$.newMemberId", is(memberId.toString())));
 
-        when(collectRepo.findById(someReferenceValue)).thenReturn(Optional.of(collectType));
+  }
 
-        CollectResponse collectResponse = createStartedCollectResponse(ssn, someReferenceValue);
 
-        when(bankIdService.authCollect(someReferenceValue)).thenReturn(collectResponse);
+  @Test
+  public void collect_SIGN_status_STARTED() throws Exception {
 
-        mockMvc.
-                perform(
-                        post("/member/bankid/collect", "").
-                                param("referenceToken", someReferenceValue).
-                                header("hedvig.token", memberId.toString())
-                ).
-                andExpect(
-                        status().is2xxSuccessful()).
-                andExpect(jsonPath("$.bankIdStatus", is("STARTED"))).
-                andExpect(jsonPath("$.referenceToken", is(someReferenceValue))).
-                andExpect(jsonPath("$.newMemberId", is(memberId.toString())));
+    final Long memberId = 1337L;
+    final String someReferenceValue = "someReferenceValue";
+    final String ssn = "1212121212";
 
-    }
+    CollectType collectType = new CollectType();
+    collectType.type = CollectType.RequestType.SIGN;
+    collectType.token = someReferenceValue;
+    collectType.memberId = memberId;
 
+    when(collectRepo.findById(someReferenceValue)).thenReturn(Optional.of(collectType));
 
-    @Test
-    public void collect_SIGN_status_STARTED() throws Exception {
+    CollectResponse collectResponse = createStartedCollectResponse(ssn, someReferenceValue);
 
-        final Long memberId = 1337L;
-        final String someReferenceValue = "someReferenceValue";
-        final String ssn = "1212121212";
+    when(bankIdService.signCollect(someReferenceValue)).thenReturn(collectResponse);
 
-        CollectType collectType = new CollectType();
-        collectType.type = CollectType.RequestType.SIGN;
-        collectType.token = someReferenceValue;
-        collectType.memberId = memberId;
+    mockMvc.
+      perform(
+        post("/member/bankid/collect", "").
+          param("referenceToken", someReferenceValue).
+          header("hedvig.token", memberId.toString())
+      ).
+      andExpect(
+        status().is2xxSuccessful()).
+      andExpect(jsonPath("$.bankIdStatus", is("STARTED"))).
+      andExpect(jsonPath("$.referenceToken", is(someReferenceValue))).
+      andExpect(jsonPath("$.newMemberId", is(memberId.toString())));
 
-        when(collectRepo.findById(someReferenceValue)).thenReturn(Optional.of(collectType));
+  }
 
-        CollectResponse collectResponse = createStartedCollectResponse(ssn, someReferenceValue);
+  @Test
+  public void collect_SIGN_status_COMPLETE_Sends_SIGN_COMMAND() throws Exception {
 
-        when(bankIdService.signCollect(someReferenceValue)).thenReturn(collectResponse);
+    final Long memberId = 1337L;
+    final String someReferenceValue = "someReferenceValue";
+    final String ssn = "1212121212";
 
-        mockMvc.
-                perform(
-                        post("/member/bankid/collect", "").
-                                param("referenceToken", someReferenceValue).
-                                header("hedvig.token", memberId.toString())
-                ).
-                andExpect(
-                        status().is2xxSuccessful()).
-                andExpect(jsonPath("$.bankIdStatus", is("STARTED"))).
-                andExpect(jsonPath("$.referenceToken", is(someReferenceValue))).
-                andExpect(jsonPath("$.newMemberId", is(memberId.toString())));
+    CollectType collectType = new CollectType();
+    collectType.type = CollectType.RequestType.SIGN;
+    collectType.token = someReferenceValue;
+    collectType.memberId = memberId;
 
-    }
+    when(collectRepo.findById(someReferenceValue)).thenReturn(Optional.of(collectType));
 
-    @Test
-    public void collect_SIGN_status_COMPLETE_Sends_SIGN_COMMAND() throws Exception {
+    CollectResponse collectResponse = createCompletCollecteResponse(ssn, someReferenceValue);
 
-        final Long memberId = 1337L;
-        final String someReferenceValue = "someReferenceValue";
-        final String ssn = "1212121212";
+    when(bankIdService.signCollect(someReferenceValue)).thenReturn(collectResponse);
 
-        CollectType collectType = new CollectType();
-        collectType.type = CollectType.RequestType.SIGN;
-        collectType.token = someReferenceValue;
-        collectType.memberId = memberId;
+    MemberEntity memberEntity = new MemberEntity();
+    memberEntity.setId(memberId);
+    when(memberRepo.findById(memberId)).thenReturn(Optional.of(memberEntity));
 
-        when(collectRepo.findById(someReferenceValue)).thenReturn(Optional.of(collectType));
+    mockMvc.
+      perform(
+        post("/member/bankid/collect", "").
+          param("referenceToken", someReferenceValue).
+          header("hedvig.token", memberId.toString())
+      ).
+      andExpect(
+        status().is2xxSuccessful()).
+      andExpect(jsonPath("$.bankIdStatus", is("COMPLETE"))).
+      andExpect(jsonPath("$.referenceToken", is(someReferenceValue))).
+      andExpect(jsonPath("$.newMemberId", is(memberId.toString())));
 
-        CollectResponse collectResponse = createCompletCollecteResponse(ssn, someReferenceValue);
+    verify(commandGateway).sendAndWait(new BankIdSignCommand(memberId, someReferenceValue, "signature", "oscpResponse", ssn));
 
-        when(bankIdService.signCollect(someReferenceValue)).thenReturn(collectResponse);
+  }
 
-        MemberEntity memberEntity = new MemberEntity();
-        memberEntity.setId(memberId);
-        when(memberRepo.findById(memberId)).thenReturn(Optional.of(memberEntity));
+  private CollectResponse createCompletCollecteResponse(String ssn, String orderReference) throws DatatypeConfigurationException {
 
-        mockMvc.
-                perform(
-                        post("/member/bankid/collect", "").
-                                param("referenceToken", someReferenceValue).
-                                header("hedvig.token", memberId.toString())
-                ).
-                andExpect(
-                        status().is2xxSuccessful()).
-                andExpect(jsonPath("$.bankIdStatus", is("COMPLETE"))).
-                andExpect(jsonPath("$.referenceToken", is(someReferenceValue))).
-                andExpect(jsonPath("$.newMemberId", is(memberId.toString())));
+    User user = new User(ssn, "Name", "GivenName", "Surname");
 
-        verify(commandGateway).sendAndWait(new BankIdSignCommand(memberId, someReferenceValue, "signature", "oscpResponse", ssn));
+    CompletionData completionData = new CompletionData(user, null, null, "signature", "oscpResponse");
 
-    }
-
-    private CollectResponse createCompletCollecteResponse(String ssn, String orderReference) throws DatatypeConfigurationException {
-
-        User user = new User(ssn,"Name","GivenName", "Surname");
-
-        CompletionData completionData = new CompletionData(user, null, null, "signature","oscpResponse");
-
-        return new CollectResponse(orderReference, CollectStatus.complete, null, completionData);
-    }
+    return new CollectResponse(orderReference, CollectStatus.complete, null, completionData);
+  }
 
   private CollectResponse createStartedCollectResponse(String ssn, String orderReference) throws DatatypeConfigurationException {
     return new CollectResponse(orderReference, CollectStatus.pending, "started", null);
@@ -309,7 +305,7 @@ public class AuthControllerTest {
 
 
   private XMLGregorianCalendar createXMLGregorian(ZonedDateTime dateTime) throws DatatypeConfigurationException {
-        return DatatypeFactory.newInstance().newXMLGregorianCalendar(GregorianCalendar.from(dateTime));
-    }
+    return DatatypeFactory.newInstance().newXMLGregorianCalendar(GregorianCalendar.from(dateTime));
+  }
 
 }

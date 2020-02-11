@@ -1,29 +1,35 @@
 package com;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.when;
-
-import bankid.*;
+import bankid.FaultStatusType;
+import bankid.RpFaultType;
 import com.hedvig.external.bankID.bankId.BankIdApi;
 import com.hedvig.external.bankID.bankId.BankIdApiImpl;
 import com.hedvig.external.bankID.bankId.BankIdClient;
-import com.hedvig.external.bankID.bankIdTypes.*;
+import com.hedvig.external.bankID.bankIdTypes.BankIdError;
+import com.hedvig.external.bankID.bankIdTypes.BankIdErrorType;
 import com.hedvig.external.bankID.bankIdTypes.Collect.User;
-
-import java.io.UnsupportedEncodingException;
-import java.time.ZonedDateTime;
-import java.util.GregorianCalendar;
-import javax.xml.datatype.DatatypeConfigurationException;
-import javax.xml.datatype.DatatypeFactory;
-import javax.xml.datatype.XMLGregorianCalendar;
-
-import com.hedvig.external.bankID.exceptions.BankIDError;
+import com.hedvig.external.bankID.bankIdTypes.CollectRequest;
+import com.hedvig.external.bankID.bankIdTypes.CollectResponse;
+import com.hedvig.external.bankID.bankIdTypes.CollectStatus;
+import com.hedvig.external.bankID.bankIdTypes.CompletionData;
+import com.hedvig.external.bankID.bankIdTypes.OrderAuthRequest;
+import com.hedvig.external.bankID.bankIdTypes.OrderResponse;
+import com.hedvig.external.bankID.bankIdTypes.OrderSignRequest;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.junit4.SpringRunner;
+
+import javax.xml.datatype.DatatypeConfigurationException;
+import javax.xml.datatype.DatatypeFactory;
+import javax.xml.datatype.XMLGregorianCalendar;
+import java.io.UnsupportedEncodingException;
+import java.time.ZonedDateTime;
+import java.util.GregorianCalendar;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.when;
 
 @RunWith(SpringRunner.class)
 public class BankIdApiTests {
@@ -51,7 +57,7 @@ public class BankIdApiTests {
   }
 
   @Test
-  public void TestSign() throws UnsupportedEncodingException {
+  public void TestSign(){
 
     final String orderReference = "orderReference";
     final String autostartToken = "autostartToken";
@@ -73,7 +79,7 @@ public class BankIdApiTests {
     assertThat(response.getOrderRef()).isEqualTo(orderReference);
   }
 
-  @Test(expected = BankIDError.class)
+  @Test(expected = BankIdError.class)
   public void TestSignWithError() throws UnsupportedEncodingException {
 
     RpFaultType rpFaultType = new RpFaultType();
@@ -84,7 +90,7 @@ public class BankIdApiTests {
     final String message = "A short but nice message!";
     final String endUserIp = "0.0.0.0";
 
-    when(bankIdClient.sign(new OrderSignRequest(ssn, endUserIp, message))).thenThrow(new BankIDError(rpFaultType));
+    when(bankIdClient.sign(new OrderSignRequest(ssn, endUserIp, message))).thenThrow(new BankIdError(BankIdErrorType.UNKNOWN));
 
     BankIdApi api = new BankIdApiImpl(bankIdClient);
     api.sign(ssn, endUserIp, message);
@@ -100,7 +106,7 @@ public class BankIdApiTests {
 
     User user = new User(ssn, firstName, lastName, name);
 
-    CompletionData completionData = new CompletionData(user, null, null, "signature","oscpResponse");
+    CompletionData completionData = new CompletionData(user, null, null, "signature", "oscpResponse");
 
     CollectResponse collectResponse = new CollectResponse(orderReference, CollectStatus.complete, null, completionData);
     CollectRequest collectRequest = new CollectRequest(orderReference);

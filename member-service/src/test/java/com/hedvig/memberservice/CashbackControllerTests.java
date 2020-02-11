@@ -25,7 +25,6 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @RunWith(SpringRunner.class)
-//@ContextConfiguration(classes = TestApplication.class)
 @WebMvcTest(controllers = CashbackController.class)
 @EnableAxon
 public class CashbackControllerTests {
