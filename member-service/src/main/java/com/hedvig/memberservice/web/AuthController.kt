@@ -2,9 +2,6 @@ package com.hedvig.memberservice.web
 
 
 import com.hedvig.common.DeprecatedException
-import com.hedvig.external.authentication.NorwegianAuthentication
-import com.hedvig.external.authentication.dto.NorwegianAuthenticationRequest
-import com.hedvig.external.authentication.dto.NorwegianAuthenticationResponse
 import com.hedvig.external.bankID.bankIdTypes.CollectResponse
 import com.hedvig.external.bankID.bankIdTypes.CollectStatus
 import com.hedvig.memberservice.aggregates.exceptions.BankIdReferenceUsedException
