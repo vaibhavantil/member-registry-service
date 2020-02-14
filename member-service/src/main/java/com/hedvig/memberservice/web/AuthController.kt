@@ -1,5 +1,6 @@
 package com.hedvig.memberservice.web
 
+
 import com.hedvig.common.DeprecatedException
 import com.hedvig.external.authentication.NorwegianAuthentication
 import com.hedvig.external.authentication.dto.NorwegianAuthenticationRequest
@@ -48,8 +49,7 @@ class AuthController @Autowired constructor(
     private val memberRepo: MemberRepository,
     private val signedMemberRepository: SignedMemberRepository,
     private val collectRepo: CollectRepository,
-    private val bankIdService: BankIdService,
-    private val norwegianAuthentication: NorwegianAuthentication) {
+    private val bankIdService: BankIdService) {
 
     @PostMapping(path = ["auth"])
     fun auth(@RequestHeader(value = "x-forwarded-for", required = false) forwardedIp: String?, @RequestBody request: BankIdAuthRequest): ResponseEntity<BankIdAuthResponse> {
@@ -198,15 +198,6 @@ class AuthController @Autowired constructor(
             }
             else -> throw RuntimeException("BankId collection response with no status! Collect response: $collectResponse")
         }
-    }
-
-    @PostMapping(path = ["norway"])
-    fun norway(): ResponseEntity<NorwegianAuthenticationResponse> {
-        val request = NorwegianAuthenticationRequest(
-            "19041452504", "SV", false
-        )
-        val response = norwegianAuthentication.auth(request)
-        return ResponseEntity.ok(response)
     }
 
     companion object {

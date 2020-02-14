@@ -20,7 +20,7 @@ public class WebsignRequest {
   @NotBlank
   String ipAddress;
 
-
+  boolean isMobile;
 
 
   @ConstructorProperties({"email", "ssn", "ipAddress"})
@@ -28,6 +28,15 @@ public class WebsignRequest {
     this.email = email;
     this.ssn = ssn;
     this.ipAddress = GetValidIpAddress(ipAddress);
+    isMobile = false;
+  }
+
+  @ConstructorProperties({"email", "ssn", "ipAddress", "isMobile"})
+  public WebsignRequest(@Email String email, @NotBlank String ssn, @NotBlank String ipAddress, boolean isMobile) {
+    this.email = email;
+    this.ssn = ssn;
+    this.ipAddress = GetValidIpAddress(ipAddress);
+    this.isMobile = isMobile;
   }
 
   private String GetValidIpAddress(String ipAddress) {

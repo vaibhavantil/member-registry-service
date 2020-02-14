@@ -1,6 +1,7 @@
 package com.hedvig.external.authentication
 
-import com.hedvig.external.authentication.dto.NorwegianAuthenticationRequest
+import com.hedvig.external.authentication.dto.NorwegianAuthenticationCollectResponse
+import com.hedvig.external.authentication.dto.NorwegianBankIdAuthenticationRequest
 import com.hedvig.external.authentication.dto.NorwegianAuthenticationResponse
 import com.hedvig.external.authentication.dto.NorwegianAuthenticationResponseError
 import com.hedvig.external.zignSec.client.ZignSecClient
@@ -20,7 +21,7 @@ class NorwegianAuthenticationImpl(
     @Value("\${zignsec.host:test.zignsec.com}")
     private lateinit var host: String
 
-    override fun auth(request: NorwegianAuthenticationRequest): NorwegianAuthenticationResponse {
+    override fun auth(request: NorwegianBankIdAuthenticationRequest): NorwegianAuthenticationResponse {
         val body = ZignSecRequestBody(
             personalnumber = request.personalNumber,
             language = request.language
@@ -37,6 +38,14 @@ class NorwegianAuthenticationImpl(
             response.errors.map { NorwegianAuthenticationResponseError(it.code, it.description) },
             response.redirectUrl
         )
+    }
+
+    override fun sign(request: NorwegianBankIdAuthenticationRequest): NorwegianAuthenticationResponse {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+
+    override fun collect(reference: UUID): NorwegianAuthenticationCollectResponse {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
     companion object {

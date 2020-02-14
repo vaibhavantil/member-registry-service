@@ -104,6 +104,7 @@ public class SigningService {
 
       if (session.canReuseBankIdSession() == false) {
 
+        // TODO: on ssn figure out if we should use norwegian sign
         val result =
             bankidService.startSign(
                 request.getSsn(),
