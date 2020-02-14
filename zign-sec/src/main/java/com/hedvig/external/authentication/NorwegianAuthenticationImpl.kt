@@ -24,7 +24,8 @@ class NorwegianAuthenticationImpl(
     override fun auth(request: NorwegianBankIdAuthenticationRequest): NorwegianAuthenticationResponse {
         val body = ZignSecRequestBody(
             personalnumber = request.personalNumber,
-            language = request.language
+            language = request.language,
+            webhook = request.webhook
         )
         val response = zignSecClient.auth(
             bankIdSelector = if(request.isMobile) BANK_ID_MOBILE else BANK_ID_WEB,
