@@ -17,4 +17,5 @@ public class MemberSignResponse {
   @NonNull
   OrderResponse bankIdOrderResponse;
 
+  //TODO: add norwegian response
 }
