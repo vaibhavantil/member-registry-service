@@ -30,17 +30,6 @@ class BankIdService(
         return status
     }
 
-    @Throws(UnsupportedEncodingException::class)
-    fun sign(ssn: String, userMessage: String, memberId: Long?, endUserIp: String?): OrderResponse {
-        val status = bankIdApi.sign(ssn, endUserIp, userMessage)
-        trackSignToken(status.orderRef, memberId)
-        return status
-    }
-
-    private fun trackSignToken(referenceToken: String, memberId: Long?) {
-        trackReferenceToken(referenceToken, RequestType.SIGN, memberId)
-    }
-
     private fun trackAuthToken(referenceToken: String, memberId: Long?) {
         trackReferenceToken(referenceToken, RequestType.AUTH, memberId)
     }

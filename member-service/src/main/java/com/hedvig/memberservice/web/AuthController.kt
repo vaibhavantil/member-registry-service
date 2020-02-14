@@ -1,5 +1,6 @@
 package com.hedvig.memberservice.web
 
+import com.hedvig.common.DeprecatedException
 import com.hedvig.external.bankID.bankIdTypes.CollectResponse
 import com.hedvig.external.bankID.bankIdTypes.CollectStatus
 import com.hedvig.memberservice.aggregates.exceptions.BankIdReferenceUsedException
@@ -69,25 +70,9 @@ class AuthController @Autowired constructor(
 
     @PostMapping(path = ["sign"])
     @Throws(UnsupportedEncodingException::class)
+    @Deprecated("Use V2")
     fun sign(@RequestHeader(value = "x-forwarded-for", required = false) forwardedIp: String?, @RequestBody request: BankIdSignRequest): ResponseEntity<BankIdSignResponse> {
-        MDC.put("memberId", request.memberId)
-
-        val memberId = convertMemberId(request.memberId)
-
-        log.info(
-            "Sign request for ssn: ${request.ssn}", StructuredArguments.value("memberId", request.memberId))
-
-        val endUserIp = forwardedIp
-            .getEndUserIp("Header 'x-forwarded-for' was not included when calling AuthController sign! MemberId:$memberId")
-
-        val status = bankIdService.sign(request.ssn, request.userMessage, memberId, endUserIp)
-
-        val response = BankIdSignResponse(
-            autoStartToken = status.autoStartToken,
-            referenceToken = status.orderRef
-        )
-
-        return ResponseEntity.ok(response)
+        throw DeprecatedException("Use V2")
     }
 
     private fun convertMemberId(memberId: String): Long {
