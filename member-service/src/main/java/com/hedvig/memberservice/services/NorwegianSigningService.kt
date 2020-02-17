@@ -30,6 +30,6 @@ class NorwegianSigningService(
                 status = SignStatus.IN_PROGRESS,
                 norwegianBankIdResponse = NorwegianBankIdResponse(redirectUrl)
             )
-        } ?: throw IllegalStateException("Started norwegian sign got no redirect url [Response: $response]")
+        } ?: throw IllegalStateException("Started norwegian sign got no redirect url [memberId: $memberId] [Response: $response]")
     }
 }

@@ -35,7 +35,8 @@ class NorwegianBankIdService(
     //TODO: maybe we should map more
     private fun String.toTwoLetterLanguage() = when (this) {
         "sv-SE" -> "SV"
-        "en-SE" -> "EN"
+        "en-SE",
+        "en-NO" -> "EN"
         else -> "NO"
     }
 
