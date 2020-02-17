@@ -1,5 +1,6 @@
 package com.hedvig.integration.underwritter
 
+import com.hedvig.integration.underwritter.dtos.QuoteState
 import com.hedvig.integration.underwritter.dtos.QuoteToSignStatusDTO
 import com.hedvig.integration.underwritter.dtos.SignRequest
 import feign.FeignException
@@ -22,7 +23,7 @@ class UnderwriterApi(private val underwriterClient: UnderwriterClient) {
             val response = underwriterClient.getQuoteFromMemberId(memberId).body!!
 
             return QuoteToSignStatusDTO(
-                isEligibleToSign = true,
+                isEligibleToSign = response.state == QuoteState.QUOTED,
                 isSwitching = response.currentInsurer != null
             )
         } catch (feignException: FeignException) {

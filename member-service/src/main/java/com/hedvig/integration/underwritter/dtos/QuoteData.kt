@@ -4,5 +4,7 @@ import java.util.*
 
 data class QuoteDto(
     val id: UUID,
-    val currentInsurer: String? = null
+    val currentInsurer: String? = null,
+    val state: QuoteState
 )
+
