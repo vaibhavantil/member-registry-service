@@ -8,8 +8,15 @@ import javax.persistence.Enumerated;
 import lombok.Data;
 
 @Embeddable
-@Data
 public class CollectResponse {
+
+  public CollectResponse(
+    CollectStatus status,
+    String hintCode
+  ) {
+    this.status = status;
+    this.hintCode = hintCode;
+  }
 
   @Enumerated(EnumType.STRING)
   @Column(name = "collect_response_status")
@@ -17,4 +24,12 @@ public class CollectResponse {
 
   @Column(name = "collect_reponse_hint_code")
   private String hintCode;
+
+  public CollectStatus getStatus() {
+    return status;
+  }
+
+  public String getHintCode() {
+    return hintCode;
+  }
 }
