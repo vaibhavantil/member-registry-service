@@ -19,6 +19,8 @@ import com.hedvig.external.bankID.bankIdTypes.CollectResponse;
 import com.hedvig.external.bankID.bankIdTypes.CollectStatus;
 import com.hedvig.external.bankID.bankIdTypes.CompletionData;
 import com.hedvig.external.bankID.bankIdTypes.OrderResponse;
+import com.hedvig.integration.underwritter.UnderwriterApi;
+import com.hedvig.integration.underwritter.dtos.QuoteToSignStatusDTO;
 import com.hedvig.memberservice.commands.UpdateWebOnBoardingInfoCommand;
 import com.hedvig.memberservice.entities.SignSession;
 import com.hedvig.memberservice.entities.SignSessionRepository;
@@ -33,11 +35,13 @@ import com.hedvig.memberservice.query.SignedMemberRepository;
 import com.hedvig.memberservice.services.member.CannotSignInsuranceException;
 import com.hedvig.memberservice.services.member.MemberService;
 import com.hedvig.memberservice.web.v2.dto.WebsignRequest;
+
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.Date;
 import java.util.Optional;
+
 import lombok.val;
 import org.axonframework.commandhandling.gateway.CommandGateway;
 import org.junit.Before;
@@ -61,7 +65,7 @@ public class SigningServiceTest {
   private static final String SSN = "191212121212";
   private static final String EMAIL = "test@test.com";
 
-  private static final String ORDER_REFERENCE = "orderReference";
+  private static final String ORDER_REFERENCE = "1337";
   private static final String AUTO_START_TOKEN = "autoStartToken";
 
   private static final String ORDER_REFERENCE2 = "orderReference2";
@@ -73,10 +77,13 @@ public class SigningServiceTest {
 
 
   @Mock
-  ProductApi productApi;
+  UnderwriterApi underwriterApi;
 
   @Mock
   BankIdRestService bankIdRestService;
+
+  @Mock
+  NorwegianBankIdService norwegianBankIdService;
 
   @Mock
   SignedMemberRepository signedMemberRepository;
@@ -102,28 +109,42 @@ public class SigningServiceTest {
   @Rule
   public ExpectedException thrown = ExpectedException.none();
 
-  @Captor ArgumentCaptor<JobDetail> jobDetailArgumentCaptor;
-  @Captor ArgumentCaptor<String> argumentCaptor;
-  @Captor ArgumentCaptor<UpdateWebOnBoardingInfoCommand> updateWebOnBoardingInfoCommandArgumentCaptor;
+  @Captor
+  ArgumentCaptor<JobDetail> jobDetailArgumentCaptor;
+  @Captor
+  ArgumentCaptor<String> argumentCaptor;
+  @Captor
+  ArgumentCaptor<UpdateWebOnBoardingInfoCommand> updateWebOnBoardingInfoCommandArgumentCaptor;
 
   private SigningService sut;
+  private SwedishBankIdSigningService swedishBankIdSigningService;
+  private NorwegianSigningService norwegianSigningService;
 
   @Before
   public void setup() {
     given(signedMemberRepository.findBySsn(any())).willReturn(Optional.empty());
-    sut = new SigningService(bankIdRestService, productApi, signedMemberRepository,
-        signSessionRepository, scheduler, memberService, memberRepository, botService, commandGateway,
-        SWITCHER_MESSAGE, NON_SWITCHER_MESSAGE);
+
+    swedishBankIdSigningService = new SwedishBankIdSigningService(
+      bankIdRestService, signSessionRepository, memberRepository, botService,
+      scheduler, memberService, SWITCHER_MESSAGE, NON_SWITCHER_MESSAGE
+    );
+
+    norwegianSigningService = new NorwegianSigningService(
+      memberRepository, norwegianBankIdService
+    );
+
+    sut = new SigningService(underwriterApi, signedMemberRepository, memberRepository, commandGateway,
+      swedishBankIdSigningService, norwegianSigningService);
   }
 
 
   @Test
-  public void startWebSign_givenMemberWithOkProduct_thenReturnOrderRefAndAutoStartToken() {
+  public void startWebSign_givenMemberWithOkQuote_thenReturnOrderRefAndAutoStartToken() {
 
-    given(productApi.hasProductToSign(MEMBER_ID)).willReturn(
-        makeProductToSignStatusEligibleSwitching());
+    given(underwriterApi.hasQuoteToSign(Long.toString(MEMBER_ID))).willReturn(
+      makeQuoteToSignStatusEligibleSwitching());
     given(bankIdRestService.startSign(matches(SSN), anyString(), anyString()))
-        .willReturn(makeOrderResponse());
+      .willReturn(makeOrderResponse());
 
     val result = sut.startWebSign(MEMBER_ID, new WebsignRequest(EMAIL, SSN, IP_ADDRESS));
 
@@ -133,17 +154,17 @@ public class SigningServiceTest {
   }
 
   @Test
-  public void startWebSign_givenMemberWithOkProduct_thenSchedulesCollectJob()
-      throws SchedulerException {
+  public void startWebSign_givenMemberWithOkQuote_thenSchedulesCollectJob()
+    throws SchedulerException {
 
-    given(productApi.hasProductToSign(MEMBER_ID)).willReturn(
-        makeProductToSignStatusEligibleSwitching());
+    given(underwriterApi.hasQuoteToSign(Long.toString(MEMBER_ID))).willReturn(
+      makeQuoteToSignStatusEligibleSwitching());
     given(bankIdRestService.startSign(matches(SSN), anyString(), anyString()))
-        .willReturn(makeOrderResponse());
+      .willReturn(makeOrderResponse());
 
 
     given(scheduler.scheduleJob(jobDetailArgumentCaptor.capture(), any())).willReturn(Date.from(
-        Instant.now()));
+      Instant.now()));
 
     sut.startWebSign(MEMBER_ID, new WebsignRequest(EMAIL, SSN, IP_ADDRESS));
 
@@ -153,10 +174,10 @@ public class SigningServiceTest {
   }
 
   @Test
-  public void startWebSign_givenMemberWithoutOkProduct_thenThrowException() {
+  public void startWebSign_givenMemberWithoutOkQuote_thenThrowException() {
 
-    given(productApi.hasProductToSign(MEMBER_ID)).willReturn(
-        makeProductToSignStatusNotEligibleSwitching());
+    given(underwriterApi.hasQuoteToSign(Long.toString(MEMBER_ID))).willReturn(
+      makeQuoteToSignStatusNotEligibleSwitching());
 
     thrown.expect(CannotSignInsuranceException.class);
     sut.startWebSign(MEMBER_ID, new WebsignRequest(EMAIL, SSN, IP_ADDRESS));
@@ -179,10 +200,10 @@ public class SigningServiceTest {
   @Test
   public void startWebSign_givenBankidThrowsError_thenThrowException() {
 
-    given(productApi.hasProductToSign(MEMBER_ID)).willReturn(
-        makeProductToSignStatusEligibleSwitching());
+    given(underwriterApi.hasQuoteToSign(Long.toString(MEMBER_ID))).willReturn(
+      makeQuoteToSignStatusEligibleSwitching());
     given(bankIdRestService.startSign(any(), any(), anyString()))
-        .willThrow(BankIdError.class);
+      .willThrow(BankIdError.class);
 
     thrown.expect(BankIdError.class);
     sut.startWebSign(MEMBER_ID, new WebsignRequest(EMAIL, SSN, IP_ADDRESS));
@@ -190,9 +211,9 @@ public class SigningServiceTest {
   }
 
   @Test
-  public void startWebSign_givenSwitchingMember_thenSendSwitchingMessage(){
-    given(productApi.hasProductToSign(MEMBER_ID)).willReturn(
-        makeProductToSignStatusEligibleSwitching());
+  public void startWebSign_givenSwitchingMember_thenSendSwitchingMessage() {
+    given(underwriterApi.hasQuoteToSign(Long.toString(MEMBER_ID))).willReturn(
+      makeQuoteToSignStatusEligibleSwitching());
     val response = makeOrderResponse();
     given(bankIdRestService.startSign(anyString(), argumentCaptor.capture(), anyString())).willReturn(response);
 
@@ -203,9 +224,9 @@ public class SigningServiceTest {
   }
 
   @Test
-  public void startWebSign_givenNonSwitchingMember_thenSendNonSwitchingMessage(){
-    given(productApi.hasProductToSign(MEMBER_ID)).willReturn(
-        makeProductToSignStatusEligibleNotSwitching());
+  public void startWebSign_givenNonSwitchingMember_thenSendNonSwitchingMessage() {
+    given(underwriterApi.hasQuoteToSign(Long.toString(MEMBER_ID))).willReturn(
+      makeQuoteToSignStatusEligibleNotSwitching());
     val response = makeOrderResponse();
     given(bankIdRestService.startSign(anyString(), argumentCaptor.capture(), anyString())).willReturn(response);
 
@@ -216,9 +237,9 @@ public class SigningServiceTest {
   }
 
   @Test
-  public void startWebSign_givenReusableBankIdSession_thenDontCallBankIdReturnSignSession(){
-    given(productApi.hasProductToSign(MEMBER_ID)).willReturn(
-        makeProductToSignStatusEligibleNotSwitching());
+  public void startWebSign_givenReusableBankIdSession_thenDontCallBankIdReturnSignSession() {
+    given(underwriterApi.hasQuoteToSign(Long.toString(MEMBER_ID))).willReturn(
+      makeQuoteToSignStatusEligibleNotSwitching());
 
     val signSession = Mockito.spy(SignSession.class);
 
@@ -226,8 +247,7 @@ public class SigningServiceTest {
     given(signSession.getOrderResponse()).willReturn(new OrderResponse(ORDER_REFERENCE, AUTO_START_TOKEN));
 
     given(signSessionRepository.findByMemberId(MEMBER_ID)).willReturn(
-        Optional.of(signSession));
-
+      Optional.of(signSession));
 
 
     val response = sut.startWebSign(MEMBER_ID, new WebsignRequest(EMAIL, SSN, IP_ADDRESS));
@@ -247,21 +267,21 @@ public class SigningServiceTest {
   @Test
   public void startWebSign_givenNonReusableBankIdSession_thenCallBankIdReturnOrderRefAndAutoStartToken() {
 
-    given(productApi.hasProductToSign(MEMBER_ID)).willReturn(
-        makeProductToSignStatusEligibleSwitching());
+    given(underwriterApi.hasQuoteToSign(Long.toString(MEMBER_ID))).willReturn(
+      makeQuoteToSignStatusEligibleSwitching());
     val signSession = Mockito.mock(SignSession.class);
 
     given(signSession.canReuseBankIdSession()).willReturn(false);
     given(signSessionRepository.findByMemberId(MEMBER_ID)).willReturn(Optional.of(signSession));
 
     given(bankIdRestService.startSign(matches(SSN), anyString(), anyString()))
-        .willReturn(makeOrderResponse(ORDER_REFERENCE2, AUTO_START_TOKEN2));
+      .willReturn(makeOrderResponse(ORDER_REFERENCE2, AUTO_START_TOKEN2));
 
     val result = sut.startWebSign(MEMBER_ID, new WebsignRequest(EMAIL, SSN, IP_ADDRESS));
 
     assertThat(result.getBankIdOrderResponse()).hasFieldOrPropertyWithValue("orderRef", ORDER_REFERENCE2);
     assertThat(result.getBankIdOrderResponse()).hasFieldOrPropertyWithValue("autoStartToken",
-        AUTO_START_TOKEN2);
+      AUTO_START_TOKEN2);
 
     then(commandGateway).should().sendAndWait(updateWebOnBoardingInfoCommandArgumentCaptor.capture());
     assertThat(updateWebOnBoardingInfoCommandArgumentCaptor.getValue().getEmail()).isNotEmpty();
@@ -273,12 +293,12 @@ public class SigningServiceTest {
     SignSession session = makeSignSession(SignStatus.IN_PROGRESS);
 
     given(signSessionRepository.findByOrderReference(ORDER_REFERENCE))
-        .willReturn(Optional.of(session));
+      .willReturn(Optional.of(session));
 
     val response = makeCollectResponse(CollectStatus.pending);
     given(bankIdRestService.collect(ORDER_REFERENCE)).willReturn(response);
 
-    val actual = sut.collectBankId(ORDER_REFERENCE);
+    val actual = swedishBankIdSigningService.collectBankId(ORDER_REFERENCE);
 
     assertThat(actual).isEqualTo(true);
   }
@@ -288,9 +308,9 @@ public class SigningServiceTest {
     SignSession session = makeSignSession(SignStatus.COMPLETED);
 
     given(signSessionRepository.findByOrderReference(ORDER_REFERENCE))
-        .willReturn(Optional.of(session));
+      .willReturn(Optional.of(session));
 
-    val status = sut.collectBankId(ORDER_REFERENCE);
+    val status = swedishBankIdSigningService.collectBankId(ORDER_REFERENCE);
 
     assertThat(status).isEqualTo(false);
     then(bankIdRestService).shouldHaveZeroInteractions();
@@ -302,9 +322,9 @@ public class SigningServiceTest {
     SignSession session = makeSignSession(SignStatus.FAILED);
 
     given(signSessionRepository.findByOrderReference(ORDER_REFERENCE))
-        .willReturn(Optional.of(session));
+      .willReturn(Optional.of(session));
 
-    val status = sut.collectBankId(ORDER_REFERENCE);
+    val status = swedishBankIdSigningService.collectBankId(ORDER_REFERENCE);
 
     assertThat(status).isEqualTo(false);
     then(bankIdRestService).shouldHaveZeroInteractions();
@@ -316,11 +336,11 @@ public class SigningServiceTest {
 
     given(signSessionRepository.findByOrderReference(ORDER_REFERENCE)).willReturn(Optional.empty());
 
-    val status = sut.collectBankId(ORDER_REFERENCE);
+    val status = swedishBankIdSigningService.collectBankId(ORDER_REFERENCE);
 
     assertThat(status).isEqualTo(false);
     then(bankIdRestService)
-        .shouldHaveZeroInteractions();
+      .shouldHaveZeroInteractions();
 
   }
 
@@ -329,16 +349,16 @@ public class SigningServiceTest {
 
     val session = makeSignSession(SignStatus.IN_PROGRESS);
     given(signSessionRepository.findByOrderReference(ORDER_REFERENCE))
-        .willReturn(Optional.of(session));
+      .willReturn(Optional.of(session));
 
     val response = makeCollectResponse(CollectStatus.pending);
     given(bankIdRestService.collect(eq(ORDER_REFERENCE))).willReturn(response);
 
-    val status = sut.collectBankId(ORDER_REFERENCE);
+    val status = swedishBankIdSigningService.collectBankId(ORDER_REFERENCE);
 
     assertThat(status).isEqualTo(true);
     assertThat(session.getCollectResponse())
-        .hasFieldOrPropertyWithValue("status", CollectStatus.pending);
+      .hasFieldOrPropertyWithValue("status", CollectStatus.pending);
     then(signSessionRepository).should(times(1)).save(eq(session));
   }
 
@@ -347,16 +367,16 @@ public class SigningServiceTest {
 
     val session = makeSignSession(SignStatus.IN_PROGRESS);
     given(signSessionRepository.findByOrderReference(ORDER_REFERENCE))
-        .willReturn(Optional.of(session));
+      .willReturn(Optional.of(session));
 
     val response = makeCollectResponse(CollectStatus.complete);
     given(bankIdRestService.collect(eq(ORDER_REFERENCE))).willReturn(response);
 
-    val status = sut.collectBankId(ORDER_REFERENCE);
+    val status = swedishBankIdSigningService.collectBankId(ORDER_REFERENCE);
 
     assertThat(status).isEqualTo(false);
     assertThat(session.getCollectResponse())
-        .hasFieldOrPropertyWithValue("status", CollectStatus.complete);
+      .hasFieldOrPropertyWithValue("status", CollectStatus.complete);
     then(signSessionRepository).should(times(1)).save(eq(session));
 
   }
@@ -366,12 +386,12 @@ public class SigningServiceTest {
 
     val session = makeSignSession(SignStatus.IN_PROGRESS);
     given(signSessionRepository.findByOrderReference(ORDER_REFERENCE))
-        .willReturn(Optional.of(session));
+      .willReturn(Optional.of(session));
 
     val response = makeCollectResponse(CollectStatus.complete);
     given(bankIdRestService.collect(eq(ORDER_REFERENCE))).willReturn(response);
 
-    sut.collectBankId(ORDER_REFERENCE);
+    swedishBankIdSigningService.collectBankId(ORDER_REFERENCE);
 
     then(memberService).should(times(1)).bankIdSignComplete(eq(MEMBER_ID), eq(response));
 
@@ -382,12 +402,12 @@ public class SigningServiceTest {
 
     val session = makeSignSession(SignStatus.IN_PROGRESS);
     given(signSessionRepository.findByOrderReference(ORDER_REFERENCE))
-        .willReturn(Optional.of(session));
+      .willReturn(Optional.of(session));
 
     val response = makeCollectResponse(CollectStatus.complete);
     given(bankIdRestService.collect(eq(ORDER_REFERENCE))).willReturn(response);
 
-    sut.collectBankId(ORDER_REFERENCE);
+    swedishBankIdSigningService.collectBankId(ORDER_REFERENCE);
 
     assertThat(session.getStatus()).isEqualTo(SignStatus.COMPLETED);
 
@@ -397,15 +417,15 @@ public class SigningServiceTest {
     val userData = new User(SSN, "Tolvan Tolvansson", "Tolvan", "Tolvansson");
     val device = new Device(IP_ADDRESS);
     val cert = new Cert(
-        LocalDateTime.parse("2018-09-01T00:00:00").toInstant(
-            ZoneOffset.UTC).toEpochMilli(),
-        LocalDateTime.parse("2020-09-01T00:00:00").toInstant(
-            ZoneOffset.UTC).toEpochMilli());
+      LocalDateTime.parse("2018-09-01T00:00:00").toInstant(
+        ZoneOffset.UTC).toEpochMilli(),
+      LocalDateTime.parse("2020-09-01T00:00:00").toInstant(
+        ZoneOffset.UTC).toEpochMilli());
     val completionData = new CompletionData(userData, device, cert, "", "");
 
     return new CollectResponse(ORDER_REFERENCE, collectStatus,
-        collectStatus == CollectStatus.complete ? null : "someHint",
-        collectStatus == CollectStatus.complete ? completionData : null);
+      collectStatus == CollectStatus.complete ? null : "someHint",
+      collectStatus == CollectStatus.complete ? completionData : null);
   }
 
   @Test
@@ -413,12 +433,12 @@ public class SigningServiceTest {
 
     val session = makeSignSession(SignStatus.IN_PROGRESS);
     given(signSessionRepository.findByOrderReference(ORDER_REFERENCE))
-        .willReturn(Optional.of(session));
+      .willReturn(Optional.of(session));
 
     val response = makeCollectResponse(CollectStatus.failed);
     given(bankIdRestService.collect(eq(ORDER_REFERENCE))).willReturn(response);
 
-    sut.collectBankId(ORDER_REFERENCE);
+    swedishBankIdSigningService.collectBankId(ORDER_REFERENCE);
 
     assertThat(session.getStatus()).isEqualTo(SignStatus.FAILED);
 
@@ -426,7 +446,6 @@ public class SigningServiceTest {
 
   @Test
   public void getSignStatus_givenNoMatchingSignStatus_thenReturnEmpty() {
-    given(signSessionRepository.findByMemberId(MEMBER_ID)).willReturn(Optional.empty());
 
     val status = sut.getSignStatus(MEMBER_ID);
 
@@ -438,6 +457,8 @@ public class SigningServiceTest {
     val session = makeSignSession(SignStatus.IN_PROGRESS);
     given(signSessionRepository.findByMemberId(MEMBER_ID))
         .willReturn(Optional.of(session));
+    given(memberRepository.findById(MEMBER_ID))
+      .willReturn(Optional.of(MemberEntity.builder().ssn(SSN).build()));
 
     val status = sut.getSignStatus(MEMBER_ID);
 
@@ -449,11 +470,11 @@ public class SigningServiceTest {
     val session = makeSignSession(SignStatus.IN_PROGRESS);
 
     given(signSessionRepository.findByOrderReference(ORDER_REFERENCE))
-        .willReturn(Optional.of(session));
+      .willReturn(Optional.of(session));
 
     given(memberRepository.getOne(anyLong())).willReturn(new MemberEntity());
 
-    sut.productSignConfirmed(ORDER_REFERENCE);
+    sut.productSignConfirmed(SSN, ORDER_REFERENCE);
 
     assertThat(session.getStatus()).isEqualTo(SignStatus.COMPLETED);
     then(signSessionRepository).should(times(1)).save(session);
@@ -465,7 +486,7 @@ public class SigningServiceTest {
 
     given(signSessionRepository.findByOrderReference(ORDER_REFERENCE)).willReturn(Optional.empty());
 
-    sut.productSignConfirmed(ORDER_REFERENCE);
+    sut.productSignConfirmed(SSN, ORDER_REFERENCE);
 
     then(signSessionRepository).should(times(0)).save(any());
 
@@ -476,35 +497,35 @@ public class SigningServiceTest {
     val session = makeSignSession(SignStatus.IN_PROGRESS);
 
     given(signSessionRepository.findByOrderReference(ORDER_REFERENCE))
-        .willReturn(Optional.of(session));
+      .willReturn(Optional.of(session));
 
     given(memberRepository.getOne(anyLong())).willReturn(new MemberEntity());
 
     willThrow(RuntimeException.class).given(botService).initBotServiceSessionWebOnBoarding(anyLong(), any());
 
-    sut.productSignConfirmed(ORDER_REFERENCE);
+    sut.productSignConfirmed(SSN, ORDER_REFERENCE);
   }
 
   private OrderResponse makeOrderResponse() {
     return new OrderResponse(
-        ORDER_REFERENCE, AUTO_START_TOKEN);
+      ORDER_REFERENCE, AUTO_START_TOKEN);
   }
 
   private OrderResponse makeOrderResponse(String orderReference, String autostartToken) {
     return new OrderResponse(
-        orderReference, autostartToken);
+      orderReference, autostartToken);
   }
 
-  private ProductToSignStatusDTO makeProductToSignStatusEligibleSwitching() {
-    return new ProductToSignStatusDTO(true, true);
+  private QuoteToSignStatusDTO makeQuoteToSignStatusEligibleSwitching() {
+    return new QuoteToSignStatusDTO(true, true);
   }
 
-  private ProductToSignStatusDTO makeProductToSignStatusNotEligibleSwitching() {
-    return new ProductToSignStatusDTO(false, true);
+  private QuoteToSignStatusDTO makeQuoteToSignStatusNotEligibleSwitching() {
+    return new QuoteToSignStatusDTO(false, true);
   }
 
-  private ProductToSignStatusDTO makeProductToSignStatusEligibleNotSwitching() {
-    return new ProductToSignStatusDTO(true, false);
+  private QuoteToSignStatusDTO makeQuoteToSignStatusEligibleNotSwitching() {
+    return new QuoteToSignStatusDTO(true, false);
   }
 
   private static SignSession makeSignSession(SignStatus inProgress) {
