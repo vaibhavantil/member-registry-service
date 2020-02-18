@@ -9,6 +9,6 @@ interface NorwegianAuthentication {
 
     fun auth(request: NorwegianBankIdAuthenticationRequest): NorwegianAuthenticationResponse
     fun sign(request: NorwegianBankIdAuthenticationRequest): NorwegianAuthenticationResponse
-    fun collect(reference: UUID): NorwegianAuthenticationCollectResponse
+    fun collect(sessionId: UUID): NorwegianAuthenticationCollectResponse
 }
 
