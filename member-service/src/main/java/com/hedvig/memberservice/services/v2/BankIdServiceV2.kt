@@ -82,8 +82,10 @@ class BankIdServiceV2(
                     val personalNumber = bankIdRes.completionData.user.personalNumber
                     val signedMember = signedMemberRepository.findBySsn(personalNumber)
                     if (signedMember.isPresent) {
-                        commandGateway.sendAndWait<Any>(InactivateMemberCommand(memberId))
-                        apiGatewayService.reassignMember(memberId, signedMember.get().id)
+                        if(memberId != signedMember.get().id) {
+                            commandGateway.sendAndWait<Any>(InactivateMemberCommand(memberId))
+                            apiGatewayService.reassignMember(memberId, signedMember.get().id)
+                        }
                         redisEventPublisher.onAuthSessionUpdated(memberId, AuthSessionUpdatedEventStatus.SUCCESS)
                     } else {
                         redisEventPublisher.onAuthSessionUpdated(memberId, AuthSessionUpdatedEventStatus.FAILED)
