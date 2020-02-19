@@ -34,7 +34,6 @@ class BankIdServiceV2(
     private val apiGatewayService: ApiGatewayService
 
 ) {
-    private val logger = LoggerFactory.getLogger(this::class.java)
 
     @Transactional
     fun auth(memberId: Long, endUserIp: String): OrderResponse {
@@ -82,8 +81,10 @@ class BankIdServiceV2(
                     val personalNumber = bankIdRes.completionData.user.personalNumber
                     val signedMember = signedMemberRepository.findBySsn(personalNumber)
                     if (signedMember.isPresent) {
-                        commandGateway.sendAndWait<Any>(InactivateMemberCommand(memberId))
-                        apiGatewayService.reassignMember(memberId, signedMember.get().id)
+                        if (memberId != signedMember.get().id) {
+                            commandGateway.sendAndWait<Any>(InactivateMemberCommand(memberId))
+                            apiGatewayService.reassignMember(memberId, signedMember.get().id)
+                        }
                         redisEventPublisher.onAuthSessionUpdated(memberId, AuthSessionUpdatedEventStatus.SUCCESS)
                     } else {
                         redisEventPublisher.onAuthSessionUpdated(memberId, AuthSessionUpdatedEventStatus.FAILED)
@@ -93,7 +94,7 @@ class BankIdServiceV2(
                 else -> {}
             }
         } catch (e: Exception) {
-            logger.error(e.toString())
+            logger.error(e.toString(), e)
             redisEventPublisher.onAuthSessionUpdated(memberId, AuthSessionUpdatedEventStatus.FAILED)
             return true
         }
@@ -134,5 +135,7 @@ class BankIdServiceV2(
 
     companion object {
         const val JOB_GROUP = "bankid.auth.collect"
+
+        private val logger = LoggerFactory.getLogger(BankIdServiceV2::class.java)
     }
 }
