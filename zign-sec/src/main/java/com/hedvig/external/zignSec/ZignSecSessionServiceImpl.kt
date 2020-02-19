@@ -5,6 +5,9 @@ import com.hedvig.external.authentication.dto.NorwegianAuthenticationResponse
 import com.hedvig.external.authentication.dto.NorwegianAuthenticationResponseError
 import com.hedvig.external.authentication.dto.NorwegianBankIdAuthenticationRequest
 import com.hedvig.external.authentication.dto.NorwegianBankIdProgressStatus
+import com.hedvig.external.event.NorwegianAuthenticationEvent
+import com.hedvig.external.event.NorwegianAuthenticationEventPublisher
+import com.hedvig.external.event.NorwegianSignEvent
 import com.hedvig.external.zignSec.client.ZignSecClient
 import com.hedvig.external.zignSec.client.dto.ZignSecNotificationRequest
 import com.hedvig.external.zignSec.client.dto.ZignSecRequestBody
@@ -13,13 +16,15 @@ import com.hedvig.external.zignSec.repository.entitys.NorwegianAuthenticationTyp
 import com.hedvig.external.zignSec.repository.entitys.ZignSecNotification
 import com.hedvig.external.zignSec.repository.entitys.ZignSecSession
 import org.springframework.beans.factory.annotation.Value
+import org.springframework.context.ApplicationEventPublisher
 import org.springframework.stereotype.Service
 import java.util.*
 
 @Service
 class ZignSecSessionServiceImpl(
     private val sessionRepository: ZignSecSessionRepository,
-    private val zignSecService: ZignSecService
+    private val zignSecService: ZignSecService,
+    private val norwegianAuthenticationEventPublisher: NorwegianAuthenticationEventPublisher
 ) : ZignSecSessionService {
 
     override fun auth(request: NorwegianBankIdAuthenticationRequest): NorwegianAuthenticationResponse =
@@ -64,6 +69,14 @@ class ZignSecSessionServiceImpl(
             session.status = NorwegianBankIdProgressStatus.FAILED
         }
 
+        when (session.requestType) {
+            NorwegianAuthenticationType.SIGN ->
+                norwegianAuthenticationEventPublisher.publishSignEvent(NorwegianAuthenticationCollectResponse(session.status))
+            NorwegianAuthenticationType.AUTH ->
+                norwegianAuthenticationEventPublisher.publishAuthenticationEvent(NorwegianAuthenticationCollectResponse(session.status))
+        }
+
         sessionRepository.save(session)
     }
+
 }
