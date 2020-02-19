@@ -1,9 +1,9 @@
 package com.hedvig.external.zignSec
 
-import com.hedvig.external.authentication.NorwegianAuthentication
-import com.hedvig.external.zignSec.client.dto.ZignSecNotificationRequest
+import com.hedvig.external.authentication.dto.NorwegianBankIdAuthenticationRequest
+import com.hedvig.external.zignSec.client.dto.ZignSecResponse
 
-interface ZignSecService: NorwegianAuthentication {
-
-    fun handleNotification(request: ZignSecNotificationRequest)
+interface ZignSecService {
+    fun auth(request: NorwegianBankIdAuthenticationRequest): ZignSecResponse
 }
+
