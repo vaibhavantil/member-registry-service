@@ -6,7 +6,5 @@ import org.junit.Assert.*
 
 class NorwegianSigningServiceTest {
 
-    @Test
-    fun startSign() {
-    }
+    //TODO
 }

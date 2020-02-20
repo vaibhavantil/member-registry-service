@@ -6,11 +6,5 @@ import org.junit.Assert.*
 
 class NorwegianBankIdServiceTest {
 
-    @Test
-    fun authenticate() {
-    }
-
-    @Test
-    fun sign() {
-    }
+    //TODO
 }

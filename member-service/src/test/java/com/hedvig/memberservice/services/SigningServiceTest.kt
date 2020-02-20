@@ -132,7 +132,7 @@ class SigningServiceTest {
     fun productSignConfirmed_whenBotserviceThrowsException_Continues() {
         val session = makeSignSession(SignStatus.IN_PROGRESS)
 
-        whenever(swedishBankIdSigningService.getUserContextDTOFromSession(MEMBER_ID.toString())).thenReturn(
+        whenever(swedishBankIdSigningService.getUserContextDTOFromSession(ORDER_REFERENCE)).thenReturn(
             UpdateUserContextDTO(MEMBER_ID.toString(), "","","", "", "", "","", "", false)
         )
 

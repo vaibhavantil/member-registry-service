@@ -6,7 +6,7 @@ import org.springframework.stereotype.Service
 
 @Service
 class ZignSecServicImpl(
-    private val zignSecRepository: ZignSecRepository
+//    private val zignSecRepository: ZignSecRepository
 ): ZignSecService {
     override fun handleNotification(request: ZignSecNotificationRequest) {
         TODO("Store notification entity to zignSecRepository")
