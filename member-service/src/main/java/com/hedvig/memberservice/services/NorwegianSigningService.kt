@@ -1,10 +1,13 @@
 package com.hedvig.memberservice.services
 
+import com.hedvig.external.authentication.dto.StartNorwegianAuthenticationResult
+import com.hedvig.external.zignSec.ZignSecServiceImpl
 import com.hedvig.memberservice.entities.SignStatus
 import com.hedvig.memberservice.query.MemberRepository
 import com.hedvig.memberservice.services.member.dto.MemberSignResponse
 import com.hedvig.memberservice.services.member.dto.NorwegianBankIdResponse
 import com.hedvig.memberservice.web.v2.dto.WebsignRequest
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import javax.transaction.Transactional
 
@@ -24,12 +27,24 @@ class NorwegianSigningService(
             acceptLanguage,
             request.isMobile
         )
-        return response.redirectUrl?.let { redirectUrl ->
-            MemberSignResponse(
+
+        return when (response) {
+            is StartNorwegianAuthenticationResult.Success -> MemberSignResponse(
                 signUUID = response.id,
                 status = SignStatus.IN_PROGRESS,
-                norwegianBankIdResponse = NorwegianBankIdResponse(redirectUrl)
+                norwegianBankIdResponse = NorwegianBankIdResponse(response.redirectUrl)
             )
-        } ?: throw IllegalStateException("Started norwegian sign got no redirect url [Response: $response]")
+            is StartNorwegianAuthenticationResult.Failed -> {
+                logger.error("Norwegian authentication failed with errors: ${response.errors}")
+                MemberSignResponse(
+                    signUUID = response.id,
+                    status = SignStatus.FAILED
+                )
+            }
+        }
+    }
+
+    companion object {
+        private val logger = LoggerFactory.getLogger(NorwegianSigningService::class.java)
     }
 }

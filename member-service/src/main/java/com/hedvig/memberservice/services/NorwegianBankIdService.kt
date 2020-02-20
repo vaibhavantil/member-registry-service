@@ -1,7 +1,6 @@
 package com.hedvig.memberservice.services
 
 import com.hedvig.external.authentication.NorwegianAuthentication
-import com.hedvig.external.authentication.dto.NorwegianAuthenticationResponse
 import com.hedvig.external.authentication.dto.NorwegianBankIdAuthenticationRequest
 import org.springframework.stereotype.Service
 
@@ -9,7 +8,6 @@ import org.springframework.stereotype.Service
 class NorwegianBankIdService(
     private val norwegianAuthentication: NorwegianAuthentication
 ) {
-
     fun authenticate(request: NorwegianBankIdAuthenticationRequest) =
         norwegianAuthentication.auth(
             request
