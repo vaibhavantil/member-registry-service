@@ -1,5 +1,6 @@
 package com.hedvig.memberservice.services
 
+import com.hedvig.integration.botService.BotService
 import com.hedvig.integration.underwritter.UnderwriterApi
 import com.hedvig.memberservice.commands.SignMemberFromUnderwriterCommand
 import com.hedvig.memberservice.commands.UpdateWebOnBoardingInfoCommand
@@ -25,6 +26,7 @@ import javax.transaction.Transactional
 class SigningService(
     private val underwriterApi: UnderwriterApi,
     private val signedMemberRepository: SignedMemberRepository,
+    private val botService: BotService,
     private val memberRepository: MemberRepository,
     private val commandGateway: CommandGateway,
     private val swedishBankIdSigningService: SwedishBankIdSigningService,
@@ -90,9 +92,18 @@ class SigningService(
 
     @Transactional
     fun productSignConfirmed(ssn: String, id: String?) {
-        return when (SsnUtilImpl.instance.getMarketFromSsn(ssn)) {
-            Market.SWEDEN -> swedishBankIdSigningService.productSignConfirmed(id)
+        val userContext = when (SsnUtilImpl.instance.getMarketFromSsn(ssn)) {
+            Market.SWEDEN -> swedishBankIdSigningService.getUserContextDTOFromSession(id)
             Market.NORWAY -> TODO()
+        }
+
+        userContext?.let {
+            val memberId = it.memberId.toLong()
+            try {
+                botService.initBotServiceSessionWebOnBoarding(memberId, it)
+            } catch (ex: RuntimeException) {
+                log.error("Could not initialize bot-service for memberId: {}", memberId, ex)
+            }
         }
     }
 

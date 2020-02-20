@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/v2/member/sign/")
+@RequestMapping("/v2/member/sign")
 public class SignController {
 
   private final SigningService signingService;

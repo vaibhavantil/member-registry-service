@@ -7,13 +7,11 @@ import org.springframework.scheduling.annotation.Async
 import org.springframework.stereotype.Component
 
 @Component
-class AnnotationDrivenContextStartedListener(
-    redisEventPublisher: RedisEventPublisher
-) {
+class NorwegianAuthEventListener() {
 
     @Async
     @EventListener
     fun handleNorwegianAuthEvent(norwegianAuthEvent: NorwegianAuthenticationEvent) {
-
+        //TODO: member is auth publish to redis!
     }
 }
