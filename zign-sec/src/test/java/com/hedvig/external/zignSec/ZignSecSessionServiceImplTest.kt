@@ -1,5 +1,6 @@
 package com.hedvig.external.zignSec
 
+import com.hedvig.external.authentication.dto.NorwegianAuthenticationCollectResponse
 import com.hedvig.external.authentication.dto.NorwegianBankIdAuthenticationRequest
 import com.hedvig.external.authentication.dto.NorwegianBankIdProgressStatus
 import com.hedvig.external.authentication.dto.StartNorwegianAuthenticationResult.Success
@@ -20,6 +21,7 @@ import org.mockito.ArgumentMatchers.any
 import org.mockito.Mock
 import org.mockito.Mockito.never
 import org.mockito.Mockito.verify
+import org.mockito.Mockito.verifyZeroInteractions
 import org.mockito.Mockito.`when` as whenever
 import org.mockito.junit.MockitoJUnitRunner
 import java.time.Instant
@@ -124,7 +126,7 @@ class ZignSecSessionServiceImplTest {
     }
 
     @Test
-    fun handleSuccessNotification() {
+    fun handleAuthenticationSuccessNotification() {
         val timestamp = Instant.now()
         val session = ZignSecSession(
             sessionId = zignSecSuccessAuthNotificationRequest.id,
@@ -142,6 +144,8 @@ class ZignSecSessionServiceImplTest {
 
         classUnderTest.handleNotification(zignSecSuccessAuthNotificationRequest)
 
+        verify(norwegianAuthenticationEventPublisher).publishAuthenticationEvent(NorwegianAuthenticationCollectResponse(NorwegianBankIdProgressStatus.COMPLETED))
+
         val savedSession = sessionRepository.findById(zignSecSuccessAuthNotificationRequest.id).get()
         assertThat(savedSession.sessionId).isEqualTo(zignSecSuccessAuthNotificationRequest.id)
         assertThat(savedSession.memberId).isEqualTo(1337)
@@ -151,13 +155,13 @@ class ZignSecSessionServiceImplTest {
     }
 
     @Test
-    fun handleFailedNotification() {
+    fun handleSignFailedNotification() {
         val timestamp = Instant.now()
         val session = ZignSecSession(
             sessionId = zignSecFailedAuthNotificationRequest.id,
             memberId = 1337,
             status = NorwegianBankIdProgressStatus.INITIATED,
-            requestType = NorwegianAuthenticationType.AUTH,
+            requestType = NorwegianAuthenticationType.SIGN,
             notification = null,
             createdAt = timestamp,
             updatedAt = timestamp
@@ -169,10 +173,12 @@ class ZignSecSessionServiceImplTest {
 
         classUnderTest.handleNotification(zignSecFailedAuthNotificationRequest)
 
+        verify(norwegianAuthenticationEventPublisher).publishSignEvent(NorwegianAuthenticationCollectResponse(NorwegianBankIdProgressStatus.FAILED))
+
         val savedSession = sessionRepository.findById(zignSecFailedAuthNotificationRequest.id).get()
         assertThat(savedSession.sessionId).isEqualTo(zignSecFailedAuthNotificationRequest.id)
         assertThat(savedSession.status).isEqualTo(NorwegianBankIdProgressStatus.FAILED)
-        assertThat(savedSession.requestType).isEqualTo(NorwegianAuthenticationType.AUTH)
+        assertThat(savedSession.requestType).isEqualTo(NorwegianAuthenticationType.SIGN)
     }
 
     @Test
@@ -194,6 +200,7 @@ class ZignSecSessionServiceImplTest {
 
         classUnderTest.handleNotification(zignSecFailedAuthNotificationRequest)
 
+        verifyZeroInteractions(norwegianAuthenticationEventPublisher)
         verify(sessionRepository, never()).save(any())
     }
 
