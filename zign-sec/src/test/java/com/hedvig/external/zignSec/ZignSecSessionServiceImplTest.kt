@@ -1,53 +1,234 @@
 package com.hedvig.external.zignSec
 
 import com.hedvig.external.authentication.dto.NorwegianBankIdAuthenticationRequest
+import com.hedvig.external.authentication.dto.NorwegianBankIdProgressStatus
+import com.hedvig.external.authentication.dto.StartNorwegianAuthenticationResult.Success
+import com.hedvig.external.authentication.dto.StartNorwegianAuthenticationResult.Failed
+import com.hedvig.external.zignSec.client.dto.ZignSecIdentity
+import com.hedvig.external.zignSec.client.dto.ZignSecNotificationRequest
+import com.hedvig.external.zignSec.client.dto.ZignSecResponse
+import com.hedvig.external.zignSec.client.dto.ZignSecResponseError
 import com.hedvig.external.zignSec.repository.ZignSecSessionRepository
-import com.ninjasquad.springmockk.MockkBean
+import com.hedvig.external.zignSec.repository.entitys.NorwegianAuthenticationType
+import com.hedvig.external.zignSec.repository.entitys.ZignSecSession
+import org.assertj.core.api.Assertions.assertThat
+import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.mock.mockito.MockBean
-import org.springframework.test.context.junit4.SpringRunner
+import org.mockito.ArgumentMatchers.any
+import org.mockito.Mock
+import org.mockito.Mockito.never
+import org.mockito.Mockito.verify
+import org.mockito.Mockito.`when` as whenever
+import org.mockito.junit.MockitoJUnitRunner
+import java.time.Instant
+import java.time.LocalDate
+import java.util.*
 
-@RunWith(SpringRunner::class)
+@RunWith(MockitoJUnitRunner::class)
 class ZignSecSessionServiceImplTest {
 
-    @MockkBean
+    @Mock
     lateinit var sessionRepository: ZignSecSessionRepository
 
-//    @MockkBean
-//    lateinit var zignSecService: ZignSecService
+    @Mock
+    lateinit var zignSecService: ZignSecService
 
-//    @Autowired
-//    lateinit var zignSecSessionService: ZignSecSessionServiceImpl
+    private lateinit var classUnderTest: ZignSecSessionServiceImpl
 
-
-    @Test
-    fun auth() {
-//        var classUnderTest = ZignSecSessionServiceImpl(sessionRepository, zignSecService)
-//        val response = classUnderTest.auth(request)
-
-        assert(true)
+    @Before
+    fun before() {
+        classUnderTest = ZignSecSessionServiceImpl(sessionRepository, zignSecService)
     }
 
     @Test
-    fun sign() {
+    fun authSuccess() {
+        val id = UUID.randomUUID()
+
+        whenever(zignSecService.auth(startAuthRequest)).thenReturn(
+            ZignSecResponse(
+                id,
+                emptyList(),
+                "redirect url"
+            )
+        )
+
+        val response = classUnderTest.auth(startAuthRequest)
+
+        assertThat(response).isInstanceOf(Success::class.java)
+        assertThat((response as Success).id).isEqualTo(id)
+        assertThat(response.redirectUrl).isEqualTo("redirect url")
+
+        verify(sessionRepository).save(any())
     }
 
     @Test
-    fun collect() {
+    fun authFailed() {
+        whenever(zignSecService.auth(startAuthRequest)).thenReturn(
+            ZignSecResponse(
+                UUID.randomUUID(),
+                listOf(ZignSecResponseError(0, "some_error")),
+                "redirect url"
+            )
+        )
+
+        val response = classUnderTest.auth(startAuthRequest)
+
+        assertThat(response).isInstanceOf(Failed::class.java)
+        assertThat((response as Failed).errors).isNotEmpty
+
+        verify(sessionRepository, never()).save(any())
     }
 
     @Test
-    fun handleNotification() {
+    fun signSuccess() {
+        val id = UUID.randomUUID()
+
+        whenever(zignSecService.auth(startAuthRequest)).thenReturn(
+            ZignSecResponse(
+                id,
+                emptyList(),
+                "redirect url"
+            )
+        )
+
+        val response = classUnderTest.auth(startAuthRequest)
+
+        assertThat(response).isInstanceOf(Success::class.java)
+        assertThat((response as Success).id).isEqualTo(id)
+        assertThat(response.redirectUrl).isEqualTo("redirect url")
+
+        verify(sessionRepository).save(any())
+    }
+
+    @Test
+    fun signFailed() {
+        whenever(zignSecService.auth(startAuthRequest)).thenReturn(
+            ZignSecResponse(
+                UUID.randomUUID(),
+                listOf(ZignSecResponseError(0, "some_error")),
+                "redirect url"
+            )
+        )
+
+        val response = classUnderTest.auth(startAuthRequest)
+
+        assertThat(response).isInstanceOf(Failed::class.java)
+        assertThat((response as Failed).errors).isNotEmpty
+
+        verify(sessionRepository, never()).save(any())
+    }
+
+    @Test
+    fun handleSuccessNotification() {
+        val timestamp = Instant.now()
+        val session = ZignSecSession(
+            sessionId = zignSecSuccessAuthNotificationRequest.id,
+            memberId = 1337,
+            status = NorwegianBankIdProgressStatus.INITIATED,
+            requestType = NorwegianAuthenticationType.AUTH,
+            notification = null,
+            createdAt = timestamp,
+            updatedAt = timestamp
+        )
+
+        whenever(sessionRepository.findById(zignSecSuccessAuthNotificationRequest.id)).thenReturn(
+            Optional.of(session)
+        )
+
+        classUnderTest.handleNotification(zignSecSuccessAuthNotificationRequest)
+
+        val savedSession = sessionRepository.findById(zignSecSuccessAuthNotificationRequest.id).get()
+        assertThat(savedSession.sessionId).isEqualTo(zignSecSuccessAuthNotificationRequest.id)
+        assertThat(savedSession.memberId).isEqualTo(1337)
+        assertThat(savedSession.status).isEqualTo(NorwegianBankIdProgressStatus.COMPLETED)
+        assertThat(savedSession.requestType).isEqualTo(NorwegianAuthenticationType.AUTH)
+        assertThat(savedSession.notification).isNotNull
+    }
+
+    @Test
+    fun handleFailedNotification() {
+        val timestamp = Instant.now()
+        val session = ZignSecSession(
+            sessionId = zignSecFailedAuthNotificationRequest.id,
+            memberId = 1337,
+            status = NorwegianBankIdProgressStatus.INITIATED,
+            requestType = NorwegianAuthenticationType.AUTH,
+            notification = null,
+            createdAt = timestamp,
+            updatedAt = timestamp
+        )
+
+        whenever(sessionRepository.findById(zignSecFailedAuthNotificationRequest.id)).thenReturn(
+            Optional.of(session)
+        )
+
+        classUnderTest.handleNotification(zignSecFailedAuthNotificationRequest)
+
+        val savedSession = sessionRepository.findById(zignSecFailedAuthNotificationRequest.id).get()
+        assertThat(savedSession.sessionId).isEqualTo(zignSecFailedAuthNotificationRequest.id)
+        assertThat(savedSession.status).isEqualTo(NorwegianBankIdProgressStatus.FAILED)
+        assertThat(savedSession.requestType).isEqualTo(NorwegianAuthenticationType.AUTH)
+    }
+
+    @Test
+    fun handleSecondCompletedNotificationRequests() {
+        val timestamp = Instant.now()
+        val session = ZignSecSession(
+            sessionId = zignSecFailedAuthNotificationRequest.id,
+            memberId = 1337,
+            status = NorwegianBankIdProgressStatus.COMPLETED,
+            requestType = NorwegianAuthenticationType.AUTH,
+            notification = null,
+            createdAt = timestamp,
+            updatedAt = timestamp
+        )
+
+        whenever(sessionRepository.findById(zignSecFailedAuthNotificationRequest.id)).thenReturn(
+            Optional.of(session)
+        )
+
+        classUnderTest.handleNotification(zignSecFailedAuthNotificationRequest)
+
+        verify(sessionRepository, never()).save(any())
     }
 
     companion object {
-        val request = NorwegianBankIdAuthenticationRequest(
+        val startAuthRequest = NorwegianBankIdAuthenticationRequest(
             "1337",
             "12121212120",
             "NO",
             false
+        )
+
+        val zignSecSuccessAuthNotificationRequest = ZignSecNotificationRequest(
+            UUID.randomUUID(),
+            emptyList(),
+            ZignSecIdentity(
+                "NO",
+                "first",
+                "last",
+                "first mid last",
+                "12121212120",
+                "12-12-12",
+                108,
+                "female",
+                "first",
+                LocalDate.now(),
+                "",
+                "",
+                ""
+            ),
+            "nbid",
+            ""
+        )
+
+        val zignSecFailedAuthNotificationRequest = ZignSecNotificationRequest(
+            UUID.randomUUID(),
+            listOf(ZignSecResponseError(0, "some error")),
+            null,
+            "nbid",
+            ""
         )
     }
 }
