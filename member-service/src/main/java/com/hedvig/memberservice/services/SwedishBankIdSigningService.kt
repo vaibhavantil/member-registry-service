@@ -38,7 +38,6 @@ class SwedishBankIdSigningService(
     private val bankidService: BankIdRestService,
     private val signSessionRepository: SignSessionRepository,
     private val memberRepository: MemberRepository,
-    private val botService: BotService,
     private val scheduler: Scheduler,
     private val memberService: MemberService,
     @Value("\${hedvig.bankid.signmessage.switcher}")
@@ -105,6 +104,7 @@ class SwedishBankIdSigningService(
                         val collectResponse = CollectResponse(response.status, response.hintCode)
                         s.newCollectResponse(collectResponse)
                         if (response.status == CollectStatus.complete) {
+                            //TODO: we should rename to signComplete
                             memberService.bankIdSignComplete(s.memberId, response)
                             s.status = SignStatus.COMPLETED
                         } else if (response.status == CollectStatus.failed) {
@@ -130,13 +130,14 @@ class SwedishBankIdSigningService(
     }
 
     @Transactional
-    fun productSignConfirmed(id: String?) {
+    fun getUserContextDTOFromSession(id: String?): UpdateUserContextDTO? {
         val session = signSessionRepository.findByOrderReference(id)
-        session.ifPresent { s: SignSession ->
+        return if (session.isPresent) {
+            val s = session.get()
             s.status = SignStatus.COMPLETED
             signSessionRepository.save(s)
             val member = memberRepository.getOne(s.memberId)
-            val userContext = UpdateUserContextDTO(
+            UpdateUserContextDTO(
                 s.memberId.toString(),
                 member.getSsn(),
                 member.getFirstName(),
@@ -147,11 +148,8 @@ class SwedishBankIdSigningService(
                 member.getCity(),
                 member.zipCode,
                 true)
-            try {
-                botService.initBotServiceSessionWebOnBoarding(s.memberId, userContext)
-            } catch (ex: RuntimeException) {
-                log.error("Could not initialize bot-service for memberId: {}", s.memberId, ex)
-            }
+        } else {
+            null
         }
     }
 
