@@ -29,10 +29,19 @@ class ZignSecSessionServiceImpl(
     private fun authenticate(request: NorwegianBankIdAuthenticationRequest, type: NorwegianAuthenticationType): StartNorwegianAuthenticationResult {
         val response = zignSecService.auth(request)
 
-        if (response.errors.isNotEmpty()) {
-            return StartNorwegianAuthenticationResult.Failed (
+        if (response.errors.isNotEmpty() || response.redirectUrl == null) {
+            val errors = response.errors.map { NorwegianAuthenticationResponseError(it.code, it.description) }.toMutableList()
+
+            if (errors.isEmpty() && response.redirectUrl == null) {
+                errors.add(NorwegianAuthenticationResponseError(
+                    -1,
+                    "No errors and no redirect error from ZignSec"
+                ))
+            }
+
+            return StartNorwegianAuthenticationResult.Failed(
                 response.id,
-                response.errors.map { NorwegianAuthenticationResponseError(it.code, it.description) }
+                errors
             )
         }
 

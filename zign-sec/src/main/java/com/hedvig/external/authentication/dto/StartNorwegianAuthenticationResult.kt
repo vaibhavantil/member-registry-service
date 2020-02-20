@@ -5,7 +5,7 @@ import java.util.*
 sealed class StartNorwegianAuthenticationResult {
     data class Success(
         val id: UUID,
-        val redirectUrl: String?
+        val redirectUrl: String
     ): StartNorwegianAuthenticationResult()
 
     data class Failed(

@@ -14,7 +14,7 @@ class NorwegianBankIdService(
     fun authenticate(request: NorwegianBankIdAuthenticationRequest): StartNorwegianAuthenticationResult {
         val response = norwegianAuthentication.auth(request)
 
-        startCollect(response.id)
+        //startCollect(response.id) will change this in an later PR
         return response
     }
 
@@ -28,7 +28,7 @@ class NorwegianBankIdService(
             )
         )
 
-        startCollect(response.id)
+        //startCollect(response.id) will change this in an later PR
         return response
     }
 
