@@ -27,7 +27,6 @@ class NorwegianSigningService(
 
     @Transactional
     fun startSign(memberId: Long, request: WebsignRequest): MemberSignResponse {
-
         val acceptLanguage = memberRepository.findById(memberId).get().acceptLanguage
         val response = norwegianBankIdService.sign(
             memberId.toString(),

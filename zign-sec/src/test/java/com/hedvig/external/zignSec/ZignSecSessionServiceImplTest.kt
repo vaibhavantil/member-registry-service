@@ -202,7 +202,7 @@ class ZignSecSessionServiceImplTest {
             Optional.of(session)
         )
 
-        classUnderTest.handleNotification(zignSecFailedAuthNotificationRequest)
+        classUnderTest.handleNotification(zignSecSuccessAuthNotificationRequest)
 
         verifyZeroInteractions(norwegianAuthenticationEventPublisher)
         verify(sessionRepository, never()).save(any())
