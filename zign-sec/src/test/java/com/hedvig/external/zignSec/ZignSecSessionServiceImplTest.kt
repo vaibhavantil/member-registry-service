@@ -146,7 +146,7 @@ class ZignSecSessionServiceImplTest {
 
         classUnderTest.handleNotification(zignSecSuccessAuthNotificationRequest)
 
-        verify(norwegianAuthenticationEventPublisher).publishAuthenticationEvent(NorwegianAuthenticationResult.Completed(zignSecSuccessAuthNotificationRequest.id, "12121212120"))
+        verify(norwegianAuthenticationEventPublisher).publishAuthenticationEvent(NorwegianAuthenticationResult.Completed(zignSecSuccessAuthNotificationRequest.id, 1337, "12121212120"))
 
         val savedSession = sessionRepository.findById(zignSecSuccessAuthNotificationRequest.id).get()
         assertThat(savedSession.sessionId).isEqualTo(zignSecSuccessAuthNotificationRequest.id)
@@ -175,7 +175,7 @@ class ZignSecSessionServiceImplTest {
 
         classUnderTest.handleNotification(zignSecFailedAuthNotificationRequest)
 
-        verify(norwegianAuthenticationEventPublisher).publishSignEvent(NorwegianSignResult.Failed(zignSecFailedAuthNotificationRequest.id))
+        verify(norwegianAuthenticationEventPublisher).publishSignEvent(NorwegianSignResult.Failed(zignSecFailedAuthNotificationRequest.id, 1337))
 
         val savedSession = sessionRepository.findById(zignSecFailedAuthNotificationRequest.id).get()
         assertThat(savedSession.sessionId).isEqualTo(zignSecFailedAuthNotificationRequest.id)
