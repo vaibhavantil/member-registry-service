@@ -1,6 +1,7 @@
 package com.hedvig.memberservice.jobs;
 
 import com.hedvig.memberservice.services.SigningService;
+import com.hedvig.memberservice.services.SwedishBankIdSigningService;
 import lombok.val;
 import org.quartz.JobExecutionContext;
 import org.quartz.SchedulerException;
@@ -20,10 +21,10 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
 public class BankIdCollectorBean {
 
   private static final Logger log = LoggerFactory.getLogger(BankIdCollectorBean.class);
-  private final SigningService signingService;
+  private final SwedishBankIdSigningService signingService;
 
   @Autowired
-  public BankIdCollectorBean(SigningService signingService){
+  public BankIdCollectorBean(SwedishBankIdSigningService signingService){
     this.signingService = signingService;
   }
 

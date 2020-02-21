@@ -13,24 +13,18 @@ import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.validation.constraints.NotNull;
-import lombok.AccessLevel;
-import lombok.Data;
-import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 @Entity
-@Data
 @EntityListeners(SignSessionEntityListener.class)
 public class SignSession {
 
   @Id
   @GeneratedValue(strategy = SEQUENCE)
-  @Setter(AccessLevel.NONE)
   long sessionId;
 
   @NotNull
-  @Setter(AccessLevel.NONE)
   @Column(unique = true)
   Long memberId;
 
@@ -39,11 +33,9 @@ public class SignSession {
   SignStatus status;
 
   @CreationTimestamp
-  @Setter(AccessLevel.NONE)
   Instant createdAt;
 
   @UpdateTimestamp
-  @Setter(AccessLevel.NONE)
   Instant updatedAt;
 
   @Embedded BankIdSession bankIdSession;
@@ -91,5 +83,21 @@ public class SignSession {
       return bankIdSession.canBeReused();
     }
     return false;
+  }
+
+  public Long getSessionId() {
+    return sessionId;
+  }
+
+  public Long getMemberId() {
+    return memberId;
+  }
+
+  public void setStatus(SignStatus status) {
+    this.status = status;
+  }
+
+  public SignStatus getStatus() {
+    return status;
   }
 }

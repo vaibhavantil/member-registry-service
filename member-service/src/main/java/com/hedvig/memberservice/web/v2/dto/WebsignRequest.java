@@ -1,9 +1,11 @@
 package com.hedvig.memberservice.web.v2.dto;
 
 import com.google.common.net.InetAddresses;
+
 import java.beans.ConstructorProperties;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -22,8 +24,6 @@ public class WebsignRequest {
 
   boolean isMobile;
 
-
-  @ConstructorProperties({"email", "ssn", "ipAddress"})
   public WebsignRequest(@Email String email, @NotBlank String ssn, @NotBlank String ipAddress) {
     this.email = email;
     this.ssn = ssn;
@@ -32,11 +32,11 @@ public class WebsignRequest {
   }
 
   @ConstructorProperties({"email", "ssn", "ipAddress", "isMobile"})
-  public WebsignRequest(@Email String email, @NotBlank String ssn, @NotBlank String ipAddress, boolean isMobile) {
+  public WebsignRequest(@Email String email, @NotBlank String ssn, @NotBlank String ipAddress, Boolean isMobile) {
     this.email = email;
     this.ssn = ssn;
     this.ipAddress = GetValidIpAddress(ipAddress);
-    this.isMobile = isMobile;
+    this.isMobile =  (isMobile == null) ? false : isMobile;
   }
 
   private String GetValidIpAddress(String ipAddress) {
@@ -59,6 +59,10 @@ public class WebsignRequest {
 
   public @NotBlank String getIpAddress() {
     return this.ipAddress;
+  }
+
+  public boolean isMobile() {
+    return this.isMobile;
   }
 
   public boolean equals(Object o) {
@@ -87,7 +91,7 @@ public class WebsignRequest {
     final Object this$ipAddress = this.getIpAddress();
     final Object other$ipAddress = other.getIpAddress();
     if (this$ipAddress == null ? other$ipAddress != null
-        : !this$ipAddress.equals(other$ipAddress)) {
+      : !this$ipAddress.equals(other$ipAddress)) {
       return false;
     }
     return true;
@@ -109,6 +113,6 @@ public class WebsignRequest {
 
   public String toString() {
     return "WebsignRequest(logger=" + this.getLogger() + ", email=" + this.getEmail() + ", ssn="
-        + this.getSsn() + ", ipAddress=" + this.getIpAddress() + ")";
+      + this.getSsn() + ", ipAddress=" + this.getIpAddress() + ")";
   }
 }

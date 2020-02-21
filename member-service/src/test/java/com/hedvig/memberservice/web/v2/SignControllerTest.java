@@ -120,9 +120,7 @@ public class SignControllerTest {
 
     SignSession session = makeSignSession(AUTOSTART_TOKEN);
 
-    val cr = new CollectResponse();
-    cr.setHintCode(null);
-    cr.setStatus(CollectStatus.complete);
+    CollectResponse cr = new CollectResponse(CollectStatus.complete, null);
 
     session.newCollectResponse(cr);
 

@@ -43,7 +43,7 @@ public class MemberSignedSagaTest {
     saga.onMemberSignedEvent(
         e, new GenericEventMessage<>(e));
 
-    then(signingService).should().productSignConfirmed(e.getReferenceId());
+    then(signingService).should().productSignConfirmed(e.ssn, e.getReferenceId());
     then(snsNotificationService).should().sendMemberSignedNotification(e.getId());
   }
 }
