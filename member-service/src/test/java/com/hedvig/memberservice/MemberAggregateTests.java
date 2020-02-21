@@ -7,25 +7,8 @@ import com.hedvig.common.UUIDGenerator;
 import com.hedvig.external.bisnodeBCI.BisnodeClient;
 import com.hedvig.memberservice.aggregates.MemberAggregate;
 import com.hedvig.memberservice.aggregates.MemberStatus;
-import com.hedvig.memberservice.commands.AuthenticationAttemptCommand;
-import com.hedvig.memberservice.commands.BankIdAuthenticationStatus;
-import com.hedvig.memberservice.commands.BankIdSignCommand;
-import com.hedvig.memberservice.commands.InactivateMemberCommand;
-import com.hedvig.memberservice.commands.MemberUpdateContactInformationCommand;
-import com.hedvig.memberservice.commands.SelectNewCashbackCommand;
-import com.hedvig.memberservice.commands.StartOnboardingWithSSNCommand;
-import com.hedvig.memberservice.events.EmailUpdatedEvent;
-import com.hedvig.memberservice.events.LivingAddressUpdatedEvent;
-import com.hedvig.memberservice.events.MemberAuthenticatedEvent;
-import com.hedvig.memberservice.events.MemberCreatedEvent;
-import com.hedvig.memberservice.events.MemberInactivatedEvent;
-import com.hedvig.memberservice.events.MemberSignedEvent;
-import com.hedvig.memberservice.events.MemberStartedOnBoardingEvent;
-import com.hedvig.memberservice.events.NameUpdatedEvent;
-import com.hedvig.memberservice.events.NewCashbackSelectedEvent;
-import com.hedvig.memberservice.events.OnboardingStartedWithSSNEvent;
-import com.hedvig.memberservice.events.SSNUpdatedEvent;
-import com.hedvig.memberservice.events.TrackingIdCreatedEvent;
+import com.hedvig.memberservice.commands.*;
+import com.hedvig.memberservice.events.*;
 import com.hedvig.memberservice.services.CashbackService;
 import com.hedvig.memberservice.web.dto.Address;
 import com.hedvig.memberservice.web.dto.StartOnboardingWithSSNRequest;
@@ -243,6 +226,47 @@ public class MemberAggregateTests {
             new NewCashbackSelectedEvent(memberId, DEFAULT_CASHBACK.toString()),
             new MemberSignedEvent(memberId, referenceId, "", "", personalNumber)
             );
+  }
+
+  @Test
+  public void norwegianSignCommand_validJSON_ThenEmitThreeEvents() {
+    Long memberId = 1234L;
+    UUID referenceId = UUID.randomUUID();
+    String personalNumber = "12121212120";
+    String provideJsonResponse = "{ \"json\": true }";
+
+    when(cashbackService.getDefaultId()).thenReturn(DEFAULT_CASHBACK);
+
+    fixture
+      .given(
+        new MemberCreatedEvent(memberId, MemberStatus.INITIATED),
+        new MemberStartedOnBoardingEvent(memberId, MemberStatus.ONBOARDING),
+        new TrackingIdCreatedEvent(memberId, TRACKING_UUID))
+      .when(new NorwegianSignCommand(memberId, referenceId, personalNumber, provideJsonResponse))
+      .expectSuccessfulHandlerExecution()
+      .expectEvents(
+        new SSNUpdatedEvent(memberId, personalNumber),
+        new NewCashbackSelectedEvent(memberId, DEFAULT_CASHBACK.toString()),
+        new NorwegianMemberSignedEvent(memberId, personalNumber, provideJsonResponse)
+      );
+  }
+
+  @Test
+  public void norwegianSignCommand_invalidJSON_expectException() {
+    Long memberId = 1234L;
+    UUID referenceId = UUID.randomUUID();
+    String personalNumber = "12121212120";
+    String provideJsonResponse = "not a valid json";
+
+    when(cashbackService.getDefaultId()).thenReturn(DEFAULT_CASHBACK);
+
+    fixture
+      .given(
+        new MemberCreatedEvent(memberId, MemberStatus.INITIATED),
+        new MemberStartedOnBoardingEvent(memberId, MemberStatus.ONBOARDING),
+        new TrackingIdCreatedEvent(memberId, TRACKING_UUID))
+      .when(new NorwegianSignCommand(memberId, referenceId, personalNumber, provideJsonResponse))
+      .expectException(RuntimeException.class);
   }
 
   @Test

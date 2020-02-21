@@ -269,11 +269,15 @@ public class MemberAggregate {
   @CommandHandler
   void norwegianBankIdSignHandler(NorwegianSignCommand cmd) {
     if (!isValidJSON(cmd.getProvideJsonResponse()))
-      return;
+      throw new RuntimeException("Invalid json from provider");
 
     if (cmd.getPersonalNumber() != null
       && !Objects.equals(this.member.getSsn(), cmd.getPersonalNumber())) {
       apply(new SSNUpdatedEvent(this.id, cmd.getPersonalNumber()));
+    }
+
+    if (defaultCharityEnabled) {
+      apply(new NewCashbackSelectedEvent(this.id, cashbackService.getDefaultId().toString()));
     }
 
     apply(
