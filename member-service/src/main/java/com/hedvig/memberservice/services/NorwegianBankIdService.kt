@@ -13,13 +13,12 @@ class NorwegianBankIdService(
             request
         )
 
-    fun sign(memberId: String, ssn: String, acceptLanguage: String, isMobile: Boolean) =
+    fun sign(memberId: String, ssn: String, acceptLanguage: String) =
         norwegianAuthentication.sign(
             NorwegianBankIdAuthenticationRequest(
                 memberId,
                 ssn,
-                acceptLanguage.toTwoLetterLanguage(),
-                isMobile
+                acceptLanguage.toTwoLetterLanguage()
             )
         )
 

@@ -212,8 +212,7 @@ class ZignSecSessionServiceImplTest {
         val startAuthRequest = NorwegianBankIdAuthenticationRequest(
             "1337",
             "12121212120",
-            "NO",
-            false
+            "NO"
         )
 
         val SESSION_ID: UUID = UUID.fromString("a42a8afe-4071-4e99-8f9f-757c5942e1e5")!!

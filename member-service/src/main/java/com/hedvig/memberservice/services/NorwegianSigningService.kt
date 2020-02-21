@@ -32,8 +32,7 @@ class NorwegianSigningService(
         val response = norwegianBankIdService.sign(
             memberId.toString(),
             request.ssn,
-            acceptLanguage,
-            request.isMobile
+            acceptLanguage
         )
 
         return when (response) {

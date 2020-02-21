@@ -17,7 +17,7 @@ class ZignSecServiceImpl(
 ): ZignSecService {
 
     override fun auth(request: NorwegianBankIdAuthenticationRequest): ZignSecResponse = client.auth(
-        bankIdSelector = if (request.isMobile) BANK_ID_MOBILE else BANK_ID_WEB,
+        bankIdSelector = WEB_OR_MOBILE,
         authorization = authentication,
         host = host,
         body = ZignSecRequestBody(
@@ -28,7 +28,6 @@ class ZignSecServiceImpl(
     )
 
     companion object {
-        private const val BANK_ID_WEB = "nbid"
-        private const val BANK_ID_MOBILE = "nbid_mobile"
+        private const val WEB_OR_MOBILE = "nbid_oidc"
     }
 }
