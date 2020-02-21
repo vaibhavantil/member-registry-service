@@ -2,6 +2,7 @@ package com.hedvig.memberservice;
 
 import static org.mockito.Mockito.when;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hedvig.common.UUIDGenerator;
 import com.hedvig.external.bisnodeBCI.BisnodeClient;
 import com.hedvig.memberservice.aggregates.MemberAggregate;
@@ -38,6 +39,7 @@ import org.axonframework.test.aggregate.FixtureConfiguration;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.web.client.RestClientException;
@@ -62,10 +64,14 @@ public class MemberAggregateTests {
   @MockBean
   private UUIDGenerator uuidGenerator;
 
+  ObjectMapper objectMapper;
+
   @Before
   public void setUp() {
     fixture = new AggregateTestFixture<>(MemberAggregate.class);
     fixture.registerAggregateFactory(new AggregateFactoryM<>(MemberAggregate.class));
+
+    objectMapper = new ObjectMapper();
   }
 
   @Test
@@ -274,7 +280,7 @@ public class MemberAggregateTests {
 
     @Override
     protected T doCreateAggregate(String aggregateIdentifier, DomainEventMessage firstEvent) {
-      return (T) new MemberAggregate(bisnodeClient, cashbackService, uuidGenerator, true);
+      return (T) new MemberAggregate(bisnodeClient, cashbackService, uuidGenerator, objectMapper, true);
     }
   }
 }

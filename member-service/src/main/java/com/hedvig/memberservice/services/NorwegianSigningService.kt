@@ -1,9 +1,12 @@
 package com.hedvig.memberservice.services
 
+import com.hedvig.external.authentication.dto.NorwegianSignResult
 import com.hedvig.external.authentication.dto.StartNorwegianAuthenticationResult
+import com.hedvig.external.event.NorwegianSignEvent
 import com.hedvig.external.zignSec.ZignSecServiceImpl
 import com.hedvig.memberservice.entities.SignStatus
 import com.hedvig.memberservice.query.MemberRepository
+import com.hedvig.memberservice.services.member.MemberService
 import com.hedvig.memberservice.services.member.dto.MemberSignResponse
 import com.hedvig.memberservice.services.member.dto.NorwegianBankIdResponse
 import com.hedvig.memberservice.web.v2.dto.WebsignRequest
@@ -14,6 +17,7 @@ import javax.transaction.Transactional
 @Service
 class NorwegianSigningService(
     private val memberRepository: MemberRepository,
+    private val memberService: MemberService,
     private val norwegianBankIdService: NorwegianBankIdService
 ) {
 
@@ -41,6 +45,15 @@ class NorwegianSigningService(
                     status = SignStatus.FAILED
                 )
             }
+        }
+    }
+
+    fun handleSignResult(result: NorwegianSignResult) {
+        when (result) {
+            is NorwegianSignResult.Signed -> {
+                memberService.norwegianBankIdSignComplete(result.memberId, result.id, result.ssn, result.providerJsonResponse)
+            }
+            is NorwegianSignResult.Failed -> TODO()
         }
     }
 

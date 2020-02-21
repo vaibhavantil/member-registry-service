@@ -1,5 +1,8 @@
 package com.hedvig.memberservice.aggregates;
 
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hedvig.common.UUIDGenerator;
 import com.hedvig.external.bisnodeBCI.BisnodeClient;
 import com.hedvig.external.bisnodeBCI.dto.Person;
@@ -19,6 +22,7 @@ import org.axonframework.spring.stereotype.Aggregate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 
+import java.io.IOException;
 import java.time.ZoneId;
 import java.util.List;
 import java.util.Objects;
@@ -46,6 +50,8 @@ public class MemberAggregate {
 
   private CashbackService cashbackService;
 
+  private ObjectMapper objectMapper;
+
   private UUIDGenerator uuidGenerator;
   private UUID trackingId;
 
@@ -56,11 +62,13 @@ public class MemberAggregate {
     BisnodeClient bisnodeClient,
     CashbackService cashbackService,
     UUIDGenerator uuidGenerator,
+    ObjectMapper objectMapper,
     @Value("${hedvig.memberAggregate.defaultCharity.enabled:true}") boolean defaultCharityEnabled) {
     this.bisnodeClient = bisnodeClient;
     this.cashbackService = cashbackService;
     this.uuidGenerator = uuidGenerator;
     this.defaultCharityEnabled = defaultCharityEnabled;
+    this.objectMapper = objectMapper;
   }
 
   @CommandHandler
@@ -259,6 +267,33 @@ public class MemberAggregate {
   }
 
   @CommandHandler
+  void norwegianBankIdSignHandler(NorwegianSignCommand cmd) {
+    if (!isValidJSON(cmd.getProvideJsonResponse()))
+      return;
+
+    if (cmd.getPersonalNumber() != null
+      && !Objects.equals(this.member.getSsn(), cmd.getPersonalNumber())) {
+      apply(new SSNUpdatedEvent(this.id, cmd.getPersonalNumber()));
+    }
+
+    apply(
+      new NorwegianMemberSignedEvent(
+        this.id, cmd.getPersonalNumber(), cmd.getProvideJsonResponse()));
+  }
+
+  public boolean isValidJSON(final String json) {
+    boolean valid = false;
+    try {
+      objectMapper.readTree(json);
+      valid = true;
+    } catch (IOException e) {
+      log.error("Failed to validate json", e);
+    }
+
+    return valid;
+  }
+
+  @CommandHandler
   public void on(SignMemberFromUnderwriterCommand signMemberFromUnderwriterCommand) {
     apply(new MemberSignedWithoutBankId(signMemberFromUnderwriterCommand.getId(), signMemberFromUnderwriterCommand.getSsn()));
   }
@@ -441,6 +476,12 @@ public class MemberAggregate {
 
   @EventSourcingHandler
   public void on(MemberSignedEvent e) {
+    this.status = MemberStatus.SIGNED;
+  }
+
+  //fixme: not sure if this is needed
+  @EventSourcingHandler
+  public void on(NorwegianMemberSignedEvent e) {
     this.status = MemberStatus.SIGNED;
   }
 

@@ -104,7 +104,6 @@ class SwedishBankIdSigningService(
                         val collectResponse = CollectResponse(response.status, response.hintCode)
                         s.newCollectResponse(collectResponse)
                         if (response.status == CollectStatus.complete) {
-                            //TODO: we should rename to signComplete
                             memberService.bankIdSignComplete(s.memberId, response)
                             s.status = SignStatus.COMPLETED
                         } else if (response.status == CollectStatus.failed) {
