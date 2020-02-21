@@ -5,5 +5,5 @@ import com.hedvig.external.zignSec.client.dto.ZignSecNotificationRequest
 
 interface ZignSecSessionService: NorwegianAuthentication {
 
-    fun handleNotification(request: ZignSecNotificationRequest)
+    fun handleNotification(jsonRequest: String)
 }

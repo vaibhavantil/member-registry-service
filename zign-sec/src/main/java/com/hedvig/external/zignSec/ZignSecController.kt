@@ -14,7 +14,7 @@ class ZignSecController(
 ) {
 
     @PostMapping(value = ["notifications"])
-    fun webhook(@RequestBody request: ZignSecNotificationRequest): ResponseEntity<String> {
+    fun webhook(@RequestBody request: String): ResponseEntity<String> {
         zignSecSessionService.handleNotification(request)
         return ResponseEntity.ok("\uD83D\uDC4D")
     }

@@ -1,12 +1,14 @@
 package com.hedvig.external.authentication.dto
 
+import com.hedvig.external.zignSec.client.dto.ZignSecNotificationRequest
 import java.util.*
 
 sealed class NorwegianSignResult {
     data class Signed(
         val id: UUID,
         val memberId: Long,
-        val ssn: String
+        val ssn: String,
+        val providerJsonResponse: String
     ) : NorwegianSignResult()
 
     data class Failed(

@@ -2,6 +2,7 @@ package com.hedvig.external.zignSec.client.dto
 
 import com.fasterxml.jackson.annotation.JsonProperty
 import java.time.LocalDate
+import java.time.LocalDateTime
 
 data class ZignSecIdentity(
     @JsonProperty("CountryCode")
@@ -23,7 +24,7 @@ data class ZignSecIdentity(
     @JsonProperty("IdProviderName")
     val idProviderName: String?,
     @JsonProperty("IdentificationDate")
-    val identificationDate: LocalDate,
+    val identificationDate: LocalDateTime?,
     @JsonProperty("IdProviderRequestId")
     val idProviderRequestId: String?,
     @JsonProperty("IdProviderPersonId")

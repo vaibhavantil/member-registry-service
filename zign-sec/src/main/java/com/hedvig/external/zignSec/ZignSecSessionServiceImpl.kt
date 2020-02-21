@@ -1,5 +1,6 @@
 package com.hedvig.external.zignSec
 
+import com.fasterxml.jackson.databind.ObjectMapper
 import com.hedvig.external.authentication.dto.NorwegianAuthenticationResult
 import com.hedvig.external.authentication.dto.NorwegianAuthenticationCollectResponse
 import com.hedvig.external.authentication.dto.NorwegianSignResult
@@ -21,7 +22,8 @@ import java.util.*
 class ZignSecSessionServiceImpl(
     private val sessionRepository: ZignSecSessionRepository,
     private val zignSecService: ZignSecService,
-    private val norwegianAuthenticationEventPublisher: NorwegianAuthenticationEventPublisher
+    private val norwegianAuthenticationEventPublisher: NorwegianAuthenticationEventPublisher,
+    private val objectMapper: ObjectMapper
 ) : ZignSecSessionService {
 
     override fun auth(request: NorwegianBankIdAuthenticationRequest): StartNorwegianAuthenticationResult =
@@ -70,12 +72,13 @@ class ZignSecSessionServiceImpl(
         )
     }
 
-    override fun handleNotification(request: ZignSecNotificationRequest) {
+    override fun handleNotification(jsonRequest: String) {
+        val request = objectMapper.readValue(jsonRequest, ZignSecNotificationRequest::class.java)
         val session = sessionRepository.findById(request.id).get()
 
         when (session.status) {
             NorwegianBankIdProgressStatus.INITIATED,
-            NorwegianBankIdProgressStatus.IN_PROGRESS -> updateSession(session, request)
+            NorwegianBankIdProgressStatus.IN_PROGRESS -> updateSession(session, request, jsonRequest)
             NorwegianBankIdProgressStatus.FAILED,
             NorwegianBankIdProgressStatus.COMPLETED -> {
                 if (session.status != getSessionStatusFromNotification(request)) {
@@ -85,7 +88,7 @@ class ZignSecSessionServiceImpl(
         }
     }
 
-    private fun updateSession(session: ZignSecSession, request: ZignSecNotificationRequest) {
+    private fun updateSession(session: ZignSecSession, request: ZignSecNotificationRequest, jsonRequest: String) {
         session.notification = ZignSecNotification.from(request)
 
         session.status = getSessionStatusFromNotification(request)
@@ -95,16 +98,35 @@ class ZignSecSessionServiceImpl(
                 when (session.status) {
                     NorwegianBankIdProgressStatus.INITIATED,
                     NorwegianBankIdProgressStatus.IN_PROGRESS -> { /* strange but no-op */ }
-                    NorwegianBankIdProgressStatus.FAILED -> norwegianAuthenticationEventPublisher.publishSignEvent(NorwegianSignResult.Failed(session.sessionId))
-                    NorwegianBankIdProgressStatus.COMPLETED -> norwegianAuthenticationEventPublisher.publishSignEvent(NorwegianSignResult.Signed(session.sessionId, session.notification!!.identity!!.personalNumber!!))
+                    NorwegianBankIdProgressStatus.FAILED -> norwegianAuthenticationEventPublisher.publishSignEvent(
+                        NorwegianSignResult.Failed(
+                            session.sessionId,
+                            session.memberId
+                        )
+                    )
+                    NorwegianBankIdProgressStatus.COMPLETED -> norwegianAuthenticationEventPublisher.publishSignEvent(
+                        NorwegianSignResult.Signed(
+                            session.sessionId,
+                            session.memberId,
+                            session.notification!!.identity!!.personalNumber!!,
+                            jsonRequest
+                        )
+                    )
                 }
             }
-            NorwegianAuthenticationType.AUTH ->{
+            NorwegianAuthenticationType.AUTH -> {
                 when (session.status) {
                     NorwegianBankIdProgressStatus.INITIATED,
                     NorwegianBankIdProgressStatus.IN_PROGRESS -> { /* strange but no-op */ }
-                    NorwegianBankIdProgressStatus.FAILED -> norwegianAuthenticationEventPublisher.publishAuthenticationEvent(NorwegianAuthenticationResult.Failed(session.sessionId))
-                    NorwegianBankIdProgressStatus.COMPLETED -> norwegianAuthenticationEventPublisher.publishAuthenticationEvent(NorwegianAuthenticationResult.Completed(session.sessionId, session.notification!!.identity!!.personalNumber!!))
+                    NorwegianBankIdProgressStatus.FAILED -> norwegianAuthenticationEventPublisher.publishAuthenticationEvent(
+                        NorwegianAuthenticationResult.Failed(
+                            session.sessionId,
+                            session.memberId))
+                    NorwegianBankIdProgressStatus.COMPLETED -> norwegianAuthenticationEventPublisher.publishAuthenticationEvent(
+                        NorwegianAuthenticationResult.Completed(
+                            session.sessionId, session.memberId,
+                            session.notification!!.identity!!.personalNumber!!)
+                    )
                 }
             }
         }
