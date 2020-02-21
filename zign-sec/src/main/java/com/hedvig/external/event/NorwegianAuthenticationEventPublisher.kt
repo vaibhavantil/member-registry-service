@@ -1,9 +1,10 @@
 package com.hedvig.external.event
 
-import com.hedvig.external.authentication.dto.NorwegianAuthenticationCollectResponse
+import com.hedvig.external.authentication.dto.NorwegianAuthenticationResult
+import com.hedvig.external.authentication.dto.NorwegianSignResult
 
 interface NorwegianAuthenticationEventPublisher {
 
-    fun publishAuthenticationEvent(norwegianAuthenticationCollectResponse: NorwegianAuthenticationCollectResponse)
-    fun publishSignEvent(norwegianAuthenticationCollectResponse: NorwegianAuthenticationCollectResponse)
+    fun publishAuthenticationEvent(norwegianAuthResult: NorwegianAuthenticationResult)
+    fun publishSignEvent(norwegianSignResult: NorwegianSignResult)
 }

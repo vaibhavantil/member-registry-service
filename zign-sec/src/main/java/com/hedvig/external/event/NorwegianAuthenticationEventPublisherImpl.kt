@@ -1,6 +1,7 @@
 package com.hedvig.external.event
 
-import com.hedvig.external.authentication.dto.NorwegianAuthenticationCollectResponse
+import com.hedvig.external.authentication.dto.NorwegianAuthenticationResult
+import com.hedvig.external.authentication.dto.NorwegianSignResult
 import org.springframework.context.ApplicationEventPublisher
 import org.springframework.stereotype.Component
 
@@ -8,13 +9,14 @@ import org.springframework.stereotype.Component
 class NorwegianAuthenticationEventPublisherImpl(
     private val applicationEventPublisher: ApplicationEventPublisher
 ): NorwegianAuthenticationEventPublisher {
-    override fun publishAuthenticationEvent(norwegianAuthenticationCollectResponse: NorwegianAuthenticationCollectResponse) {
-        val event = NorwegianAuthenticationEvent(this, norwegianAuthenticationCollectResponse)
+
+    override fun publishAuthenticationEvent(norwegianAuthResult: NorwegianAuthenticationResult) {
+        val event = NorwegianAuthenticationEvent(this, norwegianAuthResult)
         applicationEventPublisher.publishEvent(event)
     }
 
-    override fun publishSignEvent(norwegianAuthenticationCollectResponse: NorwegianAuthenticationCollectResponse) {
-        val event = NorwegianSignEvent(this, norwegianAuthenticationCollectResponse)
+    override fun publishSignEvent(norwegianSignResult: NorwegianSignResult) {
+        val event = NorwegianSignEvent(this, norwegianSignResult)
         applicationEventPublisher.publishEvent(event)
     }
 }

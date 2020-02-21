@@ -1,6 +1,8 @@
 package com.hedvig.external.zignSec
 
+import com.hedvig.external.authentication.dto.NorwegianAuthenticationResult
 import com.hedvig.external.authentication.dto.NorwegianAuthenticationCollectResponse
+import com.hedvig.external.authentication.dto.NorwegianSignResult
 import com.hedvig.external.authentication.dto.StartNorwegianAuthenticationResult
 import com.hedvig.external.authentication.dto.NorwegianAuthenticationResponseError
 import com.hedvig.external.authentication.dto.NorwegianBankIdAuthenticationRequest
@@ -89,10 +91,22 @@ class ZignSecSessionServiceImpl(
         session.status = getSessionStatusFromNotification(request)
 
         when (session.requestType) {
-            NorwegianAuthenticationType.SIGN ->
-                norwegianAuthenticationEventPublisher.publishSignEvent(NorwegianAuthenticationCollectResponse(session.status))
-            NorwegianAuthenticationType.AUTH ->
-                norwegianAuthenticationEventPublisher.publishAuthenticationEvent(NorwegianAuthenticationCollectResponse(session.status))
+            NorwegianAuthenticationType.SIGN -> {
+                when (session.status) {
+                    NorwegianBankIdProgressStatus.INITIATED,
+                    NorwegianBankIdProgressStatus.IN_PROGRESS -> { /* strange but no-op */ }
+                    NorwegianBankIdProgressStatus.FAILED -> norwegianAuthenticationEventPublisher.publishSignEvent(NorwegianSignResult.Failed(session.sessionId))
+                    NorwegianBankIdProgressStatus.COMPLETED -> norwegianAuthenticationEventPublisher.publishSignEvent(NorwegianSignResult.Signed(session.sessionId, session.notification!!.identity!!.personalNumber!!))
+                }
+            }
+            NorwegianAuthenticationType.AUTH ->{
+                when (session.status) {
+                    NorwegianBankIdProgressStatus.INITIATED,
+                    NorwegianBankIdProgressStatus.IN_PROGRESS -> { /* strange but no-op */ }
+                    NorwegianBankIdProgressStatus.FAILED -> norwegianAuthenticationEventPublisher.publishAuthenticationEvent(NorwegianAuthenticationResult.Failed(session.sessionId))
+                    NorwegianBankIdProgressStatus.COMPLETED -> norwegianAuthenticationEventPublisher.publishAuthenticationEvent(NorwegianAuthenticationResult.Completed(session.sessionId, session.notification!!.identity!!.personalNumber!!))
+                }
+            }
         }
 
         sessionRepository.save(session)

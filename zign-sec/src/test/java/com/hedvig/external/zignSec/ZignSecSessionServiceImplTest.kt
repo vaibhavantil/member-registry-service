@@ -1,6 +1,7 @@
 package com.hedvig.external.zignSec
 
-import com.hedvig.external.authentication.dto.NorwegianAuthenticationCollectResponse
+import com.hedvig.external.authentication.dto.NorwegianAuthenticationResult
+import com.hedvig.external.authentication.dto.NorwegianSignResult
 import com.hedvig.external.authentication.dto.NorwegianBankIdAuthenticationRequest
 import com.hedvig.external.authentication.dto.NorwegianBankIdProgressStatus
 import com.hedvig.external.authentication.dto.StartNorwegianAuthenticationResult.Success
@@ -18,6 +19,7 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.ArgumentMatchers.any
+import org.mockito.ArgumentMatchers.same
 import org.mockito.Mock
 import org.mockito.Mockito.never
 import org.mockito.Mockito.verify
@@ -144,7 +146,7 @@ class ZignSecSessionServiceImplTest {
 
         classUnderTest.handleNotification(zignSecSuccessAuthNotificationRequest)
 
-        verify(norwegianAuthenticationEventPublisher).publishAuthenticationEvent(NorwegianAuthenticationCollectResponse(NorwegianBankIdProgressStatus.COMPLETED))
+        verify(norwegianAuthenticationEventPublisher).publishAuthenticationEvent(NorwegianAuthenticationResult.Completed(zignSecSuccessAuthNotificationRequest.id, "12121212120"))
 
         val savedSession = sessionRepository.findById(zignSecSuccessAuthNotificationRequest.id).get()
         assertThat(savedSession.sessionId).isEqualTo(zignSecSuccessAuthNotificationRequest.id)
@@ -173,7 +175,7 @@ class ZignSecSessionServiceImplTest {
 
         classUnderTest.handleNotification(zignSecFailedAuthNotificationRequest)
 
-        verify(norwegianAuthenticationEventPublisher).publishSignEvent(NorwegianAuthenticationCollectResponse(NorwegianBankIdProgressStatus.FAILED))
+        verify(norwegianAuthenticationEventPublisher).publishSignEvent(NorwegianSignResult.Failed(zignSecFailedAuthNotificationRequest.id))
 
         val savedSession = sessionRepository.findById(zignSecFailedAuthNotificationRequest.id).get()
         assertThat(savedSession.sessionId).isEqualTo(zignSecFailedAuthNotificationRequest.id)
