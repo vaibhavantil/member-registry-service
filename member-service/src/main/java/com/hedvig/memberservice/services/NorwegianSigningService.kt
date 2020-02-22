@@ -12,6 +12,7 @@ import com.hedvig.memberservice.services.redispublisher.AuthSessionUpdatedEventS
 import com.hedvig.memberservice.services.redispublisher.RedisEventPublisher
 import com.hedvig.memberservice.web.v2.dto.WebsignRequest
 import org.slf4j.LoggerFactory
+import org.springframework.context.ApplicationEventPublisher
 import org.springframework.stereotype.Service
 import javax.transaction.Transactional
 
@@ -20,7 +21,7 @@ class NorwegianSigningService(
     private val memberRepository: MemberRepository,
     private val memberService: MemberService,
     private val norwegianBankIdService: NorwegianBankIdService,
-    private val redisEventPublisher: RedisEventPublisher
+    private val applicationEventPublisher: ApplicationEventPublisher
 ) {
 
     @Transactional
@@ -52,9 +53,9 @@ class NorwegianSigningService(
         when (result) {
             is NorwegianSignResult.Signed -> {
                 memberService.norwegianBankIdSignComplete(result.memberId, result.id, result.ssn, result.providerJsonResponse)
-                redisEventPublisher.onSignSessionComplete(SignSessionCompleteEvent(result.memberId))
+                applicationEventPublisher.publishEvent(SignSessionCompleteEvent(result.memberId))
             }
-            is NorwegianSignResult.Failed -> redisEventPublisher.onAuthSessionUpdated(result.memberId, AuthSessionUpdatedEventStatus.FAILED)
+            is NorwegianSignResult.Failed -> applicationEventPublisher.publishEvent(SignSessionCompleteEvent(result.memberId))
         }
     }
 

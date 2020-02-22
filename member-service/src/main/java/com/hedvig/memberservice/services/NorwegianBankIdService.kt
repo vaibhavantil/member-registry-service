@@ -22,7 +22,6 @@ class NorwegianBankIdService(
             )
         )
 
-    //TODO: maybe we should map more
     private fun String.toTwoLetterLanguage() = when (this) {
         "sv-SE" -> "SV"
         "en-SE",

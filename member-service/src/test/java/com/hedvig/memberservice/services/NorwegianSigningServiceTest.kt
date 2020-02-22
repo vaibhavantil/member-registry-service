@@ -19,6 +19,7 @@ import org.mockito.Mock
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.verifyZeroInteractions
 import org.mockito.junit.MockitoJUnitRunner
+import org.springframework.context.ApplicationEventPublisher
 import java.util.*
 import org.mockito.Mockito.`when` as whenever
 
@@ -35,13 +36,13 @@ class NorwegianSigningServiceTest {
     lateinit var norwegianBankIdService: NorwegianBankIdService
 
     @Mock
-    lateinit var redisEventPublisher: RedisEventPublisher
+    lateinit var applicationEventPublisher: ApplicationEventPublisher
 
     lateinit var classUnderTest: NorwegianSigningService
 
     @Before
     fun before() {
-        classUnderTest = NorwegianSigningService(memberRepository, memberService, norwegianBankIdService, redisEventPublisher)
+        classUnderTest = NorwegianSigningService(memberRepository, memberService, norwegianBankIdService, applicationEventPublisher)
     }
 
     @Test
@@ -90,7 +91,7 @@ class NorwegianSigningServiceTest {
         )
 
         verify(memberService).norwegianBankIdSignComplete(MEMBER_ID, RESPONSE_ID, SSN, PROVIDER_JSON_RESPONSE)
-        verify(redisEventPublisher).onSignSessionComplete(SignSessionCompleteEvent(MEMBER_ID))
+        verify(applicationEventPublisher).publishEvent(SignSessionCompleteEvent(MEMBER_ID))
     }
 
     @Test
@@ -103,7 +104,7 @@ class NorwegianSigningServiceTest {
         )
 
         verifyZeroInteractions(memberService)
-        verify(redisEventPublisher).onAuthSessionUpdated(MEMBER_ID, AuthSessionUpdatedEventStatus.FAILED)
+        verify(applicationEventPublisher).publishEvent(SignSessionCompleteEvent(MEMBER_ID))
     }
 
 

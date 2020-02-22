@@ -48,9 +48,6 @@ class SwedishBankIdSigningServiceTest {
     lateinit var bankIdRestService: BankIdRestService
 
     @Mock
-    lateinit var signedMemberRepository: SignedMemberRepository
-
-    @Mock
     lateinit var signSessionRepository: SignSessionRepository
 
     @Mock
@@ -58,9 +55,6 @@ class SwedishBankIdSigningServiceTest {
 
     @Mock
     lateinit var memberService: MemberService
-
-    @Mock
-    lateinit var memberRepository: MemberRepository
 
     @Rule
     @JvmField
@@ -76,10 +70,8 @@ class SwedishBankIdSigningServiceTest {
 
     @Before
     fun setup() {
-//        whenever(signedMemberRepository.findBySsn(ArgumentMatchers.any())).thenReturn(Optional.empty())
-
         sut = SwedishBankIdSigningService(
-            bankIdRestService, signSessionRepository, memberRepository,
+            bankIdRestService, signSessionRepository,
             scheduler, memberService, SWITCHER_MESSAGE, NON_SWITCHER_MESSAGE
         )
     }

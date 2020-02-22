@@ -37,7 +37,6 @@ import javax.transaction.Transactional
 class SwedishBankIdSigningService(
     private val bankidService: BankIdRestService,
     private val signSessionRepository: SignSessionRepository,
-    private val memberRepository: MemberRepository,
     private val scheduler: Scheduler,
     private val memberService: MemberService,
     @Value("\${hedvig.bankid.signmessage.switcher}")
