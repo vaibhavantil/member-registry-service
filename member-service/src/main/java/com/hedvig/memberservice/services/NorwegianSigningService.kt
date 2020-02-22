@@ -8,8 +8,6 @@ import com.hedvig.memberservice.services.events.SignSessionCompleteEvent
 import com.hedvig.memberservice.services.member.MemberService
 import com.hedvig.memberservice.services.member.dto.MemberSignResponse
 import com.hedvig.memberservice.services.member.dto.NorwegianBankIdResponse
-import com.hedvig.memberservice.services.redispublisher.AuthSessionUpdatedEventStatus
-import com.hedvig.memberservice.services.redispublisher.RedisEventPublisher
 import com.hedvig.memberservice.web.v2.dto.WebsignRequest
 import org.slf4j.LoggerFactory
 import org.springframework.context.ApplicationEventPublisher
