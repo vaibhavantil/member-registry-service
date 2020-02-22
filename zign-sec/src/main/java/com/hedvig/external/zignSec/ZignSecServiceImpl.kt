@@ -13,7 +13,13 @@ class ZignSecServiceImpl(
     @Value("\${zignsec.authentication.token:authenticate-me}")
     private val authentication: String,
     @Value("\${zignsec.host:test.zignsec.com}")
-    private val host: String
+    private val host: String,
+    @Value("\${zignsec.webhook.url}")
+    private val webhookUrl: String,
+    @Value("\${zignsec.success.url}")
+    private val sucessUrl: String,
+    @Value("\${zignsec.failed.url}")
+    private val failedUrl: String
 ): ZignSecService {
 
     override fun auth(request: NorwegianBankIdAuthenticationRequest): ZignSecResponse = client.auth(
@@ -23,7 +29,9 @@ class ZignSecServiceImpl(
         body = ZignSecRequestBody(
             personalnumber = request.personalNumber,
             language = request.language,
-            webhook = request.webhook
+            target = sucessUrl,
+            targetError = failedUrl,
+            webhook = webhookUrl
         )
     )
 
