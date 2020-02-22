@@ -1,6 +1,7 @@
 package com.hedvig.memberservice.services
 
 import com.hedvig.integration.botService.BotService
+import com.hedvig.integration.botService.dto.UpdateUserContextDTO
 import com.hedvig.integration.underwritter.UnderwriterApi
 import com.hedvig.memberservice.commands.SignMemberFromUnderwriterCommand
 import com.hedvig.memberservice.commands.UpdateWebOnBoardingInfoCommand
@@ -20,6 +21,7 @@ import org.slf4j.LoggerFactory
 import org.springframework.lang.NonNull
 import org.springframework.stereotype.Service
 import java.util.*
+import javax.transaction.NotSupportedException
 import javax.transaction.Transactional
 
 @Service
@@ -83,7 +85,7 @@ class SigningService(
         return if (optionalMember.isPresent) {
             when (SsnUtilImpl.instance.getMarketFromSsn(optionalMember.get().ssn)) {
                 Market.SWEDEN -> swedishBankIdSigningService.getSignStatus(memberId)
-                Market.NORWAY -> TODO()
+                Market.NORWAY -> throw NotSupportedException("This is not supported for norway")
             }
         } else {
             Optional.empty()
@@ -91,19 +93,28 @@ class SigningService(
     }
 
     @Transactional
-    fun productSignConfirmed(ssn: String, id: String?) {
-        val userContext = when (SsnUtilImpl.instance.getMarketFromSsn(ssn)) {
-            Market.SWEDEN -> swedishBankIdSigningService.getUserContextDTOFromSession(id)
-            Market.NORWAY -> TODO()
-        }
+    fun swedishProductSignConfirmed(id: String?) {
+        swedishBankIdSigningService.completeSession(id) ?: return
+    }
 
-        userContext?.let {
-            val memberId = it.memberId.toLong()
-            try {
-                botService.initBotServiceSessionWebOnBoarding(memberId, it)
-            } catch (ex: RuntimeException) {
-                log.error("Could not initialize bot-service for memberId: {}", memberId, ex)
-            }
+    fun productSignConfirmed(memberId: Long){
+        val member = memberRepository.getOne(memberId)
+        val userContext = UpdateUserContextDTO(
+            memberId.toString(),
+            member.getSsn(),
+            member.getFirstName(),
+            member.getLastName(),
+            member.getPhoneNumber(),
+            member.getEmail(),
+            member.getStreet(),
+            member.getCity(),
+            member.zipCode,
+            true)
+
+        try {
+            botService.initBotServiceSessionWebOnBoarding(memberId, userContext)
+        } catch (ex: RuntimeException) {
+            log.error("Could not initialize bot-service for memberId: {}", memberId, ex)
         }
     }
 

@@ -2,7 +2,6 @@ package com.hedvig.external.zignSec
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.hedvig.external.authentication.dto.NorwegianAuthenticationResult
-import com.hedvig.external.authentication.dto.NorwegianAuthenticationCollectResponse
 import com.hedvig.external.authentication.dto.NorwegianSignResult
 import com.hedvig.external.authentication.dto.StartNorwegianAuthenticationResult
 import com.hedvig.external.authentication.dto.NorwegianAuthenticationResponseError
@@ -61,14 +60,6 @@ class ZignSecSessionServiceImpl(
         return StartNorwegianAuthenticationResult.Success(
             response.id,
             response.redirectUrl
-        )
-    }
-
-    override fun collect(sessionId: UUID): NorwegianAuthenticationCollectResponse {
-        val session = sessionRepository.findById(sessionId).get()
-
-        return NorwegianAuthenticationCollectResponse(
-            status = session.status
         )
     }
 

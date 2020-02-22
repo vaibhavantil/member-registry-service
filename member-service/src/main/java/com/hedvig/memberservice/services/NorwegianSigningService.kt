@@ -2,8 +2,6 @@ package com.hedvig.memberservice.services
 
 import com.hedvig.external.authentication.dto.NorwegianSignResult
 import com.hedvig.external.authentication.dto.StartNorwegianAuthenticationResult
-import com.hedvig.external.event.NorwegianSignEvent
-import com.hedvig.external.zignSec.ZignSecServiceImpl
 import com.hedvig.memberservice.entities.SignStatus
 import com.hedvig.memberservice.query.MemberRepository
 import com.hedvig.memberservice.services.events.SignSessionCompleteEvent
@@ -23,7 +21,7 @@ class NorwegianSigningService(
     private val memberService: MemberService,
     private val norwegianBankIdService: NorwegianBankIdService,
     private val redisEventPublisher: RedisEventPublisher
-    ) {
+) {
 
     @Transactional
     fun startSign(memberId: Long, request: WebsignRequest): MemberSignResponse {

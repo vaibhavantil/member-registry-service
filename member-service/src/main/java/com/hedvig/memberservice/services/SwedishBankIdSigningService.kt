@@ -129,26 +129,12 @@ class SwedishBankIdSigningService(
     }
 
     @Transactional
-    fun getUserContextDTOFromSession(id: String?): UpdateUserContextDTO? {
+    fun completeSession(id: String?) {
         val session = signSessionRepository.findByOrderReference(id)
-        return if (session.isPresent) {
+        if (session.isPresent) {
             val s = session.get()
             s.status = SignStatus.COMPLETED
             signSessionRepository.save(s)
-            val member = memberRepository.getOne(s.memberId)
-            UpdateUserContextDTO(
-                s.memberId.toString(),
-                member.getSsn(),
-                member.getFirstName(),
-                member.getLastName(),
-                member.getPhoneNumber(),
-                member.getEmail(),
-                member.getStreet(),
-                member.getCity(),
-                member.zipCode,
-                true)
-        } else {
-            null
         }
     }
 

@@ -8,8 +8,6 @@ import com.hedvig.external.bankID.bankIdTypes.CollectResponse
 import com.hedvig.external.bankID.bankIdTypes.CollectStatus
 import com.hedvig.external.bankID.bankIdTypes.CompletionData
 import com.hedvig.external.bankID.bankIdTypes.OrderResponse
-import com.hedvig.integration.underwritter.dtos.QuoteToSignStatusDTO
-import com.hedvig.memberservice.commands.UpdateWebOnBoardingInfoCommand
 import com.hedvig.memberservice.entities.SignSession
 import com.hedvig.memberservice.entities.SignSessionRepository
 import com.hedvig.memberservice.entities.SignStatus
@@ -291,9 +289,8 @@ class SwedishBankIdSigningServiceTest {
 
         whenever(signSessionRepository.findByOrderReference(ORDER_REFERENCE))
             .thenReturn(Optional.of(session))
-        whenever(memberRepository.getOne(ArgumentMatchers.anyLong())).thenReturn(MemberEntity())
 
-        sut.getUserContextDTOFromSession(ORDER_REFERENCE)
+        sut.completeSession(ORDER_REFERENCE)
 
         assertThat(session.status).isEqualTo(SignStatus.COMPLETED)
 
@@ -368,7 +365,7 @@ class SwedishBankIdSigningServiceTest {
     fun productSignConfirmed_givenNoSignSession_thenDoesNothing() {
         whenever(signSessionRepository.findByOrderReference(ORDER_REFERENCE)).thenReturn(Optional.empty())
 
-        sut.getUserContextDTOFromSession(ORDER_REFERENCE)
+        sut.completeSession(ORDER_REFERENCE)
 
         verify(signSessionRepository, never()).save(ArgumentMatchers.any())
     }
