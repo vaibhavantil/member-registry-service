@@ -33,14 +33,13 @@ class NorwegianSigningService(
 
         return when (response) {
             is StartNorwegianAuthenticationResult.Success -> MemberSignResponse(
-                signUUID = response.id,
+                signId = response.sessionId,
                 status = SignStatus.IN_PROGRESS,
                 norwegianBankIdResponse = NorwegianBankIdResponse(response.redirectUrl)
             )
             is StartNorwegianAuthenticationResult.Failed -> {
                 logger.error("Norwegian authentication failed with errors: ${response.errors}")
                 MemberSignResponse(
-                    signUUID = response.id,
                     status = SignStatus.FAILED
                 )
             }

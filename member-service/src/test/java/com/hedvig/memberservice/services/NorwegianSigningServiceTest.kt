@@ -51,14 +51,14 @@ class NorwegianSigningServiceTest {
 
         whenever(norwegianBankIdService.sign(MEMBER_ID.toString(), SSN, null)).thenReturn(
             StartNorwegianAuthenticationResult.Success(
-                RESPONSE_ID,
+                SESSION_ID,
                 REDIRECT_URL
             )
         )
 
         val response = classUnderTest.startSign(MEMBER_ID, WebsignRequest(EMAIL, SSN, IP_ADDRESS))
 
-        assertThat(response.signUUID).isEqualTo(RESPONSE_ID)
+        assertThat(response.signId).isEqualTo(SESSION_ID)
         assertThat(response.status).isEqualTo(SignStatus.IN_PROGRESS)
         assertThat(response.norwegianBankIdResponse?.redirectUrl).isEqualTo(REDIRECT_URL)
     }
@@ -69,7 +69,6 @@ class NorwegianSigningServiceTest {
 
         whenever(norwegianBankIdService.sign(MEMBER_ID.toString(), SSN, null)).thenReturn(
             StartNorwegianAuthenticationResult.Failed(
-                RESPONSE_ID,
                 LIST_OF_ERRORS
             )
         )
@@ -109,6 +108,7 @@ class NorwegianSigningServiceTest {
 
 
     companion object {
+        private const val SESSION_ID: Long = 1
         private const val MEMBER_ID: Long = 1337
         private const val SSN: String = "12121212120"
         private const val EMAIL: String = "em@i.l"

@@ -255,11 +255,11 @@ class SwedishBankIdSigningServiceTest {
         whenever(bankIdRestService.startSign(ArgumentMatchers.matches(SSN), ArgumentMatchers.anyString(), ArgumentMatchers.anyString()))
             .thenReturn(makeOrderResponse(ORDER_REFERENCE2, AUTO_START_TOKEN2))
 
-        val (_, _, _, bankIdOrderResponse) = sut.startSign(WebsignRequest(EMAIL, SSN, IP_ADDRESS), MEMBER_ID, false)
+        val response = sut.startSign(WebsignRequest(EMAIL, SSN, IP_ADDRESS), MEMBER_ID, false)
 
-        assertThat(bankIdOrderResponse).hasFieldOrPropertyWithValue("orderRef", ORDER_REFERENCE2)
+        assertThat(response.bankIdOrderResponse).hasFieldOrPropertyWithValue("orderRef", ORDER_REFERENCE2)
 
-        assertThat(bankIdOrderResponse).hasFieldOrPropertyWithValue("autoStartToken",
+        assertThat(response.bankIdOrderResponse).hasFieldOrPropertyWithValue("autoStartToken",
             AUTO_START_TOKEN2)
     }
 
@@ -315,10 +315,10 @@ class SwedishBankIdSigningServiceTest {
         whenever(bankIdRestService.startSign(ArgumentMatchers.matches(SSN), ArgumentMatchers.anyString(), ArgumentMatchers.anyString()))
             .thenReturn(makeOrderResponse())
 
-        val (_, _, _, bankIdOrderResponse) = sut.startSign(WebsignRequest(EMAIL, SSN, IP_ADDRESS), MEMBER_ID, true)
+        val response = sut.startSign(WebsignRequest(EMAIL, SSN, IP_ADDRESS), MEMBER_ID, true)
 
-        assertThat(bankIdOrderResponse).hasFieldOrProperty("orderRef")
-        assertThat(bankIdOrderResponse).hasFieldOrProperty("autoStartToken")
+        assertThat(response.bankIdOrderResponse).hasFieldOrProperty("orderRef")
+        assertThat(response.bankIdOrderResponse).hasFieldOrProperty("autoStartToken")
     }
 
     @Test
@@ -332,13 +332,13 @@ class SwedishBankIdSigningServiceTest {
         whenever(signSessionRepository.findByMemberId(MEMBER_ID)).thenReturn(
             Optional.of(signSession))
 
-        val (_, _, _, bankIdOrderResponse) = sut.startSign(WebsignRequest(EMAIL, SSN, IP_ADDRESS), MEMBER_ID, true)
+       val response = sut.startSign(WebsignRequest(EMAIL, SSN, IP_ADDRESS), MEMBER_ID, true)
 
         verify(bankIdRestService, never()).startSign(anyString(), anyString(), anyString())
 
-        assertThat(bankIdOrderResponse!!.orderRef).isEqualTo(ORDER_REFERENCE)
+        assertThat(response.bankIdOrderResponse!!.orderRef).isEqualTo(ORDER_REFERENCE)
 
-        assertThat(bankIdOrderResponse.autoStartToken).isEqualTo(AUTO_START_TOKEN)
+        assertThat(response.bankIdOrderResponse!!.autoStartToken).isEqualTo(AUTO_START_TOKEN)
     }
 
      @Test

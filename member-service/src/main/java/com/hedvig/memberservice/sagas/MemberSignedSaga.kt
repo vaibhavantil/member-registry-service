@@ -1,7 +1,6 @@
 package com.hedvig.memberservice.sagas
 
-import com.hedvig.external.event.NorwegianSignEvent
-import com.hedvig.integration.underwritter.UnderwriterApi
+import com.hedvig.integration.underwriter.UnderwriterApi
 import com.hedvig.memberservice.events.MemberSignedEvent
 import com.hedvig.memberservice.events.MemberSignedWithoutBankId
 import com.hedvig.memberservice.events.NorwegianMemberSignedEvent

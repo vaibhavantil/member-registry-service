@@ -8,9 +8,8 @@ import com.hedvig.external.bankID.bankIdTypes.CollectStatus
 import com.hedvig.external.bankID.bankIdTypes.CompletionData
 import com.hedvig.external.bankID.bankIdTypes.OrderResponse
 import com.hedvig.integration.botService.BotService
-import com.hedvig.integration.botService.dto.UpdateUserContextDTO
-import com.hedvig.integration.underwritter.UnderwriterApi
-import com.hedvig.integration.underwritter.dtos.QuoteToSignStatusDTO
+import com.hedvig.integration.underwriter.UnderwriterApi
+import com.hedvig.integration.underwriter.dtos.QuoteToSignStatusDTO
 import com.hedvig.memberservice.commands.UpdateWebOnBoardingInfoCommand
 import com.hedvig.memberservice.entities.SignSession
 import com.hedvig.memberservice.entities.SignStatus

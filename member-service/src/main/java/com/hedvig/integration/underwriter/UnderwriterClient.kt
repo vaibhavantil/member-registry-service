@@ -1,7 +1,7 @@
-package com.hedvig.integration.underwritter
+package com.hedvig.integration.underwriter
 
-import com.hedvig.integration.underwritter.dtos.QuoteDto
-import com.hedvig.integration.underwritter.dtos.SignRequest
+import com.hedvig.integration.underwriter.dtos.QuoteDto
+import com.hedvig.integration.underwriter.dtos.SignRequest
 import org.springframework.cloud.openfeign.FeignClient
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.GetMapping

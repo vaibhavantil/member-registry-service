@@ -1,8 +1,8 @@
-package com.hedvig.integration.underwritter
+package com.hedvig.integration.underwriter
 
-import com.hedvig.integration.underwritter.dtos.QuoteState
-import com.hedvig.integration.underwritter.dtos.QuoteToSignStatusDTO
-import com.hedvig.integration.underwritter.dtos.SignRequest
+import com.hedvig.integration.underwriter.dtos.QuoteState
+import com.hedvig.integration.underwriter.dtos.QuoteToSignStatusDTO
+import com.hedvig.integration.underwriter.dtos.SignRequest
 import feign.FeignException
 import org.springframework.stereotype.Service
 

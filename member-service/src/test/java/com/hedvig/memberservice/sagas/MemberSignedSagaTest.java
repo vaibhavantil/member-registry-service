@@ -1,14 +1,11 @@
 package com.hedvig.memberservice.sagas;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.then;
 import static org.mockito.BDDMockito.willThrow;
 
-import com.hedvig.integration.underwritter.UnderwriterApi;
+import com.hedvig.integration.underwriter.UnderwriterApi;
 import com.hedvig.memberservice.events.MemberSignedEvent;
-import com.hedvig.integration.productsPricing.ProductApi;
 import com.hedvig.memberservice.services.SNSNotificationService;
 import com.hedvig.memberservice.services.SigningService;
 import lombok.val;

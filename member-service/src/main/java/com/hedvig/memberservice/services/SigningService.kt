@@ -2,7 +2,7 @@ package com.hedvig.memberservice.services
 
 import com.hedvig.integration.botService.BotService
 import com.hedvig.integration.botService.dto.UpdateUserContextDTO
-import com.hedvig.integration.underwritter.UnderwriterApi
+import com.hedvig.integration.underwriter.UnderwriterApi
 import com.hedvig.memberservice.commands.SignMemberFromUnderwriterCommand
 import com.hedvig.memberservice.commands.UpdateWebOnBoardingInfoCommand
 import com.hedvig.memberservice.entities.SignSession
