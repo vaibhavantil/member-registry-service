@@ -130,11 +130,22 @@ class ZignSecSessionServiceImplTest {
     }
 
     @Test
+    fun authReuseInProgressSession() {
+        assertThat(false).isEqualTo(true)
+    }
+
+    @Test
+    fun authReuseCompletedSession() {
+        assertThat(false).isEqualTo(true)
+    }
+
+    @Test
     fun handleAuthenticationSuccessNotification() {
         val timestamp = Instant.now()
         val session = ZignSecSession(
-            sessionId = SESSION_ID,
+            referenceId = REFERENCE_ID,
             memberId = 1337,
+            redirectUrl = REDIRECT_URL,
             status = NorwegianBankIdProgressStatus.INITIATED,
             requestType = NorwegianAuthenticationType.AUTH,
             notification = null,
@@ -142,16 +153,16 @@ class ZignSecSessionServiceImplTest {
             updatedAt = timestamp
         )
 
-        whenever(sessionRepository.findById(SESSION_ID)).thenReturn(
+        whenever(sessionRepository.findByReferenceId(REFERENCE_ID)).thenReturn(
             Optional.of(session)
         )
 
         classUnderTest.handleNotification(zignSecSuccessAuthNotificationRequest)
 
-        verify(norwegianAuthenticationEventPublisher).publishAuthenticationEvent(NorwegianAuthenticationResult.Completed(SESSION_ID, 1337, "12121212120"))
+        verify(norwegianAuthenticationEventPublisher).publishAuthenticationEvent(NorwegianAuthenticationResult.Completed(REFERENCE_ID, 1337, "12121212120"))
 
-        val savedSession = sessionRepository.findById(SESSION_ID).get()
-        assertThat(savedSession.sessionId).isEqualTo(SESSION_ID)
+        val savedSession = sessionRepository.findByReferenceId(REFERENCE_ID).get()
+        assertThat(savedSession.referenceId).isEqualTo(REFERENCE_ID)
         assertThat(savedSession.memberId).isEqualTo(1337)
         assertThat(savedSession.status).isEqualTo(NorwegianBankIdProgressStatus.COMPLETED)
         assertThat(savedSession.requestType).isEqualTo(NorwegianAuthenticationType.AUTH)
@@ -162,25 +173,26 @@ class ZignSecSessionServiceImplTest {
     fun handleSignFailedNotification() {
         val timestamp = Instant.now()
         val session = ZignSecSession(
-            sessionId = SESSION_ID,
+            referenceId = REFERENCE_ID,
             memberId = 1337,
             status = NorwegianBankIdProgressStatus.INITIATED,
             requestType = NorwegianAuthenticationType.SIGN,
+            redirectUrl = REDIRECT_URL,
             notification = null,
             createdAt = timestamp,
             updatedAt = timestamp
         )
 
-        whenever(sessionRepository.findById(SESSION_ID)).thenReturn(
+        whenever(sessionRepository.findByReferenceId(REFERENCE_ID)).thenReturn(
             Optional.of(session)
         )
 
         classUnderTest.handleNotification(zignSecFailedAuthNotificationRequest)
 
-        verify(norwegianAuthenticationEventPublisher).publishSignEvent(NorwegianSignResult.Failed(SESSION_ID, 1337))
+        verify(norwegianAuthenticationEventPublisher).publishSignEvent(NorwegianSignResult.Failed(REFERENCE_ID, 1337))
 
-        val savedSession = sessionRepository.findById(SESSION_ID).get()
-        assertThat(savedSession.sessionId).isEqualTo(SESSION_ID)
+        val savedSession = sessionRepository.findByReferenceId(REFERENCE_ID).get()
+        assertThat(savedSession.referenceId).isEqualTo(REFERENCE_ID)
         assertThat(savedSession.status).isEqualTo(NorwegianBankIdProgressStatus.FAILED)
         assertThat(savedSession.requestType).isEqualTo(NorwegianAuthenticationType.SIGN)
     }
@@ -189,16 +201,17 @@ class ZignSecSessionServiceImplTest {
     fun handleSecondCompletedNotificationRequests() {
         val timestamp = Instant.now()
         val session = ZignSecSession(
-            sessionId = SESSION_ID,
+            referenceId = REFERENCE_ID,
             memberId = 1337,
             status = NorwegianBankIdProgressStatus.COMPLETED,
             requestType = NorwegianAuthenticationType.AUTH,
+            redirectUrl = REDIRECT_URL,
             notification = null,
             createdAt = timestamp,
             updatedAt = timestamp
         )
 
-        whenever(sessionRepository.findById(SESSION_ID)).thenReturn(
+        whenever(sessionRepository.findByReferenceId(REFERENCE_ID)).thenReturn(
             Optional.of(session)
         )
 
@@ -215,7 +228,9 @@ class ZignSecSessionServiceImplTest {
             "NO"
         )
 
-        val SESSION_ID: UUID = UUID.fromString("a42a8afe-4071-4e99-8f9f-757c5942e1e5")!!
+        val REDIRECT_URL = "redirect_url"
+
+        val REFERENCE_ID: UUID = UUID.fromString("a42a8afe-4071-4e99-8f9f-757c5942e1e5")!!
 
         val zignSecSuccessAuthNotificationRequest = """
             {
