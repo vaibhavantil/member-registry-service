@@ -4,12 +4,11 @@ import java.util.*
 
 sealed class StartNorwegianAuthenticationResult {
     data class Success(
-        val id: UUID,
+        val sessionId: Long,
         val redirectUrl: String
     ): StartNorwegianAuthenticationResult()
 
     data class Failed(
-        val id: UUID,
         val errors: List<NorwegianAuthenticationResponseError>
     ): StartNorwegianAuthenticationResult()
 }

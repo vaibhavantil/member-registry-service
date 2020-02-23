@@ -66,8 +66,7 @@ class ZignSecSessionServiceImplTest {
         val response = classUnderTest.auth(startAuthRequest)
 
         assertThat(response).isInstanceOf(Success::class.java)
-        assertThat((response as Success).id).isEqualTo(id)
-        assertThat(response.redirectUrl).isEqualTo("redirect url")
+        assertThat((response as Success).redirectUrl).isEqualTo("redirect url")
 
         verify(sessionRepository).save(any())
     }
@@ -105,8 +104,7 @@ class ZignSecSessionServiceImplTest {
         val response = classUnderTest.auth(startAuthRequest)
 
         assertThat(response).isInstanceOf(Success::class.java)
-        assertThat((response as Success).id).isEqualTo(id)
-        assertThat(response.redirectUrl).isEqualTo("redirect url")
+        assertThat((response as Success).redirectUrl).isEqualTo("redirect url")
 
         verify(sessionRepository).save(any())
     }

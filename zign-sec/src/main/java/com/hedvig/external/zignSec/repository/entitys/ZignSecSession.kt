@@ -20,11 +20,11 @@ class ZignSecSession(
     @Column(unique = true)
     val memberId: Long,
     @Column(unique = true)
-    var referenceId: UUID = UUID.randomUUID(),
+    var referenceId: UUID,
     @Column(columnDefinition="VARCHAR(1000)")
     var redirectUrl: String,
     @Enumerated(javax.persistence.EnumType.STRING)
-    var status: NorwegianBankIdProgressStatus? = null,
+    var status: NorwegianBankIdProgressStatus = NorwegianBankIdProgressStatus.INITIATED,
     @Enumerated(javax.persistence.EnumType.STRING)
     val requestType: NorwegianAuthenticationType,
     @Embedded
@@ -37,6 +37,7 @@ class ZignSecSession(
     constructor() : this(
         memberId = 1337,
         requestType = NorwegianAuthenticationType.AUTH,
+        referenceId = UUID.randomUUID(),
         redirectUrl = "empty constructor"
     )
 }

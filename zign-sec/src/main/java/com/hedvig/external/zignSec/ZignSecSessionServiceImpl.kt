@@ -36,16 +36,16 @@ class ZignSecSessionServiceImpl(
         return if (optional.isPresent) {
             val session = optional.get()
             when (session.status) {
+                //TODO need to invalidate this after sometime
                 NorwegianBankIdProgressStatus.INITIATED,
                 NorwegianBankIdProgressStatus.IN_PROGRESS -> {
                     StartNorwegianAuthenticationResult.Success(
-                        session.referenceId,
+                        session.sessionId,
                         session.redirectUrl
                     )
                 }
                 NorwegianBankIdProgressStatus.FAILED,
-                NorwegianBankIdProgressStatus.COMPLETED,
-                null -> startNewSession(request, type, session)
+                NorwegianBankIdProgressStatus.COMPLETED -> startNewSession(request, type, session)
             }
         } else {
             startNewSession(request, type, null)
@@ -66,7 +66,6 @@ class ZignSecSessionServiceImpl(
             }
 
             return StartNorwegianAuthenticationResult.Failed(
-                response.id,
                 errors
             )
         }
@@ -77,13 +76,14 @@ class ZignSecSessionServiceImpl(
         } ?: ZignSecSession(
             memberId = request.memberId.toLong(),
             requestType = type,
+            referenceId = response.id,
             redirectUrl = response.redirectUrl
         )
 
         sessionRepository.save(s)
 
         return StartNorwegianAuthenticationResult.Success(
-            response.id,
+            s.sessionId,
             response.redirectUrl
         )
     }
