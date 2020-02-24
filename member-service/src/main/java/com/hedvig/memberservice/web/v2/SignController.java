@@ -60,8 +60,10 @@ public class SignController {
 
     val session = signingService.getSignStatus(memberId);
 
-    return session
-        .map(x -> ResponseEntity.ok(SignStatusResponse.CreateFromEntity(x)))
-        .orElseGet(() -> ResponseEntity.notFound().build());
+    if (session != null) {
+      return ResponseEntity.ok(session);
+    } else {
+      return ResponseEntity.notFound().build();
+    }
   }
 }

@@ -12,7 +12,7 @@ class ZignSecNotification(
     val errors: List<Error>,
     val identity: Identity?,
     val method: String?,
-    @Column(columnDefinition="VARCHAR(10000)")
+    @Column(length=10_000)
     val bankIdNoOidc: String?
 ) {
     constructor() : this(

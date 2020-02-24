@@ -39,7 +39,7 @@ class MemberSignedSaga {
             log.error("Could not notify underwriter about signed member [MemberId: ${e.id}] Exception $ex")
         }
 
-        signingService.swedishProductSignConfirmed(e.getReferenceId())
+        signingService.completeSwedishSession(e.getReferenceId())
         signingService.productSignConfirmed(e.id)
         snsNotificationService.sendMemberSignedNotification(e.getId())
     }
@@ -53,8 +53,6 @@ class MemberSignedSaga {
     ) {
         log.debug("Product has already been signed [MemberId: ${e.memberId}]")
 
-        //FIXME: I can't se when this has ever worked! Please help me!
-        signingService.swedishProductSignConfirmed(e.memberId.toString())
         signingService.productSignConfirmed(e.memberId)
         snsNotificationService.sendMemberSignedNotification(e.memberId)
     }

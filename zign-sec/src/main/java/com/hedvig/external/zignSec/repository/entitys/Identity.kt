@@ -21,8 +21,6 @@ class Identity(
     val idProviderPersonId: String? = null,
     val customerPersonId: String? = null
 ) {
-    constructor() : this("", "", "", "", "", "",0, "", "", LocalDateTime.now(), "", "","")
-
     companion object {
         fun from(identity: ZignSecIdentity) = Identity(
             identity.countryCode,

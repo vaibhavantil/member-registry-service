@@ -31,6 +31,16 @@ class ZignSecSessionServiceImpl(
     override fun sign(request: NorwegianBankIdAuthenticationRequest): StartNorwegianAuthenticationResult =
         authenticate(request, NorwegianAuthenticationType.SIGN)
 
+    override fun getStatus(memberId: Long): NorwegianBankIdProgressStatus? {
+        val optionalSession = sessionRepository.findByMemberId(memberId)
+
+        return if (optionalSession.isPresent) {
+            optionalSession.get().status
+        } else {
+            null
+        }
+    }
+
     private fun authenticate(request: NorwegianBankIdAuthenticationRequest, type: NorwegianAuthenticationType): StartNorwegianAuthenticationResult {
         val optional = sessionRepository.findByMemberId(request.memberId.toLong())
 

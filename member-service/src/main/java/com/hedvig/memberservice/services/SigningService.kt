@@ -14,6 +14,7 @@ import com.hedvig.memberservice.services.member.dto.MemberSignUnderwriterQuoteRe
 import com.hedvig.memberservice.util.Market
 import com.hedvig.memberservice.util.SsnUtilImpl
 import com.hedvig.memberservice.web.dto.IsSsnAlreadySignedMemberResponse
+import com.hedvig.memberservice.web.v2.dto.SignStatusResponse
 import com.hedvig.memberservice.web.v2.dto.UnderwriterQuoteSignRequest
 import com.hedvig.memberservice.web.v2.dto.WebsignRequest
 import org.axonframework.commandhandling.gateway.CommandGateway
@@ -79,22 +80,31 @@ class SigningService(
         return IsSsnAlreadySignedMemberResponse(existing.isPresent)
     }
 
-    fun getSignStatus(@NonNull memberId: Long): Optional<SignSession> {
+    fun getSignStatus(@NonNull memberId: Long): SignStatusResponse? {
         val optionalMember = memberRepository.findById(memberId)
 
         return if (optionalMember.isPresent) {
             when (SsnUtilImpl.instance.getMarketFromSsn(optionalMember.get().ssn)) {
-                Market.SWEDEN -> swedishBankIdSigningService.getSignStatus(memberId)
-                Market.NORWAY -> throw NotSupportedException("This is not supported for norway")
+                Market.SWEDEN -> {
+                    val session = swedishBankIdSigningService.getSignSession(memberId)
+                    session
+                        .map { SignStatusResponse.CreateFromEntity(it) }
+                        .orElseGet { null }
+                }
+                Market.NORWAY -> {
+                    norwegianSigningService.getSignStatus(memberId)?.let {
+                        SignStatusResponse.CreateFromNorwegianStatus(it)
+                    }
+                }
             }
         } else {
-            Optional.empty()
+            null
         }
     }
 
     @Transactional
-    fun swedishProductSignConfirmed(id: String?) {
-        swedishBankIdSigningService.completeSession(id) ?: return
+    fun completeSwedishSession(id: String?) {
+        swedishBankIdSigningService.completeSession(id)
     }
 
     fun productSignConfirmed(memberId: Long){

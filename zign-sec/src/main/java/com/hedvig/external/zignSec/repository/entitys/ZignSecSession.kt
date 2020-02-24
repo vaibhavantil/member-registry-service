@@ -21,7 +21,7 @@ class ZignSecSession(
     val memberId: Long,
     @Column(unique = true)
     var referenceId: UUID,
-    @Column(columnDefinition="VARCHAR(1000)")
+    @Column(length=10_000)
     var redirectUrl: String,
     @Enumerated(javax.persistence.EnumType.STRING)
     var status: NorwegianBankIdProgressStatus = NorwegianBankIdProgressStatus.INITIATED,

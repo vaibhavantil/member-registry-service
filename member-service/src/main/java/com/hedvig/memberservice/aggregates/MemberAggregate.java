@@ -286,15 +286,13 @@ public class MemberAggregate {
   }
 
   public boolean isValidJSON(final String json) {
-    boolean valid = false;
     try {
       objectMapper.readTree(json);
-      valid = true;
+      return true;
     } catch (IOException e) {
       log.error("Failed to validate json", e);
+      return false;
     }
-
-    return valid;
   }
 
   @CommandHandler
@@ -483,7 +481,6 @@ public class MemberAggregate {
     this.status = MemberStatus.SIGNED;
   }
 
-  //fixme: not sure if this is needed
   @EventSourcingHandler
   public void on(NorwegianMemberSignedEvent e) {
     this.status = MemberStatus.SIGNED;

@@ -14,7 +14,7 @@ class ZignSecServiceImpl(
     private val client: ZignSecClient,
     @Value("\${zignsec.authentication.token:authenticate-me}")
     private val authentication: String,
-    @Value("\${zignsec.host:test.zignsec.com}")
+    @Value("\${zignsec.host}")
     private val host: String,
     @Value("\${zignsec.webhook.url}")
     private val webhookUrl: String,

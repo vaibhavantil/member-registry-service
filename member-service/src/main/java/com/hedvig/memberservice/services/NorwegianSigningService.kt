@@ -2,6 +2,7 @@ package com.hedvig.memberservice.services
 
 import com.hedvig.external.authentication.dto.NorwegianSignResult
 import com.hedvig.external.authentication.dto.StartNorwegianAuthenticationResult
+import com.hedvig.memberservice.entities.SignSession
 import com.hedvig.memberservice.entities.SignStatus
 import com.hedvig.memberservice.query.MemberRepository
 import com.hedvig.memberservice.services.events.SignSessionCompleteEvent
@@ -11,7 +12,9 @@ import com.hedvig.memberservice.services.member.dto.NorwegianBankIdResponse
 import com.hedvig.memberservice.web.v2.dto.WebsignRequest
 import org.slf4j.LoggerFactory
 import org.springframework.context.ApplicationEventPublisher
+import org.springframework.lang.NonNull
 import org.springframework.stereotype.Service
+import java.util.*
 import javax.transaction.Transactional
 
 @Service
@@ -45,6 +48,8 @@ class NorwegianSigningService(
             }
         }
     }
+
+    fun getSignStatus(memberId: Long) = norwegianBankIdService.getStatus(memberId)
 
     fun handleSignResult(result: NorwegianSignResult) {
         when (result) {

@@ -7,8 +7,27 @@ import com.hedvig.common.UUIDGenerator;
 import com.hedvig.external.bisnodeBCI.BisnodeClient;
 import com.hedvig.memberservice.aggregates.MemberAggregate;
 import com.hedvig.memberservice.aggregates.MemberStatus;
-import com.hedvig.memberservice.commands.*;
-import com.hedvig.memberservice.events.*;
+import com.hedvig.memberservice.commands.AuthenticationAttemptCommand;
+import com.hedvig.memberservice.commands.BankIdAuthenticationStatus;
+import com.hedvig.memberservice.commands.BankIdSignCommand;
+import com.hedvig.memberservice.commands.InactivateMemberCommand;
+import com.hedvig.memberservice.commands.MemberUpdateContactInformationCommand;
+import com.hedvig.memberservice.commands.SelectNewCashbackCommand;
+import com.hedvig.memberservice.commands.StartOnboardingWithSSNCommand;
+import com.hedvig.memberservice.commands.NorwegianSignCommand;
+import com.hedvig.memberservice.events.EmailUpdatedEvent;
+import com.hedvig.memberservice.events.LivingAddressUpdatedEvent;
+import com.hedvig.memberservice.events.MemberAuthenticatedEvent;
+import com.hedvig.memberservice.events.MemberCreatedEvent;
+import com.hedvig.memberservice.events.MemberInactivatedEvent;
+import com.hedvig.memberservice.events.MemberSignedEvent;
+import com.hedvig.memberservice.events.MemberStartedOnBoardingEvent;
+import com.hedvig.memberservice.events.NameUpdatedEvent;
+import com.hedvig.memberservice.events.NewCashbackSelectedEvent;
+import com.hedvig.memberservice.events.NorwegianMemberSignedEvent;
+import com.hedvig.memberservice.events.OnboardingStartedWithSSNEvent;
+import com.hedvig.memberservice.events.SSNUpdatedEvent;
+import com.hedvig.memberservice.events.TrackingIdCreatedEvent;
 import com.hedvig.memberservice.services.CashbackService;
 import com.hedvig.memberservice.web.dto.Address;
 import com.hedvig.memberservice.web.dto.StartOnboardingWithSSNRequest;
@@ -47,14 +66,13 @@ public class MemberAggregateTests {
   @MockBean
   private UUIDGenerator uuidGenerator;
 
+  @Autowired
   ObjectMapper objectMapper;
 
   @Before
   public void setUp() {
     fixture = new AggregateTestFixture<>(MemberAggregate.class);
     fixture.registerAggregateFactory(new AggregateFactoryM<>(MemberAggregate.class));
-
-    objectMapper = new ObjectMapper();
   }
 
   @Test

@@ -348,7 +348,7 @@ class SwedishBankIdSigningServiceTest {
         whenever(signSessionRepository.findByMemberId(MEMBER_ID))
             .thenReturn(Optional.of(session))
 
-        val status = sut.getSignStatus(MEMBER_ID)
+        val status = sut.getSignSession(MEMBER_ID)
 
         assertThat(status).get().isEqualTo(session)
     }

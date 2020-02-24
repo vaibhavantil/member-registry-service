@@ -123,8 +123,8 @@ class SwedishBankIdSigningService(
             }
     }
 
-    fun getSignStatus(@NonNull orderRef: Long): Optional<SignSession> {
-        return signSessionRepository.findByMemberId(orderRef)
+    fun getSignSession(@NonNull memberId: Long): Optional<SignSession> {
+        return signSessionRepository.findByMemberId(memberId)
     }
 
     @Transactional

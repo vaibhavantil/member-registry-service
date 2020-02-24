@@ -22,6 +22,8 @@ class NorwegianBankIdService(
             )
         )
 
+    fun getStatus(memberId: Long) = norwegianAuthentication.getStatus(memberId)
+
     private fun String.toTwoLetterLanguage() = when (this) {
         "sv-SE" -> "SV"
         "en-SE",
