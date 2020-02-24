@@ -123,7 +123,7 @@ class SigningServiceTest {
     fun getSignStatus_givenNoMatchingSignStatus_thenReturnEmpty() {
         val status = sut.getSignStatus(MEMBER_ID)
 
-        assertThat(status).isEmpty
+        assertThat(status).isNull()
     }
 
     @Test

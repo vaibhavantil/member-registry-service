@@ -66,13 +66,14 @@ public class MemberAggregateTests {
   @MockBean
   private UUIDGenerator uuidGenerator;
 
-  @Autowired
   ObjectMapper objectMapper;
 
   @Before
   public void setUp() {
     fixture = new AggregateTestFixture<>(MemberAggregate.class);
     fixture.registerAggregateFactory(new AggregateFactoryM<>(MemberAggregate.class));
+
+    objectMapper = new ObjectMapper();
   }
 
   @Test
