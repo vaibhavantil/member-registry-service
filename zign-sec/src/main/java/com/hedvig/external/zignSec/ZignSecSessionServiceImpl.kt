@@ -8,6 +8,7 @@ import com.hedvig.external.authentication.dto.NorwegianAuthenticationResponseErr
 import com.hedvig.external.authentication.dto.NorwegianBankIdAuthenticationRequest
 import com.hedvig.external.authentication.dto.NorwegianBankIdProgressStatus
 import com.hedvig.external.event.NorwegianAuthenticationEventPublisher
+import com.hedvig.external.zignSec.client.dto.ZignSecCollectState
 import com.hedvig.external.zignSec.client.dto.ZignSecNotificationRequest
 import com.hedvig.external.zignSec.repository.ZignSecSessionRepository
 import com.hedvig.external.zignSec.repository.entitys.NorwegianAuthenticationType
@@ -36,13 +37,17 @@ class ZignSecSessionServiceImpl(
         return if (optional.isPresent) {
             val session = optional.get()
             when (session.status) {
-                //TODO need to invalidate this after sometime
                 NorwegianBankIdProgressStatus.INITIATED,
                 NorwegianBankIdProgressStatus.IN_PROGRESS -> {
-                    StartNorwegianAuthenticationResult.Success(
-                        session.sessionId,
-                        session.redirectUrl
-                    )
+                    val collectResponse = zignSecService.collect(session.referenceId)
+
+                    when (collectResponse.result.identity.state) {
+                        ZignSecCollectState.PENDING -> StartNorwegianAuthenticationResult.Success(
+                            session.sessionId,
+                            session.redirectUrl
+                        )
+                        ZignSecCollectState.FINISHED -> startNewSession(request, type, session)
+                    }
                 }
                 NorwegianBankIdProgressStatus.FAILED,
                 NorwegianBankIdProgressStatus.COMPLETED -> startNewSession(request, type, session)

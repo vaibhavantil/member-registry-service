@@ -2,10 +2,12 @@ package com.hedvig.external.zignSec
 
 import com.hedvig.external.authentication.dto.NorwegianBankIdAuthenticationRequest
 import com.hedvig.external.zignSec.client.ZignSecClient
+import com.hedvig.external.zignSec.client.dto.ZignSecCollectResponse
 import com.hedvig.external.zignSec.client.dto.ZignSecRequestBody
 import com.hedvig.external.zignSec.client.dto.ZignSecResponse
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
+import java.util.*
 
 @Service
 class ZignSecServiceImpl(
@@ -20,7 +22,7 @@ class ZignSecServiceImpl(
     private val sucessUrl: String,
     @Value("\${zignsec.failed.url}")
     private val failedUrl: String
-): ZignSecService {
+) : ZignSecService {
 
     override fun auth(request: NorwegianBankIdAuthenticationRequest): ZignSecResponse = client.auth(
         bankIdSelector = WEB_OR_MOBILE,
@@ -33,6 +35,12 @@ class ZignSecServiceImpl(
             targetError = failedUrl,
             webhook = webhookUrl
         )
+    )
+
+    override fun collect(referenceId: UUID) = client.collect(
+        sessionId = referenceId,
+        authorization = authentication,
+        host = host
     )
 
     companion object {
