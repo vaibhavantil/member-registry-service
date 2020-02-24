@@ -10,6 +10,10 @@ import com.hedvig.external.authentication.dto.NorwegianBankIdProgressStatus
 import com.hedvig.external.authentication.dto.StartNorwegianAuthenticationResult.Success
 import com.hedvig.external.authentication.dto.StartNorwegianAuthenticationResult.Failed
 import com.hedvig.external.event.NorwegianAuthenticationEventPublisher
+import com.hedvig.external.zignSec.client.dto.ZignSecCollectIdentity
+import com.hedvig.external.zignSec.client.dto.ZignSecCollectResponse
+import com.hedvig.external.zignSec.client.dto.ZignSecCollectResult
+import com.hedvig.external.zignSec.client.dto.ZignSecCollectState
 import com.hedvig.external.zignSec.client.dto.ZignSecResponse
 import com.hedvig.external.zignSec.client.dto.ZignSecResponseError
 import com.hedvig.external.zignSec.repository.ZignSecSessionRepository
@@ -128,13 +132,104 @@ class ZignSecSessionServiceImplTest {
     }
 
     @Test
-    fun authReuseInProgressSession() {
-        assertThat(false).isEqualTo(true)
+    fun authReuseInitiatedPendingSession() {
+        whenever(sessionRepository.findByMemberId(startAuthRequest.memberId.toLong())).thenReturn(
+            Optional.of(ZignSecSession(
+                memberId = 1337,
+                requestType = NorwegianAuthenticationType.AUTH,
+                status = NorwegianBankIdProgressStatus.INITIATED,
+                referenceId = REFERENCE_ID,
+                redirectUrl = "redirect url"
+            ))
+        )
+
+        whenever(zignSecService.collect(REFERENCE_ID)).thenReturn(
+            ZignSecCollectResponse(
+                REFERENCE_ID,
+                ZignSecCollectResult(
+                    ZignSecCollectIdentity(
+                        ZignSecCollectState.PENDING
+                    )
+                )
+            )
+        )
+
+        val response = classUnderTest.auth(startAuthRequest)
+
+        verify(sessionRepository, never()).save(any())
+        assertThat(response).isInstanceOf(Success::class.java)
+        assertThat((response as Success).redirectUrl).isEqualTo("redirect url")
     }
 
     @Test
-    fun authReuseCompletedSession() {
-        assertThat(false).isEqualTo(true)
+    fun authDontReuseFinishedSession() {
+        val id = UUID.randomUUID()
+
+        whenever(sessionRepository.findByMemberId(startAuthRequest.memberId.toLong())).thenReturn(
+            Optional.of(ZignSecSession(
+                memberId = 1337,
+                requestType = NorwegianAuthenticationType.AUTH,
+                status = NorwegianBankIdProgressStatus.INITIATED,
+                referenceId = REFERENCE_ID,
+                redirectUrl = "redirect url"
+            ))
+        )
+
+        whenever(zignSecService.collect(REFERENCE_ID)).thenReturn(
+            ZignSecCollectResponse(
+                REFERENCE_ID,
+                ZignSecCollectResult(
+                    ZignSecCollectIdentity(
+                        ZignSecCollectState.FINISHED
+                    )
+                )
+            )
+        )
+
+        whenever(zignSecService.auth(startAuthRequest)).thenReturn(
+            ZignSecResponse(
+                id,
+                emptyList(),
+                "redirect url 2"
+            )
+        )
+
+
+        val response = classUnderTest.auth(startAuthRequest)
+
+        verify(sessionRepository).save(any())
+        assertThat(response).isInstanceOf(Success::class.java)
+        assertThat((response as Success).redirectUrl).isEqualTo("redirect url 2")
+    }
+
+    @Test
+    fun authDontReuseCompletedSession() {
+        val id = UUID.randomUUID()
+
+        whenever(sessionRepository.findByMemberId(startAuthRequest.memberId.toLong())).thenReturn(
+            Optional.of(ZignSecSession(
+                memberId = 1337,
+                requestType = NorwegianAuthenticationType.AUTH,
+                status = NorwegianBankIdProgressStatus.COMPLETED,
+                referenceId = REFERENCE_ID,
+                redirectUrl = "redirect url"
+            ))
+        )
+
+        whenever(zignSecService.auth(startAuthRequest)).thenReturn(
+            ZignSecResponse(
+                id,
+                emptyList(),
+                "redirect url 2"
+            )
+        )
+
+
+        val response = classUnderTest.auth(startAuthRequest)
+
+        verify(zignSecService, never()).collect(any<>())
+        assertThat(response).isInstanceOf(Success::class.java)
+        assertThat((response as Success).redirectUrl).isEqualTo("redirect url 2")
     }
 
     @Test
