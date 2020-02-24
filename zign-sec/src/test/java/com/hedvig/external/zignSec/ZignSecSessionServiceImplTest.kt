@@ -227,7 +227,6 @@ class ZignSecSessionServiceImplTest {
 
         val response = classUnderTest.auth(startAuthRequest)
 
-        verify(zignSecService, never()).collect(any<>())
         assertThat(response).isInstanceOf(Success::class.java)
         assertThat((response as Success).redirectUrl).isEqualTo("redirect url 2")
     }
