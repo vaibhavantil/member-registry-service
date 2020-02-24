@@ -30,6 +30,7 @@ import org.mockito.Mockito.verify
 import org.mockito.Mockito.verifyZeroInteractions
 import org.mockito.Mockito.`when` as whenever
 import org.mockito.junit.MockitoJUnitRunner
+import java.lang.RuntimeException
 import java.time.Instant
 import java.util.*
 
@@ -185,6 +186,39 @@ class ZignSecSessionServiceImplTest {
                 )
             )
         )
+
+        whenever(zignSecService.auth(startAuthRequest)).thenReturn(
+            ZignSecResponse(
+                id,
+                emptyList(),
+                "redirect url 2"
+            )
+        )
+
+
+        val response = classUnderTest.auth(startAuthRequest)
+
+        verify(sessionRepository).save(any())
+        assertThat(response).isInstanceOf(Success::class.java)
+        assertThat((response as Success).redirectUrl).isEqualTo("redirect url 2")
+    }
+
+
+    @Test
+    fun authStartNewSessionIfCollectFails() {
+        val id = UUID.randomUUID()
+
+        whenever(sessionRepository.findByMemberId(startAuthRequest.memberId.toLong())).thenReturn(
+            Optional.of(ZignSecSession(
+                memberId = 1337,
+                requestType = NorwegianAuthenticationType.AUTH,
+                status = NorwegianBankIdProgressStatus.INITIATED,
+                referenceId = REFERENCE_ID,
+                redirectUrl = "redirect url"
+            ))
+        )
+
+        whenever(zignSecService.collect(REFERENCE_ID)).thenThrow(RuntimeException())
 
         whenever(zignSecService.auth(startAuthRequest)).thenReturn(
             ZignSecResponse(

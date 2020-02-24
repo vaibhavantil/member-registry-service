@@ -39,8 +39,11 @@ class ZignSecSessionServiceImpl(
             when (session.status) {
                 NorwegianBankIdProgressStatus.INITIATED,
                 NorwegianBankIdProgressStatus.IN_PROGRESS -> {
-                    val collectResponse = zignSecService.collect(session.referenceId)
-
+                    val collectResponse = try {
+                         zignSecService.collect(session.referenceId)
+                    } catch (e: Exception) {
+                        return startNewSession(request, type, session)
+                    }
                     when (collectResponse.result.identity.state) {
                         ZignSecCollectState.PENDING -> StartNorwegianAuthenticationResult.Success(
                             session.sessionId,
