@@ -34,6 +34,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.http.converter.HttpMessageNotReadableException
+import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestHeader
@@ -170,9 +171,14 @@ class AuthController @Autowired constructor(
         }
     }
 
-    @PostMapping(path = ["norway/bankid/auth"])
-    private fun norwayAuth(@RequestBody request: NorwegianBankIdAuthenticationRequest): ResponseEntity<StartNorwegianAuthenticationResult> {
-        return ResponseEntity.ok(norwegianBankIdService.authenticate(request))
+    @PostMapping(path = ["/{country}/bankid/auth"])
+    private fun auth(@PathVariable("country") country: String, @RequestBody request: NorwegianBankIdAuthenticationRequest): ResponseEntity<StartNorwegianAuthenticationResult> {
+        return when (country) {
+            "norway" ->
+                ResponseEntity.ok(norwegianBankIdService.authenticate(request))
+            else ->
+                ResponseEntity.notFound().build()
+        }
     }
 
     private fun createResponse(collectResponse: CollectResponse, referenceToken: String, hid: Long): ResponseEntity<*> {
