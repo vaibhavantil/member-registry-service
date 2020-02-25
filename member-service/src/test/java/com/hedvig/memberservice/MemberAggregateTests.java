@@ -2,6 +2,7 @@ package com.hedvig.memberservice;
 
 import static org.mockito.Mockito.when;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hedvig.common.UUIDGenerator;
 import com.hedvig.external.bisnodeBCI.BisnodeClient;
 import com.hedvig.memberservice.aggregates.MemberAggregate;
@@ -13,6 +14,7 @@ import com.hedvig.memberservice.commands.InactivateMemberCommand;
 import com.hedvig.memberservice.commands.MemberUpdateContactInformationCommand;
 import com.hedvig.memberservice.commands.SelectNewCashbackCommand;
 import com.hedvig.memberservice.commands.StartOnboardingWithSSNCommand;
+import com.hedvig.memberservice.commands.NorwegianSignCommand;
 import com.hedvig.memberservice.events.EmailUpdatedEvent;
 import com.hedvig.memberservice.events.LivingAddressUpdatedEvent;
 import com.hedvig.memberservice.events.MemberAuthenticatedEvent;
@@ -22,6 +24,7 @@ import com.hedvig.memberservice.events.MemberSignedEvent;
 import com.hedvig.memberservice.events.MemberStartedOnBoardingEvent;
 import com.hedvig.memberservice.events.NameUpdatedEvent;
 import com.hedvig.memberservice.events.NewCashbackSelectedEvent;
+import com.hedvig.memberservice.events.NorwegianMemberSignedEvent;
 import com.hedvig.memberservice.events.OnboardingStartedWithSSNEvent;
 import com.hedvig.memberservice.events.SSNUpdatedEvent;
 import com.hedvig.memberservice.events.TrackingIdCreatedEvent;
@@ -38,6 +41,7 @@ import org.axonframework.test.aggregate.FixtureConfiguration;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.web.client.RestClientException;
@@ -62,10 +66,14 @@ public class MemberAggregateTests {
   @MockBean
   private UUIDGenerator uuidGenerator;
 
+  ObjectMapper objectMapper;
+
   @Before
   public void setUp() {
     fixture = new AggregateTestFixture<>(MemberAggregate.class);
     fixture.registerAggregateFactory(new AggregateFactoryM<>(MemberAggregate.class));
+
+    objectMapper = new ObjectMapper();
   }
 
   @Test
@@ -240,6 +248,47 @@ public class MemberAggregateTests {
   }
 
   @Test
+  public void norwegianSignCommand_validJSON_ThenEmitThreeEvents() {
+    Long memberId = 1234L;
+    UUID referenceId = UUID.randomUUID();
+    String personalNumber = "12121212120";
+    String provideJsonResponse = "{ \"json\": true }";
+
+    when(cashbackService.getDefaultId()).thenReturn(DEFAULT_CASHBACK);
+
+    fixture
+      .given(
+        new MemberCreatedEvent(memberId, MemberStatus.INITIATED),
+        new MemberStartedOnBoardingEvent(memberId, MemberStatus.ONBOARDING),
+        new TrackingIdCreatedEvent(memberId, TRACKING_UUID))
+      .when(new NorwegianSignCommand(memberId, referenceId, personalNumber, provideJsonResponse))
+      .expectSuccessfulHandlerExecution()
+      .expectEvents(
+        new SSNUpdatedEvent(memberId, personalNumber),
+        new NewCashbackSelectedEvent(memberId, DEFAULT_CASHBACK.toString()),
+        new NorwegianMemberSignedEvent(memberId, personalNumber, provideJsonResponse)
+      );
+  }
+
+  @Test
+  public void norwegianSignCommand_invalidJSON_expectException() {
+    Long memberId = 1234L;
+    UUID referenceId = UUID.randomUUID();
+    String personalNumber = "12121212120";
+    String provideJsonResponse = "not a valid json";
+
+    when(cashbackService.getDefaultId()).thenReturn(DEFAULT_CASHBACK);
+
+    fixture
+      .given(
+        new MemberCreatedEvent(memberId, MemberStatus.INITIATED),
+        new MemberStartedOnBoardingEvent(memberId, MemberStatus.ONBOARDING),
+        new TrackingIdCreatedEvent(memberId, TRACKING_UUID))
+      .when(new NorwegianSignCommand(memberId, referenceId, personalNumber, provideJsonResponse))
+      .expectException(RuntimeException.class);
+  }
+
+  @Test
   public void inactivateMemberCommand_givenInitiatedMember_thenEmitsMemberInactivatedEvent() {
     Long memberId = 1234L;
 
@@ -274,7 +323,7 @@ public class MemberAggregateTests {
 
     @Override
     protected T doCreateAggregate(String aggregateIdentifier, DomainEventMessage firstEvent) {
-      return (T) new MemberAggregate(bisnodeClient, cashbackService, uuidGenerator, true);
+      return (T) new MemberAggregate(bisnodeClient, cashbackService, uuidGenerator, objectMapper, true);
     }
   }
 }

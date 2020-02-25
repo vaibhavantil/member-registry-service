@@ -8,8 +8,6 @@ import com.hedvig.external.bankID.bankIdTypes.CollectResponse
 import com.hedvig.external.bankID.bankIdTypes.CollectStatus
 import com.hedvig.external.bankID.bankIdTypes.CompletionData
 import com.hedvig.external.bankID.bankIdTypes.OrderResponse
-import com.hedvig.integration.underwritter.dtos.QuoteToSignStatusDTO
-import com.hedvig.memberservice.commands.UpdateWebOnBoardingInfoCommand
 import com.hedvig.memberservice.entities.SignSession
 import com.hedvig.memberservice.entities.SignSessionRepository
 import com.hedvig.memberservice.entities.SignStatus
@@ -50,9 +48,6 @@ class SwedishBankIdSigningServiceTest {
     lateinit var bankIdRestService: BankIdRestService
 
     @Mock
-    lateinit var signedMemberRepository: SignedMemberRepository
-
-    @Mock
     lateinit var signSessionRepository: SignSessionRepository
 
     @Mock
@@ -60,9 +55,6 @@ class SwedishBankIdSigningServiceTest {
 
     @Mock
     lateinit var memberService: MemberService
-
-    @Mock
-    lateinit var memberRepository: MemberRepository
 
     @Rule
     @JvmField
@@ -78,10 +70,8 @@ class SwedishBankIdSigningServiceTest {
 
     @Before
     fun setup() {
-//        whenever(signedMemberRepository.findBySsn(ArgumentMatchers.any())).thenReturn(Optional.empty())
-
         sut = SwedishBankIdSigningService(
-            bankIdRestService, signSessionRepository, memberRepository,
+            bankIdRestService, signSessionRepository,
             scheduler, memberService, SWITCHER_MESSAGE, NON_SWITCHER_MESSAGE
         )
     }
@@ -265,11 +255,11 @@ class SwedishBankIdSigningServiceTest {
         whenever(bankIdRestService.startSign(ArgumentMatchers.matches(SSN), ArgumentMatchers.anyString(), ArgumentMatchers.anyString()))
             .thenReturn(makeOrderResponse(ORDER_REFERENCE2, AUTO_START_TOKEN2))
 
-        val (_, _, _, bankIdOrderResponse) = sut.startSign(WebsignRequest(EMAIL, SSN, IP_ADDRESS), MEMBER_ID, false)
+        val response = sut.startSign(WebsignRequest(EMAIL, SSN, IP_ADDRESS), MEMBER_ID, false)
 
-        assertThat(bankIdOrderResponse).hasFieldOrPropertyWithValue("orderRef", ORDER_REFERENCE2)
+        assertThat(response.bankIdOrderResponse).hasFieldOrPropertyWithValue("orderRef", ORDER_REFERENCE2)
 
-        assertThat(bankIdOrderResponse).hasFieldOrPropertyWithValue("autoStartToken",
+        assertThat(response.bankIdOrderResponse).hasFieldOrPropertyWithValue("autoStartToken",
             AUTO_START_TOKEN2)
     }
 
@@ -291,9 +281,8 @@ class SwedishBankIdSigningServiceTest {
 
         whenever(signSessionRepository.findByOrderReference(ORDER_REFERENCE))
             .thenReturn(Optional.of(session))
-        whenever(memberRepository.getOne(ArgumentMatchers.anyLong())).thenReturn(MemberEntity())
 
-        sut.getUserContextDTOFromSession(ORDER_REFERENCE)
+        sut.completeSession(ORDER_REFERENCE)
 
         assertThat(session.status).isEqualTo(SignStatus.COMPLETED)
 
@@ -326,10 +315,10 @@ class SwedishBankIdSigningServiceTest {
         whenever(bankIdRestService.startSign(ArgumentMatchers.matches(SSN), ArgumentMatchers.anyString(), ArgumentMatchers.anyString()))
             .thenReturn(makeOrderResponse())
 
-        val (_, _, _, bankIdOrderResponse) = sut.startSign(WebsignRequest(EMAIL, SSN, IP_ADDRESS), MEMBER_ID, true)
+        val response = sut.startSign(WebsignRequest(EMAIL, SSN, IP_ADDRESS), MEMBER_ID, true)
 
-        assertThat(bankIdOrderResponse).hasFieldOrProperty("orderRef")
-        assertThat(bankIdOrderResponse).hasFieldOrProperty("autoStartToken")
+        assertThat(response.bankIdOrderResponse).hasFieldOrProperty("orderRef")
+        assertThat(response.bankIdOrderResponse).hasFieldOrProperty("autoStartToken")
     }
 
     @Test
@@ -343,13 +332,13 @@ class SwedishBankIdSigningServiceTest {
         whenever(signSessionRepository.findByMemberId(MEMBER_ID)).thenReturn(
             Optional.of(signSession))
 
-        val (_, _, _, bankIdOrderResponse) = sut.startSign(WebsignRequest(EMAIL, SSN, IP_ADDRESS), MEMBER_ID, true)
+       val response = sut.startSign(WebsignRequest(EMAIL, SSN, IP_ADDRESS), MEMBER_ID, true)
 
         verify(bankIdRestService, never()).startSign(anyString(), anyString(), anyString())
 
-        assertThat(bankIdOrderResponse!!.orderRef).isEqualTo(ORDER_REFERENCE)
+        assertThat(response.bankIdOrderResponse!!.orderRef).isEqualTo(ORDER_REFERENCE)
 
-        assertThat(bankIdOrderResponse.autoStartToken).isEqualTo(AUTO_START_TOKEN)
+        assertThat(response.bankIdOrderResponse!!.autoStartToken).isEqualTo(AUTO_START_TOKEN)
     }
 
      @Test
@@ -359,7 +348,7 @@ class SwedishBankIdSigningServiceTest {
         whenever(signSessionRepository.findByMemberId(MEMBER_ID))
             .thenReturn(Optional.of(session))
 
-        val status = sut.getSignStatus(MEMBER_ID)
+        val status = sut.getSignSession(MEMBER_ID)
 
         assertThat(status).get().isEqualTo(session)
     }
@@ -368,7 +357,7 @@ class SwedishBankIdSigningServiceTest {
     fun productSignConfirmed_givenNoSignSession_thenDoesNothing() {
         whenever(signSessionRepository.findByOrderReference(ORDER_REFERENCE)).thenReturn(Optional.empty())
 
-        sut.getUserContextDTOFromSession(ORDER_REFERENCE)
+        sut.completeSession(ORDER_REFERENCE)
 
         verify(signSessionRepository, never()).save(ArgumentMatchers.any())
     }

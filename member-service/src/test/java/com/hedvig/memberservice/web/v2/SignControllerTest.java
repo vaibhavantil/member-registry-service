@@ -9,6 +9,7 @@ import com.hedvig.memberservice.services.BankIdRestService;
 import com.hedvig.memberservice.services.MemberHasExistingInsuranceException;
 import com.hedvig.memberservice.services.SigningService;
 import com.hedvig.memberservice.services.member.dto.MemberSignResponse;
+import com.hedvig.memberservice.web.v2.dto.SignStatusResponse;
 import lombok.val;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -89,7 +90,7 @@ public class SignControllerTest {
   @Test
   public void getSignStatus_givenNoActiveSession_thenReturn404() throws Exception{
 
-    given(signingService.getSignStatus(MEMBER_ID)).willReturn(Optional.empty());
+    given(signingService.getSignStatus(MEMBER_ID)).willReturn(null);
 
     mockMvc
         .perform(
@@ -104,7 +105,7 @@ public class SignControllerTest {
 
     SignSession session = makeSignSession(AUTOSTART_TOKEN);
 
-    given(signingService.getSignStatus(MEMBER_ID)).willReturn(Optional.of(session));
+    given(signingService.getSignStatus(MEMBER_ID)).willReturn(SignStatusResponse.CreateFromEntity(session));
 
     mockMvc
         .perform(
@@ -124,7 +125,7 @@ public class SignControllerTest {
 
     session.newCollectResponse(cr);
 
-    given(signingService.getSignStatus(MEMBER_ID)).willReturn(Optional.of(session));
+    given(signingService.getSignStatus(MEMBER_ID)).willReturn(SignStatusResponse.CreateFromEntity(session));
 
     mockMvc
         .perform(

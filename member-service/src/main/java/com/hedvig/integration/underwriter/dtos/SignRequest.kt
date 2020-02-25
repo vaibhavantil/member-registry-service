@@ -1,4 +1,4 @@
-package com.hedvig.integration.underwritter.dtos
+package com.hedvig.integration.underwriter.dtos
 
 data class SignRequest(
     val referenceToken: String,

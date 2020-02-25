@@ -37,7 +37,6 @@ import javax.transaction.Transactional
 class SwedishBankIdSigningService(
     private val bankidService: BankIdRestService,
     private val signSessionRepository: SignSessionRepository,
-    private val memberRepository: MemberRepository,
     private val scheduler: Scheduler,
     private val memberService: MemberService,
     @Value("\${hedvig.bankid.signmessage.switcher}")
@@ -104,7 +103,6 @@ class SwedishBankIdSigningService(
                         val collectResponse = CollectResponse(response.status, response.hintCode)
                         s.newCollectResponse(collectResponse)
                         if (response.status == CollectStatus.complete) {
-                            //TODO: we should rename to signComplete
                             memberService.bankIdSignComplete(s.memberId, response)
                             s.status = SignStatus.COMPLETED
                         } else if (response.status == CollectStatus.failed) {
@@ -125,31 +123,17 @@ class SwedishBankIdSigningService(
             }
     }
 
-    fun getSignStatus(@NonNull orderRef: Long): Optional<SignSession> {
-        return signSessionRepository.findByMemberId(orderRef)
+    fun getSignSession(@NonNull memberId: Long): Optional<SignSession> {
+        return signSessionRepository.findByMemberId(memberId)
     }
 
     @Transactional
-    fun getUserContextDTOFromSession(id: String?): UpdateUserContextDTO? {
+    fun completeSession(id: String?) {
         val session = signSessionRepository.findByOrderReference(id)
-        return if (session.isPresent) {
+        if (session.isPresent) {
             val s = session.get()
             s.status = SignStatus.COMPLETED
             signSessionRepository.save(s)
-            val member = memberRepository.getOne(s.memberId)
-            UpdateUserContextDTO(
-                s.memberId.toString(),
-                member.getSsn(),
-                member.getFirstName(),
-                member.getLastName(),
-                member.getPhoneNumber(),
-                member.getEmail(),
-                member.getStreet(),
-                member.getCity(),
-                member.zipCode,
-                true)
-        } else {
-            null
         }
     }
 

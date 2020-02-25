@@ -32,7 +32,7 @@ public class SignController {
 
     val result = signingService.startWebSign(hedvigToken, websignRequest);
 
-    return ResponseEntity.ok(new WebSignResponse(result.getSignId(),result.getStatus(), result.getBankIdOrderResponse()));
+    return ResponseEntity.ok(new WebSignResponse(result.getSignId(),result.getStatus(), result.getBankIdOrderResponse(), result.getNorwegianBankIdResponse()));
   }
 
   @PostMapping("underwriter")
@@ -60,8 +60,10 @@ public class SignController {
 
     val session = signingService.getSignStatus(memberId);
 
-    return session
-        .map(x -> ResponseEntity.ok(SignStatusResponse.CreateFromEntity(x)))
-        .orElseGet(() -> ResponseEntity.notFound().build());
+    if (session != null) {
+      return ResponseEntity.ok(session);
+    } else {
+      return ResponseEntity.notFound().build();
+    }
   }
 }

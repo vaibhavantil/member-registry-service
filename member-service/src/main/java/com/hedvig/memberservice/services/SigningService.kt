@@ -1,7 +1,8 @@
 package com.hedvig.memberservice.services
 
 import com.hedvig.integration.botService.BotService
-import com.hedvig.integration.underwritter.UnderwriterApi
+import com.hedvig.integration.botService.dto.UpdateUserContextDTO
+import com.hedvig.integration.underwriter.UnderwriterApi
 import com.hedvig.memberservice.commands.SignMemberFromUnderwriterCommand
 import com.hedvig.memberservice.commands.UpdateWebOnBoardingInfoCommand
 import com.hedvig.memberservice.entities.SignSession
@@ -13,6 +14,7 @@ import com.hedvig.memberservice.services.member.dto.MemberSignUnderwriterQuoteRe
 import com.hedvig.memberservice.util.Market
 import com.hedvig.memberservice.util.SsnUtilImpl
 import com.hedvig.memberservice.web.dto.IsSsnAlreadySignedMemberResponse
+import com.hedvig.memberservice.web.v2.dto.SignStatusResponse
 import com.hedvig.memberservice.web.v2.dto.UnderwriterQuoteSignRequest
 import com.hedvig.memberservice.web.v2.dto.WebsignRequest
 import org.axonframework.commandhandling.gateway.CommandGateway
@@ -20,6 +22,7 @@ import org.slf4j.LoggerFactory
 import org.springframework.lang.NonNull
 import org.springframework.stereotype.Service
 import java.util.*
+import javax.transaction.NotSupportedException
 import javax.transaction.Transactional
 
 @Service
@@ -77,33 +80,51 @@ class SigningService(
         return IsSsnAlreadySignedMemberResponse(existing.isPresent)
     }
 
-    fun getSignStatus(@NonNull memberId: Long): Optional<SignSession> {
+    fun getSignStatus(@NonNull memberId: Long): SignStatusResponse? {
         val optionalMember = memberRepository.findById(memberId)
 
         return if (optionalMember.isPresent) {
             when (SsnUtilImpl.instance.getMarketFromSsn(optionalMember.get().ssn)) {
-                Market.SWEDEN -> swedishBankIdSigningService.getSignStatus(memberId)
-                Market.NORWAY -> TODO()
+                Market.SWEDEN -> {
+                    val session = swedishBankIdSigningService.getSignSession(memberId)
+                    session
+                        .map { SignStatusResponse.CreateFromEntity(it) }
+                        .orElseGet { null }
+                }
+                Market.NORWAY -> {
+                    norwegianSigningService.getSignStatus(memberId)?.let {
+                        SignStatusResponse.CreateFromNorwegianStatus(it)
+                    }
+                }
             }
         } else {
-            Optional.empty()
+            null
         }
     }
 
     @Transactional
-    fun productSignConfirmed(ssn: String, id: String?) {
-        val userContext = when (SsnUtilImpl.instance.getMarketFromSsn(ssn)) {
-            Market.SWEDEN -> swedishBankIdSigningService.getUserContextDTOFromSession(id)
-            Market.NORWAY -> TODO()
-        }
+    fun completeSwedishSession(id: String?) {
+        swedishBankIdSigningService.completeSession(id)
+    }
 
-        userContext?.let {
-            val memberId = it.memberId.toLong()
-            try {
-                botService.initBotServiceSessionWebOnBoarding(memberId, it)
-            } catch (ex: RuntimeException) {
-                log.error("Could not initialize bot-service for memberId: {}", memberId, ex)
-            }
+    fun productSignConfirmed(memberId: Long){
+        val member = memberRepository.getOne(memberId)
+        val userContext = UpdateUserContextDTO(
+            memberId.toString(),
+            member.getSsn(),
+            member.getFirstName(),
+            member.getLastName(),
+            member.getPhoneNumber(),
+            member.getEmail(),
+            member.getStreet(),
+            member.getCity(),
+            member.zipCode,
+            true)
+
+        try {
+            botService.initBotServiceSessionWebOnBoarding(memberId, userContext)
+        } catch (ex: RuntimeException) {
+            log.error("Could not initialize bot-service for memberId: {}", memberId, ex)
         }
     }
 

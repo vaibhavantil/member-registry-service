@@ -8,12 +8,12 @@ import com.hedvig.external.bankID.bankIdTypes.CollectStatus
 import com.hedvig.external.bankID.bankIdTypes.CompletionData
 import com.hedvig.external.bankID.bankIdTypes.OrderResponse
 import com.hedvig.integration.botService.BotService
-import com.hedvig.integration.botService.dto.UpdateUserContextDTO
-import com.hedvig.integration.underwritter.UnderwriterApi
-import com.hedvig.integration.underwritter.dtos.QuoteToSignStatusDTO
+import com.hedvig.integration.underwriter.UnderwriterApi
+import com.hedvig.integration.underwriter.dtos.QuoteToSignStatusDTO
 import com.hedvig.memberservice.commands.UpdateWebOnBoardingInfoCommand
 import com.hedvig.memberservice.entities.SignSession
 import com.hedvig.memberservice.entities.SignStatus
+import com.hedvig.memberservice.query.MemberEntity
 import com.hedvig.memberservice.query.MemberRepository
 import com.hedvig.memberservice.query.SignedMemberEntity
 import com.hedvig.memberservice.query.SignedMemberRepository
@@ -32,11 +32,9 @@ import org.mockito.ArgumentMatchers
 import org.mockito.BDDMockito
 import org.mockito.Captor
 import org.mockito.Mock
-import org.mockito.Mockito
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.`when` as whenever
 import org.mockito.junit.MockitoJUnitRunner
-import org.quartz.SchedulerException
 import java.time.LocalDateTime
 import java.time.ZoneOffset
 import java.util.*
@@ -125,20 +123,16 @@ class SigningServiceTest {
     fun getSignStatus_givenNoMatchingSignStatus_thenReturnEmpty() {
         val status = sut.getSignStatus(MEMBER_ID)
 
-        assertThat(status).isEmpty
+        assertThat(status).isNull()
     }
 
     @Test
     fun productSignConfirmed_whenBotserviceThrowsException_Continues() {
-        val session = makeSignSession(SignStatus.IN_PROGRESS)
-
-        whenever(swedishBankIdSigningService.getUserContextDTOFromSession(ORDER_REFERENCE)).thenReturn(
-            UpdateUserContextDTO(MEMBER_ID.toString(), "","","", "", "", "","", "", false)
-        )
+        whenever(memberRepository.getOne(MEMBER_ID)).thenReturn(MemberEntity())
 
         BDDMockito.willThrow(RuntimeException::class.java).given(botService).initBotServiceSessionWebOnBoarding(ArgumentMatchers.anyLong(), ArgumentMatchers.any())
 
-        sut.productSignConfirmed(SSN, ORDER_REFERENCE)
+        sut.productSignConfirmed(MEMBER_ID)
     }
 
     @Test
