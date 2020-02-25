@@ -8,5 +8,5 @@ data class QuoteDto(
     val id: UUID,
     val currentInsurer: String? = null,
     val state: QuoteState,
-    val data: QuoteData
+    val signMethod: SignMethod
 )

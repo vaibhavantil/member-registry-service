@@ -1,9 +1,7 @@
 package com.hedvig.integration.underwriter
 
-import com.hedvig.integration.underwriter.dtos.QuoteDto
 import com.hedvig.integration.underwriter.dtos.QuoteState
 import com.hedvig.integration.underwriter.dtos.QuoteToSignStatusDto
-import com.hedvig.integration.underwriter.dtos.SignMethod
 import com.hedvig.integration.underwriter.dtos.SignRequest
 import feign.FeignException
 import org.springframework.stereotype.Service
@@ -27,7 +25,7 @@ class UnderwriterApi(private val underwriterClient: UnderwriterClient) {
             return if (response.state == QuoteState.QUOTED){
                 QuoteToSignStatusDto.EligibleToSign(
                     response.currentInsurer != null,
-                    response.getSignMethod()
+                    response.signMethod
                 )
             } else {
                 QuoteToSignStatusDto.NotEligibleToSign
@@ -38,18 +36,6 @@ class UnderwriterApi(private val underwriterClient: UnderwriterClient) {
             }
 
             throw feignException
-        }
-    }
-
-    fun QuoteDto.getSignMethod() = when {
-        this.data.type == "apartment" || this.data.type == "house"-> {
-            SignMethod.SWEDISH_BANK_ID
-        }
-        this.data.type == "norwegianHomeContentsData" || this.data.type == "norwegianTravelData"-> {
-            SignMethod.NORWEGIAN_BANK_ID
-        }
-        else -> {
-            throw RuntimeException("Could not map [QuoteDto: $this] to sign method")
         }
     }
 }
