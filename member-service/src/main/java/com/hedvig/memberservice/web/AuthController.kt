@@ -171,7 +171,7 @@ class AuthController @Autowired constructor(
     }
 
     @PostMapping(path = ["norway/bankid/auth"])
-    private fun norwayAuth(request: NorwegianBankIdAuthenticationRequest): ResponseEntity<StartNorwegianAuthenticationResult> {
+    private fun norwayAuth(@RequestBody request: NorwegianBankIdAuthenticationRequest): ResponseEntity<StartNorwegianAuthenticationResult> {
         return ResponseEntity.ok(norwegianBankIdService.authenticate(request))
     }
 
