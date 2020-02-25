@@ -16,6 +16,7 @@ import com.hedvig.memberservice.query.MemberRepository;
 import com.hedvig.memberservice.query.SignedMemberEntity;
 import com.hedvig.memberservice.query.SignedMemberRepository;
 import com.hedvig.memberservice.services.BankIdService;
+import com.hedvig.memberservice.services.NorwegianBankIdService;
 import org.axonframework.commandhandling.gateway.CommandGateway;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -63,6 +64,9 @@ public class AuthControllerTest {
 
   @MockBean
   SignedMemberRepository signedMemberRepository;
+
+  @MockBean
+  NorwegianBankIdService norwegianBankIdService;
 
   @Test
   public void collect_referenceTokenNotFound_results_in_500() throws Exception {
