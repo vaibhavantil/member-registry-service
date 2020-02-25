@@ -31,7 +31,7 @@ public class BotServiceImpl implements BotService {
     if (json == null) {
       botServiceClient.initBotService(memberId);
     } else {
-      //botServiceClient.initBotService(memberId, json);
+      botServiceClient.initBotService(memberId, json);
     }
   }
 

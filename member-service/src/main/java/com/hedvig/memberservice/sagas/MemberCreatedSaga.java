@@ -25,7 +25,7 @@ public class MemberCreatedSaga {
     log.debug("ON MEMBER CREATED EVENT FOR {}", e.getId());
 
     try {
-//      productApi.memberCreated(e.getId());
+      productApi.memberCreated(e.getId());
     } catch (RuntimeException ex) {
       log.error("Could not notify product-pricing about created member for memberId: {}", e.getId(), ex);
     }
