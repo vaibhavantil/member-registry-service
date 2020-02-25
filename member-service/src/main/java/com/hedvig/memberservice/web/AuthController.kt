@@ -2,6 +2,8 @@ package com.hedvig.memberservice.web
 
 
 import com.hedvig.common.DeprecatedException
+import com.hedvig.external.authentication.dto.NorwegianBankIdAuthenticationRequest
+import com.hedvig.external.authentication.dto.StartNorwegianAuthenticationResult
 import com.hedvig.external.bankID.bankIdTypes.CollectResponse
 import com.hedvig.external.bankID.bankIdTypes.CollectStatus
 import com.hedvig.memberservice.aggregates.exceptions.BankIdReferenceUsedException
@@ -14,6 +16,7 @@ import com.hedvig.memberservice.query.CollectType
 import com.hedvig.memberservice.query.MemberRepository
 import com.hedvig.memberservice.query.SignedMemberRepository
 import com.hedvig.memberservice.services.BankIdService
+import com.hedvig.memberservice.services.NorwegianBankIdService
 import com.hedvig.memberservice.util.getEndUserIp
 import com.hedvig.memberservice.web.dto.APIErrorDTO
 import com.hedvig.memberservice.web.dto.BankIdAuthRequest
@@ -40,15 +43,16 @@ import org.springframework.web.bind.annotation.RestController
 import java.io.UnsupportedEncodingException
 
 @RestController
-@RequestMapping("/member/bankid/")
+@RequestMapping("/member/")
 class AuthController @Autowired constructor(
     private val commandGateway: CommandGateway,
     private val memberRepo: MemberRepository,
     private val signedMemberRepository: SignedMemberRepository,
     private val collectRepo: CollectRepository,
-    private val bankIdService: BankIdService) {
+    private val bankIdService: BankIdService,
+    private val norwegianBankIdService: NorwegianBankIdService) {
 
-    @PostMapping(path = ["auth"])
+    @PostMapping(path = ["bankid/auth"])
     fun auth(@RequestHeader(value = "x-forwarded-for", required = false) forwardedIp: String?, @RequestBody request: BankIdAuthRequest): ResponseEntity<BankIdAuthResponse> {
         MDC.put("memberId", request.memberId)
         log.info(
@@ -69,7 +73,7 @@ class AuthController @Autowired constructor(
         return ResponseEntity.ok(response)
     }
 
-    @PostMapping(path = ["sign"])
+    @PostMapping(path = ["bankid/sign"])
     @Throws(UnsupportedEncodingException::class)
     @Deprecated("Use V2")
     fun sign(@RequestHeader(value = "x-forwarded-for", required = false) forwardedIp: String?, @RequestBody request: BankIdSignRequest): ResponseEntity<BankIdSignResponse> {
@@ -84,7 +88,7 @@ class AuthController @Autowired constructor(
         }
     }
 
-    @PostMapping(path = ["collect"])
+    @PostMapping(path = ["bankid/collect"])
     @Throws(InterruptedException::class)
     fun collect(
         @RequestParam referenceToken: String,
@@ -164,6 +168,11 @@ class AuthController @Autowired constructor(
                 ResponseEntity.noContent().build<Any>()
             }
         }
+    }
+
+    @PostMapping(path = ["norway/bankid/auth"])
+    private fun norwayAuth(request: NorwegianBankIdAuthenticationRequest): ResponseEntity<StartNorwegianAuthenticationResult> {
+        return ResponseEntity.ok(norwegianBankIdService.authenticate(request))
     }
 
     private fun createResponse(collectResponse: CollectResponse, referenceToken: String, hid: Long): ResponseEntity<*> {
