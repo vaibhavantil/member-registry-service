@@ -44,7 +44,7 @@ class NorwegianBankIdServiceTest {
     }
 
     @Test
-    fun finishedCompletedAuthentication_differntMemberId_inactivateMemberAndReassignsMember() {
+    fun completeCompletedAuthentication_differntMemberId_inactivateMemberAndReassignsMember() {
         val result = NorwegianAuthenticationResult.Completed(
             RESULT_ID,
             MEMBER_ID,
@@ -59,7 +59,7 @@ class NorwegianBankIdServiceTest {
             signedMemberEntity
         ))
 
-        classUnderTest.finishedAuthentication(result)
+        classUnderTest.completeAuthentication(result)
 
         verify(commandGateway).sendAndWait<Any>(InactivateMemberCommand(MEMBER_ID))
         verify(apiGatewayService).reassignMember(MEMBER_ID, MEMBERS_ORIGIGINAL_ID)
@@ -67,7 +67,7 @@ class NorwegianBankIdServiceTest {
     }
 
     @Test
-    fun finishedCompletedAuthentication_sameMemberId_doesNotInactivateMemberAndDoesNotReassignsMember() {
+    fun completeCompletedAuthentication_sameMemberId_doesNotInactivateMemberAndDoesNotReassignsMember() {
         val result = NorwegianAuthenticationResult.Completed(
             RESULT_ID,
             MEMBER_ID,
@@ -82,7 +82,7 @@ class NorwegianBankIdServiceTest {
             signedMemberEntity
         ))
 
-        classUnderTest.finishedAuthentication(result)
+        classUnderTest.completeAuthentication(result)
 
         verify(commandGateway, never()).sendAndWait<Any>(any())
         verify(apiGatewayService, never()).reassignMember(anyLong(), anyLong())
@@ -90,7 +90,7 @@ class NorwegianBankIdServiceTest {
     }
 
     @Test
-    fun finishedCompletedAuthentication_noSignedMember_publishFailedEvent() {
+    fun completeCompletedAuthentication_noSignedMember_publishFailedEvent() {
         val result = NorwegianAuthenticationResult.Completed(
             RESULT_ID,
             MEMBER_ID,
@@ -99,20 +99,20 @@ class NorwegianBankIdServiceTest {
 
         whenever(signedMemberRepository.findBySsn(SSN)).thenReturn(Optional.empty())
 
-        classUnderTest.finishedAuthentication(result)
+        classUnderTest.completeAuthentication(result)
 
         verify(redisEventPublisher).onAuthSessionUpdated(MEMBER_ID, AuthSessionUpdatedEventStatus.FAILED)
     }
 
 
     @Test
-    fun finishedFailedAuthentication_sameMemberId_doesNotInactivateMemberAndDoesNotReassignsMember() {
+    fun completeFailedAuthentication_sameMemberId_doesNotInactivateMemberAndDoesNotReassignsMember() {
         val result = NorwegianAuthenticationResult.Failed(
             RESULT_ID,
             MEMBER_ID
         )
 
-        classUnderTest.finishedAuthentication(result)
+        classUnderTest.completeAuthentication(result)
 
         verify(redisEventPublisher).onAuthSessionUpdated(MEMBER_ID, AuthSessionUpdatedEventStatus.FAILED)
     }

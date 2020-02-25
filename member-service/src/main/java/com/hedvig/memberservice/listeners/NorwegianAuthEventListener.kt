@@ -14,7 +14,7 @@ class NorwegianAuthEventListener(
     @Async
     @EventListener
     fun handleNorwegianAuthEvent(norwegianAuthEvent: NorwegianAuthenticationEvent) {
-        norwegianBankIdService.finishedAuthentication(norwegianAuthEvent.message)
+        norwegianBankIdService.completeAuthentication(norwegianAuthEvent.message)
     }
 }
 

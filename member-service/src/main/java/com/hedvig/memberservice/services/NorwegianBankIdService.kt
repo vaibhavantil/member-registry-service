@@ -33,7 +33,7 @@ class NorwegianBankIdService(
             )
         )
 
-    fun finishedAuthentication(result: NorwegianAuthenticationResult) {
+    fun completeAuthentication(result: NorwegianAuthenticationResult) {
         when (result) {
             is NorwegianAuthenticationResult.Completed -> {
                 val signedMember = signedMemberRepository.findBySsn(result.ssn)

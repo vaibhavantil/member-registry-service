@@ -2,6 +2,6 @@ package com.hedvig.external.authentication.dto
 
 data class NorwegianBankIdAuthenticationRequest(
     val memberId: String,
-    val personalNumber: String,
+    val personalNumber: String? = null,
     val language: String
 )
