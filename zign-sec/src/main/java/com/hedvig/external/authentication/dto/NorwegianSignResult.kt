@@ -1,6 +1,5 @@
 package com.hedvig.external.authentication.dto
 
-import com.hedvig.external.zignSec.client.dto.ZignSecNotificationRequest
 import java.util.*
 
 sealed class NorwegianSignResult {

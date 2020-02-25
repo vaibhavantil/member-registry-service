@@ -9,7 +9,8 @@ import com.hedvig.external.bankID.bankIdTypes.CompletionData
 import com.hedvig.external.bankID.bankIdTypes.OrderResponse
 import com.hedvig.integration.botService.BotService
 import com.hedvig.integration.underwriter.UnderwriterApi
-import com.hedvig.integration.underwriter.dtos.QuoteToSignStatusDTO
+import com.hedvig.integration.underwriter.dtos.QuoteToSignStatusDto
+import com.hedvig.integration.underwriter.dtos.SignMethod
 import com.hedvig.memberservice.commands.UpdateWebOnBoardingInfoCommand
 import com.hedvig.memberservice.entities.SignSession
 import com.hedvig.memberservice.entities.SignStatus
@@ -157,16 +158,16 @@ class SigningServiceTest {
         assertThat(updateWebOnBoardingInfoCommandArgumentCaptor.value.email).isNotEmpty()
     }
 
-    private fun makeQuoteToSignStatusEligibleSwitching(): QuoteToSignStatusDTO {
-        return QuoteToSignStatusDTO(true, true)
+    private fun makeQuoteToSignStatusEligibleSwitching(): QuoteToSignStatusDto {
+        return QuoteToSignStatusDto.EligibleToSign(true, SignMethod.SWEDISH_BANK_ID)
     }
 
-    private fun makeQuoteToSignStatusEligibleNotSwitching(): QuoteToSignStatusDTO {
-        return QuoteToSignStatusDTO(true, false)
+    private fun makeQuoteToSignStatusEligibleNotSwitching(): QuoteToSignStatusDto {
+        return QuoteToSignStatusDto.EligibleToSign(false, SignMethod.SWEDISH_BANK_ID)
     }
 
-    private fun makeQuoteToSignStatusNotEligibleSwitching(): QuoteToSignStatusDTO {
-        return QuoteToSignStatusDTO(false, true)
+    private fun makeQuoteToSignStatusNotEligibleSwitching(): QuoteToSignStatusDto {
+        return QuoteToSignStatusDto.NotEligibleToSign
     }
 
     companion object {

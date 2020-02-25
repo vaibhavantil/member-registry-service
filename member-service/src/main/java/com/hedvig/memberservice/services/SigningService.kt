@@ -3,16 +3,15 @@ package com.hedvig.memberservice.services
 import com.hedvig.integration.botService.BotService
 import com.hedvig.integration.botService.dto.UpdateUserContextDTO
 import com.hedvig.integration.underwriter.UnderwriterApi
+import com.hedvig.integration.underwriter.dtos.QuoteToSignStatusDto
+import com.hedvig.integration.underwriter.dtos.SignMethod
 import com.hedvig.memberservice.commands.SignMemberFromUnderwriterCommand
 import com.hedvig.memberservice.commands.UpdateWebOnBoardingInfoCommand
-import com.hedvig.memberservice.entities.SignSession
 import com.hedvig.memberservice.query.MemberRepository
 import com.hedvig.memberservice.query.SignedMemberRepository
 import com.hedvig.memberservice.services.member.CannotSignInsuranceException
 import com.hedvig.memberservice.services.member.dto.MemberSignResponse
 import com.hedvig.memberservice.services.member.dto.MemberSignUnderwriterQuoteResponse
-import com.hedvig.memberservice.util.Market
-import com.hedvig.memberservice.util.SsnUtilImpl
 import com.hedvig.memberservice.web.dto.IsSsnAlreadySignedMemberResponse
 import com.hedvig.memberservice.web.v2.dto.SignStatusResponse
 import com.hedvig.memberservice.web.v2.dto.UnderwriterQuoteSignRequest
@@ -21,8 +20,6 @@ import org.axonframework.commandhandling.gateway.CommandGateway
 import org.slf4j.LoggerFactory
 import org.springframework.lang.NonNull
 import org.springframework.stereotype.Service
-import java.util.*
-import javax.transaction.NotSupportedException
 import javax.transaction.Transactional
 
 @Service
@@ -45,17 +42,17 @@ class SigningService(
             throw MemberHasExistingInsuranceException()
         }
 
-        val quoteStatus = underwriterApi.hasQuoteToSign(memberId.toString())
-        if (quoteStatus.isEligibleToSign) {
-            val cmd = UpdateWebOnBoardingInfoCommand(memberId, request.ssn, request.email)
-            commandGateway.sendAndWait<Any>(cmd)
+        when (val quote = underwriterApi.hasQuoteToSign(memberId.toString())) {
+            is QuoteToSignStatusDto.EligibleToSign -> {
+                val cmd = UpdateWebOnBoardingInfoCommand(memberId, request.ssn, request.email)
+                commandGateway.sendAndWait<Any>(cmd)
 
-            return when (SsnUtilImpl.instance.getMarketFromSsn(request.ssn)) {
-                Market.SWEDEN -> swedishBankIdSigningService.startSign(request, memberId, quoteStatus.isSwitching)
-                Market.NORWAY -> norwegianSigningService.startSign(memberId, request)
+                return when (quote.signMethod) {
+                    SignMethod.SWEDISH_BANK_ID -> swedishBankIdSigningService.startSign(request, memberId, quote.isSwitching)
+                    SignMethod.NORWEGIAN_BANK_ID-> norwegianSigningService.startSign(memberId, request)
+                }
             }
-        } else {
-            throw CannotSignInsuranceException()
+            is QuoteToSignStatusDto.NotEligibleToSign -> throw CannotSignInsuranceException()
         }
     }
 
@@ -84,18 +81,23 @@ class SigningService(
         val optionalMember = memberRepository.findById(memberId)
 
         return if (optionalMember.isPresent) {
-            when (SsnUtilImpl.instance.getMarketFromSsn(optionalMember.get().ssn)) {
-                Market.SWEDEN -> {
-                    val session = swedishBankIdSigningService.getSignSession(memberId)
-                    session
-                        .map { SignStatusResponse.CreateFromEntity(it) }
-                        .orElseGet { null }
-                }
-                Market.NORWAY -> {
-                    norwegianSigningService.getSignStatus(memberId)?.let {
-                        SignStatusResponse.CreateFromNorwegianStatus(it)
+            when (val quote = underwriterApi.hasQuoteToSign(memberId.toString())) {
+                is QuoteToSignStatusDto.EligibleToSign -> {
+                    when(quote.signMethod) {
+                        SignMethod.SWEDISH_BANK_ID  -> {
+                            val session = swedishBankIdSigningService.getSignSession(memberId)
+                            session
+                                .map { SignStatusResponse.CreateFromEntity(it) }
+                                .orElseGet { null }
+                        }
+                        SignMethod.NORWEGIAN_BANK_ID -> {
+                            norwegianSigningService.getSignStatus(memberId)?.let {
+                                SignStatusResponse.CreateFromNorwegianStatus(it)
+                            }
+                        }
                     }
                 }
+                is QuoteToSignStatusDto.NotEligibleToSign -> null
             }
         } else {
             null
