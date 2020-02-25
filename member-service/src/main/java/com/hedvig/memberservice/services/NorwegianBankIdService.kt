@@ -46,8 +46,6 @@ class NorwegianBankIdService(
                 } else {
                     redisEventPublisher.onAuthSessionUpdated(result.memberId, AuthSessionUpdatedEventStatus.FAILED)
                 }
-
-                redisEventPublisher.onAuthSessionUpdated(result.memberId, AuthSessionUpdatedEventStatus.SUCCESS)
             }
             is NorwegianAuthenticationResult.Failed ->
                 redisEventPublisher.onAuthSessionUpdated(result.memberId, AuthSessionUpdatedEventStatus.FAILED)
