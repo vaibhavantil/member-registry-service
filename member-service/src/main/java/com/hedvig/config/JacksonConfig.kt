@@ -12,8 +12,4 @@ import org.zalando.jackson.datatype.money.MoneyModule
 class JacksonConfig {
     @Bean
     fun monetaModule(): Module = MoneyModule().withQuotedDecimalNumbers()
-
-    @Bean
-    fun objectMapper(): ObjectMapper =
-        ObjectMapper().registerKotlinModule().registerModule(JavaTimeModule())
 }
