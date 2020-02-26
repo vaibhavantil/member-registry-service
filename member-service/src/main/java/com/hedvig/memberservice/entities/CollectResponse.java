@@ -10,6 +10,7 @@ import lombok.Data;
 @Embeddable
 public class CollectResponse {
 
+  public CollectResponse() {}
   public CollectResponse(
     CollectStatus status,
     String hintCode
