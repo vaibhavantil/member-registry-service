@@ -1,8 +1,6 @@
 package com.hedvig.memberservice.services.redispublisher
 
-import com.hedvig.memberservice.services.events.AuthSessionCompleteEvent
 import com.hedvig.memberservice.services.events.SignSessionCompleteEvent
-import lombok.`val`
 import org.springframework.data.redis.core.RedisTemplate
 import org.springframework.stereotype.Component
 import org.springframework.transaction.event.TransactionPhase

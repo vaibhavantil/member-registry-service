@@ -187,6 +187,20 @@ public class MemberEventListener {
   }
 
   @EventHandler
+  void on(NorwegianMemberSignedEvent e, @Timestamp Instant timestamp) {
+    MemberEntity m = userRepo.findById(e.getMemberId()).get();
+    m.setStatus(MemberStatus.SIGNED);
+    m.setSignedOn(timestamp);
+
+    SignedMemberEntity sme = new SignedMemberEntity();
+    sme.setId(e.getMemberId());
+    sme.setSsn(e.getSsn());
+
+    userRepo.save(m);
+    signedMemberRepository.save(sme);
+  }
+
+  @EventHandler
   void on(MemberCancellationEvent e) {
     MemberEntity m = userRepo.findById(e.getMemberId()).get();
     m.setStatus(MemberStatus.TERMINATED);

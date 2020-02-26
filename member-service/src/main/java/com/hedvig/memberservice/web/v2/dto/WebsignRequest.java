@@ -1,9 +1,11 @@
 package com.hedvig.memberservice.web.v2.dto;
 
 import com.google.common.net.InetAddresses;
+
 import java.beans.ConstructorProperties;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -19,9 +21,6 @@ public class WebsignRequest {
 
   @NotBlank
   String ipAddress;
-
-
-
 
   @ConstructorProperties({"email", "ssn", "ipAddress"})
   public WebsignRequest(@Email String email, @NotBlank String ssn, @NotBlank String ipAddress) {
@@ -78,7 +77,7 @@ public class WebsignRequest {
     final Object this$ipAddress = this.getIpAddress();
     final Object other$ipAddress = other.getIpAddress();
     if (this$ipAddress == null ? other$ipAddress != null
-        : !this$ipAddress.equals(other$ipAddress)) {
+      : !this$ipAddress.equals(other$ipAddress)) {
       return false;
     }
     return true;
@@ -100,6 +99,6 @@ public class WebsignRequest {
 
   public String toString() {
     return "WebsignRequest(logger=" + this.getLogger() + ", email=" + this.getEmail() + ", ssn="
-        + this.getSsn() + ", ipAddress=" + this.getIpAddress() + ")";
+      + this.getSsn() + ", ipAddress=" + this.getIpAddress() + ")";
   }
 }

@@ -37,8 +37,7 @@ public class SignSessionTest {
   public void canReuseBankIdSession_givenPendingBankIdSession_returnTrue() {
     val session = new SignSession(MEMBER_ID);
 
-    val collectResponse = new CollectResponse();
-    collectResponse.setStatus(CollectStatus.pending);
+    CollectResponse collectResponse = new CollectResponse(CollectStatus.pending, null);
     session.newCollectResponse(collectResponse);
 
     val actual = session.canReuseBankIdSession();
@@ -50,8 +49,7 @@ public class SignSessionTest {
   public void canReuseBankIdSession_givenCompleteBankIdSession_returnFalse() {
     val session = new SignSession(MEMBER_ID);
 
-    val collectResponse = new CollectResponse();
-    collectResponse.setStatus(CollectStatus.complete);
+    CollectResponse collectResponse = new CollectResponse(CollectStatus.complete, null);
     session.newCollectResponse(collectResponse);
 
     val actual = session.canReuseBankIdSession();
@@ -63,8 +61,7 @@ public class SignSessionTest {
   public void canReuseBankIdSession_givenFailedBankIdSession_returnFalse() {
     val session = new SignSession(MEMBER_ID);
 
-    val collectResponse = new CollectResponse();
-    collectResponse.setStatus(CollectStatus.failed);
+    CollectResponse collectResponse = new CollectResponse(CollectStatus.failed, null);
     session.newCollectResponse(collectResponse);
 
     val actual = session.canReuseBankIdSession();

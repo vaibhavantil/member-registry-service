@@ -2,9 +2,12 @@ package com.hedvig.memberservice.services.member;
 
 import com.hedvig.external.bankID.bankIdTypes.CollectResponse;
 import com.hedvig.memberservice.commands.BankIdSignCommand;
+import com.hedvig.memberservice.commands.NorwegianSignCommand;
 import org.axonframework.commandhandling.gateway.CommandGateway;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
+
+import java.util.UUID;
 
 @Service
 public class MemberService {
@@ -21,5 +24,12 @@ public class MemberService {
             BankIdSignCommand(
             memberId, collectResponse.getOrderRef(), collectResponse.getCompletionData().getSignature(), collectResponse.getCompletionData().getOcspResponse(),
             collectResponse.getCompletionData().getUser().getPersonalNumber()));
+  }
+
+  public void norwegianBankIdSignComplete(final long memberId, @NonNull final UUID referenceId, @NonNull final String peronalNumber, @NonNull final String providerJsonResponse) {
+    this.commandGateway.sendAndWait(
+      new
+        NorwegianSignCommand(memberId, referenceId, peronalNumber, providerJsonResponse)
+    );
   }
 }

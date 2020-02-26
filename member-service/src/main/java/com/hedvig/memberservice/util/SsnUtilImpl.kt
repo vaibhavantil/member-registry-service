@@ -1,6 +1,7 @@
 package com.hedvig.memberservice.util
 
 class SsnUtilImpl : SsnUtil {
+
     override fun getGenderFromSsn(ssn: String?): Gender? {
         if (ssn == null) {
             return null
