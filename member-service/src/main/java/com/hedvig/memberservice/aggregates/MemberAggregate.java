@@ -229,6 +229,7 @@ public class MemberAggregate {
       cmd.getZipCode(),
       cmd.getApartmentNo(),
       cmd.getFloor())) {
+      int floor = (cmd.getFloor() != null) ? cmd.getFloor() : 0;
       apply(
         new LivingAddressUpdatedEvent(
           this.id,
@@ -236,7 +237,7 @@ public class MemberAggregate {
           cmd.getCity(),
           cmd.getZipCode(),
           cmd.getApartmentNo(),
-          cmd.getFloor()));
+          floor));
     }
 
     if (cmd.getPhoneNumber() != null
