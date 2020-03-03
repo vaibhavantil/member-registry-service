@@ -172,10 +172,10 @@ class AuthController @Autowired constructor(
     }
 
     @PostMapping(path = ["/{country}/bankid/auth"])
-    private fun auth(@PathVariable("country") country: String, @RequestBody request: GenericBankIdAuthenticationRequest): ResponseEntity<StartNorwegianAuthenticationResult> {
+    private fun auth(@RequestHeader("hedvig.token") memberId: Long, @PathVariable("country") country: String, @RequestBody request: GenericBankIdAuthenticationRequest): ResponseEntity<StartNorwegianAuthenticationResult> {
         return when (country) {
             "norway" ->
-                ResponseEntity.ok(norwegianBankIdService.authenticate(request))
+                ResponseEntity.ok(norwegianBankIdService.authenticate(memberId, request))
             else ->
                 ResponseEntity.notFound().build()
         }

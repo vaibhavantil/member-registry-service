@@ -23,11 +23,11 @@ class NorwegianBankIdService(
     private val apiGatewayService: ApiGatewayService,
     private val memberRepository: MemberRepository
 ) {
-    fun authenticate(request: GenericBankIdAuthenticationRequest): StartNorwegianAuthenticationResult {
-        val acceptLanguage = memberRepository.findById(request.memberId.toLong()).get().acceptLanguage
+    fun authenticate(memberId: Long, request: GenericBankIdAuthenticationRequest): StartNorwegianAuthenticationResult {
+        val acceptLanguage = memberRepository.findById(memberId).get().acceptLanguage
         return norwegianAuthentication.auth(
             NorwegianBankIdAuthenticationRequest(
-                request.memberId,
+                memberId.toString(),
                 request.personalNumber,
                 acceptLanguage?.toTwoLetterLanguage() ?: "NO"
             )
