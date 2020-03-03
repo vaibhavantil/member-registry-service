@@ -3,11 +3,14 @@ package com.hedvig.memberservice.services
 import com.hedvig.external.authentication.NorwegianAuthentication
 import com.hedvig.external.authentication.dto.NorwegianAuthenticationResult
 import com.hedvig.external.authentication.dto.NorwegianBankIdAuthenticationRequest
+import com.hedvig.external.authentication.dto.StartNorwegianAuthenticationResult
 import com.hedvig.integration.apigateway.ApiGatewayService
 import com.hedvig.memberservice.commands.InactivateMemberCommand
+import com.hedvig.memberservice.query.MemberRepository
 import com.hedvig.memberservice.query.SignedMemberRepository
 import com.hedvig.memberservice.services.redispublisher.AuthSessionUpdatedEventStatus
 import com.hedvig.memberservice.services.redispublisher.RedisEventPublisher
+import com.hedvig.memberservice.web.dto.GenericBankIdAuthenticationRequest
 import org.axonframework.commandhandling.gateway.CommandGateway
 import org.springframework.stereotype.Service
 
@@ -17,12 +20,19 @@ class NorwegianBankIdService(
     private val commandGateway: CommandGateway,
     private val redisEventPublisher: RedisEventPublisher,
     private val signedMemberRepository: SignedMemberRepository,
-    private val apiGatewayService: ApiGatewayService
+    private val apiGatewayService: ApiGatewayService,
+    private val memberRepository: MemberRepository
 ) {
-    fun authenticate(request: NorwegianBankIdAuthenticationRequest) =
-        norwegianAuthentication.auth(
-            request
+    fun authenticate(request: GenericBankIdAuthenticationRequest): StartNorwegianAuthenticationResult {
+        val acceptLanguage = memberRepository.findById(request.memberId.toLong()).get().acceptLanguage
+        return norwegianAuthentication.auth(
+            NorwegianBankIdAuthenticationRequest(
+                request.memberId,
+                request.personalNumber,
+                acceptLanguage?.toTwoLetterLanguage() ?: "NO"
+            )
         )
+    }
 
     fun sign(memberId: String, ssn: String, acceptLanguage: String?) =
         norwegianAuthentication.sign(

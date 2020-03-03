@@ -4,6 +4,7 @@ import com.hedvig.external.authentication.NorwegianAuthentication
 import com.hedvig.external.authentication.dto.NorwegianAuthenticationResult
 import com.hedvig.integration.apigateway.ApiGatewayService
 import com.hedvig.memberservice.commands.InactivateMemberCommand
+import com.hedvig.memberservice.query.MemberRepository
 import com.hedvig.memberservice.query.SignedMemberEntity
 import com.hedvig.memberservice.query.SignedMemberRepository
 import com.hedvig.memberservice.services.redispublisher.AuthSessionUpdatedEventStatus
@@ -35,12 +36,14 @@ class NorwegianBankIdServiceTest {
     lateinit var signedMemberRepository: SignedMemberRepository
     @Mock
     lateinit var apiGatewayService: ApiGatewayService
+    @Mock
+    lateinit var memberRepository: MemberRepository
 
     lateinit var classUnderTest: NorwegianBankIdService
 
     @Before
     fun before() {
-        classUnderTest = NorwegianBankIdService(norwegianAuthentication, commandGateway, redisEventPublisher, signedMemberRepository, apiGatewayService)
+        classUnderTest = NorwegianBankIdService(norwegianAuthentication, commandGateway, redisEventPublisher, signedMemberRepository, apiGatewayService, memberRepository)
     }
 
     @Test
