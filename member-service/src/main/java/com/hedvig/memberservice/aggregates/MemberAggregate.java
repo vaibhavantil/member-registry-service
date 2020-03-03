@@ -481,6 +481,12 @@ public class MemberAggregate {
     }
   }
 
+  @CommandHandler
+  public void on(BackfillMarketCommand cmd) {
+      apply(new MarketUpdatedEvent(cmd.getMemberId(), Market.SE));
+  }
+
+
 
 
   @EventSourcingHandler

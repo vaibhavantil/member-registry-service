@@ -1,30 +1,12 @@
 package com.hedvig.memberservice.web;
 
-import com.hedvig.memberservice.commands.EditMemberInformationCommand;
-import com.hedvig.memberservice.commands.InsurnaceCancellationCommand;
-import com.hedvig.memberservice.commands.MemberCancelInsuranceCommand;
-import com.hedvig.memberservice.commands.MemberUpdateContactInformationCommand;
-import com.hedvig.memberservice.commands.SetFraudulentStatusCommand;
-import com.hedvig.memberservice.commands.StartOnboardingWithSSNCommand;
-import com.hedvig.memberservice.commands.UpdateEmailCommand;
-import com.hedvig.memberservice.commands.UpdatePhoneNumberCommand;
-import com.hedvig.memberservice.commands.UpdateSSNCommand;
+import com.hedvig.memberservice.commands.*;
+import com.hedvig.memberservice.events.MarketUpdatedEvent;
 import com.hedvig.memberservice.query.MemberEntity;
 import com.hedvig.memberservice.query.MemberRepository;
 import com.hedvig.memberservice.services.member.MemberQueryService;
 import com.hedvig.memberservice.services.trace.TraceMemberService;
-import com.hedvig.memberservice.web.dto.ChargeMembersDTO;
-import com.hedvig.memberservice.web.dto.InsuranceCancellationDTO;
-import com.hedvig.memberservice.web.dto.InternalMember;
-import com.hedvig.memberservice.web.dto.InternalMemberSearchRequestDTO;
-import com.hedvig.memberservice.web.dto.InternalMemberSearchResultDTO;
-import com.hedvig.memberservice.web.dto.MemberCancelInsurance;
-import com.hedvig.memberservice.web.dto.MemberFraudulentStatusDTO;
-import com.hedvig.memberservice.web.dto.StartOnboardingWithSSNRequest;
-import com.hedvig.memberservice.web.dto.UpdateContactInformationRequest;
-import com.hedvig.memberservice.web.dto.UpdateEmailRequest;
-import com.hedvig.memberservice.web.dto.UpdatePhoneNumberRequest;
-import com.hedvig.memberservice.web.dto.UpdateSSNRequest;
+import com.hedvig.memberservice.web.dto.*;
 import lombok.val;
 import org.axonframework.commandhandling.gateway.CommandGateway;
 import org.slf4j.Logger;
@@ -206,6 +188,17 @@ public class InternalMembersController {
     @RequestBody UpdateSSNRequest request
   ) {
     commandBus.sendAndWait(new UpdateSSNCommand(memberId, request.getSsn()));
+    return ResponseEntity.noContent().build();
+  }
+
+  //TODO: THIS IS A ONE OFF TO BACKFILL MARKET. REMOVE AFTER USE!
+  @PostMapping(value = "/backfill/market")
+  public ResponseEntity<Void> backfillMarket(
+  ) {
+    memberRepository
+      .findAll()
+      .forEach(m ->
+        commandBus.sendAndWait(new BackfillMarketCommand(m.getId())));
     return ResponseEntity.noContent().build();
   }
 }
