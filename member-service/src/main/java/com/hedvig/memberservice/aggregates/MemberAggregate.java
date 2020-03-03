@@ -10,6 +10,7 @@ import com.hedvig.external.bisnodeBCI.dto.PersonSearchResult;
 import com.hedvig.memberservice.commands.*;
 import com.hedvig.memberservice.events.*;
 import com.hedvig.memberservice.services.CashbackService;
+import com.hedvig.memberservice.web.dto.Market;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.axonframework.commandhandling.CommandHandler;
@@ -269,6 +270,8 @@ public class MemberAggregate {
         this.id, cmd.getReferenceId(), cmd.getSignature(), cmd.getOscpResponse(),
         cmd.getPersonalNumber()));
 
+    apply(new MarketUpdatedEvent(this.id, Market.SE));
+
     if (this.trackingId == null) {
       generateTrackingId();
     }
@@ -291,6 +294,9 @@ public class MemberAggregate {
     apply(
       new NorwegianMemberSignedEvent(
         this.id, cmd.getPersonalNumber(), cmd.getProvideJsonResponse()));
+
+    apply(new MarketUpdatedEvent(this.id, Market.NO));
+
   }
 
   public boolean isValidJSON(final String json) {
@@ -306,6 +312,8 @@ public class MemberAggregate {
   @CommandHandler
   public void on(SignMemberFromUnderwriterCommand signMemberFromUnderwriterCommand) {
     apply(new MemberSignedWithoutBankId(signMemberFromUnderwriterCommand.getId(), signMemberFromUnderwriterCommand.getSsn()));
+
+    apply(new MarketUpdatedEvent(this.id, Market.SE));
   }
 
   @CommandHandler
@@ -462,11 +470,13 @@ public class MemberAggregate {
 
   @CommandHandler
   public void on(UpdateMarketCommand cmd) {
-    log.info("Updating accept locale for member {}, new locale: {}", cmd.getMemberId(),
-      cmd.getMarket());
 
-    if (!cmd.getMarket().toString().isEmpty() &&
+    if (this.status != MemberStatus.SIGNED &&
+      !cmd.getMarket().toString().isEmpty() &&
       !Objects.equals(member.getMarket(), cmd.getMarket())) {
+      log.info("Updating accept locale for member {}, new locale: {}", cmd.getMemberId(),
+        cmd.getMarket());
+
       apply(new MarketUpdatedEvent(cmd.getMemberId(), cmd.getMarket()));
     }
   }
