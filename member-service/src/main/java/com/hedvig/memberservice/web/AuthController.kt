@@ -2,7 +2,6 @@ package com.hedvig.memberservice.web
 
 
 import com.hedvig.common.DeprecatedException
-import com.hedvig.external.authentication.dto.NorwegianBankIdAuthenticationRequest
 import com.hedvig.external.authentication.dto.StartNorwegianAuthenticationResult
 import com.hedvig.external.bankID.bankIdTypes.CollectResponse
 import com.hedvig.external.bankID.bankIdTypes.CollectStatus
@@ -26,6 +25,7 @@ import com.hedvig.memberservice.web.dto.BankIdProgressStatus
 import com.hedvig.memberservice.web.dto.BankIdProgressStatus.Companion.valueOf
 import com.hedvig.memberservice.web.dto.BankIdSignRequest
 import com.hedvig.memberservice.web.dto.BankIdSignResponse
+import com.hedvig.memberservice.web.dto.GenericBankIdAuthenticationRequest
 import net.logstash.logback.argument.StructuredArguments
 import org.axonframework.commandhandling.gateway.CommandGateway
 import org.slf4j.LoggerFactory
@@ -172,7 +172,7 @@ class AuthController @Autowired constructor(
     }
 
     @PostMapping(path = ["/{country}/bankid/auth"])
-    private fun auth(@PathVariable("country") country: String, @RequestBody request: NorwegianBankIdAuthenticationRequest): ResponseEntity<StartNorwegianAuthenticationResult> {
+    private fun auth(@PathVariable("country") country: String, @RequestBody request: GenericBankIdAuthenticationRequest): ResponseEntity<StartNorwegianAuthenticationResult> {
         return when (country) {
             "norway" ->
                 ResponseEntity.ok(norwegianBankIdService.authenticate(request))
@@ -217,3 +217,4 @@ class AuthController @Autowired constructor(
     }
 
 }
+
