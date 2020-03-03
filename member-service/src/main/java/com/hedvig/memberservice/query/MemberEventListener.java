@@ -230,4 +230,11 @@ public class MemberEventListener {
     m.setAcceptLanguage(e.getAcceptLanguage());
     userRepo.save(m);
   }
+
+  @EventHandler
+  void on(MarketUpdatedEvent e) {
+    MemberEntity m = userRepo.findById(e.getMemberId()).get();
+    m.setMarket(e.getMarket());
+    userRepo.save(m);
+  }
 }

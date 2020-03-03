@@ -79,7 +79,14 @@ public class MemberAggregate {
           return new AcceptLanguageUpdatedEvent(command.getMemberId(), command.getAcceptLanguage());
         }
         return null;
-        });
+        })
+      .andThenApply(() ->
+      {
+        if(command.getMarket() != null && !command.getMarket().toString().isEmpty()){
+          return new MarketUpdatedEvent(command.getMemberId(), command.getMarket());
+        }
+        return null;
+      });
   }
 
   @CommandHandler
@@ -453,6 +460,18 @@ public class MemberAggregate {
     }
   }
 
+  @CommandHandler
+  public void on(UpdateMarketCommand cmd) {
+    log.info("Updating accept locale for member {}, new locale: {}", cmd.getMemberId(),
+      cmd.getMarket());
+
+    if (!cmd.getMarket().toString().isEmpty() &&
+      !Objects.equals(member.getMarket(), cmd.getMarket())) {
+      apply(new MarketUpdatedEvent(cmd.getMemberId(), cmd.getMarket()));
+    }
+  }
+
+
 
   @EventSourcingHandler
   public void on(MemberCreatedEvent e) {
@@ -535,5 +554,10 @@ public class MemberAggregate {
   @EventSourcingHandler
   public void on(AcceptLanguageUpdatedEvent e) {
       this.member.setAcceptLanguage(e.getAcceptLanguage());
+  }
+
+  @EventSourcingHandler
+  public void on(MarketUpdatedEvent e) {
+    this.member.setMarket(e.getMarket());
   }
 }

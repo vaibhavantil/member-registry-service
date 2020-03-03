@@ -10,7 +10,6 @@ import com.hedvig.memberservice.query.TrackingIdEntity;
 import com.hedvig.memberservice.query.TrackingIdRepository;
 import com.hedvig.memberservice.services.CashbackService;
 import com.hedvig.memberservice.web.dto.*;
-import lombok.val;
 import org.axonframework.commandhandling.gateway.CommandGateway;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -160,4 +159,12 @@ public class MembersController {
 
         return ResponseEntity.accepted().build();
     }
+
+  @PostMapping("/locale/update")
+  public ResponseEntity<?> postLanguage(@RequestHeader(value = "hedvig.token") Long hid, @RequestBody @Valid PostLocaleRequestDTO body) {
+
+    commandGateway.sendAndWait(new UpdateMarketCommand(hid, body.getMarket()));
+
+    return ResponseEntity.accepted().build();
+  }
 }

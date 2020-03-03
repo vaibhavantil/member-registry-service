@@ -40,7 +40,7 @@ class MembersControllerV2 @Autowired constructor(
                 member = memberRepository.findById(memberId)
             } while (member.isPresent)
 
-            commandGateway.send<Void>(CreateMemberCommand(memberId!!, acceptLanguage))
+            commandGateway.send<Void>(CreateMemberCommand(memberId!!, acceptLanguage, null))
             return@execute memberId
         }
 

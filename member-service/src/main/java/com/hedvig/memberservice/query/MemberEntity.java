@@ -13,6 +13,7 @@ import javax.persistence.Table;
 import com.hedvig.memberservice.aggregates.FraudulentStatus;
 import com.hedvig.memberservice.aggregates.MemberStatus;
 import com.hedvig.memberservice.util.EnumMapChecker;
+import com.hedvig.memberservice.web.dto.Market;
 import com.hedvig.memberservice.web.dto.MembersSortColumn;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -49,6 +50,9 @@ public class MemberEntity {
   public String cashbackId;
 
   public String acceptLanguage;
+
+  @Enumerated(EnumType.STRING)
+  public Market market;
 
   public Integer floor;
 
@@ -198,6 +202,8 @@ public class MemberEntity {
   public void setAcceptLanguage(String acceptLanguage) {
     this.acceptLanguage = acceptLanguage;
   }
+
+  public void setMarket(Market market) { this.market = market; }
 
   public void setFloor(Integer floor) {
     this.floor = floor;

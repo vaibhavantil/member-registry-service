@@ -60,7 +60,7 @@ public class AppleController {
       return ResponseEntity.badRequest().build();
     }
 
-    commandGateway.sendAndWait(new CreateMemberCommand(appleMemberId, null));
+    commandGateway.sendAndWait(new CreateMemberCommand(appleMemberId, null, null));
 
     InitializeAppleUserCommand cmd = new InitializeAppleUserCommand(
       appleMemberId,
