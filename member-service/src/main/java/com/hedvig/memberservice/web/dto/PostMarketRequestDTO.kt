@@ -1,6 +1,6 @@
 package com.hedvig.memberservice.web.dto
 
-data class PostLocaleRequestDTO (
+data class PostMarketRequestDTO (
      val market : Market
 )
 

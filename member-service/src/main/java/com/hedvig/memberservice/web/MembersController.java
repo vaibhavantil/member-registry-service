@@ -161,7 +161,7 @@ public class MembersController {
     }
 
   @PostMapping("/market/update")
-  public ResponseEntity<?> postLanguage(@RequestHeader(value = "hedvig.token") Long hid, @RequestBody @Valid PostLocaleRequestDTO body) {
+  public ResponseEntity<?> postMarket(@RequestHeader(value = "hedvig.token") Long hid, @RequestBody @Valid PostMarketRequestDTO body) {
 
     commandGateway.sendAndWait(new UpdateMarketCommand(hid, body.getMarket()));
 

@@ -1,7 +1,5 @@
 package com.hedvig.memberservice.aggregates;
 
-import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hedvig.common.UUIDGenerator;
 import com.hedvig.external.bisnodeBCI.BisnodeClient;
@@ -80,14 +78,7 @@ public class MemberAggregate {
           return new AcceptLanguageUpdatedEvent(command.getMemberId(), command.getAcceptLanguage());
         }
         return null;
-        })
-      .andThenApply(() ->
-      {
-        if(command.getMarket() != null && !command.getMarket().toString().isEmpty()){
-          return new MarketUpdatedEvent(command.getMemberId(), command.getMarket());
-        }
-        return null;
-      });
+        });
   }
 
   @CommandHandler
@@ -471,7 +462,7 @@ public class MemberAggregate {
 
     if (this.status != MemberStatus.SIGNED &&
       !Objects.equals(member.getMarket(), cmd.getMarket())) {
-      log.info("Updating market for member {}, new locale: {}", cmd.getMemberId(),
+      log.info("Updating market for member {}, new market: {}", cmd.getMemberId(),
         cmd.getMarket());
 
       apply(new MarketUpdatedEvent(cmd.getMemberId(), cmd.getMarket()));

@@ -203,17 +203,14 @@ public class InternalMembersController {
   ) {
 
 
-    Pageable pageable = PageRequest.of(0, 2000);
+    Pageable pageable = PageRequest.of(0, 1000);
 
     while (true){
       Slice<Long> page = memberRepository.findIdsWithNoMarket(pageable);
-      System.out.println("COUNT: " + page.getContent().size());
-      System.out.println("FIRST ID: " + page.getContent().stream().findFirst());
 
       page.getContent().forEach(
         id -> commandBus.sendAndWait(new BackfillMarketCommand(id))
       );
-
 
       if (!page.hasNext()) { break; }
       pageable = page.nextPageable();

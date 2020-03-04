@@ -6,6 +6,5 @@ import org.axonframework.commandhandling.TargetAggregateIdentifier
 data class CreateMemberCommand(
     @TargetAggregateIdentifier
     val memberId: Long,
-    val acceptLanguage: String? = null,
-    val market: Market? = null
+    val acceptLanguage: String? = null
 )
