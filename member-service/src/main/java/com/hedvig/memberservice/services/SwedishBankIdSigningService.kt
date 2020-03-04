@@ -10,6 +10,7 @@ import com.hedvig.memberservice.entities.SignStatus
 import com.hedvig.memberservice.jobs.BankIdCollector
 import com.hedvig.memberservice.services.member.MemberService
 import com.hedvig.memberservice.services.member.dto.MemberSignResponse
+import com.hedvig.memberservice.services.member.dto.StartSwedishSignResponse
 import com.hedvig.memberservice.web.v2.dto.WebsignRequest
 import org.quartz.JobBuilder
 import org.quartz.Scheduler
@@ -36,25 +37,32 @@ class SwedishBankIdSigningService(
 ) {
 
     fun startSign(request: WebsignRequest, memberId: Long, isSwitching: Boolean): MemberSignResponse {
+        val response = startSign(memberId, request.ssn, request.ipAddress, isSwitching)
+
+        return MemberSignResponse(
+            signId = response.signId,
+            status = SignStatus.IN_PROGRESS,
+            bankIdOrderResponse = response.bankIdOrderResponse)
+    }
+
+    fun startSign(memberId: Long, ssn: String, ipAddress: String, isSwitching: Boolean): StartSwedishSignResponse {
         val session = signSessionRepository.findByMemberId(memberId).orElseGet { SignSession(memberId) }
 
         if (!session.canReuseBankIdSession()) {
             val result = bankidService.startSign(
-                request.ssn,
+                ssn,
                 createUserSignText(isSwitching),
-                request.ipAddress)
+                ipAddress)
             session.newOrderStarted(result)
             signSessionRepository.save(session)
             scheduleCollectJob(result)
 
-            return MemberSignResponse(
+            return StartSwedishSignResponse(
                 signId = session.sessionId,
-                status = SignStatus.IN_PROGRESS,
                 bankIdOrderResponse = result)
         }
-        return MemberSignResponse(
+        return StartSwedishSignResponse(
             signId = session.sessionId,
-            status = SignStatus.IN_PROGRESS,
             bankIdOrderResponse = session.orderResponse)
     }
 

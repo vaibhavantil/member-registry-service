@@ -31,7 +31,7 @@ class UnderwriterSigningServiceImplTest {
 
     @Before
     fun setup() {
-        sut = UnderwriterSigningServiceImpl()
+        sut = UnderwriterSigningServiceImpl(underwriterSignSessionRepository, swedishBankIdSigningService)
     }
 
     @Test
@@ -46,16 +46,18 @@ class UnderwriterSigningServiceImplTest {
             ))
 
         whenever(underwriterSignSessionRepository.save(captor.capture()))
+            .thenReturn(UnderwriterSignSessionEntity(underwriterSessionRef, swedishOrderRefUUID))
 
-        val response = sut.startSwedishBankIdSignSession(memberId, swedishSSN, ip, false)
+        val response = sut.startSwedishBankIdSignSession(underwriterSessionRef, memberId, swedishSSN, ip, false)
 
         assertThat(response.autoStartToken).isEqualTo(autoStartToken)
-        assertThat(captor.value.signReference).isEqualTo(swedishOrderRef)
+        assertThat(captor.value.signReference).isEqualTo(swedishOrderRefUUID)
     }
 
     companion object {
         private val underwriterSessionRef = UUID.randomUUID()
-        private const val swedishOrderRef = "orderRef"
+        private const val swedishOrderRef = "db5da518-5e2d-11ea-bc55-0242ac130003"
+        private val swedishOrderRefUUID = UUID.fromString(swedishOrderRef)
         private const val autoStartToken = "autoStartToken"
         private const val memberId = 1337L
         private const val swedishSSN = "1912121212"
