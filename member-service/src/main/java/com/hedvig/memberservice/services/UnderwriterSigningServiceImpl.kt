@@ -2,6 +2,7 @@ package com.hedvig.memberservice.services
 
 import com.hedvig.memberservice.entities.UnderwriterSignSessionEntity
 import com.hedvig.memberservice.query.UnderwriterSignSessionRepository
+import com.hedvig.memberservice.services.dto.StartNorwegianBankIdSignResponse
 import com.hedvig.memberservice.services.dto.StartSwedishBankIdSignResponse
 import org.springframework.stereotype.Service
 import java.util.*
@@ -18,5 +19,9 @@ class UnderwriterSigningServiceImpl(
         underwriterSignSessionRepository.save(UnderwriterSignSessionEntity(underwriterSessionRef, UUID.fromString(response.bankIdOrderResponse.orderRef)))
 
         return StartSwedishBankIdSignResponse(response.bankIdOrderResponse.autoStartToken)
+    }
+
+    override fun startNorwegianBankIdSignSession(underwriterSessionRef: UUID, memberId: Long): StartNorwegianBankIdSignResponse {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 }

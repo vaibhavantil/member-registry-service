@@ -3,6 +3,7 @@ package com.hedvig.memberservice.services
 import com.hedvig.external.bankID.bankIdTypes.OrderResponse
 import com.hedvig.memberservice.entities.UnderwriterSignSessionEntity
 import com.hedvig.memberservice.query.UnderwriterSignSessionRepository
+import com.hedvig.memberservice.services.member.MemberService
 import com.hedvig.memberservice.services.member.dto.StartSwedishSignResponse
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Before
@@ -52,6 +53,11 @@ class UnderwriterSigningServiceImplTest {
 
         assertThat(response.autoStartToken).isEqualTo(autoStartToken)
         assertThat(captor.value.signReference).isEqualTo(swedishOrderRefUUID)
+    }
+
+    @Test
+    fun startNorwegianBankIdSession() {
+        sut.startNorwegianBankIdSignSession(underwriterSessionRef, memberId)
     }
 
     companion object {
