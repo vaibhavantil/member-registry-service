@@ -11,7 +11,12 @@ import lombok.val;
 import org.axonframework.commandhandling.gateway.CommandGateway;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -23,6 +28,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Nullable;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -195,10 +201,24 @@ public class InternalMembersController {
   @PostMapping(value = "/backfill/market")
   public ResponseEntity<Void> backfillMarket(
   ) {
-    memberRepository
-      .findAll()
-      .forEach(m ->
-        commandBus.sendAndWait(new BackfillMarketCommand(m.getId())));
+
+
+    Pageable pageable = PageRequest.of(0, 2000);
+
+    while (true){
+      Slice<Long> page = memberRepository.findIdsWithNoMarket(pageable);
+      System.out.println("COUNT: " + page.getContent().size());
+      System.out.println("FIRST ID: " + page.getContent().stream().findFirst());
+
+      page.getContent().forEach(
+        id -> commandBus.sendAndWait(new BackfillMarketCommand(id))
+      );
+
+
+      if (!page.hasNext()) { break; }
+      pageable = page.nextPageable();
+    }
+
     return ResponseEntity.noContent().build();
   }
 }

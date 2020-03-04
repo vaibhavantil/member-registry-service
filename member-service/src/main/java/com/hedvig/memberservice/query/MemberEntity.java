@@ -3,6 +3,7 @@ package com.hedvig.memberservice.query;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.util.EnumMap;
+import javax.annotation.Nullable;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
@@ -51,6 +52,7 @@ public class MemberEntity {
 
   public String acceptLanguage;
 
+  @Nullable
   @Enumerated(EnumType.STRING)
   public Market market;
 

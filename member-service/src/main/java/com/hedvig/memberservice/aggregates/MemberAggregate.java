@@ -268,9 +268,8 @@ public class MemberAggregate {
     apply(
       new MemberSignedEvent(
         this.id, cmd.getReferenceId(), cmd.getSignature(), cmd.getOscpResponse(),
-        cmd.getPersonalNumber()));
-
-    apply(new MarketUpdatedEvent(this.id, Market.SE));
+        cmd.getPersonalNumber()))
+      .andThenApply(() -> new MarketUpdatedEvent(this.id, Market.SE));
 
     if (this.trackingId == null) {
       generateTrackingId();
@@ -293,9 +292,9 @@ public class MemberAggregate {
 
     apply(
       new NorwegianMemberSignedEvent(
-        this.id, cmd.getPersonalNumber(), cmd.getProvideJsonResponse()));
+        this.id, cmd.getPersonalNumber(), cmd.getProvideJsonResponse()))
+      .andThenApply(() -> new MarketUpdatedEvent(this.id, Market.NO));
 
-    apply(new MarketUpdatedEvent(this.id, Market.NO));
 
   }
 
@@ -311,9 +310,8 @@ public class MemberAggregate {
 
   @CommandHandler
   public void on(SignMemberFromUnderwriterCommand signMemberFromUnderwriterCommand) {
-    apply(new MemberSignedWithoutBankId(signMemberFromUnderwriterCommand.getId(), signMemberFromUnderwriterCommand.getSsn()));
-
-    apply(new MarketUpdatedEvent(this.id, Market.SE));
+    apply(new MemberSignedWithoutBankId(signMemberFromUnderwriterCommand.getId(), signMemberFromUnderwriterCommand.getSsn()))
+      .andThenApply(() -> new MarketUpdatedEvent(this.id, Market.SE));
   }
 
   @CommandHandler
@@ -472,9 +470,8 @@ public class MemberAggregate {
   public void on(UpdateMarketCommand cmd) {
 
     if (this.status != MemberStatus.SIGNED &&
-      !cmd.getMarket().toString().isEmpty() &&
       !Objects.equals(member.getMarket(), cmd.getMarket())) {
-      log.info("Updating accept locale for member {}, new locale: {}", cmd.getMemberId(),
+      log.info("Updating market for member {}, new locale: {}", cmd.getMemberId(),
         cmd.getMarket());
 
       apply(new MarketUpdatedEvent(cmd.getMemberId(), cmd.getMarket()));
@@ -483,6 +480,7 @@ public class MemberAggregate {
 
   @CommandHandler
   public void on(BackfillMarketCommand cmd) {
+
       apply(new MarketUpdatedEvent(cmd.getMemberId(), Market.SE));
   }
 
