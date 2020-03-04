@@ -1,6 +1,6 @@
 package com.hedvig.memberservice.repositories
 
-import com.hedvig.memberservice.query.UnderwriterSignSessionEntity
+import com.hedvig.memberservice.entities.UnderwriterSignSessionEntity
 import com.hedvig.memberservice.query.UnderwriterSignSessionRepository
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test
