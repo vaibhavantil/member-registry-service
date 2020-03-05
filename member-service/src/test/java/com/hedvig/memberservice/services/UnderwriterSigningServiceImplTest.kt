@@ -66,12 +66,7 @@ class UnderwriterSigningServiceImplTest {
 
     @Test
     fun startNorwegianBankIdSession() {
-        val member = MemberEntity()
-        member.acceptLanguage = "nb-NO"
-
-        whenever(memberRepository.findById(memberId))
-            .thenReturn(Optional.of(member))
-        whenever(norwegianBankIdService.sign(memberId.toString(), norwegianSSN, "NO"))
+        whenever(norwegianBankIdService.sign(memberId.toString(), norwegianSSN))
             .thenReturn(StartNorwegianAuthenticationResult.Success(orderRefUUID, redirectUrl))
 
         whenever(underwriterSignSessionRepository.save(captor.capture()))
