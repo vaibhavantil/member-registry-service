@@ -3,7 +3,6 @@ package com.hedvig.memberservice.services
 import com.hedvig.external.authentication.dto.StartNorwegianAuthenticationResult
 import com.hedvig.external.bankID.bankIdTypes.OrderResponse
 import com.hedvig.memberservice.entities.UnderwriterSignSessionEntity
-import com.hedvig.memberservice.query.MemberEntity
 import com.hedvig.memberservice.query.MemberRepository
 import com.hedvig.memberservice.query.UnderwriterSignSessionRepository
 import com.hedvig.memberservice.services.member.dto.StartSwedishSignResponse
@@ -23,13 +22,10 @@ class UnderwriterSigningServiceImplTest {
 
     @Mock
     lateinit var underwriterSignSessionRepository: UnderwriterSignSessionRepository
-
     @Mock
     lateinit var swedishBankIdSigningService: SwedishBankIdSigningService
-
     @Mock
-    lateinit var norwegianBankIdService: NorwegianBankIdService
-
+    lateinit var norwegianSigningService: NorwegianSigningService
     @Mock
     lateinit var memberRepository: MemberRepository
 
@@ -40,7 +36,7 @@ class UnderwriterSigningServiceImplTest {
 
     @Before
     fun setup() {
-        sut = UnderwriterSigningServiceImpl(underwriterSignSessionRepository, swedishBankIdSigningService)
+        sut = UnderwriterSigningServiceImpl(underwriterSignSessionRepository, swedishBankIdSigningService, norwegianSigningService)
     }
 
     @Test
@@ -66,13 +62,13 @@ class UnderwriterSigningServiceImplTest {
 
     @Test
     fun startNorwegianBankIdSession() {
-        whenever(norwegianBankIdService.sign(memberId.toString(), norwegianSSN))
+        whenever(norwegianSigningService.startSign(memberId, null))
             .thenReturn(StartNorwegianAuthenticationResult.Success(orderRefUUID, redirectUrl))
 
         whenever(underwriterSignSessionRepository.save(captor.capture()))
             .thenReturn(UnderwriterSignSessionEntity(underwriterSessionRef, orderRefUUID))
 
-        val response = sut.startNorwegianBankIdSignSession(underwriterSessionRef, memberId)
+        val response = sut.startNorwegianBankIdSignSession(underwriterSessionRef, memberId, null)
 
         assertThat(response.redirectUrl).isEqualTo(redirectUrl)
         assertThat(captor.value.signReference).isEqualTo(orderRefUUID)

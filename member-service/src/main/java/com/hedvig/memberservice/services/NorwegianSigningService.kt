@@ -19,20 +19,13 @@ import javax.transaction.Transactional
 
 @Service
 class NorwegianSigningService(
-    private val memberRepository: MemberRepository,
     private val memberService: MemberService,
     private val norwegianBankIdService: NorwegianBankIdService,
     private val applicationEventPublisher: ApplicationEventPublisher
 ) {
 
-    @Transactional
-    fun startSign(memberId: Long, request: WebsignRequest): MemberSignResponse {
-        val response = norwegianBankIdService.sign(
-            memberId.toString(),
-            request.ssn
-        )
-
-        return when (response) {
+    fun startWebSign(memberId: Long, request: WebsignRequest): MemberSignResponse {
+        return when (val response = startSign(memberId, request.ssn)) {
             is StartNorwegianAuthenticationResult.Success -> MemberSignResponse(
                 signId = -1L,
                 status = SignStatus.IN_PROGRESS,
@@ -46,6 +39,12 @@ class NorwegianSigningService(
             }
         }
     }
+
+    @Transactional
+    fun startSign(memberId: Long, ssn: String?) = norwegianBankIdService.sign(
+        memberId.toString(),
+        ssn
+    )
 
     fun getSignStatus(memberId: Long) = norwegianBankIdService.getStatus(memberId)
 

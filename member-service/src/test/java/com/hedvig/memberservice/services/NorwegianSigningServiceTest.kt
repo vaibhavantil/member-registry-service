@@ -25,9 +25,6 @@ import org.mockito.Mockito.`when` as whenever
 class NorwegianSigningServiceTest {
 
     @Mock
-    lateinit var memberRepository: MemberRepository
-
-    @Mock
     lateinit var memberService: MemberService
 
     @Mock
@@ -40,7 +37,7 @@ class NorwegianSigningServiceTest {
 
     @Before
     fun before() {
-        classUnderTest = NorwegianSigningService(memberRepository, memberService, norwegianBankIdService, applicationEventPublisher)
+        classUnderTest = NorwegianSigningService(memberService, norwegianBankIdService, applicationEventPublisher)
     }
 
     @Test
@@ -52,7 +49,7 @@ class NorwegianSigningServiceTest {
             )
         )
 
-        val response = classUnderTest.startSign(MEMBER_ID, WebsignRequest(EMAIL, SSN, IP_ADDRESS))
+        val response = classUnderTest.startWebSign(MEMBER_ID, WebsignRequest(EMAIL, SSN, IP_ADDRESS))
 
         assertThat(response.status).isEqualTo(SignStatus.IN_PROGRESS)
         assertThat(response.norwegianBankIdResponse?.redirectUrl).isEqualTo(REDIRECT_URL)
@@ -66,7 +63,7 @@ class NorwegianSigningServiceTest {
             )
         )
 
-        val response = classUnderTest.startSign(MEMBER_ID, WebsignRequest(EMAIL, SSN, IP_ADDRESS))
+        val response = classUnderTest.startWebSign(MEMBER_ID, WebsignRequest(EMAIL, SSN, IP_ADDRESS))
 
         assertThat(response.status).isEqualTo(SignStatus.FAILED)
     }
