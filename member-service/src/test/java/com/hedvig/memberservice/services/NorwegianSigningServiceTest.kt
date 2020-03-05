@@ -45,9 +45,7 @@ class NorwegianSigningServiceTest {
 
     @Test
     fun startSignSuccessful() {
-        whenever(memberRepository.findById(MEMBER_ID)).thenReturn(Optional.of(MemberEntity()))
-
-        whenever(norwegianBankIdService.sign(MEMBER_ID.toString(), SSN, null)).thenReturn(
+        whenever(norwegianBankIdService.sign(MEMBER_ID.toString(), SSN)).thenReturn(
             StartNorwegianAuthenticationResult.Success(
                 ORDER_REF,
                 REDIRECT_URL
@@ -62,9 +60,7 @@ class NorwegianSigningServiceTest {
 
     @Test
     fun startSignFails() {
-        whenever(memberRepository.findById(MEMBER_ID)).thenReturn(Optional.of(MemberEntity()))
-
-        whenever(norwegianBankIdService.sign(MEMBER_ID.toString(), SSN, null)).thenReturn(
+        whenever(norwegianBankIdService.sign(MEMBER_ID.toString(), SSN)).thenReturn(
             StartNorwegianAuthenticationResult.Failed(
                 LIST_OF_ERRORS
             )
