@@ -56,7 +56,7 @@ class ZignSecSessionServiceImpl(
                     }
                     when (collectResponse.result.identity.state) {
                         ZignSecCollectState.PENDING -> StartNorwegianAuthenticationResult.Success(
-                            session.sessionId,
+                            session.referenceId,
                             session.redirectUrl
                         )
                         ZignSecCollectState.FINISHED -> startNewSession(request, type, session)
@@ -101,7 +101,7 @@ class ZignSecSessionServiceImpl(
         sessionRepository.save(s)
 
         return StartNorwegianAuthenticationResult.Success(
-            s.sessionId,
+            response.id,
             response.redirectUrl
         )
     }

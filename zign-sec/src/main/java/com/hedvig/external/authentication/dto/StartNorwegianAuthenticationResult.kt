@@ -4,7 +4,7 @@ import java.util.*
 
 sealed class StartNorwegianAuthenticationResult {
     data class Success(
-        val sessionId: Long,
+        val orderReference: UUID,
         val redirectUrl: String
     ): StartNorwegianAuthenticationResult()
 

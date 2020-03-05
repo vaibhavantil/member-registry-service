@@ -22,6 +22,6 @@ class UnderwriterSigningServiceImpl(
     }
 
     override fun startNorwegianBankIdSignSession(underwriterSessionRef: UUID, memberId: Long): StartNorwegianBankIdSignResponse {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        return StartNorwegianBankIdSignResponse("")
     }
 }

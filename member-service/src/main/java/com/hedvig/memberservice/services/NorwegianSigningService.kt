@@ -36,7 +36,7 @@ class NorwegianSigningService(
 
         return when (response) {
             is StartNorwegianAuthenticationResult.Success -> MemberSignResponse(
-                signId = response.sessionId,
+                signId = -1L,
                 status = SignStatus.IN_PROGRESS,
                 norwegianBankIdResponse = NorwegianBankIdResponse(response.redirectUrl)
             )
