@@ -30,7 +30,7 @@ class UnderwriterSigningServiceImpl(
 
                 StartNorwegianBankIdSignResponse(response.redirectUrl)
             }
-            is StartNorwegianAuthenticationResult.Failed -> TODO()
+            is StartNorwegianAuthenticationResult.Failed -> StartNorwegianBankIdSignResponse(null, response.errors)
         }
     }
 }

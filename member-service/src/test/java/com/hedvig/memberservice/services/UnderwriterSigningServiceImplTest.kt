@@ -1,5 +1,6 @@
 package com.hedvig.memberservice.services
 
+import com.hedvig.external.authentication.dto.NorwegianAuthenticationResponseError
 import com.hedvig.external.authentication.dto.StartNorwegianAuthenticationResult
 import com.hedvig.external.bankID.bankIdTypes.OrderResponse
 import com.hedvig.memberservice.entities.UnderwriterSignSessionEntity
@@ -13,6 +14,7 @@ import org.junit.runner.RunWith
 import org.mockito.ArgumentCaptor
 import org.mockito.Captor
 import org.mockito.Mock
+import org.mockito.Mockito.verifyZeroInteractions
 import org.mockito.junit.MockitoJUnitRunner
 import java.util.*
 import org.mockito.Mockito.`when` as whenever
@@ -73,6 +75,17 @@ class UnderwriterSigningServiceImplTest {
         assertThat(response.redirectUrl).isEqualTo(redirectUrl)
         assertThat(captor.value.signReference).isEqualTo(orderRefUUID)
         assertThat(captor.value.underwriterSignSessionReference).isEqualTo(underwriterSessionRef)
+    }
+
+    @Test
+    fun startNorwegianBankIdSessionFails() {
+        whenever(norwegianSigningService.startSign(memberId, null))
+            .thenReturn(StartNorwegianAuthenticationResult.Failed(listOf(NorwegianAuthenticationResponseError(1,"Some error message"))))
+
+        val response = sut.startNorwegianBankIdSignSession(underwriterSessionRef, memberId, null)
+
+        verifyZeroInteractions(underwriterSignSessionRepository)
+        assertThat(response.errorMessages).isNotEmpty
     }
 
     companion object {
