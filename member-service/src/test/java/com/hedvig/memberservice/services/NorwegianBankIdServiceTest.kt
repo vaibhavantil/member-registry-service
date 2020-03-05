@@ -3,6 +3,7 @@ package com.hedvig.memberservice.services
 import com.hedvig.external.authentication.NorwegianAuthentication
 import com.hedvig.external.authentication.dto.NorwegianAuthenticationResult
 import com.hedvig.integration.apigateway.ApiGatewayService
+import com.hedvig.localization.service.TextKeysLocaleResolver
 import com.hedvig.memberservice.commands.InactivateMemberCommand
 import com.hedvig.memberservice.query.MemberRepository
 import com.hedvig.memberservice.query.SignedMemberEntity
@@ -38,12 +39,14 @@ class NorwegianBankIdServiceTest {
     lateinit var apiGatewayService: ApiGatewayService
     @Mock
     lateinit var memberRepository: MemberRepository
+    @Mock
+    lateinit var textKeysLocaleResolver: TextKeysLocaleResolver
 
     lateinit var classUnderTest: NorwegianBankIdService
 
     @Before
     fun before() {
-        classUnderTest = NorwegianBankIdService(norwegianAuthentication, commandGateway, redisEventPublisher, signedMemberRepository, apiGatewayService, memberRepository)
+        classUnderTest = NorwegianBankIdService(norwegianAuthentication, commandGateway, redisEventPublisher, signedMemberRepository, apiGatewayService, memberRepository, textKeysLocaleResolver)
     }
 
     @Test
