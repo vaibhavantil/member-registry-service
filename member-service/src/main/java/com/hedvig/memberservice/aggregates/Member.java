@@ -1,6 +1,5 @@
 package com.hedvig.memberservice.aggregates;
 
-import com.hedvig.memberservice.web.dto.Market;
 import lombok.Data;
 
 @Data

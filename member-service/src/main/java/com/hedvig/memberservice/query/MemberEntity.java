@@ -12,9 +12,9 @@ import javax.persistence.Index;
 import javax.persistence.Table;
 
 import com.hedvig.memberservice.aggregates.FraudulentStatus;
+import com.hedvig.memberservice.aggregates.Market;
 import com.hedvig.memberservice.aggregates.MemberStatus;
 import com.hedvig.memberservice.util.EnumMapChecker;
-import com.hedvig.memberservice.web.dto.Market;
 import com.hedvig.memberservice.web.dto.MembersSortColumn;
 import lombok.AllArgsConstructor;
 import lombok.Builder;

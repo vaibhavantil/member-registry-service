@@ -5,20 +5,13 @@ import static org.mockito.Mockito.when;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hedvig.common.UUIDGenerator;
 import com.hedvig.external.bisnodeBCI.BisnodeClient;
+import com.hedvig.memberservice.aggregates.Market;
 import com.hedvig.memberservice.aggregates.MemberAggregate;
 import com.hedvig.memberservice.aggregates.MemberStatus;
-import com.hedvig.memberservice.commands.AuthenticationAttemptCommand;
-import com.hedvig.memberservice.commands.BankIdAuthenticationStatus;
-import com.hedvig.memberservice.commands.BankIdSignCommand;
-import com.hedvig.memberservice.commands.InactivateMemberCommand;
-import com.hedvig.memberservice.commands.MemberUpdateContactInformationCommand;
-import com.hedvig.memberservice.commands.SelectNewCashbackCommand;
-import com.hedvig.memberservice.commands.StartOnboardingWithSSNCommand;
-import com.hedvig.memberservice.commands.NorwegianSignCommand;
+import com.hedvig.memberservice.commands.*;
 import com.hedvig.memberservice.events.*;
 import com.hedvig.memberservice.services.CashbackService;
 import com.hedvig.memberservice.web.dto.Address;
-import com.hedvig.memberservice.web.dto.Market;
 import com.hedvig.memberservice.web.dto.StartOnboardingWithSSNRequest;
 import com.hedvig.memberservice.web.dto.UpdateContactInformationRequest;
 import java.util.UUID;
@@ -306,6 +299,45 @@ public class MemberAggregateTests {
             new MemberInactivatedEvent(memberId));
 
   }
+
+  @Test
+  public void marketUpdateCommand_givenNotSigned_thenUpdateMarket() {
+    Long memberId = 1234L;
+
+    fixture
+      .given(new MemberCreatedEvent(memberId, MemberStatus.INITIATED))
+      .when(new UpdateMarketCommand(memberId, Market.SE))
+      .expectSuccessfulHandlerExecution()
+      .expectEvents(
+        new MarketUpdatedEvent(memberId, Market.SE)
+      );
+  }
+
+  @Test
+  public void marketUpdateCommand_givenSigned_thenExpectNoUpdateMarketEvents() {
+    Long memberId = 1234L;
+    String referenceId = "someReferenceId";
+    String personalNumber = "198902171234";
+
+    when(uuidGenerator.generateRandom()).thenReturn(TRACKING_UUID);
+
+    when(cashbackService.getDefaultId()).thenReturn(DEFAULT_CASHBACK);
+
+    fixture
+      .given(
+        new MemberCreatedEvent(memberId, MemberStatus.INITIATED),
+        new SSNUpdatedEvent(memberId, personalNumber),
+        new NewCashbackSelectedEvent(memberId, DEFAULT_CASHBACK.toString()),
+        new MemberSignedEvent(memberId, referenceId, "", "", personalNumber),
+        new MarketUpdatedEvent(memberId, Market.SE),
+        new TrackingIdCreatedEvent(memberId, TRACKING_UUID)
+      )
+      .when(new UpdateMarketCommand(memberId, Market.NO))
+      .expectSuccessfulHandlerExecution()
+      .expectEvents();
+  }
+
+
 
   private class AggregateFactoryM<T> extends AbstractAggregateFactory<T> {
 

@@ -1,6 +1,7 @@
 package com.hedvig.memberservice.events
 
-import com.hedvig.memberservice.web.dto.Market
+import com.hedvig.memberservice.aggregates.Market
+
 
 class MarketUpdatedEvent(
     val memberId: Long,

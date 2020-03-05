@@ -1,6 +1,6 @@
 package com.hedvig.memberservice.commands
 
-import com.hedvig.memberservice.web.dto.Market
+import com.hedvig.memberservice.aggregates.Market
 import org.axonframework.commandhandling.TargetAggregateIdentifier
 
 data class UpdateMarketCommand(
