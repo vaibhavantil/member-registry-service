@@ -4,5 +4,6 @@ import com.hedvig.external.authentication.dto.NorwegianAuthenticationResponseErr
 
 data class StartNorwegianBankIdSignResponse(
     val redirectUrl: String?,
+    val internalErrorMessage: String? = null,
     val errorMessages: List<NorwegianAuthenticationResponseError>? = null
 )

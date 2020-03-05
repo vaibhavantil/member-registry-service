@@ -5,6 +5,8 @@ import com.hedvig.external.authentication.dto.StartNorwegianAuthenticationResult
 import com.hedvig.external.bankID.bankIdTypes.OrderResponse
 import com.hedvig.memberservice.entities.UnderwriterSignSessionEntity
 import com.hedvig.memberservice.query.MemberRepository
+import com.hedvig.memberservice.query.SignedMemberEntity
+import com.hedvig.memberservice.query.SignedMemberRepository
 import com.hedvig.memberservice.query.UnderwriterSignSessionRepository
 import com.hedvig.memberservice.services.member.dto.StartSwedishSignResponse
 import org.assertj.core.api.Assertions.assertThat
@@ -30,6 +32,8 @@ class UnderwriterSigningServiceImplTest {
     lateinit var norwegianSigningService: NorwegianSigningService
     @Mock
     lateinit var memberRepository: MemberRepository
+    @Mock
+    lateinit var signedMemberRepository: SignedMemberRepository
 
     @Captor
     lateinit var captor: ArgumentCaptor<UnderwriterSignSessionEntity>
@@ -38,11 +42,12 @@ class UnderwriterSigningServiceImplTest {
 
     @Before
     fun setup() {
-        sut = UnderwriterSigningServiceImpl(underwriterSignSessionRepository, swedishBankIdSigningService, norwegianSigningService)
+        sut = UnderwriterSigningServiceImpl(underwriterSignSessionRepository, swedishBankIdSigningService, norwegianSigningService, signedMemberRepository)
     }
 
     @Test
     fun startSwedishBankIdSignSession() {
+        whenever(signedMemberRepository.findBySsn(swedishSSN)).thenReturn(Optional.empty())
         whenever(swedishBankIdSigningService.startSign(memberId, swedishSSN, ip, false))
             .thenReturn(StartSwedishSignResponse(
                 signId = 0,
@@ -63,14 +68,25 @@ class UnderwriterSigningServiceImplTest {
     }
 
     @Test
+    fun dontStartSwedishBankIdSignIfAlreadySigned() {
+        whenever(signedMemberRepository.findBySsn(swedishSSN)).thenReturn(Optional.of(SignedMemberEntity()))
+
+        sut.startSwedishBankIdSignSession(underwriterSessionRef, memberId, swedishSSN, ip, false)
+
+        verifyZeroInteractions(swedishBankIdSigningService)
+        verifyZeroInteractions(underwriterSignSessionRepository)
+    }
+
+    @Test
     fun startNorwegianBankIdSession() {
-        whenever(norwegianSigningService.startSign(memberId, null))
+        whenever(signedMemberRepository.findBySsn(norwegianSSN)).thenReturn(Optional.empty())
+        whenever(norwegianSigningService.startSign(memberId, norwegianSSN))
             .thenReturn(StartNorwegianAuthenticationResult.Success(orderRefUUID, redirectUrl))
 
         whenever(underwriterSignSessionRepository.save(captor.capture()))
             .thenReturn(UnderwriterSignSessionEntity(underwriterSessionRef, orderRefUUID))
 
-        val response = sut.startNorwegianBankIdSignSession(underwriterSessionRef, memberId, null)
+        val response = sut.startNorwegianBankIdSignSession(underwriterSessionRef, memberId, norwegianSSN)
 
         assertThat(response.redirectUrl).isEqualTo(redirectUrl)
         assertThat(captor.value.signReference).isEqualTo(orderRefUUID)
@@ -79,13 +95,24 @@ class UnderwriterSigningServiceImplTest {
 
     @Test
     fun startNorwegianBankIdSessionFails() {
-        whenever(norwegianSigningService.startSign(memberId, null))
+        whenever(signedMemberRepository.findBySsn(norwegianSSN)).thenReturn(Optional.empty())
+        whenever(norwegianSigningService.startSign(memberId, norwegianSSN))
             .thenReturn(StartNorwegianAuthenticationResult.Failed(listOf(NorwegianAuthenticationResponseError(1,"Some error message"))))
 
-        val response = sut.startNorwegianBankIdSignSession(underwriterSessionRef, memberId, null)
+        val response = sut.startNorwegianBankIdSignSession(underwriterSessionRef, memberId, norwegianSSN)
 
         verifyZeroInteractions(underwriterSignSessionRepository)
         assertThat(response.errorMessages).isNotEmpty
+    }
+
+    @Test
+    fun dontStartNorwegianBankIdSignIfAlreadySigned() {
+        whenever(signedMemberRepository.findBySsn(norwegianSSN)).thenReturn(Optional.of(SignedMemberEntity()))
+
+        sut.startNorwegianBankIdSignSession(underwriterSessionRef, memberId, norwegianSSN)
+
+        verifyZeroInteractions(swedishBankIdSigningService)
+        verifyZeroInteractions(underwriterSignSessionRepository)
     }
 
     companion object {
