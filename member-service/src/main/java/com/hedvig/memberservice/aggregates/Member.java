@@ -12,5 +12,7 @@ public class Member {
 
   private String acceptLanguage;
 
+  private PickedLocale pickedLocale;
+
   private LivingAddress livingAddress;
 }

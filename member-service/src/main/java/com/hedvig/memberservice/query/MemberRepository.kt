@@ -6,7 +6,6 @@ import org.springframework.data.domain.Pageable
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.query.Param
-import java.util.*
 
 interface MemberRepository : JpaRepository<MemberEntity, Long> {
 
@@ -68,4 +67,10 @@ interface MemberRepository : JpaRepository<MemberEntity, Long> {
     fun findByStatus(status: MemberStatus): List<MemberEntity>
 
     fun findAllByStatusAndSsnNotIn(status:MemberStatus, ssns: List<String>): List<MemberEntity>
+
+
+    @Query("""
+        SELECT m.id from MemberEntity m WHERE m.pickedLocale is null and (first_name is null or first_name != 'GDPR')
+    """)
+    fun findIdsWithNoPickedLocale(pageable: Pageable): Page<Long>
 }

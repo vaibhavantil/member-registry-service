@@ -3,6 +3,7 @@ package com.hedvig.memberservice.query;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.util.EnumMap;
+import javax.annotation.Nullable;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
@@ -11,6 +12,7 @@ import javax.persistence.Index;
 import javax.persistence.Table;
 
 import com.hedvig.memberservice.aggregates.FraudulentStatus;
+import com.hedvig.memberservice.aggregates.PickedLocale;
 import com.hedvig.memberservice.aggregates.MemberStatus;
 import com.hedvig.memberservice.util.EnumMapChecker;
 import com.hedvig.memberservice.web.dto.MembersSortColumn;
@@ -49,6 +51,10 @@ public class MemberEntity {
   public String cashbackId;
 
   public String acceptLanguage;
+
+  @Nullable
+  @Enumerated(EnumType.STRING)
+  public PickedLocale pickedLocale;
 
   public Integer floor;
 
@@ -198,6 +204,8 @@ public class MemberEntity {
   public void setAcceptLanguage(String acceptLanguage) {
     this.acceptLanguage = acceptLanguage;
   }
+
+  public void setPickedLocale(PickedLocale pickedLocale) { this.pickedLocale = pickedLocale; }
 
   public void setFloor(Integer floor) {
     this.floor = floor;

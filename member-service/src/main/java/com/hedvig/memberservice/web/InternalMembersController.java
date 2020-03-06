@@ -1,34 +1,18 @@
 package com.hedvig.memberservice.web;
 
-import com.hedvig.memberservice.commands.EditMemberInformationCommand;
-import com.hedvig.memberservice.commands.InsurnaceCancellationCommand;
-import com.hedvig.memberservice.commands.MemberCancelInsuranceCommand;
-import com.hedvig.memberservice.commands.MemberUpdateContactInformationCommand;
-import com.hedvig.memberservice.commands.SetFraudulentStatusCommand;
-import com.hedvig.memberservice.commands.StartOnboardingWithSSNCommand;
-import com.hedvig.memberservice.commands.UpdateEmailCommand;
-import com.hedvig.memberservice.commands.UpdatePhoneNumberCommand;
-import com.hedvig.memberservice.commands.UpdateSSNCommand;
+import com.hedvig.memberservice.commands.*;
 import com.hedvig.memberservice.query.MemberEntity;
 import com.hedvig.memberservice.query.MemberRepository;
 import com.hedvig.memberservice.services.member.MemberQueryService;
 import com.hedvig.memberservice.services.trace.TraceMemberService;
-import com.hedvig.memberservice.web.dto.ChargeMembersDTO;
-import com.hedvig.memberservice.web.dto.InsuranceCancellationDTO;
-import com.hedvig.memberservice.web.dto.InternalMember;
-import com.hedvig.memberservice.web.dto.InternalMemberSearchRequestDTO;
-import com.hedvig.memberservice.web.dto.InternalMemberSearchResultDTO;
-import com.hedvig.memberservice.web.dto.MemberCancelInsurance;
-import com.hedvig.memberservice.web.dto.MemberFraudulentStatusDTO;
-import com.hedvig.memberservice.web.dto.StartOnboardingWithSSNRequest;
-import com.hedvig.memberservice.web.dto.UpdateContactInformationRequest;
-import com.hedvig.memberservice.web.dto.UpdateEmailRequest;
-import com.hedvig.memberservice.web.dto.UpdatePhoneNumberRequest;
-import com.hedvig.memberservice.web.dto.UpdateSSNRequest;
+import com.hedvig.memberservice.web.dto.*;
 import lombok.val;
 import org.axonframework.commandhandling.gateway.CommandGateway;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -206,6 +190,24 @@ public class InternalMembersController {
     @RequestBody UpdateSSNRequest request
   ) {
     commandBus.sendAndWait(new UpdateSSNCommand(memberId, request.getSsn()));
+    return ResponseEntity.noContent().build();
+  }
+
+  //TODO: THIS IS A ONE OFF TO BACKFILL PICKED LOCALE. REMOVE AFTER USE!
+  @PostMapping(value = "/backfill/pickedLocale")
+  public ResponseEntity<Void> backfillPickedLocale(
+  ) {
+    Pageable pageable = PageRequest.of(0, 1000);
+    while (true){
+      Slice<Long> page = memberRepository.findIdsWithNoPickedLocale(pageable);
+
+      page.getContent().forEach(
+        id -> commandBus.sendAndWait(new BackfillPickedLocaleCommand(id))
+      );
+
+      if (!page.hasNext()) { break; }
+      pageable = page.nextPageable();
+    }
     return ResponseEntity.noContent().build();
   }
 }
