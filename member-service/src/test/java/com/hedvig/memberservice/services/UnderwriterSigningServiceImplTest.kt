@@ -31,8 +31,6 @@ class UnderwriterSigningServiceImplTest {
     @Mock
     lateinit var norwegianSigningService: NorwegianSigningService
     @Mock
-    lateinit var memberRepository: MemberRepository
-    @Mock
     lateinit var signedMemberRepository: SignedMemberRepository
 
     @Captor
