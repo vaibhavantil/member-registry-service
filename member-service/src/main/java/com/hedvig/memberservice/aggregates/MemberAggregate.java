@@ -258,8 +258,7 @@ public class MemberAggregate {
     apply(
       new MemberSignedEvent(
         this.id, cmd.getReferenceId(), cmd.getSignature(), cmd.getOscpResponse(),
-        cmd.getPersonalNumber()))
-      .andThenApply(() -> new PickedLocaleUpdatedEvent(this.id, PickedLocale.SE));
+        cmd.getPersonalNumber()));
 
     if (this.trackingId == null) {
       generateTrackingId();
@@ -282,8 +281,7 @@ public class MemberAggregate {
 
     apply(
       new NorwegianMemberSignedEvent(
-        this.id, cmd.getPersonalNumber(), cmd.getProvideJsonResponse()))
-      .andThenApply(() -> new PickedLocaleUpdatedEvent(this.id, PickedLocale.NO));
+        this.id, cmd.getPersonalNumber(), cmd.getProvideJsonResponse()));
 
 
   }
@@ -300,8 +298,7 @@ public class MemberAggregate {
 
   @CommandHandler
   public void on(SignMemberFromUnderwriterCommand signMemberFromUnderwriterCommand) {
-    apply(new MemberSignedWithoutBankId(signMemberFromUnderwriterCommand.getId(), signMemberFromUnderwriterCommand.getSsn()))
-      .andThenApply(() -> new PickedLocaleUpdatedEvent(this.id, PickedLocale.SE));
+    apply(new MemberSignedWithoutBankId(signMemberFromUnderwriterCommand.getId(), signMemberFromUnderwriterCommand.getSsn()));
   }
 
   @CommandHandler

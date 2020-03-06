@@ -199,7 +199,6 @@ public class MemberAggregateTests {
             new SSNUpdatedEvent(memberId, personalNumber),
             new NewCashbackSelectedEvent(memberId, DEFAULT_CASHBACK.toString()),
             new MemberSignedEvent(memberId, referenceId, "", "", personalNumber),
-            new PickedLocaleUpdatedEvent(memberId, PickedLocale.SE),
             new TrackingIdCreatedEvent(memberId, TRACKING_UUID));
   }
 
@@ -225,8 +224,7 @@ public class MemberAggregateTests {
         .expectEvents(
             new SSNUpdatedEvent(memberId, personalNumber),
             new NewCashbackSelectedEvent(memberId, DEFAULT_CASHBACK.toString()),
-            new MemberSignedEvent(memberId, referenceId, "", "", personalNumber),
-            new PickedLocaleUpdatedEvent(memberId, PickedLocale.SE)
+            new MemberSignedEvent(memberId, referenceId, "", "", personalNumber)
             );
   }
 
@@ -249,8 +247,7 @@ public class MemberAggregateTests {
       .expectEvents(
         new SSNUpdatedEvent(memberId, personalNumber),
         new NewCashbackSelectedEvent(memberId, DEFAULT_CASHBACK.toString()),
-        new NorwegianMemberSignedEvent(memberId, personalNumber, provideJsonResponse),
-        new PickedLocaleUpdatedEvent(memberId, PickedLocale.NO)
+        new NorwegianMemberSignedEvent(memberId, personalNumber, provideJsonResponse)
       );
   }
 
