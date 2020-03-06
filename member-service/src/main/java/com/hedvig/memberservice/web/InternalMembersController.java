@@ -197,10 +197,7 @@ public class InternalMembersController {
   @PostMapping(value = "/backfill/pickedLocale")
   public ResponseEntity<Void> backfillPickedLocale(
   ) {
-
-
     Pageable pageable = PageRequest.of(0, 1000);
-
     while (true){
       Slice<Long> page = memberRepository.findIdsWithNoPickedLocale(pageable);
 
@@ -211,7 +208,6 @@ public class InternalMembersController {
       if (!page.hasNext()) { break; }
       pageable = page.nextPageable();
     }
-
     return ResponseEntity.noContent().build();
   }
 }

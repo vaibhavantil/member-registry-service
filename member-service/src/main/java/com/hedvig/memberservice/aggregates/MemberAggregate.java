@@ -282,8 +282,6 @@ public class MemberAggregate {
     apply(
       new NorwegianMemberSignedEvent(
         this.id, cmd.getPersonalNumber(), cmd.getProvideJsonResponse()));
-
-
   }
 
   public boolean isValidJSON(final String json) {
@@ -469,9 +467,6 @@ public class MemberAggregate {
 
       apply(new PickedLocaleUpdatedEvent(cmd.getMemberId(), PickedLocale.SE));
   }
-
-
-
 
   @EventSourcingHandler
   public void on(MemberCreatedEvent e) {
