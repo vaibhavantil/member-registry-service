@@ -12,7 +12,7 @@ import javax.persistence.Index;
 import javax.persistence.Table;
 
 import com.hedvig.memberservice.aggregates.FraudulentStatus;
-import com.hedvig.memberservice.aggregates.Market;
+import com.hedvig.memberservice.aggregates.PickedLocale;
 import com.hedvig.memberservice.aggregates.MemberStatus;
 import com.hedvig.memberservice.util.EnumMapChecker;
 import com.hedvig.memberservice.web.dto.MembersSortColumn;
@@ -54,7 +54,7 @@ public class MemberEntity {
 
   @Nullable
   @Enumerated(EnumType.STRING)
-  public Market market;
+  public PickedLocale pickedLocale;
 
   public Integer floor;
 
@@ -205,7 +205,7 @@ public class MemberEntity {
     this.acceptLanguage = acceptLanguage;
   }
 
-  public void setMarket(Market market) { this.market = market; }
+  public void setPickedLocale(PickedLocale pickedLocale) { this.pickedLocale = pickedLocale; }
 
   public void setFloor(Integer floor) {
     this.floor = floor;

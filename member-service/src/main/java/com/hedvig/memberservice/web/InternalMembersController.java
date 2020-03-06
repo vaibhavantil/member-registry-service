@@ -1,7 +1,6 @@
 package com.hedvig.memberservice.web;
 
 import com.hedvig.memberservice.commands.*;
-import com.hedvig.memberservice.events.MarketUpdatedEvent;
 import com.hedvig.memberservice.query.MemberEntity;
 import com.hedvig.memberservice.query.MemberRepository;
 import com.hedvig.memberservice.services.member.MemberQueryService;
@@ -11,12 +10,10 @@ import lombok.val;
 import org.axonframework.commandhandling.gateway.CommandGateway;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.http.ResponseEntity;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -28,7 +25,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Nullable;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -197,19 +193,19 @@ public class InternalMembersController {
     return ResponseEntity.noContent().build();
   }
 
-  //TODO: THIS IS A ONE OFF TO BACKFILL MARKET. REMOVE AFTER USE!
-  @PostMapping(value = "/backfill/market")
-  public ResponseEntity<Void> backfillMarket(
+  //TODO: THIS IS A ONE OFF TO BACKFILL PICKED LOCALE. REMOVE AFTER USE!
+  @PostMapping(value = "/backfill/pickedLocale")
+  public ResponseEntity<Void> backfillPickedLocale(
   ) {
 
 
     Pageable pageable = PageRequest.of(0, 1000);
 
     while (true){
-      Slice<Long> page = memberRepository.findIdsWithNoMarket(pageable);
+      Slice<Long> page = memberRepository.findIdsWithNoPickedLocale(pageable);
 
       page.getContent().forEach(
-        id -> commandBus.sendAndWait(new BackfillMarketCommand(id))
+        id -> commandBus.sendAndWait(new BackfillPickedLocaleCommand(id))
       );
 
       if (!page.hasNext()) { break; }

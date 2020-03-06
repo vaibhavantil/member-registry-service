@@ -29,8 +29,7 @@ class MembersControllerV2 @Autowired constructor(
     @PostMapping("/helloHedvig", produces = ["application/json"])
     fun helloHedvig(
         @RequestBody(required = false) json: String?,
-        @RequestHeader(value = "Accept-Language", required = false) acceptLanguage: String?,
-        @RequestHeader(value = "market", required = false) market: String?
+        @RequestHeader(value = "Accept-Language", required = false) acceptLanguage: String?
     ): ResponseEntity<HelloHedvigResponse> {
         val id = retryTemplate.execute<Long, Exception> {
             var memberId: Long?

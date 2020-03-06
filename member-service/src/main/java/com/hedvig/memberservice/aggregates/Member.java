@@ -12,7 +12,7 @@ public class Member {
 
   private String acceptLanguage;
 
-  private Market market;
+  private PickedLocale pickedLocale;
 
   private LivingAddress livingAddress;
 }

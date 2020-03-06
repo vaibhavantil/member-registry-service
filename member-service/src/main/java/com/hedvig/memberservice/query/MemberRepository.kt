@@ -70,7 +70,7 @@ interface MemberRepository : JpaRepository<MemberEntity, Long> {
 
 
     @Query("""
-        SELECT m.id from MemberEntity m WHERE m.market is null and (first_name is null or first_name != 'GDPR')
+        SELECT m.id from MemberEntity m WHERE m.pickedLocale is null and (first_name is null or first_name != 'GDPR')
     """)
-    fun findIdsWithNoMarket(pageable: Pageable): Page<Long>
+    fun findIdsWithNoPickedLocale(pageable: Pageable): Page<Long>
 }

@@ -259,7 +259,7 @@ public class MemberAggregate {
       new MemberSignedEvent(
         this.id, cmd.getReferenceId(), cmd.getSignature(), cmd.getOscpResponse(),
         cmd.getPersonalNumber()))
-      .andThenApply(() -> new MarketUpdatedEvent(this.id, Market.SE));
+      .andThenApply(() -> new PickedLocaleUpdatedEvent(this.id, PickedLocale.SE));
 
     if (this.trackingId == null) {
       generateTrackingId();
@@ -283,7 +283,7 @@ public class MemberAggregate {
     apply(
       new NorwegianMemberSignedEvent(
         this.id, cmd.getPersonalNumber(), cmd.getProvideJsonResponse()))
-      .andThenApply(() -> new MarketUpdatedEvent(this.id, Market.NO));
+      .andThenApply(() -> new PickedLocaleUpdatedEvent(this.id, PickedLocale.NO));
 
 
   }
@@ -301,7 +301,7 @@ public class MemberAggregate {
   @CommandHandler
   public void on(SignMemberFromUnderwriterCommand signMemberFromUnderwriterCommand) {
     apply(new MemberSignedWithoutBankId(signMemberFromUnderwriterCommand.getId(), signMemberFromUnderwriterCommand.getSsn()))
-      .andThenApply(() -> new MarketUpdatedEvent(this.id, Market.SE));
+      .andThenApply(() -> new PickedLocaleUpdatedEvent(this.id, PickedLocale.SE));
   }
 
   @CommandHandler
@@ -457,21 +457,20 @@ public class MemberAggregate {
   }
 
   @CommandHandler
-  public void on(UpdateMarketCommand cmd) {
+  public void on(UpdatePickedLocaleCommand cmd) {
 
-    if (this.status != MemberStatus.SIGNED &&
-      !Objects.equals(member.getMarket(), cmd.getMarket())) {
-      log.info("Updating market for member {}, new market: {}", cmd.getMemberId(),
-        cmd.getMarket());
+    if (!Objects.equals(member.getPickedLocale(), cmd.getPickedLocale())) {
+      log.info("Updating picked locale for member {}, new locale: {}", cmd.getMemberId(),
+        cmd.getPickedLocale());
 
-      apply(new MarketUpdatedEvent(cmd.getMemberId(), cmd.getMarket()));
+      apply(new PickedLocaleUpdatedEvent(cmd.getMemberId(), cmd.getPickedLocale()));
     }
   }
 
   @CommandHandler
-  public void on(BackfillMarketCommand cmd) {
+  public void on(BackfillPickedLocaleCommand cmd) {
 
-      apply(new MarketUpdatedEvent(cmd.getMemberId(), Market.SE));
+      apply(new PickedLocaleUpdatedEvent(cmd.getMemberId(), PickedLocale.SE));
   }
 
 
@@ -561,7 +560,7 @@ public class MemberAggregate {
   }
 
   @EventSourcingHandler
-  public void on(MarketUpdatedEvent e) {
-    this.member.setMarket(e.getMarket());
+  public void on(PickedLocaleUpdatedEvent e) {
+    this.member.setPickedLocale(e.getPickedLocale());
   }
 }

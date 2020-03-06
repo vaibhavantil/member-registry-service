@@ -1,6 +1,6 @@
 package com.hedvig.memberservice.aggregates
 
-enum class Market {
+enum class PickedLocale {
     SE,
     NO
 }

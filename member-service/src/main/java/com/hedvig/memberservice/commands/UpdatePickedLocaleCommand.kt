@@ -1,9 +1,9 @@
 package com.hedvig.memberservice.commands
 
-import com.hedvig.memberservice.aggregates.Market
+import com.hedvig.memberservice.aggregates.PickedLocale
 import org.axonframework.commandhandling.TargetAggregateIdentifier
 
-data class UpdateMarketCommand(
+data class UpdatePickedLocaleCommand(
     @TargetAggregateIdentifier val memberId: Long,
-    val market: Market
+    val pickedLocale: PickedLocale
 )

@@ -232,9 +232,9 @@ public class MemberEventListener {
   }
 
   @EventHandler
-  void on(MarketUpdatedEvent e) {
+  void on(PickedLocaleUpdatedEvent e) {
     MemberEntity m = userRepo.findById(e.getMemberId()).get();
-    m.setMarket(e.getMarket());
+    m.setPickedLocale(e.getPickedLocale());
     userRepo.save(m);
   }
 }

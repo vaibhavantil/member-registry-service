@@ -2,6 +2,6 @@ package com.hedvig.memberservice.commands
 
 import org.axonframework.commandhandling.TargetAggregateIdentifier
 
-data class BackfillMarketCommand(
+data class BackfillPickedLocaleCommand(
     @TargetAggregateIdentifier val memberId: Long
 )

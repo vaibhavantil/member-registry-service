@@ -5,7 +5,7 @@ import static org.mockito.Mockito.when;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hedvig.common.UUIDGenerator;
 import com.hedvig.external.bisnodeBCI.BisnodeClient;
-import com.hedvig.memberservice.aggregates.Market;
+import com.hedvig.memberservice.aggregates.PickedLocale;
 import com.hedvig.memberservice.aggregates.MemberAggregate;
 import com.hedvig.memberservice.aggregates.MemberStatus;
 import com.hedvig.memberservice.commands.*;
@@ -23,7 +23,6 @@ import org.axonframework.test.aggregate.FixtureConfiguration;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.web.client.RestClientException;
@@ -200,7 +199,7 @@ public class MemberAggregateTests {
             new SSNUpdatedEvent(memberId, personalNumber),
             new NewCashbackSelectedEvent(memberId, DEFAULT_CASHBACK.toString()),
             new MemberSignedEvent(memberId, referenceId, "", "", personalNumber),
-            new MarketUpdatedEvent(memberId, Market.SE),
+            new PickedLocaleUpdatedEvent(memberId, PickedLocale.SE),
             new TrackingIdCreatedEvent(memberId, TRACKING_UUID));
   }
 
@@ -227,7 +226,7 @@ public class MemberAggregateTests {
             new SSNUpdatedEvent(memberId, personalNumber),
             new NewCashbackSelectedEvent(memberId, DEFAULT_CASHBACK.toString()),
             new MemberSignedEvent(memberId, referenceId, "", "", personalNumber),
-            new MarketUpdatedEvent(memberId, Market.SE)
+            new PickedLocaleUpdatedEvent(memberId, PickedLocale.SE)
             );
   }
 
@@ -251,7 +250,7 @@ public class MemberAggregateTests {
         new SSNUpdatedEvent(memberId, personalNumber),
         new NewCashbackSelectedEvent(memberId, DEFAULT_CASHBACK.toString()),
         new NorwegianMemberSignedEvent(memberId, personalNumber, provideJsonResponse),
-        new MarketUpdatedEvent(memberId, Market.NO)
+        new PickedLocaleUpdatedEvent(memberId, PickedLocale.NO)
       );
   }
 
@@ -301,20 +300,20 @@ public class MemberAggregateTests {
   }
 
   @Test
-  public void marketUpdateCommand_givenNotSigned_thenUpdateMarket() {
+  public void pickedLocaleUpdateCommand_givenNotSigned_thenUpdatePickedLocale() {
     Long memberId = 1234L;
 
     fixture
       .given(new MemberCreatedEvent(memberId, MemberStatus.INITIATED))
-      .when(new UpdateMarketCommand(memberId, Market.SE))
+      .when(new UpdatePickedLocaleCommand(memberId, PickedLocale.SE))
       .expectSuccessfulHandlerExecution()
       .expectEvents(
-        new MarketUpdatedEvent(memberId, Market.SE)
+        new PickedLocaleUpdatedEvent(memberId, PickedLocale.SE)
       );
   }
 
   @Test
-  public void marketUpdateCommand_givenSigned_thenExpectNoUpdateMarketEvents() {
+  public void pickedLocaleUpdateCommand_givenSigned_thenExpectUpdatePickedLocaleEvents() {
     Long memberId = 1234L;
     String referenceId = "someReferenceId";
     String personalNumber = "198902171234";
@@ -329,12 +328,14 @@ public class MemberAggregateTests {
         new SSNUpdatedEvent(memberId, personalNumber),
         new NewCashbackSelectedEvent(memberId, DEFAULT_CASHBACK.toString()),
         new MemberSignedEvent(memberId, referenceId, "", "", personalNumber),
-        new MarketUpdatedEvent(memberId, Market.SE),
+        new PickedLocaleUpdatedEvent(memberId, PickedLocale.SE),
         new TrackingIdCreatedEvent(memberId, TRACKING_UUID)
       )
-      .when(new UpdateMarketCommand(memberId, Market.NO))
+      .when(new UpdatePickedLocaleCommand(memberId, PickedLocale.NO))
       .expectSuccessfulHandlerExecution()
-      .expectEvents();
+      .expectEvents(
+        new PickedLocaleUpdatedEvent(memberId, PickedLocale.NO)
+      );
   }
 
 
