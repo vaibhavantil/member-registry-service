@@ -41,7 +41,7 @@ class NorwegianSigningService(
     }
 
     @Transactional
-    fun startSign(memberId: Long, ssn: String?) = norwegianBankIdService.sign(
+    fun startSign(memberId: Long, ssn: String) = norwegianBankIdService.sign(
         memberId.toString(),
         ssn
     )

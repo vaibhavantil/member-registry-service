@@ -36,7 +36,7 @@ class NorwegianBankIdService(
         )
     }
 
-    fun sign(memberId: String, ssn: String?) =
+    fun sign(memberId: String, ssn: String) =
         norwegianAuthentication.sign(
             NorwegianBankIdAuthenticationRequest(
                 memberId,
