@@ -1,7 +1,8 @@
 package com.hedvig.memberservice.services
 
-import com.hedvig.external.authentication.dto.NorwegianAuthenticationResponseError
 import com.hedvig.external.authentication.dto.StartNorwegianAuthenticationResult
+import com.hedvig.integration.underwriter.UnderwriterClient
+import com.hedvig.integration.underwriter.dtos.SignRequest
 import com.hedvig.memberservice.entities.UnderwriterSignSessionEntity
 import com.hedvig.memberservice.query.SignedMemberRepository
 import com.hedvig.memberservice.query.UnderwriterSignSessionRepository
@@ -13,6 +14,7 @@ import java.util.*
 @Service
 class UnderwriterSigningServiceImpl(
     private val underwriterSignSessionRepository: UnderwriterSignSessionRepository,
+    private val underwriterClient: UnderwriterClient,
     private val swedishBankIdSigningService: SwedishBankIdSigningService,
     private val norwegianSigningService: NorwegianSigningService,
     private val signedMemberRepository: SignedMemberRepository
@@ -52,6 +54,30 @@ class UnderwriterSigningServiceImpl(
                 errorMessages = response.errors
             )
         }
+    }
+
+    override fun isUnderwriterHandlingSignSession(orderReference: UUID): Boolean =
+        underwriterSignSessionRepository.findBySignReference(orderReference) != null
+
+    override fun swedishBankIdSignSessionWasCompleted(orderReference: String, signature: String, oscpResponse: String) {
+        val session = underwriterSignSessionRepository.findBySignReference(UUID.fromString(orderReference))
+            ?: throw IllegalCallerException("Called swedishBankIdSignSessionWasCompleted but could not find underwriter sign session use isUnderwriterIsHandlingSignSession before calling this method")
+
+        underwriterClient.swedishBankIdSingComplete(
+            session.underwriterSignSessionReference,
+            SignRequest(
+                orderReference,
+                signature,
+                oscpResponse
+            )
+        )
+    }
+
+    override fun norwegianBankIdSignSessionWasCompleted(orderReference: UUID) {
+        val session = underwriterSignSessionRepository.findBySignReference(orderReference)
+            ?: throw IllegalCallerException("Called norwegianBankIdSignSessionWasCompleted but could not find underwriter sign session use isUnderwriterIsHandlingSignSession before calling this method")
+
+        underwriterClient.singSessionComplete(session.underwriterSignSessionReference)
     }
 
     private fun isAlreadySigned(ssn: String): Boolean =

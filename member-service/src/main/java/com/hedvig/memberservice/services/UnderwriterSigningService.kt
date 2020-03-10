@@ -19,5 +19,11 @@ interface UnderwriterSigningService {
         memberId: Long,
         ssn: String
     ): StartNorwegianBankIdSignResponse
+
+    fun isUnderwriterHandlingSignSession(orderReference: UUID): Boolean
+
+    fun swedishBankIdSignSessionWasCompleted(orderReference: String, signature: String, oscpResponse: String)
+
+    fun norwegianBankIdSignSessionWasCompleted(orderReference: UUID)
 }
 

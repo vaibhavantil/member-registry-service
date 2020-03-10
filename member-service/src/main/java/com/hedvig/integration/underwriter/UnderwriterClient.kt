@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
+import java.util.*
 
 @FeignClient(name = "underwriter", url = "\${hedvig.underwriter.url:underwriter}")
 interface UnderwriterClient {
@@ -16,4 +17,10 @@ interface UnderwriterClient {
 
     @GetMapping("/_/v1/quotes/members/{memberId}/latestQuote")
     fun getQuoteFromMemberId(@PathVariable memberId: String): ResponseEntity<QuoteDto>
+
+    @PostMapping("/_/v1/sign/session/swedish/bankid/{sessionId}/completed")
+    fun swedishBankIdSingComplete(@PathVariable sessionId: UUID, @RequestBody signRequest: SignRequest): ResponseEntity<Void>
+
+    @PostMapping("/_/v1/sign/session/{sessionId}/completed")
+    fun singSessionComplete(@PathVariable sessionId: UUID): ResponseEntity<Void>
 }

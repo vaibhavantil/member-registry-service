@@ -6,6 +6,7 @@ import com.hedvig.memberservice.events.MemberSignedWithoutBankId
 import com.hedvig.memberservice.events.NorwegianMemberSignedEvent
 import com.hedvig.memberservice.services.SNSNotificationService
 import com.hedvig.memberservice.services.SigningService
+import com.hedvig.memberservice.services.UnderwriterSigningService
 import org.axonframework.eventhandling.EventMessage
 import org.axonframework.eventhandling.saga.EndSaga
 import org.axonframework.eventhandling.saga.SagaEventHandler
@@ -13,12 +14,17 @@ import org.axonframework.eventhandling.saga.StartSaga
 import org.axonframework.spring.stereotype.Saga
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
+import java.util.*
 
 @Saga(configurationBean = "memberSignedSagaConfiguration")
 class MemberSignedSaga {
     @Autowired
     @Transient
     lateinit var underwriterApi: UnderwriterApi
+
+    @Autowired
+    @Transient
+    lateinit var underwriterSigningService: UnderwriterSigningService
 
     @Autowired
     @Transient
@@ -32,11 +38,19 @@ class MemberSignedSaga {
     @StartSaga
     @EndSaga
     fun onMemberSignedEvent(e: MemberSignedEvent, eventMessage: EventMessage<MemberSignedEvent>) {
-
-        try {
-            underwriterApi.memberSigned(e.getId().toString(), e.getReferenceId(), e.getSignature(), e.getOscpResponse())
-        } catch (ex: RuntimeException) {
-            log.error("Could not notify underwriter about signed member [MemberId: ${e.id}] Exception $ex")
+        val isUnderwriterHandlingSession = underwriterSigningService.isUnderwriterHandlingSignSession(UUID.fromString(e.getReferenceId()))
+        if (isUnderwriterHandlingSession) {
+            try {
+                underwriterSigningService.swedishBankIdSignSessionWasCompleted(e.getReferenceId(), e.getSignature(), e.getOscpResponse())
+            } catch (ex: RuntimeException) {
+                log.error("Could not complete swedish bank id signing session in about signed member [MemberId: ${e.id}] Exception $ex")
+            }
+        } else {
+            try {
+                underwriterApi.memberSigned(e.getId().toString(), e.getReferenceId(), e.getSignature(), e.getOscpResponse())
+            } catch (ex: RuntimeException) {
+                log.error("Could not notify underwriter about signed member [MemberId: ${e.id}] Exception $ex")
+            }
         }
 
         signingService.completeSwedishSession(e.getReferenceId())
@@ -64,11 +78,23 @@ class MemberSignedSaga {
         e: NorwegianMemberSignedEvent,
         eventMessage: EventMessage<MemberSignedWithoutBankId>
     ) {
-        try {
-            //FIXME: Maybe we should create a new endpoint for this in uw
-            underwriterApi.memberSigned(e.memberId.toString(), "", "", "")
-        } catch (ex: RuntimeException) {
-            log.error("Could not notify underwriter about signed member [MemberId: ${e.memberId}] Exception $ex")
+        val isUnderwriterHandlingSession = e.referenceId?.let {
+            underwriterSigningService.isUnderwriterHandlingSignSession(e.referenceId)
+        } ?: false
+
+        if (isUnderwriterHandlingSession) {
+            try {
+                underwriterSigningService.norwegianBankIdSignSessionWasCompleted(e.referenceId!!)
+            } catch (ex: RuntimeException) {
+                log.error("Could not complete swedish bank id signing session in about signed member [MemberId: ${e.memberId}] Exception $ex")
+            }
+        } else {
+            try {
+                //FIXME: Maybe we should create a new endpoint for this in uw
+                underwriterApi.memberSigned(e.memberId.toString(), "", "", "")
+            } catch (ex: RuntimeException) {
+                log.error("Could not notify underwriter about signed member [MemberId: ${e.memberId}] Exception $ex")
+            }
         }
 
         signingService.productSignConfirmed(e.memberId)
