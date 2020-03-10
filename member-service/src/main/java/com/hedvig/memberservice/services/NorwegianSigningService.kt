@@ -27,7 +27,6 @@ class NorwegianSigningService(
     fun startWebSign(memberId: Long, request: WebsignRequest): MemberSignResponse {
         return when (val response = startSign(memberId, request.ssn)) {
             is StartNorwegianAuthenticationResult.Success -> MemberSignResponse(
-                signId = -1L,
                 status = SignStatus.IN_PROGRESS,
                 norwegianBankIdResponse = NorwegianBankIdResponse(response.redirectUrl)
             )
