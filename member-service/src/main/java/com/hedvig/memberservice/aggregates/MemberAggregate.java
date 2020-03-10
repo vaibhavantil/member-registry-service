@@ -283,7 +283,7 @@ public class MemberAggregate {
 
     apply(
       new NorwegianMemberSignedEvent(
-        this.id, cmd.getPersonalNumber(), cmd.getProvideJsonResponse()));
+        this.id, cmd.getPersonalNumber(), cmd.getProvideJsonResponse(), cmd.getReferenceId()));
   }
 
   public boolean isValidJSON(final String json) {

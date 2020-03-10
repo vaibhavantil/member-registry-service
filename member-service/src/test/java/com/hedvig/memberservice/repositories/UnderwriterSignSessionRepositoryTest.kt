@@ -26,6 +26,6 @@ class UnderwriterSignSessionRepositoryTest {
 
         val session = underwriterSignSessionRepository.findBySignReference(signReference)
 
-        assertThat(session.underwriterSignSessionReference).isEqualTo(sessionReference)
+        assertThat(session?.underwriterSignSessionReference).isEqualTo(sessionReference)
     }
 }

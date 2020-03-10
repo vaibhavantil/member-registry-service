@@ -3,8 +3,9 @@ package com.hedvig.memberservice.services
 import com.hedvig.external.authentication.dto.NorwegianAuthenticationResponseError
 import com.hedvig.external.authentication.dto.StartNorwegianAuthenticationResult
 import com.hedvig.external.bankID.bankIdTypes.OrderResponse
+import com.hedvig.integration.underwriter.UnderwriterClient
+import com.hedvig.integration.underwriter.dtos.SignRequest
 import com.hedvig.memberservice.entities.UnderwriterSignSessionEntity
-import com.hedvig.memberservice.query.MemberRepository
 import com.hedvig.memberservice.query.SignedMemberEntity
 import com.hedvig.memberservice.query.SignedMemberRepository
 import com.hedvig.memberservice.query.UnderwriterSignSessionRepository
@@ -18,6 +19,7 @@ import org.mockito.Captor
 import org.mockito.Mock
 import org.mockito.Mockito.verifyZeroInteractions
 import org.mockito.junit.MockitoJUnitRunner
+import org.springframework.http.ResponseEntity
 import java.util.*
 import org.mockito.Mockito.`when` as whenever
 
@@ -27,6 +29,8 @@ class UnderwriterSigningServiceImplTest {
     @Mock
     lateinit var underwriterSignSessionRepository: UnderwriterSignSessionRepository
     @Mock
+    lateinit var underwriterClient: UnderwriterClient
+    @Mock
     lateinit var swedishBankIdSigningService: SwedishBankIdSigningService
     @Mock
     lateinit var norwegianSigningService: NorwegianSigningService
@@ -35,12 +39,14 @@ class UnderwriterSigningServiceImplTest {
 
     @Captor
     lateinit var captor: ArgumentCaptor<UnderwriterSignSessionEntity>
+    @Captor
+    lateinit var signRequestCaptor: ArgumentCaptor<SignRequest>
 
     private lateinit var sut: UnderwriterSigningService
 
     @Before
     fun setup() {
-        sut = UnderwriterSigningServiceImpl(underwriterSignSessionRepository, swedishBankIdSigningService, norwegianSigningService, signedMemberRepository)
+        sut = UnderwriterSigningServiceImpl(underwriterSignSessionRepository, underwriterClient, swedishBankIdSigningService, norwegianSigningService, signedMemberRepository)
     }
 
     @Test
@@ -111,6 +117,24 @@ class UnderwriterSigningServiceImplTest {
 
         verifyZeroInteractions(swedishBankIdSigningService)
         verifyZeroInteractions(underwriterSignSessionRepository)
+    }
+
+    @Test
+    fun underwriterSignSessionExists_thenShouldBeHandled() {
+        whenever(underwriterSignSessionRepository.findBySignReference(orderRefUUID)).thenReturn(UnderwriterSignSessionEntity(underwriterSessionRef, orderRefUUID))
+
+        val handled = sut.isUnderwriterHandlingSignSession(orderRefUUID)
+
+        assertThat(handled)
+    }
+
+    @Test
+    fun underwriterSignSessionDoseNotExists_thenShouldNotBeHandled() {
+        whenever(underwriterSignSessionRepository.findBySignReference(orderRefUUID)).thenReturn(null)
+
+        val handled = sut.isUnderwriterHandlingSignSession(orderRefUUID)
+
+        assertThat(!handled)
     }
 
     companion object {

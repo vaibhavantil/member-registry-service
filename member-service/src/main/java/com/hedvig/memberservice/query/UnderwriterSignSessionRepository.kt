@@ -10,6 +10,6 @@ interface UnderwriterSignSessionRepository: JpaRepository<UnderwriterSignSession
     @Query("""
         FROM UnderwriterSignSessionEntity WHERE signReference = :signReference
     """)
-    fun findBySignReference(signReference: UUID): UnderwriterSignSessionEntity
+    fun findBySignReference(signReference: UUID): UnderwriterSignSessionEntity?
 }
 
