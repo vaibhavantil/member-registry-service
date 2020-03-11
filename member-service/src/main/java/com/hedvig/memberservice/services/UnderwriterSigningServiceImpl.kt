@@ -6,6 +6,7 @@ import com.hedvig.integration.underwriter.dtos.SignRequest
 import com.hedvig.memberservice.entities.UnderwriterSignSessionEntity
 import com.hedvig.memberservice.query.SignedMemberRepository
 import com.hedvig.memberservice.query.UnderwriterSignSessionRepository
+import com.hedvig.memberservice.query.saveOrUpdateReusableSession
 import com.hedvig.memberservice.services.dto.StartNorwegianBankIdSignResponse
 import com.hedvig.memberservice.services.dto.StartSwedishBankIdSignResponse
 import org.springframework.stereotype.Service
@@ -30,7 +31,7 @@ class UnderwriterSigningServiceImpl(
 
         val response = swedishBankIdSigningService.startSign(memberId, ssn, ipAddress, isSwitching)
 
-        underwriterSignSessionRepository.save(UnderwriterSignSessionEntity(underwriterSessionRef, UUID.fromString(response.bankIdOrderResponse.orderRef)))
+        underwriterSignSessionRepository.saveOrUpdateReusableSession(underwriterSessionRef, UUID.fromString(response.bankIdOrderResponse.orderRef))
 
         return StartSwedishBankIdSignResponse(response.bankIdOrderResponse.autoStartToken)
     }
@@ -45,7 +46,7 @@ class UnderwriterSigningServiceImpl(
 
         return when (val response = norwegianSigningService.startSign(memberId, ssn)) {
             is StartNorwegianAuthenticationResult.Success -> {
-                underwriterSignSessionRepository.save(UnderwriterSignSessionEntity(underwriterSessionRef, response.orderReference))
+                underwriterSignSessionRepository.saveOrUpdateReusableSession(underwriterSessionRef, response.orderReference)
 
                 StartNorwegianBankIdSignResponse(response.redirectUrl)
             }
