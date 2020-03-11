@@ -87,6 +87,15 @@ public class MemberEventListener {
   }
 
   @EventHandler
+  void on(NorwegianSSNUpdatedEvent e) {
+    MemberEntity m = userRepo.findById(e.getMemberId()).get();
+
+    m.setSsn(e.getSsn());
+
+    userRepo.save(m);
+  }
+
+  @EventHandler
   void on(TrackingIdCreatedEvent e) {
     // Assign a unique tracking id per SSN
 
@@ -216,6 +225,13 @@ public class MemberEventListener {
     userRepo.save(m);
   }
 
+  @EventHandler
+  void on(BirthDateUpdatedEvent e) {
+    MemberEntity m = userRepo.findById(e.getMemberId()).get();
+    m.setBirthDate(e.getBirthDate());
+
+    userRepo.save(m);
+  }
   @EventHandler
   void on(FraudulentStatusUpdatedEvent e) {
     MemberEntity m = userRepo.findById(e.getMemberId()).get();

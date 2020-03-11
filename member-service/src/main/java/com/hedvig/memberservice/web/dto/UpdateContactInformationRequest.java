@@ -1,6 +1,9 @@
 package com.hedvig.memberservice.web.dto;
 
 import lombok.Data;
+import org.springframework.lang.Nullable;
+
+import java.time.LocalDate;
 
 @Data
 public class UpdateContactInformationRequest {
@@ -11,4 +14,6 @@ public class UpdateContactInformationRequest {
   private String email;
   private String phoneNumber;
   private Address address;
+  @Nullable
+  private LocalDate birthDate;
 }

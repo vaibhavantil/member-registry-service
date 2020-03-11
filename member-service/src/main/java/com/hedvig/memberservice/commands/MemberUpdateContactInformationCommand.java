@@ -4,6 +4,8 @@ import com.hedvig.memberservice.web.dto.UpdateContactInformationRequest;
 import lombok.Value;
 import org.axonframework.commandhandling.TargetAggregateIdentifier;
 
+import java.time.LocalDate;
+
 @Value
 public class MemberUpdateContactInformationCommand {
 
@@ -19,6 +21,7 @@ public class MemberUpdateContactInformationCommand {
   String zipCode;
   String apartmentNo;
   Integer floor;
+  LocalDate birthDate;
 
   public MemberUpdateContactInformationCommand(
       Long memberId, UpdateContactInformationRequest body) {
@@ -43,5 +46,6 @@ public class MemberUpdateContactInformationCommand {
     }
 
     this.phoneNumber = body.getPhoneNumber();
+    this.birthDate = body.getBirthDate();
   }
 }
