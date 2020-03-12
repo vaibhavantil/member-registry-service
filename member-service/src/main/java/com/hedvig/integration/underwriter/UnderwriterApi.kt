@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service
 @Service
 class UnderwriterApi(private val underwriterClient: UnderwriterClient) {
 
+    @Deprecated("Use `UnderwriterSigningService`")
     fun memberSigned(
         memberId: String,
         referenceToken: String,

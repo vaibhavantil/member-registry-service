@@ -242,6 +242,11 @@ public class MemberAggregate {
       && !Objects.equals(this.member.getPhoneNumber(), cmd.getPhoneNumber())) {
       apply(new PhoneNumberUpdatedEvent(this.id, cmd.getPhoneNumber()));
     }
+
+    if (cmd.getBirthDate() != null
+      && !Objects.equals(this.member.getBirthDate(), cmd.getBirthDate())){
+      apply(new BirthDateUpdatedEvent(this.id, cmd.getBirthDate()));
+    }
   }
 
   @CommandHandler
@@ -272,7 +277,7 @@ public class MemberAggregate {
 
     if (cmd.getPersonalNumber() != null
       && !Objects.equals(this.member.getSsn(), cmd.getPersonalNumber())) {
-      apply(new SSNUpdatedEvent(this.id, cmd.getPersonalNumber()));
+      apply(new NorwegianSSNUpdatedEvent(this.id, cmd.getPersonalNumber()));
     }
 
     if (defaultCharityEnabled) {
@@ -281,7 +286,7 @@ public class MemberAggregate {
 
     apply(
       new NorwegianMemberSignedEvent(
-        this.id, cmd.getPersonalNumber(), cmd.getProvideJsonResponse()));
+        this.id, cmd.getPersonalNumber(), cmd.getProvideJsonResponse(), cmd.getReferenceId()));
   }
 
   public boolean isValidJSON(final String json) {
@@ -542,7 +547,17 @@ public class MemberAggregate {
   }
 
   @EventSourcingHandler
+  public void on(BirthDateUpdatedEvent e) {
+    this.member.setBirthDate(e.getBirthDate());
+  }
+
+  @EventSourcingHandler
   public void on(SSNUpdatedEvent e) {
+    this.member.setSsn(e.getSsn());
+  }
+
+  @EventSourcingHandler
+  public void on(NorwegianSSNUpdatedEvent e) {
     this.member.setSsn(e.getSsn());
   }
 

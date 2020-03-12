@@ -1,5 +1,6 @@
 package com.hedvig.external.zignSec.client
 
+import com.hedvig.external.config.ZignSecFeignConfig
 import com.hedvig.external.zignSec.client.dto.ZignSecCollectResponse
 import com.hedvig.external.zignSec.client.dto.ZignSecRequestBody
 import com.hedvig.external.zignSec.client.dto.ZignSecResponse
@@ -11,7 +12,7 @@ import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestHeader
 import java.util.*
 
-@FeignClient(name = "bankId", url = "\${hedvig.external.zignSec.eid.baseurl:https://test.zignsec.com/v2/eid}")
+@FeignClient(name = "bankId", url = "\${hedvig.external.zignSec.eid.baseurl:https://test.zignsec.com/v2/eid}", configuration = [ZignSecFeignConfig::class])
 interface ZignSecClient {
 
     @PostMapping(value = ["/{bankid_selector}"], consumes = ["application/json"])

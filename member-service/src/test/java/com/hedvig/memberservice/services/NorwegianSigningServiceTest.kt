@@ -25,9 +25,6 @@ import org.mockito.Mockito.`when` as whenever
 class NorwegianSigningServiceTest {
 
     @Mock
-    lateinit var memberRepository: MemberRepository
-
-    @Mock
     lateinit var memberService: MemberService
 
     @Mock
@@ -40,21 +37,20 @@ class NorwegianSigningServiceTest {
 
     @Before
     fun before() {
-        classUnderTest = NorwegianSigningService(memberRepository, memberService, norwegianBankIdService, applicationEventPublisher)
+        classUnderTest = NorwegianSigningService(memberService, norwegianBankIdService, applicationEventPublisher)
     }
 
     @Test
     fun startSignSuccessful() {
         whenever(norwegianBankIdService.sign(MEMBER_ID.toString(), SSN)).thenReturn(
             StartNorwegianAuthenticationResult.Success(
-                SESSION_ID,
+                ORDER_REF,
                 REDIRECT_URL
             )
         )
 
-        val response = classUnderTest.startSign(MEMBER_ID, WebsignRequest(EMAIL, SSN, IP_ADDRESS))
+        val response = classUnderTest.startWebSign(MEMBER_ID, WebsignRequest(EMAIL, SSN, IP_ADDRESS))
 
-        assertThat(response.signId).isEqualTo(SESSION_ID)
         assertThat(response.status).isEqualTo(SignStatus.IN_PROGRESS)
         assertThat(response.norwegianBankIdResponse?.redirectUrl).isEqualTo(REDIRECT_URL)
     }
@@ -67,7 +63,7 @@ class NorwegianSigningServiceTest {
             )
         )
 
-        val response = classUnderTest.startSign(MEMBER_ID, WebsignRequest(EMAIL, SSN, IP_ADDRESS))
+        val response = classUnderTest.startWebSign(MEMBER_ID, WebsignRequest(EMAIL, SSN, IP_ADDRESS))
 
         assertThat(response.status).isEqualTo(SignStatus.FAILED)
     }
@@ -102,7 +98,6 @@ class NorwegianSigningServiceTest {
 
 
     companion object {
-        private const val SESSION_ID: Long = 1
         private const val MEMBER_ID: Long = 1337
         private const val SSN: String = "12121212120"
         private const val EMAIL: String = "em@i.l"
@@ -111,5 +106,6 @@ class NorwegianSigningServiceTest {
         private const val PROVIDER_JSON_RESPONSE = """{ "json": true }"""
         private val LIST_OF_ERRORS = listOf(NorwegianAuthenticationResponseError(0, "some error"))
         private val RESPONSE_ID: UUID = UUID.randomUUID()
+        private val ORDER_REF: UUID = UUID.randomUUID()
     }
 }

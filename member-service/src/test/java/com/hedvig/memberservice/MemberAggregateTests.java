@@ -245,9 +245,9 @@ public class MemberAggregateTests {
       .when(new NorwegianSignCommand(memberId, referenceId, personalNumber, provideJsonResponse))
       .expectSuccessfulHandlerExecution()
       .expectEvents(
-        new SSNUpdatedEvent(memberId, personalNumber),
+        new NorwegianSSNUpdatedEvent(memberId, personalNumber),
         new NewCashbackSelectedEvent(memberId, DEFAULT_CASHBACK.toString()),
-        new NorwegianMemberSignedEvent(memberId, personalNumber, provideJsonResponse)
+        new NorwegianMemberSignedEvent(memberId, personalNumber, provideJsonResponse, referenceId)
       );
   }
 

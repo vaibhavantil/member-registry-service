@@ -49,7 +49,7 @@ class SigningService(
 
                 return when (quote.signMethod) {
                     SignMethod.SWEDISH_BANK_ID -> swedishBankIdSigningService.startSign(request, memberId, quote.isSwitching)
-                    SignMethod.NORWEGIAN_BANK_ID-> norwegianSigningService.startSign(memberId, request)
+                    SignMethod.NORWEGIAN_BANK_ID-> norwegianSigningService.startWebSign(memberId, request)
                 }
             }
             is QuoteToSignStatusDto.NotEligibleToSign -> throw CannotSignInsuranceException()
