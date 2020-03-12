@@ -15,19 +15,7 @@ import com.hedvig.memberservice.commands.MemberUpdateContactInformationCommand;
 import com.hedvig.memberservice.commands.SelectNewCashbackCommand;
 import com.hedvig.memberservice.commands.StartOnboardingWithSSNCommand;
 import com.hedvig.memberservice.commands.NorwegianSignCommand;
-import com.hedvig.memberservice.events.EmailUpdatedEvent;
-import com.hedvig.memberservice.events.LivingAddressUpdatedEvent;
-import com.hedvig.memberservice.events.MemberAuthenticatedEvent;
-import com.hedvig.memberservice.events.MemberCreatedEvent;
-import com.hedvig.memberservice.events.MemberInactivatedEvent;
-import com.hedvig.memberservice.events.MemberSignedEvent;
-import com.hedvig.memberservice.events.MemberStartedOnBoardingEvent;
-import com.hedvig.memberservice.events.NameUpdatedEvent;
-import com.hedvig.memberservice.events.NewCashbackSelectedEvent;
-import com.hedvig.memberservice.events.NorwegianMemberSignedEvent;
-import com.hedvig.memberservice.events.OnboardingStartedWithSSNEvent;
-import com.hedvig.memberservice.events.SSNUpdatedEvent;
-import com.hedvig.memberservice.events.TrackingIdCreatedEvent;
+import com.hedvig.memberservice.events.*;
 import com.hedvig.memberservice.services.CashbackService;
 import com.hedvig.memberservice.web.dto.Address;
 import com.hedvig.memberservice.web.dto.StartOnboardingWithSSNRequest;
@@ -263,7 +251,7 @@ public class MemberAggregateTests {
       .when(new NorwegianSignCommand(memberId, referenceId, personalNumber, provideJsonResponse))
       .expectSuccessfulHandlerExecution()
       .expectEvents(
-        new SSNUpdatedEvent(memberId, personalNumber),
+        new NorwegianSSNUpdatedEvent(memberId, personalNumber),
         new NewCashbackSelectedEvent(memberId, DEFAULT_CASHBACK.toString()),
         new NorwegianMemberSignedEvent(memberId, personalNumber, provideJsonResponse, referenceId)
       );
