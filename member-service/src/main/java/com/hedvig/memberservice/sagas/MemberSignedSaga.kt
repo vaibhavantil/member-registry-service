@@ -86,11 +86,10 @@ class MemberSignedSaga {
             try {
                 underwriterSigningService.norwegianBankIdSignSessionWasCompleted(e.referenceId!!)
             } catch (ex: RuntimeException) {
-                log.error("Could not complete swedish bank id signing session in about signed member [MemberId: ${e.memberId}] Exception $ex")
+                log.error("Could not complete norwegian bank id signing session in about signed member [MemberId: ${e.memberId}] Exception $ex")
             }
         } else {
             try {
-                //FIXME: Maybe we should create a new endpoint for this in uw
                 underwriterApi.memberSigned(e.memberId.toString(), "", "", "")
             } catch (ex: RuntimeException) {
                 log.error("Could not notify underwriter about signed member [MemberId: ${e.memberId}] Exception $ex")

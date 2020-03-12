@@ -244,7 +244,7 @@ public class MemberAggregate {
     }
 
     if (cmd.getBirthDate() != null
-      && !Objects.equals(this.member.getPhoneNumber(), cmd.getPhoneNumber())){
+      && !Objects.equals(this.member.getBirthDate(), cmd.getBirthDate())){
       apply(new BirthDateUpdatedEvent(this.id, cmd.getBirthDate()));
     }
   }

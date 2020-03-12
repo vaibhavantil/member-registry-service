@@ -12,6 +12,7 @@ import java.util.*
 
 @FeignClient(name = "underwriter", url = "\${hedvig.underwriter.url:underwriter}")
 interface UnderwriterClient {
+    @Deprecated("Use swedishBankIdSingComplete or singSessionComplete")
     @PostMapping("/_/v1/quotes/member/{memberId}/signed")
     fun memberSigned(@PathVariable memberId: String, @RequestBody signRequest: SignRequest): ResponseEntity<Void>
 
