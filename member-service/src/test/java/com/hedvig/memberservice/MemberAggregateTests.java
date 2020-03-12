@@ -5,16 +5,10 @@ import static org.mockito.Mockito.when;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hedvig.common.UUIDGenerator;
 import com.hedvig.external.bisnodeBCI.BisnodeClient;
+import com.hedvig.memberservice.aggregates.PickedLocale;
 import com.hedvig.memberservice.aggregates.MemberAggregate;
 import com.hedvig.memberservice.aggregates.MemberStatus;
-import com.hedvig.memberservice.commands.AuthenticationAttemptCommand;
-import com.hedvig.memberservice.commands.BankIdAuthenticationStatus;
-import com.hedvig.memberservice.commands.BankIdSignCommand;
-import com.hedvig.memberservice.commands.InactivateMemberCommand;
-import com.hedvig.memberservice.commands.MemberUpdateContactInformationCommand;
-import com.hedvig.memberservice.commands.SelectNewCashbackCommand;
-import com.hedvig.memberservice.commands.StartOnboardingWithSSNCommand;
-import com.hedvig.memberservice.commands.NorwegianSignCommand;
+import com.hedvig.memberservice.commands.*;
 import com.hedvig.memberservice.events.*;
 import com.hedvig.memberservice.services.CashbackService;
 import com.hedvig.memberservice.web.dto.Address;
@@ -301,6 +295,47 @@ public class MemberAggregateTests {
             new MemberInactivatedEvent(memberId));
 
   }
+
+  @Test
+  public void pickedLocaleUpdateCommand_givenNotSigned_thenUpdatePickedLocale() {
+    Long memberId = 1234L;
+
+    fixture
+      .given(new MemberCreatedEvent(memberId, MemberStatus.INITIATED))
+      .when(new UpdatePickedLocaleCommand(memberId, PickedLocale.SE))
+      .expectSuccessfulHandlerExecution()
+      .expectEvents(
+        new PickedLocaleUpdatedEvent(memberId, PickedLocale.SE)
+      );
+  }
+
+  @Test
+  public void pickedLocaleUpdateCommand_givenSigned_thenExpectUpdatePickedLocaleEvents() {
+    Long memberId = 1234L;
+    String referenceId = "someReferenceId";
+    String personalNumber = "198902171234";
+
+    when(uuidGenerator.generateRandom()).thenReturn(TRACKING_UUID);
+
+    when(cashbackService.getDefaultId()).thenReturn(DEFAULT_CASHBACK);
+
+    fixture
+      .given(
+        new MemberCreatedEvent(memberId, MemberStatus.INITIATED),
+        new SSNUpdatedEvent(memberId, personalNumber),
+        new NewCashbackSelectedEvent(memberId, DEFAULT_CASHBACK.toString()),
+        new MemberSignedEvent(memberId, referenceId, "", "", personalNumber),
+        new PickedLocaleUpdatedEvent(memberId, PickedLocale.SE),
+        new TrackingIdCreatedEvent(memberId, TRACKING_UUID)
+      )
+      .when(new UpdatePickedLocaleCommand(memberId, PickedLocale.NO))
+      .expectSuccessfulHandlerExecution()
+      .expectEvents(
+        new PickedLocaleUpdatedEvent(memberId, PickedLocale.NO)
+      );
+  }
+
+
 
   private class AggregateFactoryM<T> extends AbstractAggregateFactory<T> {
 

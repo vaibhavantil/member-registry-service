@@ -1,7 +1,5 @@
 package com.hedvig.memberservice.aggregates;
 
-import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hedvig.common.UUIDGenerator;
 import com.hedvig.external.bisnodeBCI.BisnodeClient;
@@ -458,6 +456,22 @@ public class MemberAggregate {
     }
   }
 
+  @CommandHandler
+  public void on(UpdatePickedLocaleCommand cmd) {
+
+    if (!Objects.equals(member.getPickedLocale(), cmd.getPickedLocale())) {
+      log.info("Updating picked locale for member {}, new locale: {}", cmd.getMemberId(),
+        cmd.getPickedLocale());
+
+      apply(new PickedLocaleUpdatedEvent(cmd.getMemberId(), cmd.getPickedLocale()));
+    }
+  }
+
+  @CommandHandler
+  public void on(BackfillPickedLocaleCommand cmd) {
+
+      apply(new PickedLocaleUpdatedEvent(cmd.getMemberId(), PickedLocale.SE));
+  }
 
   @EventSourcingHandler
   public void on(MemberCreatedEvent e) {
@@ -550,5 +564,10 @@ public class MemberAggregate {
   @EventSourcingHandler
   public void on(AcceptLanguageUpdatedEvent e) {
       this.member.setAcceptLanguage(e.getAcceptLanguage());
+  }
+
+  @EventSourcingHandler
+  public void on(PickedLocaleUpdatedEvent e) {
+    this.member.setPickedLocale(e.getPickedLocale());
   }
 }
