@@ -21,6 +21,6 @@ interface UnderwriterClient {
     @PostMapping("/_/v1/signSession/swedishBankid/{sessionId}/completed")
     fun swedishBankIdSingComplete(@PathVariable sessionId: UUID, @RequestBody signRequest: SignRequest): ResponseEntity<Void>
 
-    @PostMapping("/_/v1/sign/session/{sessionId}/completed")
+    @PostMapping("/_/v1/signSession/{sessionId}/completed")
     fun singSessionComplete(@PathVariable sessionId: UUID): ResponseEntity<Void>
 }
