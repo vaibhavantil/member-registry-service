@@ -56,7 +56,7 @@ public class TraceMemberHelper {
 
   public static Map<String, TraceMemberDTO> getTraceInfo (Traceable entity, String memberId, Instant changeDate, Object token) {
     final Map<String, TraceMemberDTO> result = new HashMap<>();
-    final String email =  TraceMemberHelper.getIxMail (Optional.ofNullable(token).orElse("System").toString());
+    final String email = Optional.ofNullable(token).map(t -> TraceMemberHelper.getIxMail(t.toString())).orElse("System");
 
     entity.getValues().keySet().forEach((String item) -> result.put(formatDate (entity.getValues().get(item))+item+email, new TraceMemberDTO (
       LocalDateTime.ofInstant (changeDate, ZoneId.of("Europe/Stockholm")),
