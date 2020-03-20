@@ -9,6 +9,7 @@ import com.hedvig.memberservice.services.events.SignSessionCompleteEvent
 import com.hedvig.memberservice.services.member.MemberService
 import com.hedvig.memberservice.services.member.dto.MemberSignResponse
 import com.hedvig.memberservice.services.member.dto.NorwegianBankIdResponse
+import com.hedvig.memberservice.services.redispublisher.RedisEventPublisher
 import com.hedvig.memberservice.web.v2.dto.WebsignRequest
 import org.slf4j.LoggerFactory
 import org.springframework.context.ApplicationEventPublisher
@@ -21,15 +22,19 @@ import javax.transaction.Transactional
 class NorwegianSigningService(
     private val memberService: MemberService,
     private val norwegianBankIdService: NorwegianBankIdService,
-    private val applicationEventPublisher: ApplicationEventPublisher
+    private val applicationEventPublisher: ApplicationEventPublisher,
+    private val redisEventPublisher: RedisEventPublisher
 ) {
 
     fun startWebSign(memberId: Long, request: WebsignRequest): MemberSignResponse {
         return when (val response = startSign(memberId, request.ssn)) {
-            is StartNorwegianAuthenticationResult.Success -> MemberSignResponse(
-                status = SignStatus.IN_PROGRESS,
-                norwegianBankIdResponse = NorwegianBankIdResponse(response.redirectUrl)
-            )
+            is StartNorwegianAuthenticationResult.Success -> {
+                redisEventPublisher.onSignSessionUpdate(memberId)
+                MemberSignResponse(
+                    status = SignStatus.IN_PROGRESS,
+                    norwegianBankIdResponse = NorwegianBankIdResponse(response.redirectUrl)
+                )
+            }
             is StartNorwegianAuthenticationResult.Failed -> {
                 logger.error("Norwegian authentication failed with errors: ${response.errors}")
                 MemberSignResponse(
@@ -52,8 +57,12 @@ class NorwegianSigningService(
             is NorwegianSignResult.Signed -> {
                 memberService.norwegianBankIdSignComplete(result.memberId, result.id, result.ssn, result.providerJsonResponse)
                 applicationEventPublisher.publishEvent(SignSessionCompleteEvent(result.memberId))
+                redisEventPublisher.onSignSessionUpdate(result.memberId)
             }
-            is NorwegianSignResult.Failed -> applicationEventPublisher.publishEvent(SignSessionCompleteEvent(result.memberId))
+            is NorwegianSignResult.Failed -> {
+                applicationEventPublisher.publishEvent(SignSessionCompleteEvent(result.memberId))
+                redisEventPublisher.onSignSessionUpdate(result.memberId)
+            }
         }
     }
 
