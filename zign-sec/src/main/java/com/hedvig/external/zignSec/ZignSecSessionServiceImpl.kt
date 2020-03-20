@@ -35,7 +35,11 @@ class ZignSecSessionServiceImpl(
         val optionalSession = sessionRepository.findByMemberId(memberId)
 
         return if (optionalSession.isPresent) {
-            optionalSession.get().status
+            val session = optionalSession.get()
+            val currentStatus = optionalSession.get().status
+            session.status = NorwegianBankIdProgressStatus.IN_PROGRESS
+            sessionRepository.save(session)
+            return currentStatus
         } else {
             null
         }
