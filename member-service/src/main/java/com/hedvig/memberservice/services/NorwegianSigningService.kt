@@ -26,15 +26,6 @@ class NorwegianSigningService(
     fun startWebSign(memberId: Long, request: WebsignRequest): MemberSignResponse {
         return when (val response = startSign(memberId, request.ssn)) {
             is StartNorwegianAuthenticationResult.Success -> {
-                redisEventPublisher.onSignSessionUpdate(memberId)
-                Timer().schedule(
-                    object : TimerTask() {
-                        override fun run() {
-                            redisEventPublisher.onSignSessionUpdate(memberId)
-                        }
-                    },
-                    5000
-                )
                 MemberSignResponse(
                     status = SignStatus.IN_PROGRESS,
                     norwegianBankIdResponse = NorwegianBankIdResponse(response.redirectUrl)
@@ -50,10 +41,14 @@ class NorwegianSigningService(
     }
 
     @Transactional
-    fun startSign(memberId: Long, ssn: String) = norwegianBankIdService.sign(
-        memberId.toString(),
-        ssn
-    )
+    fun startSign(memberId: Long, ssn: String): StartNorwegianAuthenticationResult {
+        val result = norwegianBankIdService.sign(
+            memberId.toString(),
+            ssn
+        )
+        redisEventPublisher.onSignSessionUpdate(memberId)
+        return result
+    }
 
     fun getSignStatus(memberId: Long) = norwegianBankIdService.getStatus(memberId)
 
