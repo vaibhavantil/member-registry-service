@@ -2,9 +2,7 @@ package com.hedvig.memberservice.services
 
 import com.hedvig.external.authentication.dto.NorwegianSignResult
 import com.hedvig.external.authentication.dto.StartNorwegianAuthenticationResult
-import com.hedvig.memberservice.entities.SignSession
 import com.hedvig.memberservice.entities.SignStatus
-import com.hedvig.memberservice.query.MemberRepository
 import com.hedvig.memberservice.services.events.SignSessionCompleteEvent
 import com.hedvig.memberservice.services.member.MemberService
 import com.hedvig.memberservice.services.member.dto.MemberSignResponse
@@ -13,7 +11,6 @@ import com.hedvig.memberservice.services.redispublisher.RedisEventPublisher
 import com.hedvig.memberservice.web.v2.dto.WebsignRequest
 import org.slf4j.LoggerFactory
 import org.springframework.context.ApplicationEventPublisher
-import org.springframework.lang.NonNull
 import org.springframework.stereotype.Service
 import java.util.*
 import javax.transaction.Transactional
@@ -30,6 +27,14 @@ class NorwegianSigningService(
         return when (val response = startSign(memberId, request.ssn)) {
             is StartNorwegianAuthenticationResult.Success -> {
                 redisEventPublisher.onSignSessionUpdate(memberId)
+                Timer().schedule(
+                    object : TimerTask() {
+                        override fun run() {
+                            redisEventPublisher.onSignSessionUpdate(memberId)
+                        }
+                    },
+                    5000
+                )
                 MemberSignResponse(
                     status = SignStatus.IN_PROGRESS,
                     norwegianBankIdResponse = NorwegianBankIdResponse(response.redirectUrl)
