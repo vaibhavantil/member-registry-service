@@ -8,6 +8,7 @@ import com.hedvig.memberservice.query.MemberEntity
 import com.hedvig.memberservice.query.MemberRepository
 import com.hedvig.memberservice.services.events.SignSessionCompleteEvent
 import com.hedvig.memberservice.services.member.MemberService
+import com.hedvig.memberservice.services.redispublisher.RedisEventPublisher
 import com.hedvig.memberservice.web.v2.dto.WebsignRequest
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test
@@ -33,11 +34,14 @@ class NorwegianSigningServiceTest {
     @Mock
     lateinit var applicationEventPublisher: ApplicationEventPublisher
 
+    @Mock
+    lateinit var redisEventPublisher: RedisEventPublisher
+
     lateinit var classUnderTest: NorwegianSigningService
 
     @Before
     fun before() {
-        classUnderTest = NorwegianSigningService(memberService, norwegianBankIdService, applicationEventPublisher)
+        classUnderTest = NorwegianSigningService(memberService, norwegianBankIdService, applicationEventPublisher, redisEventPublisher)
     }
 
     @Test
