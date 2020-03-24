@@ -2,6 +2,7 @@ package com.hedvig.integration.underwriter
 
 import com.hedvig.integration.underwriter.dtos.QuoteState
 import com.hedvig.integration.underwriter.dtos.QuoteToSignStatusDto
+import com.hedvig.integration.underwriter.dtos.SignMethod
 import com.hedvig.integration.underwriter.dtos.SignRequest
 import feign.FeignException
 import org.springframework.stereotype.Service
@@ -39,4 +40,7 @@ class UnderwriterApi(private val underwriterClient: UnderwriterClient) {
             throw feignException
         }
     }
+
+    fun getSignMethodFromQuote(memberId: String)
+        = underwriterClient.getQuoteFromMemberId(memberId).body!!.signMethod
 }

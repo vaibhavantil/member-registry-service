@@ -81,23 +81,18 @@ class SigningService(
         val optionalMember = memberRepository.findById(memberId)
 
         return if (optionalMember.isPresent) {
-            when (val quote = underwriterApi.hasQuoteToSign(memberId.toString())) {
-                is QuoteToSignStatusDto.EligibleToSign -> {
-                    when(quote.signMethod) {
-                        SignMethod.SWEDISH_BANK_ID  -> {
-                            val session = swedishBankIdSigningService.getSignSession(memberId)
-                            session
-                                .map { SignStatusResponse.CreateFromEntity(it) }
-                                .orElseGet { null }
-                        }
-                        SignMethod.NORWEGIAN_BANK_ID -> {
-                            norwegianSigningService.getSignStatus(memberId)?.let {
-                                SignStatusResponse.CreateFromNorwegianStatus(it)
-                            }
-                        }
+            when (underwriterApi.getSignMethodFromQuote(memberId.toString())) {
+                SignMethod.SWEDISH_BANK_ID  -> {
+                    val session = swedishBankIdSigningService.getSignSession(memberId)
+                    session
+                        .map { SignStatusResponse.CreateFromEntity(it) }
+                        .orElseGet { null }
+                }
+                SignMethod.NORWEGIAN_BANK_ID -> {
+                    norwegianSigningService.getSignStatus(memberId)?.let {
+                        SignStatusResponse.CreateFromNorwegianStatus(it)
                     }
                 }
-                is QuoteToSignStatusDto.NotEligibleToSign -> null
             }
         } else {
             null
