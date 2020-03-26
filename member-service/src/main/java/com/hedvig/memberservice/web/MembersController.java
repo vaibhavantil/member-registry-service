@@ -161,10 +161,17 @@ public class MembersController {
     }
 
   @PostMapping("/pickedLocale/update")
-  public ResponseEntity<?> postPickedLocale(@RequestHeader(value = "hedvig.token") Long hid, @RequestBody @Valid PostPickedLocaleRequestDTO body) {
+  public ResponseEntity<Member> postPickedLocale(@RequestHeader(value = "hedvig.token") Long hid, @RequestBody @Valid PostPickedLocaleRequestDTO body) {
 
     commandGateway.sendAndWait(new UpdatePickedLocaleCommand(hid, body.getPickedLocale()));
 
-    return ResponseEntity.accepted().build();
+    Optional<MemberEntity> member = repo.findById(hid);
+    if (member.isPresent()) {
+
+      return ResponseEntity.ok(new Member(member.get()));
+    }
+
+    return ResponseEntity.notFound().build();
+
   }
 }

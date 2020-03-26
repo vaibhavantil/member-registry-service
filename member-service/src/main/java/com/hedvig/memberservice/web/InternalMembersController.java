@@ -1,5 +1,6 @@
 package com.hedvig.memberservice.web;
 
+import com.hedvig.memberservice.aggregates.PickedLocale;
 import com.hedvig.memberservice.commands.*;
 import com.hedvig.memberservice.query.MemberEntity;
 import com.hedvig.memberservice.query.MemberRepository;
@@ -210,5 +211,19 @@ public class InternalMembersController {
     }
     return ResponseEntity.noContent().build();
   }
+
+  @GetMapping("/{memberId}/pickedLocale")
+  public ResponseEntity<String> getPickedLocale(@PathVariable Long memberId) {
+
+    Optional<MemberEntity> member = memberRepository.findById(memberId);
+    if (member.isPresent()) {
+
+      InternalMember internalMember = InternalMember.fromEntity(member.get());
+      return ResponseEntity.ok(internalMember.getPickedLocale());
+    }
+
+    return ResponseEntity.notFound().build();
+  }
+
 }
 
