@@ -148,6 +148,7 @@ public class MemberEntity {
   public String getAcceptLanguage() {
     return acceptLanguage;
   }
+  public PickedLocale getPickedLocale() { return pickedLocale; }
 
   public void setId(Long id) {
     this.id = id;

@@ -58,6 +58,8 @@ public class InternalMember {
 
   private List<TraceMemberDTO> traceMemberInfo = new ArrayList<>();
 
+  private String pickedLocale;
+
   public static InternalMember fromEntity(MemberEntity entity) {
     val dto = new InternalMember();
     dto.setMemberId(entity.getId());
@@ -80,6 +82,7 @@ public class InternalMember {
     dto.setFraudulentStatus(entity.getFraudulentStatus() != null ? entity.getFraudulentStatus().name() : "");
     dto.setFraudulentDescription(entity.getFraudulentDescription());
     dto.setAcceptLanguage(entity.getAcceptLanguage());
+    dto.setPickedLocale(entity.getPickedLocale() != null ? entity.getPickedLocale().name() : "");
     return dto;
   }
 }
