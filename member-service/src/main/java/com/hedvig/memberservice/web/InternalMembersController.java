@@ -213,13 +213,15 @@ public class InternalMembersController {
   }
 
   @GetMapping("/{memberId}/pickedLocale")
-  public ResponseEntity<String> getPickedLocale(@PathVariable Long memberId) {
+  public ResponseEntity<PickedLocaleDTO> getPickedLocale(@PathVariable Long memberId) {
 
     Optional<MemberEntity> member = memberRepository.findById(memberId);
-    if (member.isPresent()) {
+    if (member.isPresent() && member.get().pickedLocale != null) {
 
-      InternalMember internalMember = InternalMember.fromEntity(member.get());
-      return ResponseEntity.ok(internalMember.getPickedLocale());
+      PickedLocaleDTO res = new PickedLocaleDTO();
+      res.setPickedLocale(member.get().pickedLocale);
+      
+      return ResponseEntity.ok(res);
     }
 
     return ResponseEntity.notFound().build();
