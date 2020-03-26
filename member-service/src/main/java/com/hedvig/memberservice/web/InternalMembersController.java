@@ -219,10 +219,8 @@ public class InternalMembersController {
     if (member.isPresent() && member.get().pickedLocale != null) {
 
       PickedLocaleDTO res = new PickedLocaleDTO(member.get().pickedLocale);
-
       return ResponseEntity.ok(res);
     }
-
     return ResponseEntity.notFound().build();
   }
 
