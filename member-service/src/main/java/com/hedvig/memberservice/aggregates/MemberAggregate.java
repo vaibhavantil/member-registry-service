@@ -469,8 +469,9 @@ public class MemberAggregate {
 
   @CommandHandler
   public void on(BackfillPickedLocaleCommand cmd) {
-
-      apply(new PickedLocaleUpdatedEvent(cmd.getMemberId(), PickedLocale.sv_SE));
+      if (member.getPickedLocale() == null) {
+        apply(new PickedLocaleUpdatedEvent(cmd.getMemberId(), PickedLocale.sv_SE));
+      }
   }
 
   @EventSourcingHandler
