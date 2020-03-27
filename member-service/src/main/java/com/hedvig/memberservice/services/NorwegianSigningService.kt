@@ -57,9 +57,11 @@ class NorwegianSigningService(
             is NorwegianSignResult.Signed -> {
                 memberService.norwegianBankIdSignComplete(result.memberId, result.id, result.ssn, result.providerJsonResponse)
                 applicationEventPublisher.publishEvent(SignSessionCompleteEvent(result.memberId))
+                redisEventPublisher.onSignSessionUpdate(result.memberId)
             }
             is NorwegianSignResult.Failed -> {
                 applicationEventPublisher.publishEvent(SignSessionCompleteEvent(result.memberId))
+                redisEventPublisher.onSignSessionUpdate(result.memberId)
             }
         }
     }
