@@ -1,6 +1,8 @@
 package com.hedvig.memberservice.aggregates
 
 enum class PickedLocale {
-    SE,
-    NO
+    sv_SE,
+    en_SE,
+    nb_NO,
+    en_NO
 }

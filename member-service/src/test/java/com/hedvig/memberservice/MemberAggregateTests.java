@@ -302,10 +302,10 @@ public class MemberAggregateTests {
 
     fixture
       .given(new MemberCreatedEvent(memberId, MemberStatus.INITIATED))
-      .when(new UpdatePickedLocaleCommand(memberId, PickedLocale.SE))
+      .when(new UpdatePickedLocaleCommand(memberId, PickedLocale.sv_SE))
       .expectSuccessfulHandlerExecution()
       .expectEvents(
-        new PickedLocaleUpdatedEvent(memberId, PickedLocale.SE)
+        new PickedLocaleUpdatedEvent(memberId, PickedLocale.sv_SE)
       );
   }
 
@@ -325,13 +325,13 @@ public class MemberAggregateTests {
         new SSNUpdatedEvent(memberId, personalNumber),
         new NewCashbackSelectedEvent(memberId, DEFAULT_CASHBACK.toString()),
         new MemberSignedEvent(memberId, referenceId, "", "", personalNumber),
-        new PickedLocaleUpdatedEvent(memberId, PickedLocale.SE),
+        new PickedLocaleUpdatedEvent(memberId, PickedLocale.sv_SE),
         new TrackingIdCreatedEvent(memberId, TRACKING_UUID)
       )
-      .when(new UpdatePickedLocaleCommand(memberId, PickedLocale.NO))
+      .when(new UpdatePickedLocaleCommand(memberId, PickedLocale.nb_NO))
       .expectSuccessfulHandlerExecution()
       .expectEvents(
-        new PickedLocaleUpdatedEvent(memberId, PickedLocale.NO)
+        new PickedLocaleUpdatedEvent(memberId, PickedLocale.nb_NO)
       );
   }
 

@@ -1,5 +1,6 @@
 package com.hedvig.memberservice.web;
 
+import com.hedvig.memberservice.aggregates.PickedLocale;
 import com.hedvig.memberservice.commands.*;
 import com.hedvig.memberservice.query.MemberEntity;
 import com.hedvig.memberservice.query.MemberRepository;
@@ -210,5 +211,25 @@ public class InternalMembersController {
     }
     return ResponseEntity.noContent().build();
   }
+
+  @GetMapping("/{memberId}/pickedLocale")
+  public ResponseEntity<PickedLocaleDTO> getPickedLocale(@PathVariable Long memberId) {
+
+    Optional<MemberEntity> member = memberRepository.findById(memberId);
+    if (member.isPresent() && member.get().pickedLocale != null) {
+
+      PickedLocaleDTO res = new PickedLocaleDTO(member.get().pickedLocale);
+      return ResponseEntity.ok(res);
+    }
+    //TODO: Returning sv_SE per default if member not found for launch in order to not block
+    // notification service.
+    PickedLocaleDTO res = new PickedLocaleDTO(PickedLocale.sv_SE);
+    return ResponseEntity.ok(res);
+
+    //TODO: Replace with this after launch:
+    //return ResponseEntity.notFound().build();
+
+  }
+
 }
 
