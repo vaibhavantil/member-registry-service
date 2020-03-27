@@ -12,6 +12,7 @@ import com.hedvig.memberservice.query.SignedMemberRepository
 import com.hedvig.memberservice.services.member.CannotSignInsuranceException
 import com.hedvig.memberservice.services.member.dto.MemberSignResponse
 import com.hedvig.memberservice.services.member.dto.MemberSignUnderwriterQuoteResponse
+import com.hedvig.memberservice.services.redispublisher.RedisEventPublisher
 import com.hedvig.memberservice.web.dto.IsSsnAlreadySignedMemberResponse
 import com.hedvig.memberservice.web.v2.dto.SignStatusResponse
 import com.hedvig.memberservice.web.v2.dto.UnderwriterQuoteSignRequest
@@ -30,7 +31,8 @@ class SigningService(
     private val memberRepository: MemberRepository,
     private val commandGateway: CommandGateway,
     private val swedishBankIdSigningService: SwedishBankIdSigningService,
-    private val norwegianSigningService: NorwegianSigningService
+    private val norwegianSigningService: NorwegianSigningService,
+    private val redisEventPublisher: RedisEventPublisher
 ) {
 
     @Transactional
@@ -123,6 +125,7 @@ class SigningService(
         } catch (ex: RuntimeException) {
             log.error("Could not initialize bot-service for memberId: {}", memberId, ex)
         }
+        redisEventPublisher.onSignSessionUpdate(memberId)
     }
 
     companion object {
