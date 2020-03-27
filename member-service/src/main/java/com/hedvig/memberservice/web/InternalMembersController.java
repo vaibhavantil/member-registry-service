@@ -221,7 +221,14 @@ public class InternalMembersController {
       PickedLocaleDTO res = new PickedLocaleDTO(member.get().pickedLocale);
       return ResponseEntity.ok(res);
     }
-    return ResponseEntity.notFound().build();
+    //TODO: Returning sv_SE per default if member not found for launch in order to not block
+    // notification service.
+    PickedLocaleDTO res = new PickedLocaleDTO(PickedLocale.sv_SE);
+    return ResponseEntity.ok(res);
+
+    //TODO: Replace with this after launch:
+    //return ResponseEntity.notFound().build();
+
   }
 
 }
