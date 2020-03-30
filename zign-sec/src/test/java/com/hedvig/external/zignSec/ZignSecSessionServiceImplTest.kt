@@ -146,7 +146,7 @@ class ZignSecSessionServiceImplTest {
                 status = NorwegianBankIdProgressStatus.INITIATED,
                 referenceId = REFERENCE_ID,
                 redirectUrl = "redirect url",
-                personalNumber = null
+                requestPersonalNumber = null
             ))
         )
 
@@ -179,7 +179,7 @@ class ZignSecSessionServiceImplTest {
                 status = NorwegianBankIdProgressStatus.INITIATED,
                 referenceId = REFERENCE_ID,
                 redirectUrl = "redirect url",
-                personalNumber = null
+                requestPersonalNumber = null
             ))
         )
 
@@ -222,7 +222,7 @@ class ZignSecSessionServiceImplTest {
                 status = NorwegianBankIdProgressStatus.INITIATED,
                 referenceId = REFERENCE_ID,
                 redirectUrl = "redirect url",
-                personalNumber = null
+                requestPersonalNumber = null
             ))
         )
 
@@ -255,7 +255,7 @@ class ZignSecSessionServiceImplTest {
                 status = NorwegianBankIdProgressStatus.COMPLETED,
                 referenceId = REFERENCE_ID,
                 redirectUrl = "redirect url",
-                personalNumber = null
+                requestPersonalNumber = null
             ))
         )
 
@@ -286,7 +286,7 @@ class ZignSecSessionServiceImplTest {
             notification = null,
             createdAt = timestamp,
             updatedAt = timestamp,
-            personalNumber = null
+            requestPersonalNumber = null
         )
 
         whenever(sessionRepository.findByReferenceId(REFERENCE_ID)).thenReturn(
@@ -317,7 +317,7 @@ class ZignSecSessionServiceImplTest {
             notification = null,
             createdAt = timestamp,
             updatedAt = timestamp,
-            personalNumber = null
+            requestPersonalNumber = null
         )
 
         whenever(sessionRepository.findByReferenceId(REFERENCE_ID)).thenReturn(
@@ -346,7 +346,7 @@ class ZignSecSessionServiceImplTest {
             notification = null,
             createdAt = timestamp,
             updatedAt = timestamp,
-            personalNumber = null
+            requestPersonalNumber = null
         )
 
         whenever(sessionRepository.findByReferenceId(REFERENCE_ID)).thenReturn(
@@ -371,7 +371,7 @@ class ZignSecSessionServiceImplTest {
                 status = NorwegianBankIdProgressStatus.INITIATED,
                 referenceId = REFERENCE_ID,
                 redirectUrl = "redirect url",
-                personalNumber = "12121212121"
+                requestPersonalNumber = "12121212121"
             ))
         )
 
@@ -391,14 +391,14 @@ class ZignSecSessionServiceImplTest {
                     status = NorwegianBankIdProgressStatus.INITIATED,
                     referenceId = REFERENCE_ID,
                     redirectUrl = "redirect url",
-                    personalNumber = "12121212120"
+                    requestPersonalNumber = "12121212120"
                 )
             )
 
 
         val response = classUnderTest.sign(startSignRequest)
 
-        assertThat(captor.value.personalNumber).isEqualTo("12121212120")
+        assertThat(captor.value.requestPersonalNumber).isEqualTo("12121212120")
         assertThat((response as Success).redirectUrl).isEqualTo("redirect url 2")
     }
 
@@ -411,7 +411,7 @@ class ZignSecSessionServiceImplTest {
                 status = NorwegianBankIdProgressStatus.INITIATED,
                 referenceId = REFERENCE_ID,
                 redirectUrl = "redirect url",
-                personalNumber = "12121212120"
+                requestPersonalNumber = "12121212120"
             ))
         )
 

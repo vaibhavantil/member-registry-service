@@ -56,7 +56,7 @@ class ZignSecSessionServiceImpl(
                 )
             }
 
-            if (session.personalNumber != request.personalNumber){
+            if (session.requestPersonalNumber != request.personalNumber){
                 return startNewSession(request, type, session)
             }
 
@@ -105,13 +105,13 @@ class ZignSecSessionServiceImpl(
         val s = session?.apply {
             this.referenceId = response.id
             this.redirectUrl = response.redirectUrl
-            this.personalNumber = request.personalNumber
+            this.requestPersonalNumber = request.personalNumber
         } ?: ZignSecSession(
             memberId = request.memberId.toLong(),
             requestType = type,
             referenceId = response.id,
             redirectUrl = response.redirectUrl,
-            personalNumber = request.personalNumber
+            requestPersonalNumber = request.personalNumber
         )
 
         sessionRepository.save(s)

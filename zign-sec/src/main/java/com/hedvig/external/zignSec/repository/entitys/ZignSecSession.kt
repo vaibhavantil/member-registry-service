@@ -27,7 +27,8 @@ class ZignSecSession(
     var status: NorwegianBankIdProgressStatus = NorwegianBankIdProgressStatus.INITIATED,
     @Enumerated(javax.persistence.EnumType.STRING)
     val requestType: NorwegianAuthenticationType,
-    var personalNumber: String?,
+    @Column(columnDefinition = "varchar(11) default null", nullable = true)
+    var requestPersonalNumber: String? = null,
     @Embedded
     var notification: ZignSecNotification? = null,
     @CreationTimestamp
@@ -40,7 +41,7 @@ class ZignSecSession(
         requestType = NorwegianAuthenticationType.AUTH,
         referenceId = UUID.randomUUID(),
         redirectUrl = "empty constructor",
-        personalNumber = null
+        requestPersonalNumber = null
     )
 }
 
