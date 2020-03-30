@@ -402,6 +402,25 @@ class ZignSecSessionServiceImplTest {
         assertThat((response as Success).redirectUrl).isEqualTo("redirect url 2")
     }
 
+    @Test
+    fun failSessionIfMethodChanges() {
+        whenever(sessionRepository.findByMemberId(startAuthRequest.memberId.toLong())).thenReturn(
+            Optional.of(ZignSecSession(
+                memberId = 1337,
+                requestType = NorwegianAuthenticationType.SIGN,
+                status = NorwegianBankIdProgressStatus.INITIATED,
+                referenceId = REFERENCE_ID,
+                redirectUrl = "redirect url",
+                personalNumber = "12121212120"
+            ))
+        )
+
+        val response = classUnderTest.auth(startAuthRequest)
+
+        verify(sessionRepository).delete(any())
+        assertThat(response).isInstanceOf(Failed::class.java)
+    }
+
     companion object {
         val startAuthRequest = NorwegianBankIdAuthenticationRequest(
             "1337",

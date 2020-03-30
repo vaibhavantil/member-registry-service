@@ -47,6 +47,15 @@ class ZignSecSessionServiceImpl(
         return if (optional.isPresent) {
             val session = optional.get()
 
+            if (session.requestType != type){
+                sessionRepository.delete(session)
+                return StartNorwegianAuthenticationResult.Failed(
+                    errors = listOf(
+                        NorwegianAuthenticationResponseError(0, "Illegal change of method. Tried to change from type: ${session.requestType} to $type")
+                    )
+                )
+            }
+
             if (session.personalNumber != request.personalNumber){
                 return startNewSession(request, type, session)
             }
