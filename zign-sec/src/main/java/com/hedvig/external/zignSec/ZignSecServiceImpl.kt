@@ -2,12 +2,12 @@ package com.hedvig.external.zignSec
 
 import com.hedvig.external.authentication.dto.NorwegianBankIdAuthenticationRequest
 import com.hedvig.external.zignSec.client.ZignSecClient
-import com.hedvig.external.zignSec.client.dto.ZignSecCollectResponse
 import com.hedvig.external.zignSec.client.dto.ZignSecRequestBody
 import com.hedvig.external.zignSec.client.dto.ZignSecResponse
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 import java.util.*
+
 
 @Service
 class ZignSecServiceImpl(
@@ -17,11 +17,7 @@ class ZignSecServiceImpl(
     @Value("\${zignsec.host}")
     private val host: String,
     @Value("\${zignsec.webhook.url}")
-    private val webhookUrl: String,
-    @Value("\${zignsec.success.url}")
-    private val sucessUrl: String,
-    @Value("\${zignsec.failed.url}")
-    private val failedUrl: String
+    private val webhookUrl: String
 ) : ZignSecService {
 
     override fun auth(request: NorwegianBankIdAuthenticationRequest): ZignSecResponse = client.auth(
@@ -31,8 +27,8 @@ class ZignSecServiceImpl(
         body = ZignSecRequestBody(
             personalnumber = request.personalNumber,
             language = request.language,
-            target = sucessUrl,
-            targetError = failedUrl,
+            target = request.successUrl,
+            targetError = request.failUrl,
             webhook = webhookUrl
         )
     )

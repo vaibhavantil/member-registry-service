@@ -425,13 +425,17 @@ class ZignSecSessionServiceImplTest {
         val startSignRequest = NorwegianBankIdAuthenticationRequest(
             "1337",
             "12121212120",
-            "NO"
+            "NO",
+            "success",
+            "fail"
         )
 
         val startAuthRequest = NorwegianBankIdAuthenticationRequest(
             "1337",
             null,
-            "NO"
+            "NO",
+            "success",
+            "fail"
         )
 
         val REDIRECT_URL = "redirect_url"

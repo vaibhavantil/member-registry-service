@@ -11,7 +11,7 @@ import com.hedvig.memberservice.query.MemberRepository
 import com.hedvig.memberservice.query.SignedMemberRepository
 import com.hedvig.memberservice.services.redispublisher.AuthSessionUpdatedEventStatus
 import com.hedvig.memberservice.services.redispublisher.RedisEventPublisher
-import com.hedvig.memberservice.web.dto.GenericBankIdAuthenticationRequest
+import com.hedvig.memberservice.web.dto.RedirectBankIdAuthenticationRequest
 import org.axonframework.commandhandling.gateway.CommandGateway
 import org.springframework.stereotype.Service
 import java.util.*
@@ -26,22 +26,26 @@ class NorwegianBankIdService(
     private val memberRepository: MemberRepository,
     private val textKeysLocaleResolver: TextKeysLocaleResolver
 ) {
-    fun authenticate(memberId: Long, request: GenericBankIdAuthenticationRequest): StartNorwegianAuthenticationResult {
+    fun authenticate(memberId: Long, request: RedirectBankIdAuthenticationRequest): StartNorwegianAuthenticationResult {
         return norwegianAuthentication.auth(
             NorwegianBankIdAuthenticationRequest(
                 memberId.toString(),
                 request.personalNumber,
-                resolveTwoLetterLanguageFromMember(memberId)
+                resolveTwoLetterLanguageFromMember(memberId),
+                request.successUrl,
+                request.failUrl
             )
         )
     }
 
-    fun sign(memberId: String, ssn: String) =
+    fun sign(memberId: String, ssn: String, targetUrl: String, failedTargetUrl: String) =
         norwegianAuthentication.sign(
             NorwegianBankIdAuthenticationRequest(
                 memberId,
                 ssn,
-                resolveTwoLetterLanguageFromMember(memberId.toLong())
+                resolveTwoLetterLanguageFromMember(memberId.toLong()),
+                targetUrl,
+                failedTargetUrl
             )
         )
 

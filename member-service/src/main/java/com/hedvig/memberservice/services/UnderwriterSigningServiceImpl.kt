@@ -3,14 +3,19 @@ package com.hedvig.memberservice.services
 import com.hedvig.external.authentication.dto.StartNorwegianAuthenticationResult
 import com.hedvig.integration.underwriter.UnderwriterClient
 import com.hedvig.integration.underwriter.dtos.SignRequest
-import com.hedvig.memberservice.entities.UnderwriterSignSessionEntity
 import com.hedvig.memberservice.query.SignedMemberRepository
 import com.hedvig.memberservice.query.UnderwriterSignSessionRepository
 import com.hedvig.memberservice.query.saveOrUpdateReusableSession
 import com.hedvig.memberservice.services.dto.StartNorwegianBankIdSignResponse
 import com.hedvig.memberservice.services.dto.StartSwedishBankIdSignResponse
+import org.springframework.beans.factory.annotation.Value
+import org.springframework.boot.context.properties.ConfigurationProperties
+import org.springframework.stereotype.Component
 import org.springframework.stereotype.Service
+import java.net.URL
 import java.util.*
+
+
 
 @Service
 class UnderwriterSigningServiceImpl(
@@ -18,7 +23,9 @@ class UnderwriterSigningServiceImpl(
     private val underwriterClient: UnderwriterClient,
     private val swedishBankIdSigningService: SwedishBankIdSigningService,
     private val norwegianSigningService: NorwegianSigningService,
-    private val signedMemberRepository: SignedMemberRepository
+    private val signedMemberRepository: SignedMemberRepository,
+    @Value("\${zignsec.validSigningTargetHosts}")
+    private val validTargetHosts: Array<String>
 ) : UnderwriterSigningService {
 
     override fun startSwedishBankIdSignSession(underwriterSessionRef: UUID, memberId: Long, ssn: String, ipAddress: String, isSwitching: Boolean): StartSwedishBankIdSignResponse {
@@ -36,7 +43,14 @@ class UnderwriterSigningServiceImpl(
         return StartSwedishBankIdSignResponse(response.bankIdOrderResponse.autoStartToken)
     }
 
-    override fun startNorwegianBankIdSignSession(underwriterSessionRef: UUID, memberId: Long, ssn: String): StartNorwegianBankIdSignResponse {
+    override fun startNorwegianBankIdSignSession(underwriterSessionRef: UUID, memberId: Long, ssn: String, targetUrl: String, failedTargetUrl: String): StartNorwegianBankIdSignResponse {
+        if (!hasValidHost(targetUrl) || !hasValidHost(failedTargetUrl)) {
+            return StartNorwegianBankIdSignResponse(
+                redirectUrl = null,
+                internalErrorMessage = "Not an valid target url"
+            )
+        }
+
         if (isAlreadySigned(ssn)) {
             return StartNorwegianBankIdSignResponse(
                 redirectUrl = null,
@@ -44,7 +58,7 @@ class UnderwriterSigningServiceImpl(
             )
         }
 
-        return when (val response = norwegianSigningService.startSign(memberId, ssn)) {
+        return when (val response = norwegianSigningService.startSign(memberId, ssn, targetUrl, failedTargetUrl)) {
             is StartNorwegianAuthenticationResult.Success -> {
                 underwriterSignSessionRepository.saveOrUpdateReusableSession(underwriterSessionRef, response.orderReference)
 
@@ -56,6 +70,9 @@ class UnderwriterSigningServiceImpl(
             )
         }
     }
+
+    private fun hasValidHost(url: String): Boolean =
+        validTargetHosts.contains(URL(url).host)
 
     override fun isUnderwriterHandlingSignSession(orderReference: UUID): Boolean =
         underwriterSignSessionRepository.findBySignReference(orderReference) != null

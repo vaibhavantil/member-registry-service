@@ -17,7 +17,9 @@ interface UnderwriterSigningService {
     fun startNorwegianBankIdSignSession(
         underwriterSessionRef: UUID,
         memberId: Long,
-        ssn: String
+        ssn: String,
+        targetUrl: String,
+        failedTargetUrl: String
     ): StartNorwegianBankIdSignResponse
 
     fun isUnderwriterHandlingSignSession(orderReference: UUID): Boolean
