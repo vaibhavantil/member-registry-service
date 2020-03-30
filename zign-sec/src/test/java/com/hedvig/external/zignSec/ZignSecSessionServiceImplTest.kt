@@ -103,7 +103,7 @@ class ZignSecSessionServiceImplTest {
     fun signSuccess() {
         val id = UUID.randomUUID()
 
-        whenever(zignSecService.auth(startAuthRequest)).thenReturn(
+        whenever(zignSecService.auth(startSignRequest)).thenReturn(
             ZignSecResponse(
                 id,
                 emptyList(),
@@ -111,7 +111,7 @@ class ZignSecSessionServiceImplTest {
             )
         )
 
-        val response = classUnderTest.auth(startAuthRequest)
+        val response = classUnderTest.sign(startSignRequest)
 
         assertThat(response).isInstanceOf(Success::class.java)
         assertThat((response as Success).redirectUrl).isEqualTo("redirect url")
@@ -121,7 +121,7 @@ class ZignSecSessionServiceImplTest {
 
     @Test
     fun signFailed() {
-        whenever(zignSecService.auth(startAuthRequest)).thenReturn(
+        whenever(zignSecService.auth(startSignRequest)).thenReturn(
             ZignSecResponse(
                 UUID.randomUUID(),
                 listOf(ZignSecResponseError(0, "some_error")),
@@ -129,7 +129,7 @@ class ZignSecSessionServiceImplTest {
             )
         )
 
-        val response = classUnderTest.auth(startAuthRequest)
+        val response = classUnderTest.sign(startSignRequest)
 
         assertThat(response).isInstanceOf(Failed::class.java)
         assertThat((response as Failed).errors).isNotEmpty
@@ -364,7 +364,7 @@ class ZignSecSessionServiceImplTest {
     fun signDontReuseSessionWithOldPersonalNumber() {
         val id = UUID.randomUUID()
 
-        whenever(sessionRepository.findByMemberId(startAuthRequest.memberId.toLong())).thenReturn(
+        whenever(sessionRepository.findByMemberId(startSignRequest.memberId.toLong())).thenReturn(
             Optional.of(ZignSecSession(
                 memberId = 1337,
                 requestType = NorwegianAuthenticationType.SIGN,
@@ -375,7 +375,7 @@ class ZignSecSessionServiceImplTest {
             ))
         )
 
-        whenever(zignSecService.auth(startAuthRequest)).thenReturn(
+        whenever(zignSecService.auth(startSignRequest)).thenReturn(
             ZignSecResponse(
                 id,
                 emptyList(),
@@ -396,7 +396,7 @@ class ZignSecSessionServiceImplTest {
             )
 
 
-        val response = classUnderTest.sign(startAuthRequest)
+        val response = classUnderTest.sign(startSignRequest)
 
         assertThat(captor.value.personalNumber).isEqualTo("12121212120")
         assertThat((response as Success).redirectUrl).isEqualTo("redirect url 2")
@@ -415,16 +415,22 @@ class ZignSecSessionServiceImplTest {
             ))
         )
 
-        val response = classUnderTest.auth(startAuthRequest)
+        val response = classUnderTest.auth(startSignRequest)
 
         verify(sessionRepository).delete(any())
         assertThat(response).isInstanceOf(Failed::class.java)
     }
 
     companion object {
-        val startAuthRequest = NorwegianBankIdAuthenticationRequest(
+        val startSignRequest = NorwegianBankIdAuthenticationRequest(
             "1337",
             "12121212120",
+            "NO"
+        )
+
+        val startAuthRequest = NorwegianBankIdAuthenticationRequest(
+            "1337",
+            null,
             "NO"
         )
 
