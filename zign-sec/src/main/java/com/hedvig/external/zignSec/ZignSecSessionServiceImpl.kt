@@ -46,6 +46,11 @@ class ZignSecSessionServiceImpl(
 
         return if (optional.isPresent) {
             val session = optional.get()
+
+            if (session.personalNumber != request.personalNumber){
+                return startNewSession(request, type, session)
+            }
+
             when (session.status) {
                 NorwegianBankIdProgressStatus.INITIATED,
                 NorwegianBankIdProgressStatus.IN_PROGRESS -> {
@@ -91,11 +96,13 @@ class ZignSecSessionServiceImpl(
         val s = session?.apply {
             this.referenceId = response.id
             this.redirectUrl = response.redirectUrl
+            this.personalNumber = request.personalNumber
         } ?: ZignSecSession(
             memberId = request.memberId.toLong(),
             requestType = type,
             referenceId = response.id,
-            redirectUrl = response.redirectUrl
+            redirectUrl = response.redirectUrl,
+            personalNumber = request.personalNumber
         )
 
         sessionRepository.save(s)
