@@ -23,12 +23,12 @@ class NorwegianSigningService(
 ) {
 
     @Transactional
-    fun startSign(memberId: Long, ssn: String, targetUrl: String, failedTargetUrl: String): StartNorwegianAuthenticationResult {
+    fun startSign(memberId: Long, ssn: String, successUrl: String, failUrl: String): StartNorwegianAuthenticationResult {
         val result = norwegianBankIdService.sign(
             memberId.toString(),
             ssn,
-            targetUrl,
-            failedTargetUrl
+            successUrl,
+            failUrl
         )
         redisEventPublisher.onSignSessionUpdate(memberId)
         return result

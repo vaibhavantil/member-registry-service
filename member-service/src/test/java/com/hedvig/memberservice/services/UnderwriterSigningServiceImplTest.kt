@@ -84,13 +84,13 @@ class UnderwriterSigningServiceImplTest {
     @Test
     fun startNorwegianBankIdSession() {
         whenever(signedMemberRepository.findBySsn(norwegianSSN)).thenReturn(Optional.empty())
-        whenever(norwegianSigningService.startSign(memberId, norwegianSSN, successTargetUrl, failedTargetUrl))
+        whenever(norwegianSigningService.startSign(memberId, norwegianSSN, successTargetUrl, failUrl))
             .thenReturn(StartNorwegianAuthenticationResult.Success(orderRefUUID, redirectUrl))
 
         whenever(underwriterSignSessionRepository.save(captor.capture()))
             .thenReturn(UnderwriterSignSessionEntity(underwriterSessionRef, orderRefUUID))
 
-        val response = sut.startNorwegianBankIdSignSession(underwriterSessionRef, memberId, norwegianSSN, successTargetUrl, failedTargetUrl)
+        val response = sut.startNorwegianBankIdSignSession(underwriterSessionRef, memberId, norwegianSSN, successTargetUrl, failUrl)
 
         assertThat(response.redirectUrl).isEqualTo(redirectUrl)
         assertThat(captor.value.signReference).isEqualTo(orderRefUUID)
@@ -100,10 +100,10 @@ class UnderwriterSigningServiceImplTest {
     @Test
     fun startNorwegianBankIdSessionFails() {
         whenever(signedMemberRepository.findBySsn(norwegianSSN)).thenReturn(Optional.empty())
-        whenever(norwegianSigningService.startSign(memberId, norwegianSSN, successTargetUrl, failedTargetUrl))
+        whenever(norwegianSigningService.startSign(memberId, norwegianSSN, successTargetUrl, failUrl))
             .thenReturn(StartNorwegianAuthenticationResult.Failed(listOf(NorwegianAuthenticationResponseError(1,"Some error message"))))
 
-        val response = sut.startNorwegianBankIdSignSession(underwriterSessionRef, memberId, norwegianSSN, successTargetUrl, failedTargetUrl)
+        val response = sut.startNorwegianBankIdSignSession(underwriterSessionRef, memberId, norwegianSSN, successTargetUrl, failUrl)
 
         verifyZeroInteractions(underwriterSignSessionRepository)
         assertThat(response.errorMessages).isNotEmpty
@@ -113,7 +113,7 @@ class UnderwriterSigningServiceImplTest {
     fun dontStartNorwegianBankIdSignIfAlreadySigned() {
         whenever(signedMemberRepository.findBySsn(norwegianSSN)).thenReturn(Optional.of(SignedMemberEntity()))
 
-        sut.startNorwegianBankIdSignSession(underwriterSessionRef, memberId, norwegianSSN, successTargetUrl, failedTargetUrl)
+        sut.startNorwegianBankIdSignSession(underwriterSessionRef, memberId, norwegianSSN, successTargetUrl, failUrl)
 
         verifyZeroInteractions(swedishBankIdSigningService)
         verifyZeroInteractions(underwriterSignSessionRepository)
@@ -156,6 +156,6 @@ class UnderwriterSigningServiceImplTest {
         private const val redirectUrl = "redirect url"
         private const val ip = "1.0.0.0"
         private const val successTargetUrl = "https://hedvig.com/success"
-        private const val failedTargetUrl = "https://hedvig.com/failed"
+        private const val failUrl = "https://hedvig.com/failed"
     }
 }

@@ -5,6 +5,6 @@ import java.util.*
 data class UnderwriterStartNorwegianBankIdSignSessionRequest(
     val underwriterSessionReference: UUID,
     val ssn: String,
-    val targetUrl: String,
-    val failedTargetUrl: String
+    val successUrl: String,
+    val failUrl: String
 )

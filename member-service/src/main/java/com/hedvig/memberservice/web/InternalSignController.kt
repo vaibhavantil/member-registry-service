@@ -40,8 +40,8 @@ class InternalSignController(
             request.underwriterSessionReference,
             memberId,
             request.ssn,
-            request.targetUrl,
-            request.failedTargetUrl
+            request.successUrl,
+            request.failUrl
         )
     )
 }

@@ -43,8 +43,8 @@ class UnderwriterSigningServiceImpl(
         return StartSwedishBankIdSignResponse(response.bankIdOrderResponse.autoStartToken)
     }
 
-    override fun startNorwegianBankIdSignSession(underwriterSessionRef: UUID, memberId: Long, ssn: String, targetUrl: String, failedTargetUrl: String): StartNorwegianBankIdSignResponse {
-        if (!hasValidHost(targetUrl) || !hasValidHost(failedTargetUrl)) {
+    override fun startNorwegianBankIdSignSession(underwriterSessionRef: UUID, memberId: Long, ssn: String, successUrl: String, failUrl: String): StartNorwegianBankIdSignResponse {
+        if (!hasValidHost(successUrl) || !hasValidHost(failUrl)) {
             return StartNorwegianBankIdSignResponse(
                 redirectUrl = null,
                 internalErrorMessage = "Not an valid target url"
@@ -58,7 +58,7 @@ class UnderwriterSigningServiceImpl(
             )
         }
 
-        return when (val response = norwegianSigningService.startSign(memberId, ssn, targetUrl, failedTargetUrl)) {
+        return when (val response = norwegianSigningService.startSign(memberId, ssn, successUrl, failUrl)) {
             is StartNorwegianAuthenticationResult.Success -> {
                 underwriterSignSessionRepository.saveOrUpdateReusableSession(underwriterSessionRef, response.orderReference)
 

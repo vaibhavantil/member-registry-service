@@ -32,20 +32,20 @@ class NorwegianBankIdService(
                 memberId.toString(),
                 request.personalNumber,
                 resolveTwoLetterLanguageFromMember(memberId),
-                request.targetUrl,
-                request.failedTargetUrl
+                request.successUrl,
+                request.failUrl
             )
         )
     }
 
-    fun sign(memberId: String, ssn: String, targetUrl: String, failedTargetUrl: String) =
+    fun sign(memberId: String, ssn: String, successUrl: String, failUrl: String) =
         norwegianAuthentication.sign(
             NorwegianBankIdAuthenticationRequest(
                 memberId,
                 ssn,
                 resolveTwoLetterLanguageFromMember(memberId.toLong()),
-                targetUrl,
-                failedTargetUrl
+                successUrl,
+                failUrl
             )
         )
 
