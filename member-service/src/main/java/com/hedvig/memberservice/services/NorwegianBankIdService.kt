@@ -32,8 +32,8 @@ class NorwegianBankIdService(
                 memberId.toString(),
                 request.personalNumber,
                 resolveTwoLetterLanguageFromMember(memberId),
-                request.successUrl,
-                request.failUrl
+                request.targetUrl,
+                request.failedTargetUrl
             )
         )
     }
