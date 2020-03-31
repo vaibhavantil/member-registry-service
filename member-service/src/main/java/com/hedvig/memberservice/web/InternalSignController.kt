@@ -39,7 +39,9 @@ class InternalSignController(
         underwriterSigningService.startNorwegianBankIdSignSession(
             request.underwriterSessionReference,
             memberId,
-            request.ssn
+            request.ssn,
+            request.successUrl,
+            request.failUrl
         )
     )
 }

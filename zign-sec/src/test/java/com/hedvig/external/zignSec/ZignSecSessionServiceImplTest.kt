@@ -23,7 +23,9 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers.any
+import org.mockito.Captor
 import org.mockito.Mock
 import org.mockito.Mockito.never
 import org.mockito.Mockito.verify
@@ -45,6 +47,9 @@ class ZignSecSessionServiceImplTest {
 
     @Mock
     lateinit var norwegianAuthenticationEventPublisher: NorwegianAuthenticationEventPublisher
+
+    @Captor
+    lateinit var captor: ArgumentCaptor<ZignSecSession>
 
     lateinit var objectMapper: ObjectMapper
 
@@ -98,7 +103,7 @@ class ZignSecSessionServiceImplTest {
     fun signSuccess() {
         val id = UUID.randomUUID()
 
-        whenever(zignSecService.auth(startAuthRequest)).thenReturn(
+        whenever(zignSecService.auth(startSignRequest)).thenReturn(
             ZignSecResponse(
                 id,
                 emptyList(),
@@ -106,7 +111,7 @@ class ZignSecSessionServiceImplTest {
             )
         )
 
-        val response = classUnderTest.auth(startAuthRequest)
+        val response = classUnderTest.sign(startSignRequest)
 
         assertThat(response).isInstanceOf(Success::class.java)
         assertThat((response as Success).redirectUrl).isEqualTo("redirect url")
@@ -116,7 +121,7 @@ class ZignSecSessionServiceImplTest {
 
     @Test
     fun signFailed() {
-        whenever(zignSecService.auth(startAuthRequest)).thenReturn(
+        whenever(zignSecService.auth(startSignRequest)).thenReturn(
             ZignSecResponse(
                 UUID.randomUUID(),
                 listOf(ZignSecResponseError(0, "some_error")),
@@ -124,7 +129,7 @@ class ZignSecSessionServiceImplTest {
             )
         )
 
-        val response = classUnderTest.auth(startAuthRequest)
+        val response = classUnderTest.sign(startSignRequest)
 
         assertThat(response).isInstanceOf(Failed::class.java)
         assertThat((response as Failed).errors).isNotEmpty
@@ -140,7 +145,8 @@ class ZignSecSessionServiceImplTest {
                 requestType = NorwegianAuthenticationType.AUTH,
                 status = NorwegianBankIdProgressStatus.INITIATED,
                 referenceId = REFERENCE_ID,
-                redirectUrl = "redirect url"
+                redirectUrl = "redirect url",
+                requestPersonalNumber = null
             ))
         )
 
@@ -172,7 +178,8 @@ class ZignSecSessionServiceImplTest {
                 requestType = NorwegianAuthenticationType.AUTH,
                 status = NorwegianBankIdProgressStatus.INITIATED,
                 referenceId = REFERENCE_ID,
-                redirectUrl = "redirect url"
+                redirectUrl = "redirect url",
+                requestPersonalNumber = null
             ))
         )
 
@@ -214,7 +221,8 @@ class ZignSecSessionServiceImplTest {
                 requestType = NorwegianAuthenticationType.AUTH,
                 status = NorwegianBankIdProgressStatus.INITIATED,
                 referenceId = REFERENCE_ID,
-                redirectUrl = "redirect url"
+                redirectUrl = "redirect url",
+                requestPersonalNumber = null
             ))
         )
 
@@ -246,7 +254,8 @@ class ZignSecSessionServiceImplTest {
                 requestType = NorwegianAuthenticationType.AUTH,
                 status = NorwegianBankIdProgressStatus.COMPLETED,
                 referenceId = REFERENCE_ID,
-                redirectUrl = "redirect url"
+                redirectUrl = "redirect url",
+                requestPersonalNumber = null
             ))
         )
 
@@ -276,7 +285,8 @@ class ZignSecSessionServiceImplTest {
             requestType = NorwegianAuthenticationType.AUTH,
             notification = null,
             createdAt = timestamp,
-            updatedAt = timestamp
+            updatedAt = timestamp,
+            requestPersonalNumber = null
         )
 
         whenever(sessionRepository.findByReferenceId(REFERENCE_ID)).thenReturn(
@@ -306,7 +316,8 @@ class ZignSecSessionServiceImplTest {
             redirectUrl = REDIRECT_URL,
             notification = null,
             createdAt = timestamp,
-            updatedAt = timestamp
+            updatedAt = timestamp,
+            requestPersonalNumber = null
         )
 
         whenever(sessionRepository.findByReferenceId(REFERENCE_ID)).thenReturn(
@@ -334,7 +345,8 @@ class ZignSecSessionServiceImplTest {
             redirectUrl = REDIRECT_URL,
             notification = null,
             createdAt = timestamp,
-            updatedAt = timestamp
+            updatedAt = timestamp,
+            requestPersonalNumber = null
         )
 
         whenever(sessionRepository.findByReferenceId(REFERENCE_ID)).thenReturn(
@@ -347,11 +359,83 @@ class ZignSecSessionServiceImplTest {
         verify(sessionRepository, never()).save(any())
     }
 
+
+    @Test
+    fun signDontReuseSessionWithOldPersonalNumber() {
+        val id = UUID.randomUUID()
+
+        whenever(sessionRepository.findByMemberId(startSignRequest.memberId.toLong())).thenReturn(
+            Optional.of(ZignSecSession(
+                memberId = 1337,
+                requestType = NorwegianAuthenticationType.SIGN,
+                status = NorwegianBankIdProgressStatus.INITIATED,
+                referenceId = REFERENCE_ID,
+                redirectUrl = "redirect url",
+                requestPersonalNumber = "12121212121"
+            ))
+        )
+
+        whenever(zignSecService.auth(startSignRequest)).thenReturn(
+            ZignSecResponse(
+                id,
+                emptyList(),
+                "redirect url 2"
+            )
+        )
+
+        whenever(sessionRepository.save(captor.capture()))
+            .thenReturn(
+                ZignSecSession(
+                    memberId = 1337,
+                    requestType = NorwegianAuthenticationType.SIGN,
+                    status = NorwegianBankIdProgressStatus.INITIATED,
+                    referenceId = REFERENCE_ID,
+                    redirectUrl = "redirect url",
+                    requestPersonalNumber = "12121212120"
+                )
+            )
+
+
+        val response = classUnderTest.sign(startSignRequest)
+
+        assertThat(captor.value.requestPersonalNumber).isEqualTo("12121212120")
+        assertThat((response as Success).redirectUrl).isEqualTo("redirect url 2")
+    }
+
+    @Test
+    fun failSessionIfMethodChanges() {
+        whenever(sessionRepository.findByMemberId(startAuthRequest.memberId.toLong())).thenReturn(
+            Optional.of(ZignSecSession(
+                memberId = 1337,
+                requestType = NorwegianAuthenticationType.SIGN,
+                status = NorwegianBankIdProgressStatus.INITIATED,
+                referenceId = REFERENCE_ID,
+                redirectUrl = "redirect url",
+                requestPersonalNumber = "12121212120"
+            ))
+        )
+
+        val response = classUnderTest.auth(startSignRequest)
+
+        verify(sessionRepository).delete(any())
+        assertThat(response).isInstanceOf(Failed::class.java)
+    }
+
     companion object {
-        val startAuthRequest = NorwegianBankIdAuthenticationRequest(
+        val startSignRequest = NorwegianBankIdAuthenticationRequest(
             "1337",
             "12121212120",
-            "NO"
+            "NO",
+            "success",
+            "fail"
+        )
+
+        val startAuthRequest = NorwegianBankIdAuthenticationRequest(
+            "1337",
+            null,
+            "NO",
+            "success",
+            "fail"
         )
 
         val REDIRECT_URL = "redirect_url"

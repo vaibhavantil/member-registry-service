@@ -46,30 +46,30 @@ class NorwegianSigningServiceTest {
 
     @Test
     fun startSignSuccessful() {
-        whenever(norwegianBankIdService.sign(MEMBER_ID.toString(), SSN)).thenReturn(
+        whenever(norwegianBankIdService.sign(MEMBER_ID.toString(), SSN, SUCCESS_TARGET_URL, FAILED_TARGET_URL)).thenReturn(
             StartNorwegianAuthenticationResult.Success(
                 ORDER_REF,
                 REDIRECT_URL
             )
         )
 
-        val response = classUnderTest.startWebSign(MEMBER_ID, WebsignRequest(EMAIL, SSN, IP_ADDRESS))
+        val response = classUnderTest.startSign(MEMBER_ID, SSN, SUCCESS_TARGET_URL, FAILED_TARGET_URL)
 
-        assertThat(response.status).isEqualTo(SignStatus.IN_PROGRESS)
-        assertThat(response.norwegianBankIdResponse?.redirectUrl).isEqualTo(REDIRECT_URL)
+        assertThat(response).isInstanceOf(StartNorwegianAuthenticationResult.Success::class.java)
+        assertThat((response as StartNorwegianAuthenticationResult.Success).redirectUrl).isEqualTo(REDIRECT_URL)
     }
 
     @Test
     fun startSignFails() {
-        whenever(norwegianBankIdService.sign(MEMBER_ID.toString(), SSN)).thenReturn(
+        whenever(norwegianBankIdService.sign(MEMBER_ID.toString(), SSN, SUCCESS_TARGET_URL, FAILED_TARGET_URL)).thenReturn(
             StartNorwegianAuthenticationResult.Failed(
                 LIST_OF_ERRORS
             )
         )
 
-        val response = classUnderTest.startWebSign(MEMBER_ID, WebsignRequest(EMAIL, SSN, IP_ADDRESS))
+        val response = classUnderTest.startSign(MEMBER_ID, SSN, SUCCESS_TARGET_URL, FAILED_TARGET_URL)
 
-        assertThat(response.status).isEqualTo(SignStatus.FAILED)
+        assertThat(response).isInstanceOf(StartNorwegianAuthenticationResult.Failed::class.java)
     }
 
     @Test
@@ -108,6 +108,8 @@ class NorwegianSigningServiceTest {
         private const val IP_ADDRESS: String = ""
         private const val REDIRECT_URL: String = "redirect_url"
         private const val PROVIDER_JSON_RESPONSE = """{ "json": true }"""
+        private const val SUCCESS_TARGET_URL = "success"
+        private const val FAILED_TARGET_URL = "failed"
         private val LIST_OF_ERRORS = listOf(NorwegianAuthenticationResponseError(0, "some error"))
         private val RESPONSE_ID: UUID = UUID.randomUUID()
         private val ORDER_REF: UUID = UUID.randomUUID()

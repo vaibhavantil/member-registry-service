@@ -12,7 +12,6 @@ import com.hedvig.memberservice.web.v2.dto.WebsignRequest
 import org.slf4j.LoggerFactory
 import org.springframework.context.ApplicationEventPublisher
 import org.springframework.stereotype.Service
-import java.util.*
 import javax.transaction.Transactional
 
 @Service
@@ -23,28 +22,13 @@ class NorwegianSigningService(
     private val redisEventPublisher: RedisEventPublisher
 ) {
 
-    fun startWebSign(memberId: Long, request: WebsignRequest): MemberSignResponse {
-        return when (val response = startSign(memberId, request.ssn)) {
-            is StartNorwegianAuthenticationResult.Success -> {
-                MemberSignResponse(
-                    status = SignStatus.IN_PROGRESS,
-                    norwegianBankIdResponse = NorwegianBankIdResponse(response.redirectUrl)
-                )
-            }
-            is StartNorwegianAuthenticationResult.Failed -> {
-                logger.error("Norwegian authentication failed with errors: ${response.errors}")
-                MemberSignResponse(
-                    status = SignStatus.FAILED
-                )
-            }
-        }
-    }
-
     @Transactional
-    fun startSign(memberId: Long, ssn: String): StartNorwegianAuthenticationResult {
+    fun startSign(memberId: Long, ssn: String, successUrl: String, failUrl: String): StartNorwegianAuthenticationResult {
         val result = norwegianBankIdService.sign(
             memberId.toString(),
-            ssn
+            ssn,
+            successUrl,
+            failUrl
         )
         redisEventPublisher.onSignSessionUpdate(memberId)
         return result

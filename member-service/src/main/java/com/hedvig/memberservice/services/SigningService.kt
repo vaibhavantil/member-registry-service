@@ -21,6 +21,7 @@ import org.axonframework.commandhandling.gateway.CommandGateway
 import org.slf4j.LoggerFactory
 import org.springframework.lang.NonNull
 import org.springframework.stereotype.Service
+import java.lang.IllegalArgumentException
 import javax.transaction.Transactional
 
 @Service
@@ -51,7 +52,7 @@ class SigningService(
 
                 return when (quote.signMethod) {
                     SignMethod.SWEDISH_BANK_ID -> swedishBankIdSigningService.startSign(request, memberId, quote.isSwitching)
-                    SignMethod.NORWEGIAN_BANK_ID-> norwegianSigningService.startWebSign(memberId, request)
+                    SignMethod.NORWEGIAN_BANK_ID -> throw IllegalArgumentException("Sign method norwegian bank id doesn't support web sign. Use graphql `signQuotes` mutation instead!")
                 }
             }
             is QuoteToSignStatusDto.NotEligibleToSign -> throw CannotSignInsuranceException()

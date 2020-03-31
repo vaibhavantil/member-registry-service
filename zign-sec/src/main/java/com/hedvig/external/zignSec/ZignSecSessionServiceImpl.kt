@@ -46,6 +46,20 @@ class ZignSecSessionServiceImpl(
 
         return if (optional.isPresent) {
             val session = optional.get()
+
+            if (session.requestType != type){
+                sessionRepository.delete(session)
+                return StartNorwegianAuthenticationResult.Failed(
+                    errors = listOf(
+                        NorwegianAuthenticationResponseError(0, "Illegal change of method. Tried to change from type: ${session.requestType} to $type")
+                    )
+                )
+            }
+
+            if (session.requestPersonalNumber != request.personalNumber){
+                return startNewSession(request, type, session)
+            }
+
             when (session.status) {
                 NorwegianBankIdProgressStatus.INITIATED,
                 NorwegianBankIdProgressStatus.IN_PROGRESS -> {
@@ -91,11 +105,13 @@ class ZignSecSessionServiceImpl(
         val s = session?.apply {
             this.referenceId = response.id
             this.redirectUrl = response.redirectUrl
+            this.requestPersonalNumber = request.personalNumber
         } ?: ZignSecSession(
             memberId = request.memberId.toLong(),
             requestType = type,
             referenceId = response.id,
-            redirectUrl = response.redirectUrl
+            redirectUrl = response.redirectUrl,
+            requestPersonalNumber = request.personalNumber
         )
 
         sessionRepository.save(s)

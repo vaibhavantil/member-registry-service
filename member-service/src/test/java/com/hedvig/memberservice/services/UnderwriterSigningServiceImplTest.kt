@@ -46,7 +46,7 @@ class UnderwriterSigningServiceImplTest {
 
     @Before
     fun setup() {
-        sut = UnderwriterSigningServiceImpl(underwriterSignSessionRepository, underwriterClient, swedishBankIdSigningService, norwegianSigningService, signedMemberRepository)
+        sut = UnderwriterSigningServiceImpl(underwriterSignSessionRepository, underwriterClient, swedishBankIdSigningService, norwegianSigningService, signedMemberRepository, arrayOf("hedvig.com"))
     }
 
     @Test
@@ -84,13 +84,13 @@ class UnderwriterSigningServiceImplTest {
     @Test
     fun startNorwegianBankIdSession() {
         whenever(signedMemberRepository.findBySsn(norwegianSSN)).thenReturn(Optional.empty())
-        whenever(norwegianSigningService.startSign(memberId, norwegianSSN))
+        whenever(norwegianSigningService.startSign(memberId, norwegianSSN, successTargetUrl, failUrl))
             .thenReturn(StartNorwegianAuthenticationResult.Success(orderRefUUID, redirectUrl))
 
         whenever(underwriterSignSessionRepository.save(captor.capture()))
             .thenReturn(UnderwriterSignSessionEntity(underwriterSessionRef, orderRefUUID))
 
-        val response = sut.startNorwegianBankIdSignSession(underwriterSessionRef, memberId, norwegianSSN)
+        val response = sut.startNorwegianBankIdSignSession(underwriterSessionRef, memberId, norwegianSSN, successTargetUrl, failUrl)
 
         assertThat(response.redirectUrl).isEqualTo(redirectUrl)
         assertThat(captor.value.signReference).isEqualTo(orderRefUUID)
@@ -100,10 +100,10 @@ class UnderwriterSigningServiceImplTest {
     @Test
     fun startNorwegianBankIdSessionFails() {
         whenever(signedMemberRepository.findBySsn(norwegianSSN)).thenReturn(Optional.empty())
-        whenever(norwegianSigningService.startSign(memberId, norwegianSSN))
+        whenever(norwegianSigningService.startSign(memberId, norwegianSSN, successTargetUrl, failUrl))
             .thenReturn(StartNorwegianAuthenticationResult.Failed(listOf(NorwegianAuthenticationResponseError(1,"Some error message"))))
 
-        val response = sut.startNorwegianBankIdSignSession(underwriterSessionRef, memberId, norwegianSSN)
+        val response = sut.startNorwegianBankIdSignSession(underwriterSessionRef, memberId, norwegianSSN, successTargetUrl, failUrl)
 
         verifyZeroInteractions(underwriterSignSessionRepository)
         assertThat(response.errorMessages).isNotEmpty
@@ -113,7 +113,7 @@ class UnderwriterSigningServiceImplTest {
     fun dontStartNorwegianBankIdSignIfAlreadySigned() {
         whenever(signedMemberRepository.findBySsn(norwegianSSN)).thenReturn(Optional.of(SignedMemberEntity()))
 
-        sut.startNorwegianBankIdSignSession(underwriterSessionRef, memberId, norwegianSSN)
+        sut.startNorwegianBankIdSignSession(underwriterSessionRef, memberId, norwegianSSN, successTargetUrl, failUrl)
 
         verifyZeroInteractions(swedishBankIdSigningService)
         verifyZeroInteractions(underwriterSignSessionRepository)
@@ -137,6 +137,14 @@ class UnderwriterSigningServiceImplTest {
         assertThat(!handled)
     }
 
+    @Test
+    fun failStartNorwegianBankIdSignSessionOnInvalidHost() {
+        val response = sut.startNorwegianBankIdSignSession(orderRefUUID, memberId, norwegianSSN, "http://someOther.host", "http://someOther.host")
+
+        assertThat(response.redirectUrl).isNull()
+        assertThat(response.internalErrorMessage).isNotNull()
+    }
+
     companion object {
         private val underwriterSessionRef = UUID.randomUUID()
         private const val orderRef = "db5da518-5e2d-11ea-bc55-0242ac130003"
@@ -147,5 +155,7 @@ class UnderwriterSigningServiceImplTest {
         private const val norwegianSSN = "12121212120"
         private const val redirectUrl = "redirect url"
         private const val ip = "1.0.0.0"
+        private const val successTargetUrl = "https://hedvig.com/success"
+        private const val failUrl = "https://hedvig.com/failed"
     }
 }

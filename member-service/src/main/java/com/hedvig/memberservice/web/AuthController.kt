@@ -25,7 +25,7 @@ import com.hedvig.memberservice.web.dto.BankIdProgressStatus
 import com.hedvig.memberservice.web.dto.BankIdProgressStatus.Companion.valueOf
 import com.hedvig.memberservice.web.dto.BankIdSignRequest
 import com.hedvig.memberservice.web.dto.BankIdSignResponse
-import com.hedvig.memberservice.web.dto.GenericBankIdAuthenticationRequest
+import com.hedvig.memberservice.web.dto.RedirectBankIdAuthenticationRequest
 import net.logstash.logback.argument.StructuredArguments
 import org.axonframework.commandhandling.gateway.CommandGateway
 import org.slf4j.LoggerFactory
@@ -172,7 +172,7 @@ class AuthController @Autowired constructor(
     }
 
     @PostMapping(path = ["/{country}/bankid/auth"])
-    private fun auth(@RequestHeader("hedvig.token") memberId: Long, @PathVariable("country") country: String, @RequestBody request: GenericBankIdAuthenticationRequest): ResponseEntity<StartNorwegianAuthenticationResult> {
+    private fun auth(@RequestHeader("hedvig.token") memberId: Long, @PathVariable("country") country: String, @RequestBody request: RedirectBankIdAuthenticationRequest): ResponseEntity<StartNorwegianAuthenticationResult> {
         return when (country) {
             "norway" ->
                 ResponseEntity.ok(norwegianBankIdService.authenticate(memberId, request))
