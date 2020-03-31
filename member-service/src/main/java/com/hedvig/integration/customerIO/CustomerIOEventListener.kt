@@ -1,5 +1,6 @@
 package com.hedvig.integration.customerIO
 
+import com.hedvig.integration.notificationService.NotificationService
 import com.hedvig.memberservice.events.MemberSignedEvent
 import com.hedvig.memberservice.query.MemberRepository
 import mu.KotlinLogging
@@ -15,7 +16,7 @@ import org.springframework.stereotype.Component
 @Component
 class CustomerIOEventListener(
     private val memberRepository: MemberRepository,
-    private val customerIO: CustomerIO
+    private val notificationService: NotificationService
 ) {
     private val logger = KotlinLogging.logger {}
 
@@ -29,7 +30,7 @@ class CustomerIOEventListener(
         )
         membersToDeleteFromCustomerIO.forEach { memberToRemove ->
             try {
-                customerIO.deleteUser(userId = memberToRemove.id.toString())
+                notificationService.deleteCustomer(memberToRemove.id.toString())
                 logger.info { "Deleted member=${memberToRemove.id} from customer.io since member=${member.id} signed" }
             } catch (exception: Exception) {
                 logger.error { "Failed to delete member=${memberToRemove.id} from customer.io (exception=$exception)" }

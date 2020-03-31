@@ -2,6 +2,7 @@ package com.hedvig.integration.notificationService;
 
 import com.hedvig.integration.notificationService.dto.CancellationEmailSentToInsurerRequest;
 import com.hedvig.integration.notificationService.dto.InsuranceActivationDateUpdatedRequest;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -35,5 +36,10 @@ public class NotificationServiceImpl implements NotificationService {
   @Override
   public void insuranceReminder(int NumberOfDaysFromToday) {
     notificationServiceClient.insuranceReminder(NumberOfDaysFromToday);
+  }
+
+  @Override
+  public void deleteCustomer(@NotNull String memberId) {
+    notificationServiceClient.deleteCustomer(memberId);
   }
 }
