@@ -1,10 +1,9 @@
 package com.hedvig.memberservice.services.segmentpublisher
 
 import com.google.common.collect.ImmutableMap
+import com.hedvig.integration.notificationService.NotificationService
 import com.hedvig.memberservice.events.EmailUpdatedEvent
 import com.hedvig.memberservice.events.NameUpdatedEvent
-import com.segment.analytics.Analytics
-import com.segment.analytics.messages.IdentifyMessage
 import org.axonframework.config.ProcessingGroup
 import org.axonframework.eventhandling.EventHandler
 import org.springframework.beans.factory.annotation.Autowired
@@ -16,7 +15,7 @@ import java.util.Objects
 @Profile("customer.io")
 @ProcessingGroup("SegmentProcessorGroup")
 class EventListener @Autowired constructor(
-  private val segmentAnalytics: Analytics
+    private val notificationService: NotificationService
 ) {
 
     @EventHandler
@@ -29,18 +28,17 @@ class EventListener @Autowired constructor(
     @EventHandler
     fun on(evt: EmailUpdatedEvent) {
         val traits = ImmutableMap
-            .of<String, Any>("email", evt.email,
-                "timezone", "Europe/Stockholm ")
+            .of<String, Any>(
+                "email", evt.email,
+                "timezone", "Europe/Stockholm "
+            )
         segmentEnqueue(traits, Objects.toString(evt.id))
     }
 
     private fun segmentEnqueue(traitsMap: Map<String, Any>, memberId: String) {
-        segmentAnalytics.enqueue(
-            IdentifyMessage.builder()
-                .userId(memberId)
-                .enableIntegration("All", false)
-                .enableIntegration("Customer.io", true)
-                .traits(traitsMap))
+
+        notificationService.updateCustomer(memberId, traitsMap)
+
         try {
             Thread.sleep(10)
         } catch (e: InterruptedException) {
