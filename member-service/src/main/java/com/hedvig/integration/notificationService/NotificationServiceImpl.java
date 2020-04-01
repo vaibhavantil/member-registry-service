@@ -2,8 +2,11 @@ package com.hedvig.integration.notificationService;
 
 import com.hedvig.integration.notificationService.dto.CancellationEmailSentToInsurerRequest;
 import com.hedvig.integration.notificationService.dto.InsuranceActivationDateUpdatedRequest;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.util.Map;
 
 @Service
 public class NotificationServiceImpl implements NotificationService {
@@ -17,7 +20,7 @@ public class NotificationServiceImpl implements NotificationService {
 
   @Override
   public void cancellationEmailSentToInsurer(
-      Long memberId, CancellationEmailSentToInsurerRequest request) {
+    Long memberId, CancellationEmailSentToInsurerRequest request) {
     notificationServiceClient.cancellationEmailSentToInsurer(memberId, request);
   }
 
@@ -28,12 +31,22 @@ public class NotificationServiceImpl implements NotificationService {
 
   @Override
   public void insuranceActivationDateUpdated(
-      Long memberId, InsuranceActivationDateUpdatedRequest request) {
+    Long memberId, InsuranceActivationDateUpdatedRequest request) {
     notificationServiceClient.insuranceActivationDateUpdated(memberId, request);
   }
 
   @Override
   public void insuranceReminder(int NumberOfDaysFromToday) {
     notificationServiceClient.insuranceReminder(NumberOfDaysFromToday);
+  }
+
+  @Override
+  public void deleteCustomer(@NotNull String memberId) {
+    notificationServiceClient.deleteCustomer(memberId);
+  }
+
+  @Override
+  public void updateCustomer(@NotNull String memberId, @NotNull Map<String, Object> data) {
+    notificationServiceClient.updateCustomer(memberId, data);
   }
 }
