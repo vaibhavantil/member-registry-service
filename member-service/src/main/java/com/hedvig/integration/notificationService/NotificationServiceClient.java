@@ -32,8 +32,8 @@ public interface NotificationServiceClient {
   ResponseEntity<?> insuranceReminder(@RequestBody int NumberOfDaysFromToday);
 
   @DeleteMapping("/_/customerio/{memberId}")
-  ResponseEntity<?> deleteCustomer(@NotNull String memberId);
+  ResponseEntity<?> deleteCustomer(@PathVariable @NotNull String memberId);
 
   @PostMapping("/_/customerio/{memberId}")
-  ResponseEntity<?> updateCustomer(@NotNull String memberId, @NotNull Map<String, Object> data);
+  ResponseEntity<?> updateCustomer(@PathVariable @NotNull String memberId, @RequestBody @NotNull Map<String, Object> data);
 }
