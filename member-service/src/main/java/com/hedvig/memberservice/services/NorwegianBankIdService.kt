@@ -11,7 +11,7 @@ import com.hedvig.memberservice.query.MemberRepository
 import com.hedvig.memberservice.query.SignedMemberRepository
 import com.hedvig.memberservice.services.redispublisher.AuthSessionUpdatedEventStatus
 import com.hedvig.memberservice.services.redispublisher.RedisEventPublisher
-import com.hedvig.memberservice.web.dto.RedirectBankIdAuthenticationRequest
+import com.hedvig.memberservice.web.dto.GenericBankIdAuthenticationRequest
 import org.axonframework.commandhandling.gateway.CommandGateway
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
@@ -31,7 +31,7 @@ class NorwegianBankIdService(
     @Value("\${redirect.authentication.failUrl}")
     private val authenticationFailUrl: String
 ) {
-    fun authenticate(memberId: Long, request: RedirectBankIdAuthenticationRequest): StartNorwegianAuthenticationResult {
+    fun authenticate(memberId: Long, request: GenericBankIdAuthenticationRequest): StartNorwegianAuthenticationResult {
         return norwegianAuthentication.auth(
             NorwegianBankIdAuthenticationRequest(
                 memberId.toString(),

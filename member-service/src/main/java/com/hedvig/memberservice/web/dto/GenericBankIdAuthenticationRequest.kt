@@ -1,5 +1,5 @@
 package com.hedvig.memberservice.web.dto
 
-data class RedirectBankIdAuthenticationRequest(
+data class GenericBankIdAuthenticationRequest(
     val personalNumber: String? = null
 )
