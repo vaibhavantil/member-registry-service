@@ -46,7 +46,7 @@ class NorwegianBankIdServiceTest {
 
     @Before
     fun before() {
-        classUnderTest = NorwegianBankIdService(norwegianAuthentication, commandGateway, redisEventPublisher, signedMemberRepository, apiGatewayService, memberRepository, textKeysLocaleResolver)
+        classUnderTest = NorwegianBankIdService(norwegianAuthentication, commandGateway, redisEventPublisher, signedMemberRepository, apiGatewayService, memberRepository, textKeysLocaleResolver, "success", "fail")
     }
 
     @Test
