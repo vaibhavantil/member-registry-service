@@ -13,6 +13,7 @@ import com.hedvig.memberservice.services.redispublisher.AuthSessionUpdatedEventS
 import com.hedvig.memberservice.services.redispublisher.RedisEventPublisher
 import com.hedvig.memberservice.web.dto.RedirectBankIdAuthenticationRequest
 import org.axonframework.commandhandling.gateway.CommandGateway
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 import java.util.*
 
@@ -24,7 +25,11 @@ class NorwegianBankIdService(
     private val signedMemberRepository: SignedMemberRepository,
     private val apiGatewayService: ApiGatewayService,
     private val memberRepository: MemberRepository,
-    private val textKeysLocaleResolver: TextKeysLocaleResolver
+    private val textKeysLocaleResolver: TextKeysLocaleResolver,
+    @Value("\${redirect.authentication.successUrl}")
+    private val authenticationSuccessUrl: String,
+    @Value("\${redirect.authentication.failUrl}")
+    private val authenticationFailUrl: String
 ) {
     fun authenticate(memberId: Long, request: RedirectBankIdAuthenticationRequest): StartNorwegianAuthenticationResult {
         return norwegianAuthentication.auth(
@@ -32,8 +37,8 @@ class NorwegianBankIdService(
                 memberId.toString(),
                 request.personalNumber,
                 resolveTwoLetterLanguageFromMember(memberId),
-                request.successUrl,
-                request.failUrl
+                authenticationSuccessUrl,
+                authenticationFailUrl
             )
         )
     }
@@ -75,7 +80,7 @@ class NorwegianBankIdService(
         return getTwoLetterLanguageFromLocale(textKeysLocaleResolver.resolveLocale(acceptLanguage))
     }
 
-    private fun getTwoLetterLanguageFromLocale(locale: Locale) = when(locale.language) {
+    private fun getTwoLetterLanguageFromLocale(locale: Locale) = when (locale.language) {
         "sv" -> "SV"
         "en" -> "EN"
         else -> "NO"
