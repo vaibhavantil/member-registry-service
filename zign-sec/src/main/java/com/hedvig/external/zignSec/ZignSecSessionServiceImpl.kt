@@ -47,7 +47,7 @@ class ZignSecSessionServiceImpl(
         return if (optional.isPresent) {
             val session = optional.get()
 
-            if (session.requestType != type){
+            if (session.requestType != type) {
                 sessionRepository.delete(session)
                 return StartNorwegianAuthenticationResult.Failed(
                     errors = listOf(
@@ -56,7 +56,7 @@ class ZignSecSessionServiceImpl(
                 )
             }
 
-            if (session.requestPersonalNumber != request.personalNumber){
+            if (session.requestPersonalNumber != request.personalNumber) {
                 return startNewSession(request, type, session)
             }
 
@@ -64,7 +64,7 @@ class ZignSecSessionServiceImpl(
                 NorwegianBankIdProgressStatus.INITIATED,
                 NorwegianBankIdProgressStatus.IN_PROGRESS -> {
                     val collectResponse = try {
-                         zignSecService.collect(session.referenceId)
+                        zignSecService.collect(session.referenceId)
                     } catch (e: Exception) {
                         return startNewSession(request, type, session)
                     }
@@ -139,7 +139,8 @@ class ZignSecSessionServiceImpl(
     }
 
     private fun updateSession(session: ZignSecSession, request: ZignSecNotificationRequest, jsonRequest: String) {
-        session.notification = ZignSecNotification.from(request)
+        val notification = ZignSecNotification.from(request)
+        session.notification = notification
 
         session.status = getSessionStatusFromNotification(request)
 
@@ -147,27 +148,42 @@ class ZignSecSessionServiceImpl(
             NorwegianAuthenticationType.SIGN -> {
                 when (session.status) {
                     NorwegianBankIdProgressStatus.INITIATED,
-                    NorwegianBankIdProgressStatus.IN_PROGRESS -> { /* strange but no-op */ }
+                    NorwegianBankIdProgressStatus.IN_PROGRESS -> { /* strange but no-op */
+                    }
                     NorwegianBankIdProgressStatus.FAILED -> norwegianAuthenticationEventPublisher.publishSignEvent(
                         NorwegianSignResult.Failed(
                             session.referenceId,
                             session.memberId
                         )
                     )
-                    NorwegianBankIdProgressStatus.COMPLETED -> norwegianAuthenticationEventPublisher.publishSignEvent(
-                        NorwegianSignResult.Signed(
-                            session.referenceId,
-                            session.memberId,
-                            session.notification!!.identity!!.personalNumber!!,
-                            jsonRequest
-                        )
-                    )
+                    NorwegianBankIdProgressStatus.COMPLETED -> {
+                        //check that personal number is matching when signing
+                        if (notification.identity!!.personalNumber!! != session.requestPersonalNumber!!) {
+                            session.status = NorwegianBankIdProgressStatus.FAILED
+                            norwegianAuthenticationEventPublisher.publishSignEvent(
+                                NorwegianSignResult.Failed(
+                                    session.referenceId,
+                                    session.memberId
+                                )
+                            )
+                        } else {
+                            norwegianAuthenticationEventPublisher.publishSignEvent(
+                                NorwegianSignResult.Signed(
+                                    session.referenceId,
+                                    session.memberId,
+                                    session.notification!!.identity!!.personalNumber!!,
+                                    jsonRequest
+                                )
+                            )
+                        }
+                    }
                 }
             }
             NorwegianAuthenticationType.AUTH -> {
                 when (session.status) {
                     NorwegianBankIdProgressStatus.INITIATED,
-                    NorwegianBankIdProgressStatus.IN_PROGRESS -> { /* strange but no-op */ }
+                    NorwegianBankIdProgressStatus.IN_PROGRESS -> { /* strange but no-op */
+                    }
                     NorwegianBankIdProgressStatus.FAILED -> norwegianAuthenticationEventPublisher.publishAuthenticationEvent(
                         NorwegianAuthenticationResult.Failed(
                             session.referenceId,
