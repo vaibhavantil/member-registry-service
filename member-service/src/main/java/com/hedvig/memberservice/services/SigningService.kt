@@ -20,6 +20,7 @@ import com.hedvig.memberservice.web.v2.dto.WebsignRequest
 import org.axonframework.commandhandling.gateway.CommandGateway
 import org.slf4j.LoggerFactory
 import org.springframework.lang.NonNull
+import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Service
 import java.lang.IllegalArgumentException
 import javax.transaction.Transactional
@@ -126,10 +127,17 @@ class SigningService(
         } catch (ex: RuntimeException) {
             log.error("Could not initialize bot-service for memberId: {}", memberId, ex)
         }
+
+        schedulePublishSignSessionUpdate(memberId)
+    }
+
+    @Scheduled(fixedDelay = FIXED_DELAY_MS)
+    private fun schedulePublishSignSessionUpdate(memberId: Long) {
         redisEventPublisher.onSignSessionUpdate(memberId)
     }
 
     companion object {
         private val log = LoggerFactory.getLogger(SigningService::class.java)
+        private const val FIXED_DELAY_MS = 1000L
     }
 }
