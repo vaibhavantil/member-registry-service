@@ -106,6 +106,7 @@ class ZignSecSessionServiceImpl(
             this.referenceId = response.id
             this.redirectUrl = response.redirectUrl
             this.requestPersonalNumber = request.personalNumber
+            this.status = NorwegianBankIdProgressStatus.INITIATED
         } ?: ZignSecSession(
             memberId = request.memberId.toLong(),
             requestType = type,
