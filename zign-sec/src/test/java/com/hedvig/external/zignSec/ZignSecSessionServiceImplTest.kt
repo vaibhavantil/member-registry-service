@@ -317,7 +317,7 @@ class ZignSecSessionServiceImplTest {
             notification = null,
             createdAt = timestamp,
             updatedAt = timestamp,
-            requestPersonalNumber = null
+            requestPersonalNumber = ""
         )
 
         whenever(sessionRepository.findByReferenceId(REFERENCE_ID)).thenReturn(
@@ -419,6 +419,30 @@ class ZignSecSessionServiceImplTest {
 
         verify(sessionRepository).delete(any())
         assertThat(response).isInstanceOf(Failed::class.java)
+    }
+
+    @Test
+    fun failSessionSigningIfPersonalNumberHasChanged() {
+        val timestamp = Instant.now()
+        val session = ZignSecSession(
+            referenceId = REFERENCE_ID,
+            memberId = 1337,
+            status = NorwegianBankIdProgressStatus.INITIATED,
+            requestType = NorwegianAuthenticationType.SIGN,
+            redirectUrl = REDIRECT_URL,
+            notification = null,
+            createdAt = timestamp,
+            updatedAt = timestamp,
+            requestPersonalNumber = "01010100000"
+        )
+
+        whenever(sessionRepository.findByReferenceId(REFERENCE_ID)).thenReturn(
+            Optional.of(session)
+        )
+
+        classUnderTest.handleNotification(zignSecSuccessAuthNotificationRequest)
+
+        verify(norwegianAuthenticationEventPublisher).publishSignEvent(NorwegianSignResult.Failed(REFERENCE_ID, 1337))
     }
 
     companion object {
