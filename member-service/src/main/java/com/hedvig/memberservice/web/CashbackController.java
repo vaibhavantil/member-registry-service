@@ -1,5 +1,6 @@
 package com.hedvig.memberservice.web;
 
+import com.hedvig.memberservice.aggregates.PickedLocale;
 import com.hedvig.memberservice.commands.SelectNewCashbackCommand;
 import com.hedvig.memberservice.query.MemberEntity;
 import com.hedvig.memberservice.query.MemberRepository;
@@ -46,7 +47,7 @@ public class CashbackController {
 
       List<CashbackOption> cashbackOptions =
           cashbackService
-              .getOptions()
+              .getOptions(member.get().pickedLocale)
               .stream()
               .map(
                   o -> {
@@ -61,7 +62,7 @@ public class CashbackController {
       return ResponseEntity.ok(cashbackOptions);
     }
 
-    return ResponseEntity.ok(cashbackService.getOptions());
+    return ResponseEntity.ok(cashbackService.getOptions(PickedLocale.sv_SE));
   }
 
   @PostMapping("")

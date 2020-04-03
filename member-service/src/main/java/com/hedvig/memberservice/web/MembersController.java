@@ -1,6 +1,7 @@
 package com.hedvig.memberservice.web;
 
 import com.google.common.collect.Lists;
+import com.hedvig.memberservice.aggregates.PickedLocale;
 import com.hedvig.memberservice.commands.*;
 import com.hedvig.integration.productsPricing.ProductApi;
 import com.hedvig.integration.productsPricing.dto.InsuranceStatusDTO;
@@ -97,7 +98,7 @@ public class MembersController {
             m2.setStatus(null);
             m2.setSsn("");
             m2.setEmail("");
-            m2.setCashbackId(cashbackService.getDefaultId().toString());
+            m2.setCashbackId(cashbackService.getDefaultId(PickedLocale.sv_SE).toString());
             return m2;
         });
 
@@ -105,7 +106,7 @@ public class MembersController {
 
         if (me.getCashbackId() != null) {
             cashbackOption = cashbackService.getCashbackOption(UUID.fromString(me.getCashbackId()))
-                    .orElseGet(cashbackService::getDefaultCashback);
+                    .orElseGet(() -> cashbackService.getDefaultCashback(me.pickedLocale));
         }
 
         InsuranceStatusDTO insuranceStatus = this.productApi.getInsuranceStatus(hid);
