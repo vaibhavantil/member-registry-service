@@ -62,7 +62,7 @@ public class CashbackController {
       return ResponseEntity.ok(cashbackOptions);
     }
 
-    return ResponseEntity.ok(cashbackService.getOptions(PickedLocale.sv_SE));
+    return ResponseEntity.notFound().build();
   }
 
   @PostMapping("")
