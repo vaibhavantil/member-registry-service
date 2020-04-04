@@ -1,9 +1,11 @@
 package com.hedvig.memberservice.web;
 
 import com.google.common.collect.Lists;
-import com.hedvig.memberservice.commands.*;
 import com.hedvig.integration.productsPricing.ProductApi;
 import com.hedvig.integration.productsPricing.dto.InsuranceStatusDTO;
+import com.hedvig.memberservice.commands.UpdateEmailCommand;
+import com.hedvig.memberservice.commands.UpdatePhoneNumberCommand;
+import com.hedvig.memberservice.commands.UpdatePickedLocaleCommand;
 import com.hedvig.memberservice.query.MemberEntity;
 import com.hedvig.memberservice.query.MemberRepository;
 import com.hedvig.memberservice.query.TrackingIdEntity;
@@ -16,15 +18,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.time.LocalDate;
@@ -155,12 +149,12 @@ public class MembersController {
     @PostMapping("/language/update")
     public ResponseEntity<?> postLanguage(@RequestHeader(value = "hedvig.token") Long hid, @RequestBody @Valid PostLanguageRequestDTO body) {
 
-        commandGateway.sendAndWait(new UpdateAcceptLanguageCommand(hid, body.getAcceptLanguage()));
+        final var memberControllerKotlinHelper = new MemberControllerKotlinHelper(commandGateway);
 
-        return ResponseEntity.accepted().build();
+        return memberControllerKotlinHelper.postLanguage(hid, body);
     }
 
-  @PostMapping("/pickedLocale/update")
+    @PostMapping("/pickedLocale/update")
   public ResponseEntity<Member> postPickedLocale(@RequestHeader(value = "hedvig.token") Long hid, @RequestBody @Valid PostPickedLocaleRequestDTO body) {
 
     commandGateway.sendAndWait(new UpdatePickedLocaleCommand(hid, body.getPickedLocale()));
