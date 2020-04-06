@@ -1,11 +1,10 @@
 package com.hedvig.memberservice.web;
 
 import com.google.common.collect.Lists;
+import com.hedvig.memberservice.aggregates.PickedLocale;
+import com.hedvig.memberservice.commands.*;
 import com.hedvig.integration.productsPricing.ProductApi;
 import com.hedvig.integration.productsPricing.dto.InsuranceStatusDTO;
-import com.hedvig.memberservice.commands.UpdateEmailCommand;
-import com.hedvig.memberservice.commands.UpdatePhoneNumberCommand;
-import com.hedvig.memberservice.commands.UpdatePickedLocaleCommand;
 import com.hedvig.memberservice.query.MemberEntity;
 import com.hedvig.memberservice.query.MemberRepository;
 import com.hedvig.memberservice.query.TrackingIdEntity;
@@ -91,7 +90,7 @@ public class MembersController {
             m2.setStatus(null);
             m2.setSsn("");
             m2.setEmail("");
-            m2.setCashbackId(cashbackService.getDefaultId().toString());
+            m2.setCashbackId(cashbackService.getDefaultId(PickedLocale.sv_SE).toString());
             return m2;
         });
 
@@ -99,7 +98,7 @@ public class MembersController {
 
         if (me.getCashbackId() != null) {
             cashbackOption = cashbackService.getCashbackOption(UUID.fromString(me.getCashbackId()))
-                    .orElseGet(cashbackService::getDefaultCashback);
+                    .orElseGet(() -> cashbackService.getDefaultCashback(me.pickedLocale));
         }
 
         InsuranceStatusDTO insuranceStatus = this.productApi.getInsuranceStatus(hid);
@@ -154,7 +153,7 @@ public class MembersController {
         return memberControllerKotlinHelper.postLanguage(hid, body);
     }
 
-    @PostMapping("/pickedLocale/update")
+  @PostMapping("/pickedLocale/update")
   public ResponseEntity<Member> postPickedLocale(@RequestHeader(value = "hedvig.token") Long hid, @RequestBody @Valid PostPickedLocaleRequestDTO body) {
 
     commandGateway.sendAndWait(new UpdatePickedLocaleCommand(hid, body.getPickedLocale()));
