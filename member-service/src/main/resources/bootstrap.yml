@@ -4,6 +4,9 @@ spring:
   cloud:
     config:
       allow-override: false
+  autoconfigure:
+    exclude:
+      - org.springframework.cloud.aws.autoconfigure.context.ContextStackAutoConfiguration
 ---
 spring:
   profiles: test, development, unittest
