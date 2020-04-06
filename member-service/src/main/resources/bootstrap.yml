@@ -17,3 +17,4 @@ spring:
     exclude:
       - org.springframework.cloud.kubernetes.discovery.KubernetesDiscoveryClientAutoConfiguration
       - org.springframework.cloud.kubernetes.KubernetesAutoConfiguration
+      - org.springframework.cloud.aws.autoconfigure.context.ContextStackAutoConfiguration
