@@ -257,7 +257,7 @@ public class MemberAggregate {
     }
 
     if (defaultCharityEnabled) {
-      apply(new NewCashbackSelectedEvent(this.id, cashbackService.getDefaultId().toString()));
+      apply(new NewCashbackSelectedEvent(this.id, cashbackService.getDefaultId(member.getPickedLocale()).toString()));
     }
 
     apply(
@@ -281,7 +281,7 @@ public class MemberAggregate {
     }
 
     if (defaultCharityEnabled) {
-      apply(new NewCashbackSelectedEvent(this.id, cashbackService.getDefaultId().toString()));
+      apply(new NewCashbackSelectedEvent(this.id, cashbackService.getDefaultId(member.getPickedLocale()).toString()));
     }
 
     apply(
@@ -410,7 +410,7 @@ public class MemberAggregate {
     apply(
       new NewCashbackSelectedEvent(
         cmd.getMemberId(),
-        cashbackService.getDefaultId().toString())
+        cashbackService.getDefaultId(member.getPickedLocale()).toString())
     );
 
     apply(

@@ -1,5 +1,6 @@
 package com.hedvig.memberservice;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -99,7 +100,7 @@ public class MemberAggregateTests {
 
     when(uuidGenerator.generateRandom()).thenReturn(TRACKING_UUID);
 
-    when(cashbackService.getDefaultId()).thenReturn(DEFAULT_CASHBACK);
+    when(cashbackService.getDefaultId(any())).thenReturn(DEFAULT_CASHBACK);
 
     val bankIdAuthStatus =
         makeBankIdAuthenticationStatus(
@@ -189,7 +190,7 @@ public class MemberAggregateTests {
 
     when(uuidGenerator.generateRandom()).thenReturn(TRACKING_UUID);
 
-    when(cashbackService.getDefaultId()).thenReturn(DEFAULT_CASHBACK);
+    when(cashbackService.getDefaultId(any())).thenReturn(DEFAULT_CASHBACK);
 
     fixture
         .given(new MemberCreatedEvent(memberId, MemberStatus.INITIATED))
@@ -211,7 +212,7 @@ public class MemberAggregateTests {
 
     when(uuidGenerator.generateRandom()).thenReturn(TRACKING_UUID);
 
-    when(cashbackService.getDefaultId()).thenReturn(DEFAULT_CASHBACK);
+    when(cashbackService.getDefaultId(any())).thenReturn(DEFAULT_CASHBACK);
 
     fixture
         .given(
@@ -235,7 +236,7 @@ public class MemberAggregateTests {
     String personalNumber = "12121212120";
     String provideJsonResponse = "{ \"json\": true }";
 
-    when(cashbackService.getDefaultId()).thenReturn(DEFAULT_CASHBACK);
+    when(cashbackService.getDefaultId(any())).thenReturn(DEFAULT_CASHBACK);
 
     fixture
       .given(
@@ -258,7 +259,7 @@ public class MemberAggregateTests {
     String personalNumber = "12121212120";
     String provideJsonResponse = "not a valid json";
 
-    when(cashbackService.getDefaultId()).thenReturn(DEFAULT_CASHBACK);
+    when(cashbackService.getDefaultId(any())).thenReturn(DEFAULT_CASHBACK);
 
     fixture
       .given(
@@ -317,7 +318,7 @@ public class MemberAggregateTests {
 
     when(uuidGenerator.generateRandom()).thenReturn(TRACKING_UUID);
 
-    when(cashbackService.getDefaultId()).thenReturn(DEFAULT_CASHBACK);
+    when(cashbackService.getDefaultId(any())).thenReturn(DEFAULT_CASHBACK);
 
     fixture
       .given(
