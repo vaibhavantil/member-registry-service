@@ -3,7 +3,6 @@ package com.hedvig.memberservice.query;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.util.EnumMap;
-import javax.annotation.Nullable;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
@@ -20,6 +19,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.Formula;
+import org.springframework.lang.Nullable;
 
 @Entity
 @Table(

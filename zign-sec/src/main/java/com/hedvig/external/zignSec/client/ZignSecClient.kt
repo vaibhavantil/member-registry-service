@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestHeader
 import java.util.*
 
-@FeignClient(name = "bankId", url = "\${hedvig.external.zignSec.eid.baseurl:https://test.zignsec.com/v2/eid}", configuration = [ZignSecFeignConfig::class])
+@FeignClient(name = "zignSecClient", url = "\${hedvig.external.zignSec.eid.baseurl:https://test.zignsec.com/v2/eid}", configuration = [ZignSecFeignConfig::class])
 interface ZignSecClient {
 
     @PostMapping(value = ["/{bankid_selector}"], consumes = ["application/json"])

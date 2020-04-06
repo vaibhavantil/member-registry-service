@@ -51,11 +51,6 @@ public class AWSConfig {
   }
 
   @Bean
-  AWSCredentialsProvider credentialsProvider() {
-    return new DefaultAWSCredentialsProviderChain();
-  }
-
-  @Bean
   @Profile(Profiles.PRODUCTION)
   public NotificationMessagingTemplate notificationTemplate(AmazonSNS amazonSNS) {
     return new NotificationMessagingTemplate(amazonSNS);
