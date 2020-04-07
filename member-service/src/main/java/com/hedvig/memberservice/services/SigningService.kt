@@ -136,6 +136,15 @@ class SigningService(
         redisEventPublisher.onSignSessionUpdate(memberId)
     }
 
+    fun norwegianSignConfirmed(memberId: Long) {
+        delayedNorwegianSignConfirmed(memberId)
+    }
+
+    @Scheduled(fixedDelay = FIXED_DELAY_MS)
+    private fun delayedNorwegianSignConfirmed(memberId: Long) {
+        norwegianSigningService.notifyContractsCreated(memberId)
+    }
+
     companion object {
         private val log = LoggerFactory.getLogger(SigningService::class.java)
         private const val FIXED_DELAY_MS = 1000L
