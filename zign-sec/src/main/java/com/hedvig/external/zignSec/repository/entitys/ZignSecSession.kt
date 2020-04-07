@@ -31,6 +31,8 @@ class ZignSecSession(
     var requestPersonalNumber: String? = null,
     @Embedded
     var notification: ZignSecNotification? = null,
+    @Column(columnDefinition = "boolean default false")
+    var isContractsCreated: Boolean = false,
     @CreationTimestamp
     val createdAt: Instant = Instant.now(),
     @UpdateTimestamp

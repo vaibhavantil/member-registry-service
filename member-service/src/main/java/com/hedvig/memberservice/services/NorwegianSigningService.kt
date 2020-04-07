@@ -49,6 +49,8 @@ class NorwegianSigningService(
         }
     }
 
+    fun notifyContractsCreated(memberId: Long) = norwegianBankIdService.notifyContractsCreated(memberId)
+
     companion object {
         private val logger = LoggerFactory.getLogger(NorwegianSigningService::class.java)
     }

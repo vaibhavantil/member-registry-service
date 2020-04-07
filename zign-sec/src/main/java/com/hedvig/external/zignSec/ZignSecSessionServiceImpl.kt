@@ -35,10 +35,25 @@ class ZignSecSessionServiceImpl(
         val optionalSession = sessionRepository.findByMemberId(memberId)
 
         return if (optionalSession.isPresent) {
-            optionalSession.get().status
+            val session = optionalSession.get()
+            if (session.requestType == NorwegianAuthenticationType.SIGN) {
+                if (session.status == NorwegianBankIdProgressStatus.COMPLETED) {
+                    if (session.isContractsCreated) NorwegianBankIdProgressStatus.COMPLETED else NorwegianBankIdProgressStatus.IN_PROGRESS
+                } else {
+                    optionalSession.get().status
+                }
+            } else {
+                optionalSession.get().status
+            }
         } else {
             null
         }
+    }
+
+    override fun notifyContractsCreated(memberId: Long) {
+        val session = sessionRepository.findByMemberId(memberId).get()
+        session.isContractsCreated = true
+        sessionRepository.save(session)
     }
 
     private fun authenticate(request: NorwegianBankIdAuthenticationRequest, type: NorwegianAuthenticationType): StartNorwegianAuthenticationResult {

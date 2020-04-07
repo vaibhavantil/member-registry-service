@@ -75,6 +75,8 @@ class NorwegianBankIdService(
 
     fun getStatus(memberId: Long) = norwegianAuthentication.getStatus(memberId)
 
+    fun notifyContractsCreated(memberId: Long) = norwegianAuthentication.notifyContractsCreated(memberId)
+
     private fun resolveTwoLetterLanguageFromMember(memberId: Long): String {
         val acceptLanguage = memberRepository.findById(memberId).get().acceptLanguage
         return getTwoLetterLanguageFromLocale(textKeysLocaleResolver.resolveLocale(acceptLanguage))

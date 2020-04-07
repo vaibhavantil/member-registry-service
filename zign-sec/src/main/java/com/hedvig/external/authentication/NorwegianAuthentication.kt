@@ -9,5 +9,6 @@ interface NorwegianAuthentication {
     fun auth(request: NorwegianBankIdAuthenticationRequest): StartNorwegianAuthenticationResult
     fun sign(request: NorwegianBankIdAuthenticationRequest): StartNorwegianAuthenticationResult
     fun getStatus(memberId: Long): NorwegianBankIdProgressStatus?
+    fun notifyContractsCreated(memberId: Long)
 }
 
