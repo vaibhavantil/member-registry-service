@@ -131,8 +131,8 @@ class SigningService(
         schedulePublishSignSessionUpdate(memberId)
     }
 
-    @Scheduled(fixedDelay = FIXED_DELAY_MS)
     private fun schedulePublishSignSessionUpdate(memberId: Long) {
+        Thread.sleep(FIXED_DELAY_MS)
         redisEventPublisher.onSignSessionUpdate(memberId)
     }
 
@@ -140,8 +140,8 @@ class SigningService(
         delayedNorwegianSignConfirmed(memberId)
     }
 
-    @Scheduled(fixedDelay = FIXED_DELAY_MS)
     private fun delayedNorwegianSignConfirmed(memberId: Long) {
+        Thread.sleep(FIXED_DELAY_MS)
         norwegianSigningService.notifyContractsCreated(memberId)
     }
 
