@@ -4,6 +4,7 @@ import com.hedvig.memberservice.aggregates.PickedLocale;
 import com.hedvig.memberservice.commands.*;
 import com.hedvig.memberservice.query.MemberEntity;
 import com.hedvig.memberservice.query.MemberRepository;
+import com.hedvig.memberservice.services.SigningService;
 import com.hedvig.memberservice.services.member.MemberQueryService;
 import com.hedvig.memberservice.services.trace.TraceMemberService;
 import com.hedvig.memberservice.web.dto.*;
@@ -39,13 +40,16 @@ public class InternalMembersController {
   private final MemberRepository memberRepository;
   private final MemberQueryService memberQueryService;
   private final TraceMemberService traceMemberService;
+  private final SigningService signingService;
 
   public InternalMembersController(CommandGateway commandBus, MemberRepository memberRepository,
-                                   MemberQueryService memberQueryService, TraceMemberService traceMemberService) {
+                                   MemberQueryService memberQueryService, TraceMemberService traceMemberService,
+                                   SigningService signingService) {
     this.commandBus = commandBus;
     this.memberRepository = memberRepository;
     this.memberQueryService = memberQueryService;
     this.traceMemberService = traceMemberService;
+    this.signingService = signingService;
   }
 
   @GetMapping("/{memberId}")
@@ -231,5 +235,9 @@ public class InternalMembersController {
 
   }
 
+  @PostMapping("{memberId}/contractsCreated")
+  private void contractsCreated(@PathVariable Long memberId) {
+    signingService.notifyContractsCreated(memberId);
+  }
 }
 
