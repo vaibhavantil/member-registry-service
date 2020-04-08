@@ -40,6 +40,9 @@ public class SignSession {
 
   @Embedded BankIdSession bankIdSession;
 
+  @Column(columnDefinition = "boolean default false")
+  boolean isContractsCreated = false;
+
   public SignSession() {}
 
   public SignSession(long memberId) {
@@ -99,5 +102,13 @@ public class SignSession {
 
   public SignStatus getStatus() {
     return status;
+  }
+
+  public void setIsContractsCreated(boolean isContractsCreated) {
+    this.isContractsCreated = isContractsCreated;
+  }
+
+  public boolean getIsContractsCreated() {
+    return isContractsCreated;
   }
 }

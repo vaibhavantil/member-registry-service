@@ -103,6 +103,25 @@ class SigningService(
         }
     }
 
+    fun notifyContractsCreated(memberId: Long) {
+        val optionalMember = memberRepository.findById(memberId)
+
+        if (optionalMember.isPresent) {
+            when (underwriterApi.getSignMethodFromQuote(memberId.toString())) {
+                SignMethod.SWEDISH_BANK_ID  -> {
+                    swedishBankIdSigningService.notifyContractsCreated(memberId)
+                }
+                SignMethod.NORWEGIAN_BANK_ID -> {
+                    norwegianSigningService.notifyContractsCreated(memberId)
+                }
+            }
+        } else {
+            log.error("Got contracts member ")
+        }
+
+        redisEventPublisher.onSignSessionUpdate(memberId)
+    }
+
     @Transactional
     fun completeSwedishSession(id: String?) {
         swedishBankIdSigningService.completeSession(id)
@@ -128,21 +147,7 @@ class SigningService(
             log.error("Could not initialize bot-service for memberId: {}", memberId, ex)
         }
 
-        schedulePublishSignSessionUpdate(memberId)
-    }
-
-    private fun schedulePublishSignSessionUpdate(memberId: Long) {
-        Thread.sleep(FIXED_DELAY_MS)
         redisEventPublisher.onSignSessionUpdate(memberId)
-    }
-
-    fun norwegianSignConfirmed(memberId: Long) {
-        delayedNorwegianSignConfirmed(memberId)
-    }
-
-    private fun delayedNorwegianSignConfirmed(memberId: Long) {
-        Thread.sleep(FIXED_DELAY_MS)
-        norwegianSigningService.notifyContractsCreated(memberId)
     }
 
     companion object {

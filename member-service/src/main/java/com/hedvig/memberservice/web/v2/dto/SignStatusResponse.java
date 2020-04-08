@@ -27,7 +27,12 @@ public class SignStatusResponse {
             ? null
             : new CollectData(collectResponse.getStatus(), collectResponse.getHintCode());
 
-    return new SignStatusResponse(session.getStatus(), data);
+    SignStatus status = session.getStatus();
+    if (status == SignStatus.COMPLETED) {
+      status = session.getIsContractsCreated() ? SignStatus.COMPLETED : SignStatus.IN_PROGRESS;
+    }
+
+    return new SignStatusResponse(status, data);
   }
 
   public static SignStatusResponse CreateFromNorwegianStatus(@NotNull NorwegianBankIdProgressStatus status) {

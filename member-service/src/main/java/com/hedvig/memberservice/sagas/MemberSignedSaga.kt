@@ -97,7 +97,6 @@ class MemberSignedSaga {
         }
 
         signingService.productSignConfirmed(e.memberId)
-        signingService.norwegianSignConfirmed(e.memberId)
         snsNotificationService.sendMemberSignedNotification(e.memberId)
     }
 

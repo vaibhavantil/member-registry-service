@@ -135,6 +135,15 @@ class SwedishBankIdSigningService(
         }
     }
 
+    fun notifyContractsCreated(memberId: Long) {
+        val session = signSessionRepository.findByMemberId(memberId)
+        if (session.isPresent) {
+            val s = session.get()
+            s.isContractsCreated = true
+            signSessionRepository.save(s)
+        }
+    }
+
     private fun createUserSignText(isSwitching: Boolean): String {
         val signText: String
         signText = if (isSwitching) {
