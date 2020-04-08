@@ -41,7 +41,7 @@ public class SignSession {
   @Embedded BankIdSession bankIdSession;
 
   @Column(columnDefinition = "boolean default false")
-  boolean isContractsCreated = false;
+  boolean hasContract = false;
 
   public SignSession() {}
 
@@ -104,11 +104,11 @@ public class SignSession {
     return status;
   }
 
-  public void setIsContractsCreated(boolean isContractsCreated) {
-    this.isContractsCreated = isContractsCreated;
+  public void setHasContract(boolean isContractsCreated) {
+    this.hasContract = isContractsCreated;
   }
 
-  public boolean getIsContractsCreated() {
-    return isContractsCreated;
+  public boolean getHasContract() {
+    return hasContract;
   }
 }

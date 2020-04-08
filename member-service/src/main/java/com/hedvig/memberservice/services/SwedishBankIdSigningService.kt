@@ -139,7 +139,7 @@ class SwedishBankIdSigningService(
         val session = signSessionRepository.findByMemberId(memberId)
         if (session.isPresent) {
             val s = session.get()
-            s.isContractsCreated = true
+            s.isHasContract = true
             signSessionRepository.save(s)
         }
     }

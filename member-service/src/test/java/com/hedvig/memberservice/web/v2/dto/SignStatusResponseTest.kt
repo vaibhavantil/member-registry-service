@@ -10,7 +10,7 @@ class SignStatusResponseTest {
     @Test
     fun inProgressIfContractIsNotCreated() {
         val session = SignSession()
-        session.isContractsCreated = false
+        session.isHasContract = false
         session.status = SignStatus.COMPLETED
 
         val response = SignStatusResponse.CreateFromEntity(session)
@@ -21,7 +21,7 @@ class SignStatusResponseTest {
     @Test
     fun completedIfStatusIsCompleteContractIsCreated() {
         val session = SignSession()
-        session.isContractsCreated = true
+        session.isHasContract = true
         session.status = SignStatus.COMPLETED
 
         val response = SignStatusResponse.CreateFromEntity(session)

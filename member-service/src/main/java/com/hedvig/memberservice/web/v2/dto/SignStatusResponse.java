@@ -6,7 +6,6 @@ import com.hedvig.memberservice.entities.SignStatus;
 import javax.validation.constraints.NotNull;
 import lombok.Value;
 import lombok.val;
-import org.jetbrains.annotations.Nullable;
 
 @Value
 public class SignStatusResponse {
@@ -29,7 +28,7 @@ public class SignStatusResponse {
 
     SignStatus status = session.getStatus();
     if (status == SignStatus.COMPLETED) {
-      status = session.getIsContractsCreated() ? SignStatus.COMPLETED : SignStatus.IN_PROGRESS;
+      status = session.getHasContract() ? SignStatus.COMPLETED : SignStatus.IN_PROGRESS;
     }
 
     return new SignStatusResponse(status, data);
