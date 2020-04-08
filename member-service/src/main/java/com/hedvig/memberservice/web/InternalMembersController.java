@@ -234,10 +234,5 @@ public class InternalMembersController {
     //return ResponseEntity.notFound().build();
 
   }
-
-  @PostMapping("{memberId}/contractsCreated")
-  private void contractsCreated(@PathVariable Long memberId) {
-    signingService.notifyContractsCreated(memberId);
-  }
 }
 
