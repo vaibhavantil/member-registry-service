@@ -42,6 +42,6 @@ public interface ProductClient {
   ResponseEntity<ProductToSignStatusDTO> hasProductToSign(
       @PathVariable("memberId") String memberId);
 
-  @GetMapping("/_/member{memberId}/hasContract")
+  @GetMapping("/_/contracts/members/{memberId}/hasContract")
   ResponseEntity<Boolean> hasContract(@PathVariable("memberId") Long memberId);
 }
