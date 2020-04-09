@@ -6,17 +6,14 @@ import com.hedvig.memberservice.entities.SignStatus;
 import javax.validation.constraints.NotNull;
 import lombok.Value;
 import lombok.val;
-import org.jetbrains.annotations.Nullable;
 
 @Value
 public class SignStatusResponse {
-
 
   @NotNull
   SignStatus status;
 
   CollectData collectData;
-
 
   public static SignStatusResponse CreateFromEntity(
       SignSession session) {
@@ -27,7 +24,7 @@ public class SignStatusResponse {
             ? null
             : new CollectData(collectResponse.getStatus(), collectResponse.getHintCode());
 
-    return new SignStatusResponse(session.getStatus(), data);
+    return new SignStatusResponse(session.getSignAndContractStatus(), data);
   }
 
   public static SignStatusResponse CreateFromNorwegianStatus(@NotNull NorwegianBankIdProgressStatus status) {
@@ -44,4 +41,5 @@ public class SignStatusResponse {
 
     throw new RuntimeException("Could not return SignStatusResponse from NorwegianBankIdProgressStatus: " + status +".");
   }
+
 }

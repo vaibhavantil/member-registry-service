@@ -41,4 +41,7 @@ public interface ProductClient {
   @GetMapping("/_/insurance/{memberId}/hasProductToSign")
   ResponseEntity<ProductToSignStatusDTO> hasProductToSign(
       @PathVariable("memberId") String memberId);
+
+  @GetMapping("/_/contracts/members/{memberId}/hasContract")
+  ResponseEntity<Boolean> hasContract(@PathVariable("memberId") Long memberId);
 }

@@ -148,7 +148,7 @@ public class MembersController {
     @PostMapping("/language/update")
     public ResponseEntity<?> postLanguage(@RequestHeader(value = "hedvig.token") Long hid, @RequestBody @Valid PostLanguageRequestDTO body) {
 
-        final var memberControllerKotlinHelper = new MemberControllerKotlinHelper(commandGateway);
+      MemberControllerKotlinHelper memberControllerKotlinHelper = new MemberControllerKotlinHelper(commandGateway);
 
         return memberControllerKotlinHelper.postLanguage(hid, body);
     }

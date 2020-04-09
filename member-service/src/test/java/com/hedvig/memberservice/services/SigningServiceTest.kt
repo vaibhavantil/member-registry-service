@@ -37,6 +37,7 @@ import org.mockito.Mock
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.`when` as whenever
 import org.mockito.junit.MockitoJUnitRunner
+import org.quartz.Scheduler
 import java.time.LocalDateTime
 import java.time.ZoneOffset
 import java.util.*
@@ -68,6 +69,9 @@ class SigningServiceTest {
     @Mock
     lateinit var redisEventPublisher: RedisEventPublisher
 
+    @Mock
+    lateinit var scheduler: Scheduler
+
     @Rule @JvmField
     var thrown = ExpectedException.none()
 
@@ -81,7 +85,7 @@ class SigningServiceTest {
         whenever(signedMemberRepository.findBySsn(ArgumentMatchers.any())).thenReturn(Optional.empty())
 
         sut = SigningService(underwriterApi, signedMemberRepository, botService, memberRepository, commandGateway,
-            swedishBankIdSigningService, norwegianSigningService, redisEventPublisher)
+            swedishBankIdSigningService, norwegianSigningService, redisEventPublisher, scheduler)
     }
 
     @Test

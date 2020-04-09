@@ -40,6 +40,9 @@ public class SignSession {
 
   @Embedded BankIdSession bankIdSession;
 
+  @Column(columnDefinition = "boolean default false")
+  boolean hasContract = false;
+
   public SignSession() {}
 
   public SignSession(long memberId) {
@@ -99,5 +102,17 @@ public class SignSession {
 
   public SignStatus getStatus() {
     return status;
+  }
+
+  public void setHasContract(boolean isContractsCreated) {
+    this.hasContract = isContractsCreated;
+  }
+
+  public boolean getHasContract() {
+    return hasContract;
+  }
+
+  public SignStatus getSignAndContractStatus() {
+    return ((status == SignStatus.COMPLETED) && hasContract) ? SignStatus.COMPLETED : SignStatus.IN_PROGRESS;
   }
 }

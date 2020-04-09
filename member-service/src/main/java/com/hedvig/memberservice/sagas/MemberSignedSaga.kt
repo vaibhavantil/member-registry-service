@@ -1,6 +1,7 @@
 package com.hedvig.memberservice.sagas
 
 import com.hedvig.integration.underwriter.UnderwriterApi
+import com.hedvig.integration.underwriter.dtos.SignMethod
 import com.hedvig.memberservice.events.MemberSignedEvent
 import com.hedvig.memberservice.events.MemberSignedWithoutBankId
 import com.hedvig.memberservice.events.NorwegianMemberSignedEvent
@@ -55,6 +56,7 @@ class MemberSignedSaga {
 
         signingService.completeSwedishSession(e.getReferenceId())
         signingService.productSignConfirmed(e.id)
+        signingService.scheduleContractsCreatedJob(e.id, SignMethod.SWEDISH_BANK_ID)
         snsNotificationService.sendMemberSignedNotification(e.getId())
     }
 
@@ -97,7 +99,7 @@ class MemberSignedSaga {
         }
 
         signingService.productSignConfirmed(e.memberId)
-        signingService.norwegianSignConfirmed(e.memberId)
+        signingService.scheduleContractsCreatedJob(e.memberId, SignMethod.NORWEGIAN_BANK_ID)
         snsNotificationService.sendMemberSignedNotification(e.memberId)
     }
 

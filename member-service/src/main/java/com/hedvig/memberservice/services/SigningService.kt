@@ -7,6 +7,8 @@ import com.hedvig.integration.underwriter.dtos.QuoteToSignStatusDto
 import com.hedvig.integration.underwriter.dtos.SignMethod
 import com.hedvig.memberservice.commands.SignMemberFromUnderwriterCommand
 import com.hedvig.memberservice.commands.UpdateWebOnBoardingInfoCommand
+import com.hedvig.memberservice.jobs.BankIdCollector
+import com.hedvig.memberservice.jobs.ContractsCreatedCollector
 import com.hedvig.memberservice.query.MemberRepository
 import com.hedvig.memberservice.query.SignedMemberRepository
 import com.hedvig.memberservice.services.member.CannotSignInsuranceException
@@ -18,6 +20,12 @@ import com.hedvig.memberservice.web.v2.dto.SignStatusResponse
 import com.hedvig.memberservice.web.v2.dto.UnderwriterQuoteSignRequest
 import com.hedvig.memberservice.web.v2.dto.WebsignRequest
 import org.axonframework.commandhandling.gateway.CommandGateway
+import org.quartz.JobBuilder
+import org.quartz.JobDataMap
+import org.quartz.Scheduler
+import org.quartz.SchedulerException
+import org.quartz.SimpleScheduleBuilder
+import org.quartz.TriggerBuilder
 import org.slf4j.LoggerFactory
 import org.springframework.lang.NonNull
 import org.springframework.scheduling.annotation.Scheduled
@@ -34,7 +42,8 @@ class SigningService(
     private val commandGateway: CommandGateway,
     private val swedishBankIdSigningService: SwedishBankIdSigningService,
     private val norwegianSigningService: NorwegianSigningService,
-    private val redisEventPublisher: RedisEventPublisher
+    private val redisEventPublisher: RedisEventPublisher,
+    private val scheduler: Scheduler
 ) {
 
     @Transactional
@@ -86,7 +95,7 @@ class SigningService(
 
         return if (optionalMember.isPresent) {
             when (underwriterApi.getSignMethodFromQuote(memberId.toString())) {
-                SignMethod.SWEDISH_BANK_ID  -> {
+                SignMethod.SWEDISH_BANK_ID -> {
                     val session = swedishBankIdSigningService.getSignSession(memberId)
                     session
                         .map { SignStatusResponse.CreateFromEntity(it) }
@@ -104,11 +113,37 @@ class SigningService(
     }
 
     @Transactional
+    fun scheduleContractsCreatedJob(memberId: Long, signMethod: SignMethod) {
+        try {
+            val jobName = "POLL_CONTRACTS_CREATE_FOR_${memberId}_JOB"
+            val jobDetail = JobBuilder.newJob()
+                .withIdentity(jobName, "poll.contracts")
+                .setJobData(JobDataMap(mapOf("memberId" to memberId, "signMethod" to signMethod.name)))
+                .ofType(ContractsCreatedCollector::class.java)
+                .build()
+            val trigger = TriggerBuilder.newTrigger()
+                .forJob(jobName, "poll.contracts")
+                .withSchedule(
+                    SimpleScheduleBuilder
+                        .simpleSchedule()
+                        .withIntervalInSeconds(1)
+                        .withRepeatCount(90)
+                        .withMisfireHandlingInstructionNowWithRemainingCount()
+                )
+                .build()
+            scheduler.scheduleJob(jobDetail,
+                trigger)
+        } catch (e: SchedulerException) {
+            throw RuntimeException(e.message, e)
+        }
+    }
+
+    @Transactional
     fun completeSwedishSession(id: String?) {
         swedishBankIdSigningService.completeSession(id)
     }
 
-    fun productSignConfirmed(memberId: Long){
+    fun productSignConfirmed(memberId: Long) {
         val member = memberRepository.getOne(memberId)
         val userContext = UpdateUserContextDTO(
             memberId.toString(),
@@ -128,25 +163,10 @@ class SigningService(
             log.error("Could not initialize bot-service for memberId: {}", memberId, ex)
         }
 
-        schedulePublishSignSessionUpdate(memberId)
-    }
-
-    private fun schedulePublishSignSessionUpdate(memberId: Long) {
-        Thread.sleep(FIXED_DELAY_MS)
         redisEventPublisher.onSignSessionUpdate(memberId)
-    }
-
-    fun norwegianSignConfirmed(memberId: Long) {
-        delayedNorwegianSignConfirmed(memberId)
-    }
-
-    private fun delayedNorwegianSignConfirmed(memberId: Long) {
-        Thread.sleep(FIXED_DELAY_MS)
-        norwegianSigningService.notifyContractsCreated(memberId)
     }
 
     companion object {
         private val log = LoggerFactory.getLogger(SigningService::class.java)
-        private const val FIXED_DELAY_MS = 1000L
     }
 }

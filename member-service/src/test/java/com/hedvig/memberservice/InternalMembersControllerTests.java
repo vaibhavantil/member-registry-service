@@ -7,6 +7,7 @@ import com.hedvig.memberservice.commands.SetFraudulentStatusCommand;
 import com.hedvig.memberservice.commands.StartOnboardingWithSSNCommand;
 import com.hedvig.memberservice.query.MemberEntity;
 import com.hedvig.memberservice.query.MemberRepository;
+import com.hedvig.memberservice.services.SigningService;
 import com.hedvig.memberservice.services.member.MemberQueryService;
 import com.hedvig.memberservice.services.trace.TraceMemberService;
 import com.hedvig.memberservice.web.InternalMembersController;

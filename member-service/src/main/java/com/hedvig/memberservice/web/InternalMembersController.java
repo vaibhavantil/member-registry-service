@@ -4,6 +4,7 @@ import com.hedvig.memberservice.aggregates.PickedLocale;
 import com.hedvig.memberservice.commands.*;
 import com.hedvig.memberservice.query.MemberEntity;
 import com.hedvig.memberservice.query.MemberRepository;
+import com.hedvig.memberservice.services.SigningService;
 import com.hedvig.memberservice.services.member.MemberQueryService;
 import com.hedvig.memberservice.services.trace.TraceMemberService;
 import com.hedvig.memberservice.web.dto.*;
@@ -230,6 +231,5 @@ public class InternalMembersController {
     //return ResponseEntity.notFound().build();
 
   }
-
 }
 
