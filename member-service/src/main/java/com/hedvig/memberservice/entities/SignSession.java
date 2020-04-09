@@ -111,4 +111,8 @@ public class SignSession {
   public boolean getHasContract() {
     return hasContract;
   }
+
+  public SignStatus getSignAndContractStatus() {
+    return ((status == SignStatus.COMPLETED) && hasContract) ? SignStatus.COMPLETED : SignStatus.IN_PROGRESS;
+  }
 }

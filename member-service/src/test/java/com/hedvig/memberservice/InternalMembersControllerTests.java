@@ -46,8 +46,6 @@ public class InternalMembersControllerTests {
 
   @MockBean private TraceMemberService traceMemberService;
 
-  @MockBean private SigningService signingService;
-
   @Test
   public void TestUpdateContactInformation() throws Exception {
     UpdateContactInformationRequest request = new UpdateContactInformationRequest();

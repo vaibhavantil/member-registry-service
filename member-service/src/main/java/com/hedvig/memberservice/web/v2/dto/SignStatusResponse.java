@@ -10,12 +10,10 @@ import lombok.val;
 @Value
 public class SignStatusResponse {
 
-
   @NotNull
   SignStatus status;
 
   CollectData collectData;
-
 
   public static SignStatusResponse CreateFromEntity(
       SignSession session) {
@@ -26,12 +24,7 @@ public class SignStatusResponse {
             ? null
             : new CollectData(collectResponse.getStatus(), collectResponse.getHintCode());
 
-    SignStatus status = session.getStatus();
-    if (status == SignStatus.COMPLETED) {
-      status = session.getHasContract() ? SignStatus.COMPLETED : SignStatus.IN_PROGRESS;
-    }
-
-    return new SignStatusResponse(status, data);
+    return new SignStatusResponse(session.getSignAndContractStatus(), data);
   }
 
   public static SignStatusResponse CreateFromNorwegianStatus(@NotNull NorwegianBankIdProgressStatus status) {
@@ -48,4 +41,5 @@ public class SignStatusResponse {
 
     throw new RuntimeException("Could not return SignStatusResponse from NorwegianBankIdProgressStatus: " + status +".");
   }
+
 }

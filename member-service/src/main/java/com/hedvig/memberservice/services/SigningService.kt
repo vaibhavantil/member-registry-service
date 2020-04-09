@@ -115,7 +115,7 @@ class SigningService(
     @Transactional
     fun scheduleContractsCreatedJob(memberId: Long, signMethod: SignMethod) {
         try {
-            val jobName = "POLL_CONTRACTS_CREATE_FOR ${memberId}_JOB"
+            val jobName = "POLL_CONTRACTS_CREATE_FOR_${memberId}_JOB"
             val jobDetail = JobBuilder.newJob()
                 .withIdentity(jobName, "poll.contracts")
                 .setJobData(JobDataMap(mapOf("memberId" to memberId, "signMethod" to signMethod.name)))
@@ -123,8 +123,13 @@ class SigningService(
                 .build()
             val trigger = TriggerBuilder.newTrigger()
                 .forJob(jobName, "poll.contracts")
-                .withSchedule(SimpleScheduleBuilder.simpleSchedule().withIntervalInSeconds(1).withRepeatCount(90)
-                    .withMisfireHandlingInstructionNowWithRemainingCount())
+                .withSchedule(
+                    SimpleScheduleBuilder
+                        .simpleSchedule()
+                        .withIntervalInSeconds(1)
+                        .withRepeatCount(90)
+                        .withMisfireHandlingInstructionNowWithRemainingCount()
+                )
                 .build()
             scheduler.scheduleJob(jobDetail,
                 trigger)

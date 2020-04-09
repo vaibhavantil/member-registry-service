@@ -40,16 +40,13 @@ public class InternalMembersController {
   private final MemberRepository memberRepository;
   private final MemberQueryService memberQueryService;
   private final TraceMemberService traceMemberService;
-  private final SigningService signingService;
 
   public InternalMembersController(CommandGateway commandBus, MemberRepository memberRepository,
-                                   MemberQueryService memberQueryService, TraceMemberService traceMemberService,
-                                   SigningService signingService) {
+                                   MemberQueryService memberQueryService, TraceMemberService traceMemberService) {
     this.commandBus = commandBus;
     this.memberRepository = memberRepository;
     this.memberQueryService = memberQueryService;
     this.traceMemberService = traceMemberService;
-    this.signingService = signingService;
   }
 
   @GetMapping("/{memberId}")
