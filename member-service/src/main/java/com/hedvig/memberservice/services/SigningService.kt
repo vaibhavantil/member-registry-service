@@ -159,11 +159,9 @@ class SigningService(
         }
 
         redisEventPublisher.onSignSessionUpdate(memberId)
-
     }
 
     companion object {
         private val log = LoggerFactory.getLogger(SigningService::class.java)
-        private const val FIXED_DELAY_MS = 1000L
     }
 }

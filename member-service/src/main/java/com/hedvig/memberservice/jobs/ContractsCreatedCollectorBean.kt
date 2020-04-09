@@ -5,6 +5,7 @@ import com.hedvig.integration.productsPricing.ProductApi
 import com.hedvig.integration.underwriter.dtos.SignMethod
 import com.hedvig.memberservice.query.CollectRepository
 import com.hedvig.memberservice.services.NorwegianSigningService
+import com.hedvig.memberservice.services.SwedishBankIdSigningService
 import com.hedvig.memberservice.services.redispublisher.RedisEventPublisher
 import com.hedvig.memberservice.services.v2.BankIdServiceV2
 import org.quartz.JobExecutionContext
@@ -16,7 +17,7 @@ import javax.transaction.Transactional
 @Component
 class ContractsCreatedCollectorBean(
     private val contractsService: ContractsService,
-    private val swedishSigningService: NorwegianSigningService,
+    private val swedishSigningService: SwedishBankIdSigningService,
     private val norwegianSigningService: NorwegianSigningService,
     private val redisEventPublisher: RedisEventPublisher
 ) {

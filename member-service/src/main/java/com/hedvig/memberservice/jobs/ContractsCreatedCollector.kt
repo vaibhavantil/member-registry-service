@@ -7,7 +7,7 @@ import org.springframework.scheduling.quartz.QuartzJobBean
 class ContractsCreatedCollector: QuartzJobBean() {
 
     @Autowired
-    lateinit var contractsCreatedCollector: ContractsCreatedCollector
+    lateinit var contractsCreatedCollector: ContractsCreatedCollectorBean
 
     override fun executeInternal(context: JobExecutionContext) {
         contractsCreatedCollector.execute(context)
