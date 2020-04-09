@@ -447,6 +447,13 @@ class ZignSecSessionServiceImplTest {
         verify(norwegianAuthenticationEventPublisher).publishSignEvent(NorwegianSignResult.Failed(REFERENCE_ID, 1337))
     }
 
+    @Test
+    fun testSsnAndBirthDateExtensionsWorks() {
+        assertThat("12121212120".dayMonthAndTwoDigitYearFromNorwegianSsn()).isEqualTo("12/12/12".dayMonthAndTwoDigitYearFromDateOfBirth())
+        assertThat("20059412120".dayMonthAndTwoDigitYearFromNorwegianSsn()).isEqualTo("20/05/94".dayMonthAndTwoDigitYearFromDateOfBirth())
+        assertThat("29018912120".dayMonthAndTwoDigitYearFromNorwegianSsn()).isEqualTo("29/01/89".dayMonthAndTwoDigitYearFromDateOfBirth())
+    }
+
     companion object {
         val startSignRequest = NorwegianBankIdAuthenticationRequest(
             "1337",
