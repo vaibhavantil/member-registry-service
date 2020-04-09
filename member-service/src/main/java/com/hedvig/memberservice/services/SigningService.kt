@@ -118,7 +118,7 @@ class SigningService(
             val jobName = "POLL_CONTRACTS_CREATE_FOR_${memberId}_JOB"
             val jobDetail = JobBuilder.newJob()
                 .withIdentity(jobName, "poll.contracts")
-                .setJobData(JobDataMap(mapOf("memberId" to memberId, "signMethod" to signMethod.name)))
+                .setJobData(JobDataMap(mapOf("memberId" to memberId.toString(), "signMethod" to signMethod.name)))
                 .ofType(ContractsCreatedCollector::class.java)
                 .build()
             val trigger = TriggerBuilder.newTrigger()
