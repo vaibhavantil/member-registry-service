@@ -173,8 +173,10 @@ class ZignSecSessionServiceImpl(
                         )
                     )
                     NorwegianBankIdProgressStatus.COMPLETED -> {
+                        //TODO: re add this when everything is in order with zign sec and personnumber also un ignore the test in ZignSecSessionServiceImplTest
                         //check that personal number is matching when signing
-                        if (notification.identity!!.personalNumber!! != session.requestPersonalNumber!!) {
+//                        if (notification.identity!!.personalNumber!! != session.requestPersonalNumber!!) {
+                        if (notification.identity!!.dateOfBirth!!.dayMonthAndTwoDigitYearFromDateOfBirth() != session.requestPersonalNumber!!.dayMonthAndTwoDigitYearFromNorwegianSsn()) {
                             session.status = NorwegianBankIdProgressStatus.FAILED
                             norwegianAuthenticationEventPublisher.publishSignEvent(
                                 NorwegianSignResult.Failed(
@@ -225,4 +227,21 @@ class ZignSecSessionServiceImpl(
     companion object {
         private val logger = LoggerFactory.getLogger(ZignSecServiceImpl::class.java)
     }
+}
+
+
+fun String.dayMonthAndTwoDigitYearFromNorwegianSsn(): Triple<String, String, String> {
+    val trimmedInput = this.trim().replace("-", "").replace(" ", "")
+    val day = trimmedInput.substring(0, 2)
+    val month = trimmedInput.substring(2, 4)
+    val twoDigitYear = trimmedInput.substring(4, 6)
+    return Triple(day, month, twoDigitYear)
+}
+
+//Format `dd/mm/yy`
+fun String.dayMonthAndTwoDigitYearFromDateOfBirth(): Triple<String, String, String> {
+    val day = this.substring(0, 2)
+    val month = this.substring(3, 5)
+    val twoDigitYear = this.substring(6, 8)
+    return Triple(day, month, twoDigitYear)
 }
