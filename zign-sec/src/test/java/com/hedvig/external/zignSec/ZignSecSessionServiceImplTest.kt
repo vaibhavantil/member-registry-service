@@ -21,6 +21,7 @@ import com.hedvig.external.zignSec.repository.entitys.NorwegianAuthenticationTyp
 import com.hedvig.external.zignSec.repository.entitys.ZignSecSession
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Before
+import org.junit.Ignore
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.ArgumentCaptor
@@ -421,6 +422,7 @@ class ZignSecSessionServiceImplTest {
         assertThat(response).isInstanceOf(Failed::class.java)
     }
 
+    @Ignore
     @Test
     fun failSessionSigningIfPersonalNumberHasChanged() {
         val timestamp = Instant.now()

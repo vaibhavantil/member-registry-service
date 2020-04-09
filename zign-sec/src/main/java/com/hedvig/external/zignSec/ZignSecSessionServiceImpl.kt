@@ -173,25 +173,26 @@ class ZignSecSessionServiceImpl(
                         )
                     )
                     NorwegianBankIdProgressStatus.COMPLETED -> {
+                        //TODO: re add this when everything is in order with zign sec and personnumber also un ignore the test in ZignSecSessionServiceImplTest
                         //check that personal number is matching when signing
-                        if (notification.identity!!.personalNumber!! != session.requestPersonalNumber!!) {
-                            session.status = NorwegianBankIdProgressStatus.FAILED
-                            norwegianAuthenticationEventPublisher.publishSignEvent(
-                                NorwegianSignResult.Failed(
-                                    session.referenceId,
-                                    session.memberId
-                                )
+//                        if (notification.identity!!.personalNumber!! != session.requestPersonalNumber!!) {
+//                            session.status = NorwegianBankIdProgressStatus.FAILED
+//                            norwegianAuthenticationEventPublisher.publishSignEvent(
+//                                NorwegianSignResult.Failed(
+//                                    session.referenceId,
+//                                    session.memberId
+//                                )
+//                            )
+//                        } else {
+                        norwegianAuthenticationEventPublisher.publishSignEvent(
+                            NorwegianSignResult.Signed(
+                                session.referenceId,
+                                session.memberId,
+                                session.notification!!.identity!!.personalNumber!!,
+                                jsonRequest
                             )
-                        } else {
-                            norwegianAuthenticationEventPublisher.publishSignEvent(
-                                NorwegianSignResult.Signed(
-                                    session.referenceId,
-                                    session.memberId,
-                                    session.notification!!.identity!!.personalNumber!!,
-                                    jsonRequest
-                                )
-                            )
-                        }
+                        )
+//                        }
                     }
                 }
             }
