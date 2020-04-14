@@ -17,8 +17,10 @@ import com.hedvig.external.zignSec.client.dto.ZignSecCollectState
 import com.hedvig.external.zignSec.client.dto.ZignSecResponse
 import com.hedvig.external.zignSec.client.dto.ZignSecResponseError
 import com.hedvig.external.zignSec.repository.ZignSecSessionRepository
+import com.hedvig.external.zignSec.repository.ZignSignEntityRepository
 import com.hedvig.external.zignSec.repository.entitys.NorwegianAuthenticationType
 import com.hedvig.external.zignSec.repository.entitys.ZignSecSession
+import com.hedvig.external.zignSec.repository.entitys.ZignSignEntity
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Before
 import org.junit.Ignore
@@ -44,6 +46,9 @@ class ZignSecSessionServiceImplTest {
     lateinit var sessionRepository: ZignSecSessionRepository
 
     @Mock
+    lateinit var signEntityRepository: ZignSignEntityRepository
+
+    @Mock
     lateinit var zignSecService: ZignSecService
 
     @Mock
@@ -52,6 +57,9 @@ class ZignSecSessionServiceImplTest {
     @Captor
     lateinit var captor: ArgumentCaptor<ZignSecSession>
 
+    @Captor
+    lateinit var signEntityCaptor: ArgumentCaptor<ZignSignEntity>
+
     lateinit var objectMapper: ObjectMapper
 
     private lateinit var classUnderTest: ZignSecSessionServiceImpl
@@ -59,7 +67,7 @@ class ZignSecSessionServiceImplTest {
     @Before
     fun before() {
         objectMapper = ObjectMapper().registerKotlinModule().registerModule(JavaTimeModule())
-        classUnderTest = ZignSecSessionServiceImpl(sessionRepository, zignSecService, norwegianAuthenticationEventPublisher, objectMapper)
+        classUnderTest = ZignSecSessionServiceImpl(sessionRepository, signEntityRepository, zignSecService, norwegianAuthenticationEventPublisher, objectMapper)
     }
 
     @Test
@@ -293,16 +301,63 @@ class ZignSecSessionServiceImplTest {
         whenever(sessionRepository.findByReferenceId(REFERENCE_ID)).thenReturn(
             Optional.of(session)
         )
+        whenever(signEntityRepository.findByIdProviderPersonId("9578-6000-4-365161")).thenReturn(
+            Optional.of(ZignSignEntity(
+                personalNumber = "1212120000",
+                idProviderPersonId = "9578-6000-4-365161"
+            ))
+        )
 
         classUnderTest.handleNotification(zignSecSuccessAuthNotificationRequest)
 
-        verify(norwegianAuthenticationEventPublisher).publishAuthenticationEvent(NorwegianAuthenticationResult.Completed(REFERENCE_ID, 1337, "12121212120"))
+        verify(norwegianAuthenticationEventPublisher).publishAuthenticationEvent(NorwegianAuthenticationResult.Completed(REFERENCE_ID, 1337, "1212120000"))
 
         val savedSession = sessionRepository.findByReferenceId(REFERENCE_ID).get()
         assertThat(savedSession.referenceId).isEqualTo(REFERENCE_ID)
         assertThat(savedSession.memberId).isEqualTo(1337)
         assertThat(savedSession.status).isEqualTo(NorwegianBankIdProgressStatus.COMPLETED)
         assertThat(savedSession.requestType).isEqualTo(NorwegianAuthenticationType.AUTH)
+        assertThat(savedSession.notification).isNotNull
+    }
+
+    @Test
+    fun handleSignSuccessNotification() {
+        val timestamp = Instant.now()
+        val session = ZignSecSession(
+            referenceId = REFERENCE_ID,
+            memberId = 1337,
+            redirectUrl = REDIRECT_URL,
+            status = NorwegianBankIdProgressStatus.INITIATED,
+            requestType = NorwegianAuthenticationType.SIGN,
+            notification = null,
+            createdAt = timestamp,
+            updatedAt = timestamp,
+            requestPersonalNumber = "12121200000"
+        )
+
+        whenever(sessionRepository.findByReferenceId(REFERENCE_ID)).thenReturn(
+            Optional.of(session)
+        )
+
+        whenever(signEntityRepository.save(signEntityCaptor.capture())).thenReturn(
+            ZignSignEntity(
+                personalNumber = "12121200000",
+                idProviderPersonId = "9578-6000-4-365161"
+            )
+        )
+
+        classUnderTest.handleNotification(zignSecSuccessAuthNotificationRequest)
+
+        verify(norwegianAuthenticationEventPublisher).publishSignEvent(NorwegianSignResult.Signed(REFERENCE_ID, 1337, "12121200000", zignSecSuccessAuthNotificationRequest))
+
+        assertThat(signEntityCaptor.value.personalNumber).isEqualTo("12121200000")
+        assertThat(signEntityCaptor.value.idProviderPersonId).isEqualTo("9578-6000-4-365161")
+
+        val savedSession = sessionRepository.findByReferenceId(REFERENCE_ID).get()
+        assertThat(savedSession.referenceId).isEqualTo(REFERENCE_ID)
+        assertThat(savedSession.memberId).isEqualTo(1337)
+        assertThat(savedSession.status).isEqualTo(NorwegianBankIdProgressStatus.COMPLETED)
+        assertThat(savedSession.requestType).isEqualTo(NorwegianAuthenticationType.SIGN)
         assertThat(savedSession.notification).isNotNull
     }
 
@@ -449,9 +504,9 @@ class ZignSecSessionServiceImplTest {
 
     @Test
     fun testSsnAndBirthDateExtensionsWorks() {
-        assertThat("12121212120".dayMonthAndTwoDigitYearFromNorwegianSsn()).isEqualTo("12/12/12".dayMonthAndTwoDigitYearFromDateOfBirth())
-        assertThat("20059412120".dayMonthAndTwoDigitYearFromNorwegianSsn()).isEqualTo("20/05/94".dayMonthAndTwoDigitYearFromDateOfBirth())
-        assertThat("29018912120".dayMonthAndTwoDigitYearFromNorwegianSsn()).isEqualTo("29/01/89".dayMonthAndTwoDigitYearFromDateOfBirth())
+        assertThat("12121212120".dayMonthAndTwoDigitYearFromNorwegianSsn()).isEqualTo("1912-12-12".dayMonthAndTwoDigitYearFromDateOfBirth())
+        assertThat("20059412120".dayMonthAndTwoDigitYearFromNorwegianSsn()).isEqualTo("1994-05-20".dayMonthAndTwoDigitYearFromDateOfBirth())
+        assertThat("29018912120".dayMonthAndTwoDigitYearFromNorwegianSsn()).isEqualTo("1989-01-29".dayMonthAndTwoDigitYearFromDateOfBirth())
     }
 
     companion object {
@@ -484,7 +539,6 @@ class ZignSecSessionServiceImplTest {
                 "FirstName": "first",
                 "LastName": "last",
                 "FullName": "first last",
-                "PersonalNumber": "12121212120",
                 "DateOfBirth": "2012-12-12",
                 "Age": 8,
                 "Gender": "",
