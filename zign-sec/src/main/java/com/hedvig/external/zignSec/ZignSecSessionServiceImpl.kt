@@ -11,18 +11,18 @@ import com.hedvig.external.event.NorwegianAuthenticationEventPublisher
 import com.hedvig.external.zignSec.client.dto.ZignSecCollectState
 import com.hedvig.external.zignSec.client.dto.ZignSecNotificationRequest
 import com.hedvig.external.zignSec.repository.ZignSecSessionRepository
-import com.hedvig.external.zignSec.repository.ZignSignEntityRepository
+import com.hedvig.external.zignSec.repository.ZignSecSignEntityRepository
 import com.hedvig.external.zignSec.repository.entitys.NorwegianAuthenticationType
 import com.hedvig.external.zignSec.repository.entitys.ZignSecNotification
 import com.hedvig.external.zignSec.repository.entitys.ZignSecSession
-import com.hedvig.external.zignSec.repository.entitys.ZignSignEntity
+import com.hedvig.external.zignSec.repository.entitys.ZignSecSignEntity
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 
 @Service
 class ZignSecSessionServiceImpl(
     private val sessionRepository: ZignSecSessionRepository,
-    private val signEntityRepository: ZignSignEntityRepository,
+    private val secSignEntityRepository: ZignSecSignEntityRepository,
     private val zignSecService: ZignSecService,
     private val norwegianAuthenticationEventPublisher: NorwegianAuthenticationEventPublisher,
     private val objectMapper: ObjectMapper
@@ -205,7 +205,7 @@ class ZignSecSessionServiceImpl(
                     NorwegianBankIdProgressStatus.COMPLETED -> {
                         val idProviderPersonId = session.notification!!.identity!!.idProviderPersonId!!
 
-                        val signEntity = signEntityRepository.findByIdProviderPersonId(idProviderPersonId)
+                        val signEntity = secSignEntityRepository.findByIdProviderPersonId(idProviderPersonId)
 
                         if (signEntity.isPresent) {
                             norwegianAuthenticationEventPublisher.publishAuthenticationEvent(
@@ -243,11 +243,11 @@ class ZignSecSessionServiceImpl(
             return@assert "Must have requestPersonalNumber on session to sign member"
         }
 
-        val signEntity = ZignSignEntity(
+        val signEntity = ZignSecSignEntity(
             personalNumber = session.requestPersonalNumber!!,
             idProviderPersonId = session.notification!!.identity!!.idProviderPersonId!!
         )
-        signEntityRepository.save(signEntity)
+        secSignEntityRepository.save(signEntity)
         norwegianAuthenticationEventPublisher.publishSignEvent(
             NorwegianSignResult.Signed(
                 session.referenceId,

@@ -17,10 +17,10 @@ import com.hedvig.external.zignSec.client.dto.ZignSecCollectState
 import com.hedvig.external.zignSec.client.dto.ZignSecResponse
 import com.hedvig.external.zignSec.client.dto.ZignSecResponseError
 import com.hedvig.external.zignSec.repository.ZignSecSessionRepository
-import com.hedvig.external.zignSec.repository.ZignSignEntityRepository
+import com.hedvig.external.zignSec.repository.ZignSecSignEntityRepository
 import com.hedvig.external.zignSec.repository.entitys.NorwegianAuthenticationType
 import com.hedvig.external.zignSec.repository.entitys.ZignSecSession
-import com.hedvig.external.zignSec.repository.entitys.ZignSignEntity
+import com.hedvig.external.zignSec.repository.entitys.ZignSecSignEntity
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Before
 import org.junit.Ignore
@@ -46,7 +46,7 @@ class ZignSecSessionServiceImplTest {
     lateinit var sessionRepository: ZignSecSessionRepository
 
     @Mock
-    lateinit var signEntityRepository: ZignSignEntityRepository
+    lateinit var secSignEntityRepository: ZignSecSignEntityRepository
 
     @Mock
     lateinit var zignSecService: ZignSecService
@@ -58,7 +58,7 @@ class ZignSecSessionServiceImplTest {
     lateinit var captor: ArgumentCaptor<ZignSecSession>
 
     @Captor
-    lateinit var signEntityCaptor: ArgumentCaptor<ZignSignEntity>
+    lateinit var secSignEntityCaptor: ArgumentCaptor<ZignSecSignEntity>
 
     lateinit var objectMapper: ObjectMapper
 
@@ -67,7 +67,7 @@ class ZignSecSessionServiceImplTest {
     @Before
     fun before() {
         objectMapper = ObjectMapper().registerKotlinModule().registerModule(JavaTimeModule())
-        classUnderTest = ZignSecSessionServiceImpl(sessionRepository, signEntityRepository, zignSecService, norwegianAuthenticationEventPublisher, objectMapper)
+        classUnderTest = ZignSecSessionServiceImpl(sessionRepository, secSignEntityRepository, zignSecService, norwegianAuthenticationEventPublisher, objectMapper)
     }
 
     @Test
@@ -301,8 +301,8 @@ class ZignSecSessionServiceImplTest {
         whenever(sessionRepository.findByReferenceId(REFERENCE_ID)).thenReturn(
             Optional.of(session)
         )
-        whenever(signEntityRepository.findByIdProviderPersonId("9578-6000-4-365161")).thenReturn(
-            Optional.of(ZignSignEntity(
+        whenever(secSignEntityRepository.findByIdProviderPersonId("9578-6000-4-365161")).thenReturn(
+            Optional.of(ZignSecSignEntity(
                 personalNumber = "1212120000",
                 idProviderPersonId = "9578-6000-4-365161"
             ))
@@ -339,8 +339,8 @@ class ZignSecSessionServiceImplTest {
             Optional.of(session)
         )
 
-        whenever(signEntityRepository.save(signEntityCaptor.capture())).thenReturn(
-            ZignSignEntity(
+        whenever(secSignEntityRepository.save(secSignEntityCaptor.capture())).thenReturn(
+            ZignSecSignEntity(
                 personalNumber = "12121200000",
                 idProviderPersonId = "9578-6000-4-365161"
             )
@@ -350,8 +350,8 @@ class ZignSecSessionServiceImplTest {
 
         verify(norwegianAuthenticationEventPublisher).publishSignEvent(NorwegianSignResult.Signed(REFERENCE_ID, 1337, "12121200000", zignSecSuccessAuthNotificationRequest))
 
-        assertThat(signEntityCaptor.value.personalNumber).isEqualTo("12121200000")
-        assertThat(signEntityCaptor.value.idProviderPersonId).isEqualTo("9578-6000-4-365161")
+        assertThat(secSignEntityCaptor.value.personalNumber).isEqualTo("12121200000")
+        assertThat(secSignEntityCaptor.value.idProviderPersonId).isEqualTo("9578-6000-4-365161")
 
         val savedSession = sessionRepository.findByReferenceId(REFERENCE_ID).get()
         assertThat(savedSession.referenceId).isEqualTo(REFERENCE_ID)

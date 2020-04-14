@@ -9,8 +9,8 @@ import javax.persistence.Table
 import javax.persistence.UniqueConstraint
 
 @Entity
-@Table(uniqueConstraints= [UniqueConstraint(columnNames=["personal_number", "id_provider_person_id"])])
-class ZignSignEntity(
+@Table(uniqueConstraints=[UniqueConstraint(columnNames=["personalNumber", "idProviderPersonId"])])
+class ZignSecSignEntity(
     @Id @GeneratedValue(strategy = GenerationType.SEQUENCE)
     val internalId: Long = 0,
     @Column(columnDefinition = "varchar(11)")
