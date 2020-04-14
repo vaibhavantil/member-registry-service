@@ -11,15 +11,18 @@ import com.hedvig.external.event.NorwegianAuthenticationEventPublisher
 import com.hedvig.external.zignSec.client.dto.ZignSecCollectState
 import com.hedvig.external.zignSec.client.dto.ZignSecNotificationRequest
 import com.hedvig.external.zignSec.repository.ZignSecSessionRepository
+import com.hedvig.external.zignSec.repository.ZignSecSignEntityRepository
 import com.hedvig.external.zignSec.repository.entitys.NorwegianAuthenticationType
 import com.hedvig.external.zignSec.repository.entitys.ZignSecNotification
 import com.hedvig.external.zignSec.repository.entitys.ZignSecSession
+import com.hedvig.external.zignSec.repository.entitys.ZignSecSignEntity
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 
 @Service
 class ZignSecSessionServiceImpl(
     private val sessionRepository: ZignSecSessionRepository,
+    private val zignSecSignEntityRepository: ZignSecSignEntityRepository,
     private val zignSecService: ZignSecService,
     private val norwegianAuthenticationEventPublisher: NorwegianAuthenticationEventPublisher,
     private val objectMapper: ObjectMapper
@@ -176,24 +179,17 @@ class ZignSecSessionServiceImpl(
                         //TODO: re add this when everything is in order with zign sec and personnumber also un ignore the test in ZignSecSessionServiceImplTest
                         //check that personal number is matching when signing
 //                        if (notification.identity!!.personalNumber!! != session.requestPersonalNumber!!) {
-//                        if (notification.identity!!.dateOfBirth!!.dayMonthAndTwoDigitYearFromDateOfBirth() != session.requestPersonalNumber!!.dayMonthAndTwoDigitYearFromNorwegianSsn()) {
-//                            session.status = NorwegianBankIdProgressStatus.FAILED
-//                            norwegianAuthenticationEventPublisher.publishSignEvent(
-//                                NorwegianSignResult.Failed(
-//                                    session.referenceId,
-//                                    session.memberId
-//                                )
-//                            )
-//                        } else {
+                        if (notification.identity!!.dateOfBirth!!.dayMonthAndTwoDigitYearFromDateOfBirth() != session.requestPersonalNumber!!.dayMonthAndTwoDigitYearFromNorwegianSsn()) {
+                            session.status = NorwegianBankIdProgressStatus.FAILED
                             norwegianAuthenticationEventPublisher.publishSignEvent(
-                                NorwegianSignResult.Signed(
+                                NorwegianSignResult.Failed(
                                     session.referenceId,
-                                    session.memberId,
-                                    session.notification!!.identity!!.personalNumber!!,
-                                    jsonRequest
+                                    session.memberId
                                 )
                             )
-//                        }
+                        } else {
+                            memberSigned(session, jsonRequest)
+                        }
                     }
                 }
             }
@@ -206,16 +202,60 @@ class ZignSecSessionServiceImpl(
                         NorwegianAuthenticationResult.Failed(
                             session.referenceId,
                             session.memberId))
-                    NorwegianBankIdProgressStatus.COMPLETED -> norwegianAuthenticationEventPublisher.publishAuthenticationEvent(
-                        NorwegianAuthenticationResult.Completed(
-                            session.referenceId, session.memberId,
-                            session.notification!!.identity!!.personalNumber!!)
-                    )
+                    NorwegianBankIdProgressStatus.COMPLETED -> {
+                        val idProviderPersonId = session.notification!!.identity!!.idProviderPersonId!!
+
+                        val signEntity = zignSecSignEntityRepository.findByIdProviderPersonId(idProviderPersonId)
+
+                        if (signEntity.isPresent) {
+                            norwegianAuthenticationEventPublisher.publishAuthenticationEvent(
+                                NorwegianAuthenticationResult.Completed(
+                                    session.referenceId,
+                                    session.memberId,
+                                    signEntity.get().personalNumber
+                                )
+                            )
+                        } else {
+                            logger.error("Member tried to login whit no ZignSecSignEntity [MemberId:${session.memberId}] [idProviderPersonId: $idProviderPersonId] [SessionId:${session.sessionId}] [session:$session]")
+                            norwegianAuthenticationEventPublisher.publishAuthenticationEvent(
+                                NorwegianAuthenticationResult.Failed(
+                                    session.referenceId,
+                                    session.memberId
+                                )
+                            )
+                        }
+                    }
                 }
             }
         }
 
         sessionRepository.save(session)
+    }
+
+    private fun memberSigned(session: ZignSecSession, jsonRequest: String) {
+        assert(!session.requestPersonalNumber.isNullOrEmpty() && !session.notification?.identity?.idProviderPersonId.isNullOrEmpty()) {
+            norwegianAuthenticationEventPublisher.publishSignEvent(
+                NorwegianSignResult.Failed(
+                    session.referenceId,
+                    session.memberId
+                )
+            )
+            return@assert "Must have requestPersonalNumber on session to sign member"
+        }
+
+        val signEntity = ZignSecSignEntity(
+            personalNumber = session.requestPersonalNumber!!,
+            idProviderPersonId = session.notification!!.identity!!.idProviderPersonId!!
+        )
+        zignSecSignEntityRepository.save(signEntity)
+        norwegianAuthenticationEventPublisher.publishSignEvent(
+            NorwegianSignResult.Signed(
+                session.referenceId,
+                session.memberId,
+                session.requestPersonalNumber!!,
+                jsonRequest
+            )
+        )
     }
 
     private fun getSessionStatusFromNotification(request: ZignSecNotificationRequest) = if (request.errors.isEmpty()) {
@@ -238,10 +278,10 @@ fun String.dayMonthAndTwoDigitYearFromNorwegianSsn(): Triple<String, String, Str
     return Triple(day, month, twoDigitYear)
 }
 
-//Format `dd/mm/yy`
+//Format `yyyy-mm-dd`
 fun String.dayMonthAndTwoDigitYearFromDateOfBirth(): Triple<String, String, String> {
-    val day = this.substring(0, 2)
-    val month = this.substring(3, 5)
-    val twoDigitYear = this.substring(6, 8)
+    val twoDigitYear = this.substring(2, 4)
+    val month = this.substring(5, 7)
+    val day = this.substring(8, 10)
     return Triple(day, month, twoDigitYear)
 }
