@@ -216,6 +216,7 @@ class ZignSecSessionServiceImpl(
                                 )
                             )
                         } else {
+                            logger.error("Member tried to login whit no ZignSecSignEntity [MemberId:${session.memberId}] [SessionId:${session.sessionId}] [session:$session]")
                             norwegianAuthenticationEventPublisher.publishAuthenticationEvent(
                                 NorwegianAuthenticationResult.Failed(
                                     session.referenceId,
