@@ -46,7 +46,7 @@ class ZignSecSessionServiceImplTest {
     lateinit var sessionRepository: ZignSecSessionRepository
 
     @Mock
-    lateinit var secSignEntityRepository: ZignSecSignEntityRepository
+    lateinit var zignSecSignEntityRepository: ZignSecSignEntityRepository
 
     @Mock
     lateinit var zignSecService: ZignSecService
@@ -67,7 +67,7 @@ class ZignSecSessionServiceImplTest {
     @Before
     fun before() {
         objectMapper = ObjectMapper().registerKotlinModule().registerModule(JavaTimeModule())
-        classUnderTest = ZignSecSessionServiceImpl(sessionRepository, secSignEntityRepository, zignSecService, norwegianAuthenticationEventPublisher, objectMapper)
+        classUnderTest = ZignSecSessionServiceImpl(sessionRepository, zignSecSignEntityRepository, zignSecService, norwegianAuthenticationEventPublisher, objectMapper)
     }
 
     @Test
@@ -301,7 +301,7 @@ class ZignSecSessionServiceImplTest {
         whenever(sessionRepository.findByReferenceId(REFERENCE_ID)).thenReturn(
             Optional.of(session)
         )
-        whenever(secSignEntityRepository.findByIdProviderPersonId("9578-6000-4-365161")).thenReturn(
+        whenever(zignSecSignEntityRepository.findByIdProviderPersonId("9578-6000-4-365161")).thenReturn(
             Optional.of(ZignSecSignEntity(
                 personalNumber = "1212120000",
                 idProviderPersonId = "9578-6000-4-365161"
@@ -339,7 +339,7 @@ class ZignSecSessionServiceImplTest {
             Optional.of(session)
         )
 
-        whenever(secSignEntityRepository.save(secSignEntityCaptor.capture())).thenReturn(
+        whenever(zignSecSignEntityRepository.save(secSignEntityCaptor.capture())).thenReturn(
             ZignSecSignEntity(
                 personalNumber = "12121200000",
                 idProviderPersonId = "9578-6000-4-365161"

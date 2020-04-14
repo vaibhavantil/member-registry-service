@@ -22,7 +22,7 @@ import org.springframework.stereotype.Service
 @Service
 class ZignSecSessionServiceImpl(
     private val sessionRepository: ZignSecSessionRepository,
-    private val secSignEntityRepository: ZignSecSignEntityRepository,
+    private val zignSecSignEntityRepository: ZignSecSignEntityRepository,
     private val zignSecService: ZignSecService,
     private val norwegianAuthenticationEventPublisher: NorwegianAuthenticationEventPublisher,
     private val objectMapper: ObjectMapper
@@ -205,7 +205,7 @@ class ZignSecSessionServiceImpl(
                     NorwegianBankIdProgressStatus.COMPLETED -> {
                         val idProviderPersonId = session.notification!!.identity!!.idProviderPersonId!!
 
-                        val signEntity = secSignEntityRepository.findByIdProviderPersonId(idProviderPersonId)
+                        val signEntity = zignSecSignEntityRepository.findByIdProviderPersonId(idProviderPersonId)
 
                         if (signEntity.isPresent) {
                             norwegianAuthenticationEventPublisher.publishAuthenticationEvent(
@@ -247,7 +247,7 @@ class ZignSecSessionServiceImpl(
             personalNumber = session.requestPersonalNumber!!,
             idProviderPersonId = session.notification!!.identity!!.idProviderPersonId!!
         )
-        secSignEntityRepository.save(signEntity)
+        zignSecSignEntityRepository.save(signEntity)
         norwegianAuthenticationEventPublisher.publishSignEvent(
             NorwegianSignResult.Signed(
                 session.referenceId,
