@@ -5,8 +5,51 @@ import com.hedvig.common.UUIDGenerator;
 import com.hedvig.external.bisnodeBCI.BisnodeClient;
 import com.hedvig.external.bisnodeBCI.dto.Person;
 import com.hedvig.external.bisnodeBCI.dto.PersonSearchResult;
-import com.hedvig.memberservice.commands.*;
-import com.hedvig.memberservice.events.*;
+import com.hedvig.memberservice.commands.AuthenticationAttemptCommand;
+import com.hedvig.memberservice.commands.BackfillPickedLocaleCommand;
+import com.hedvig.memberservice.commands.BankIdAuthenticationStatus;
+import com.hedvig.memberservice.commands.BankIdSignCommand;
+import com.hedvig.memberservice.commands.CreateMemberCommand;
+import com.hedvig.memberservice.commands.EditMemberInformationCommand;
+import com.hedvig.memberservice.commands.InactivateMemberCommand;
+import com.hedvig.memberservice.commands.InitializeAppleUserCommand;
+import com.hedvig.memberservice.commands.InsurnaceCancellationCommand;
+import com.hedvig.memberservice.commands.MemberCancelInsuranceCommand;
+import com.hedvig.memberservice.commands.MemberUpdateContactInformationCommand;
+import com.hedvig.memberservice.commands.NorwegianSignCommand;
+import com.hedvig.memberservice.commands.SelectNewCashbackCommand;
+import com.hedvig.memberservice.commands.SetFraudulentStatusCommand;
+import com.hedvig.memberservice.commands.SignMemberFromUnderwriterCommand;
+import com.hedvig.memberservice.commands.StartOnboardingWithSSNCommand;
+import com.hedvig.memberservice.commands.UpdateAcceptLanguageCommand;
+import com.hedvig.memberservice.commands.UpdateEmailCommand;
+import com.hedvig.memberservice.commands.UpdatePhoneNumberCommand;
+import com.hedvig.memberservice.commands.UpdatePickedLocaleCommand;
+import com.hedvig.memberservice.commands.UpdateSSNCommand;
+import com.hedvig.memberservice.commands.UpdateWebOnBoardingInfoCommand;
+import com.hedvig.memberservice.events.AcceptLanguageUpdatedEvent;
+import com.hedvig.memberservice.events.BirthDateUpdatedEvent;
+import com.hedvig.memberservice.events.EmailUpdatedEvent;
+import com.hedvig.memberservice.events.FraudulentStatusUpdatedEvent;
+import com.hedvig.memberservice.events.InsuranceCancellationEvent;
+import com.hedvig.memberservice.events.LivingAddressUpdatedEvent;
+import com.hedvig.memberservice.events.MemberAuthenticatedEvent;
+import com.hedvig.memberservice.events.MemberCancellationEvent;
+import com.hedvig.memberservice.events.MemberCreatedEvent;
+import com.hedvig.memberservice.events.MemberInactivatedEvent;
+import com.hedvig.memberservice.events.MemberSignedEvent;
+import com.hedvig.memberservice.events.MemberSignedWithoutBankId;
+import com.hedvig.memberservice.events.MemberStartedOnBoardingEvent;
+import com.hedvig.memberservice.events.NameUpdatedEvent;
+import com.hedvig.memberservice.events.NewCashbackSelectedEvent;
+import com.hedvig.memberservice.events.NorwegianMemberSignedEvent;
+import com.hedvig.memberservice.events.NorwegianSSNUpdatedEvent;
+import com.hedvig.memberservice.events.OnboardingStartedWithSSNEvent;
+import com.hedvig.memberservice.events.PersonInformationFromBisnodeEvent;
+import com.hedvig.memberservice.events.PhoneNumberUpdatedEvent;
+import com.hedvig.memberservice.events.PickedLocaleUpdatedEvent;
+import com.hedvig.memberservice.events.SSNUpdatedEvent;
+import com.hedvig.memberservice.events.TrackingIdCreatedEvent;
 import com.hedvig.memberservice.services.CashbackService;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
@@ -18,7 +61,6 @@ import org.axonframework.eventsourcing.EventSourcingHandler;
 import org.axonframework.messaging.MetaData;
 import org.axonframework.spring.stereotype.Aggregate;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 
 import java.io.IOException;
 import java.time.ZoneId;
@@ -53,19 +95,15 @@ public class MemberAggregate {
   private UUIDGenerator uuidGenerator;
   private UUID trackingId;
 
-  private boolean defaultCharityEnabled;
-
   @Autowired
   public MemberAggregate(
     BisnodeClient bisnodeClient,
     CashbackService cashbackService,
     UUIDGenerator uuidGenerator,
-    ObjectMapper objectMapper,
-    @Value("${hedvig.memberAggregate.defaultCharity.enabled:true}") boolean defaultCharityEnabled) {
+    ObjectMapper objectMapper) {
     this.bisnodeClient = bisnodeClient;
     this.cashbackService = cashbackService;
     this.uuidGenerator = uuidGenerator;
-    this.defaultCharityEnabled = defaultCharityEnabled;
     this.objectMapper = objectMapper;
   }
 
@@ -77,7 +115,7 @@ public class MemberAggregate {
           return new AcceptLanguageUpdatedEvent(command.getMemberId(), command.getAcceptLanguage());
         }
         return null;
-        });
+      });
   }
 
   @CommandHandler
@@ -244,7 +282,7 @@ public class MemberAggregate {
     }
 
     if (cmd.getBirthDate() != null
-      && !Objects.equals(this.member.getBirthDate(), cmd.getBirthDate())){
+      && !Objects.equals(this.member.getBirthDate(), cmd.getBirthDate())) {
       apply(new BirthDateUpdatedEvent(this.id, cmd.getBirthDate()));
     }
   }
@@ -256,9 +294,8 @@ public class MemberAggregate {
       apply(new SSNUpdatedEvent(this.id, cmd.getPersonalNumber()));
     }
 
-    if (defaultCharityEnabled) {
-      apply(new NewCashbackSelectedEvent(this.id, cashbackService.getDefaultId(member.getPickedLocale()).toString()));
-    }
+    apply(new NewCashbackSelectedEvent(this.id, cashbackService.getDefaultId(member.getPickedLocale()).toString()));
+
 
     apply(
       new MemberSignedEvent(
@@ -280,9 +317,8 @@ public class MemberAggregate {
       apply(new NorwegianSSNUpdatedEvent(this.id, cmd.getPersonalNumber()));
     }
 
-    if (defaultCharityEnabled) {
-      apply(new NewCashbackSelectedEvent(this.id, cashbackService.getDefaultId(member.getPickedLocale()).toString()));
-    }
+    apply(new NewCashbackSelectedEvent(this.id, cashbackService.getDefaultId(member.getPickedLocale()).toString()));
+
 
     apply(
       new NorwegianMemberSignedEvent(
@@ -448,10 +484,10 @@ public class MemberAggregate {
   @CommandHandler
   public void on(UpdateAcceptLanguageCommand cmd) {
     log.info("Updating accept language for member {}, new number: {}", cmd.getMemberId(),
-            cmd.getAcceptLanguage());
+      cmd.getAcceptLanguage());
 
     if (!cmd.getAcceptLanguage().isEmpty() &&
-        !Objects.equals(member.getAcceptLanguage(), cmd.getAcceptLanguage())) {
+      !Objects.equals(member.getAcceptLanguage(), cmd.getAcceptLanguage())) {
       apply(new AcceptLanguageUpdatedEvent(cmd.getMemberId(), cmd.getAcceptLanguage()));
     }
   }
@@ -469,9 +505,9 @@ public class MemberAggregate {
 
   @CommandHandler
   public void on(BackfillPickedLocaleCommand cmd) {
-      if (member.getPickedLocale() == null) {
-        apply(new PickedLocaleUpdatedEvent(cmd.getMemberId(), PickedLocale.sv_SE));
-      }
+    if (member.getPickedLocale() == null) {
+      apply(new PickedLocaleUpdatedEvent(cmd.getMemberId(), PickedLocale.sv_SE));
+    }
   }
 
   @EventSourcingHandler
@@ -564,7 +600,7 @@ public class MemberAggregate {
 
   @EventSourcingHandler
   public void on(AcceptLanguageUpdatedEvent e) {
-      this.member.setAcceptLanguage(e.getAcceptLanguage());
+    this.member.setAcceptLanguage(e.getAcceptLanguage());
   }
 
   @EventSourcingHandler

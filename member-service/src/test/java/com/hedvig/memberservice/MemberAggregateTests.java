@@ -1,21 +1,39 @@
 package com.hedvig.memberservice;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hedvig.common.UUIDGenerator;
 import com.hedvig.external.bisnodeBCI.BisnodeClient;
-import com.hedvig.memberservice.aggregates.PickedLocale;
 import com.hedvig.memberservice.aggregates.MemberAggregate;
 import com.hedvig.memberservice.aggregates.MemberStatus;
-import com.hedvig.memberservice.commands.*;
-import com.hedvig.memberservice.events.*;
+import com.hedvig.memberservice.aggregates.PickedLocale;
+import com.hedvig.memberservice.commands.AuthenticationAttemptCommand;
+import com.hedvig.memberservice.commands.BankIdAuthenticationStatus;
+import com.hedvig.memberservice.commands.BankIdSignCommand;
+import com.hedvig.memberservice.commands.InactivateMemberCommand;
+import com.hedvig.memberservice.commands.MemberUpdateContactInformationCommand;
+import com.hedvig.memberservice.commands.NorwegianSignCommand;
+import com.hedvig.memberservice.commands.SelectNewCashbackCommand;
+import com.hedvig.memberservice.commands.StartOnboardingWithSSNCommand;
+import com.hedvig.memberservice.commands.UpdatePickedLocaleCommand;
+import com.hedvig.memberservice.events.EmailUpdatedEvent;
+import com.hedvig.memberservice.events.LivingAddressUpdatedEvent;
+import com.hedvig.memberservice.events.MemberAuthenticatedEvent;
+import com.hedvig.memberservice.events.MemberCreatedEvent;
+import com.hedvig.memberservice.events.MemberInactivatedEvent;
+import com.hedvig.memberservice.events.MemberSignedEvent;
+import com.hedvig.memberservice.events.MemberStartedOnBoardingEvent;
+import com.hedvig.memberservice.events.NameUpdatedEvent;
+import com.hedvig.memberservice.events.NewCashbackSelectedEvent;
+import com.hedvig.memberservice.events.NorwegianMemberSignedEvent;
+import com.hedvig.memberservice.events.NorwegianSSNUpdatedEvent;
+import com.hedvig.memberservice.events.OnboardingStartedWithSSNEvent;
+import com.hedvig.memberservice.events.PickedLocaleUpdatedEvent;
+import com.hedvig.memberservice.events.SSNUpdatedEvent;
+import com.hedvig.memberservice.events.TrackingIdCreatedEvent;
 import com.hedvig.memberservice.services.CashbackService;
 import com.hedvig.memberservice.web.dto.Address;
 import com.hedvig.memberservice.web.dto.StartOnboardingWithSSNRequest;
 import com.hedvig.memberservice.web.dto.UpdateContactInformationRequest;
-import java.util.UUID;
 import lombok.val;
 import org.axonframework.eventsourcing.AbstractAggregateFactory;
 import org.axonframework.eventsourcing.DomainEventMessage;
@@ -28,13 +46,18 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.web.client.RestClientException;
 
+import java.util.UUID;
+
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
+
 @RunWith(SpringRunner.class)
 public class MemberAggregateTests {
 
   private static final UUID DEFAULT_CASHBACK =
-      java.util.UUID.fromString("9881f632-fb69-11e7-9238-a39b7922d42d");
+    java.util.UUID.fromString("9881f632-fb69-11e7-9238-a39b7922d42d");
   private static final java.util.UUID TRACKING_UUID =
-      java.util.UUID.fromString("971b25bc-5db5-11e8-9f7c-039208e9dccf");
+    java.util.UUID.fromString("971b25bc-5db5-11e8-9f7c-039208e9dccf");
   private static final String TOLVANSSON_SSN = "191212121212";
   private static final String TOLVANSSON_FIRST_NAME = "TOLVAN";
   private static final String TOLVANSSON_LAST_NAME = "TOLVANSSON";
@@ -70,27 +93,27 @@ public class MemberAggregateTests {
     final String referenceTokenValue = "referenceTokenValue";
 
     when(bisnodeClient.match(TOLVANSSON_SSN))
-        .thenThrow(new RestClientException("Something went wrong!"));
+      .thenThrow(new RestClientException("Something went wrong!"));
 
     val uuid = UUID.fromString("971b25bc-5db5-11e8-9f7c-039208e9dccf");
     when(uuidGenerator.generateRandom()).thenReturn(uuid);
 
     BankIdAuthenticationStatus authStatus =
-        makeBankIdAuthenticationStatus(
-            TOLVANSSON_SSN, referenceTokenValue, TOLVANSSON_FIRST_NAME, TOLVANSSON_LAST_NAME);
+      makeBankIdAuthenticationStatus(
+        TOLVANSSON_SSN, referenceTokenValue, TOLVANSSON_FIRST_NAME, TOLVANSSON_LAST_NAME);
 
     AuthenticationAttemptCommand cmd = new AuthenticationAttemptCommand(memberId, authStatus);
 
     fixture
-        .given(new MemberCreatedEvent(memberId, MemberStatus.INITIATED))
-        .when(cmd)
-        .expectSuccessfulHandlerExecution()
-        .expectEvents(
-            new SSNUpdatedEvent(memberId, TOLVANSSON_SSN),
-            new TrackingIdCreatedEvent(memberId, uuid),
-            new NameUpdatedEvent(memberId, "Tolvan", "Tolvansson"),
-            new MemberStartedOnBoardingEvent(memberId, MemberStatus.ONBOARDING),
-            new MemberAuthenticatedEvent(memberId, referenceTokenValue));
+      .given(new MemberCreatedEvent(memberId, MemberStatus.INITIATED))
+      .when(cmd)
+      .expectSuccessfulHandlerExecution()
+      .expectEvents(
+        new SSNUpdatedEvent(memberId, TOLVANSSON_SSN),
+        new TrackingIdCreatedEvent(memberId, uuid),
+        new NameUpdatedEvent(memberId, "Tolvan", "Tolvansson"),
+        new MemberStartedOnBoardingEvent(memberId, MemberStatus.ONBOARDING),
+        new MemberAuthenticatedEvent(memberId, referenceTokenValue));
   }
 
   @Test
@@ -103,22 +126,22 @@ public class MemberAggregateTests {
     when(cashbackService.getDefaultId(any())).thenReturn(DEFAULT_CASHBACK);
 
     val bankIdAuthStatus =
-        makeBankIdAuthenticationStatus(
-            TOLVANSSON_SSN, referenceId, TOLVANSSON_FIRST_NAME, TOLVANSSON_LAST_NAME);
+      makeBankIdAuthenticationStatus(
+        TOLVANSSON_SSN, referenceId, TOLVANSSON_FIRST_NAME, TOLVANSSON_LAST_NAME);
 
     fixture
-        .given(
-            new MemberCreatedEvent(memberId, MemberStatus.INITIATED),
-            new NewCashbackSelectedEvent(memberId, DEFAULT_CASHBACK.toString()),
-            new MemberSignedEvent(memberId, referenceId, "", "", TOLVANSSON_SSN),
-            new TrackingIdCreatedEvent(memberId, TRACKING_UUID))
-        .when(new AuthenticationAttemptCommand(memberId, bankIdAuthStatus))
-        .expectSuccessfulHandlerExecution()
-        .expectEvents(new MemberAuthenticatedEvent(memberId, referenceId));
+      .given(
+        new MemberCreatedEvent(memberId, MemberStatus.INITIATED),
+        new NewCashbackSelectedEvent(memberId, DEFAULT_CASHBACK.toString()),
+        new MemberSignedEvent(memberId, referenceId, "", "", TOLVANSSON_SSN),
+        new TrackingIdCreatedEvent(memberId, TRACKING_UUID))
+      .when(new AuthenticationAttemptCommand(memberId, bankIdAuthStatus))
+      .expectSuccessfulHandlerExecution()
+      .expectEvents(new MemberAuthenticatedEvent(memberId, referenceId));
   }
 
   private BankIdAuthenticationStatus makeBankIdAuthenticationStatus(
-      String ssn, String referenceTokenValue, String firstName, String lastName) {
+    String ssn, String referenceTokenValue, String firstName, String lastName) {
     return new BankIdAuthenticationStatus(ssn, referenceTokenValue, firstName, lastName);
   }
 
@@ -139,19 +162,19 @@ public class MemberAggregateTests {
     request.setAddress(address);
 
     fixture
-        .given(new MemberCreatedEvent(memberId, MemberStatus.INITIATED))
-        .when(new MemberUpdateContactInformationCommand(memberId, request))
-        .expectSuccessfulHandlerExecution()
-        .expectEvents(
-            new NameUpdatedEvent(memberId, request.getFirstName(), request.getLastName()),
-            new EmailUpdatedEvent(memberId, "email@hedvig.com"),
-            new LivingAddressUpdatedEvent(
-                memberId,
-                address.getStreet(),
-                address.getCity(),
-                address.getZipCode(),
-                address.getApartmentNo(),
-                0));
+      .given(new MemberCreatedEvent(memberId, MemberStatus.INITIATED))
+      .when(new MemberUpdateContactInformationCommand(memberId, request))
+      .expectSuccessfulHandlerExecution()
+      .expectEvents(
+        new NameUpdatedEvent(memberId, request.getFirstName(), request.getLastName()),
+        new EmailUpdatedEvent(memberId, "email@hedvig.com"),
+        new LivingAddressUpdatedEvent(
+          memberId,
+          address.getStreet(),
+          address.getCity(),
+          address.getZipCode(),
+          address.getApartmentNo(),
+          0));
   }
 
   @Test
@@ -162,12 +185,12 @@ public class MemberAggregateTests {
     StartOnboardingWithSSNRequest request = new StartOnboardingWithSSNRequest(ssn);
 
     fixture
-        .given(new MemberCreatedEvent(memberId, MemberStatus.INITIATED))
-        .when(new StartOnboardingWithSSNCommand(memberId, request))
-        .expectSuccessfulHandlerExecution()
-        .expectEvents(
-            new OnboardingStartedWithSSNEvent(memberId, ssn),
-            new MemberStartedOnBoardingEvent(memberId, MemberStatus.ONBOARDING));
+      .given(new MemberCreatedEvent(memberId, MemberStatus.INITIATED))
+      .when(new StartOnboardingWithSSNCommand(memberId, request))
+      .expectSuccessfulHandlerExecution()
+      .expectEvents(
+        new OnboardingStartedWithSSNEvent(memberId, ssn),
+        new MemberStartedOnBoardingEvent(memberId, MemberStatus.ONBOARDING));
   }
 
   @Test
@@ -176,10 +199,10 @@ public class MemberAggregateTests {
     String cashbackId = "328354a4-d119-11e7-ac68-139bd471ea9a";
 
     fixture
-        .given(new MemberCreatedEvent(memberId, MemberStatus.INITIATED))
-        .when(new SelectNewCashbackCommand(memberId, UUID.fromString(cashbackId)))
-        .expectSuccessfulHandlerExecution()
-        .expectEvents(new NewCashbackSelectedEvent(memberId, cashbackId));
+      .given(new MemberCreatedEvent(memberId, MemberStatus.INITIATED))
+      .when(new SelectNewCashbackCommand(memberId, UUID.fromString(cashbackId)))
+      .expectSuccessfulHandlerExecution()
+      .expectEvents(new NewCashbackSelectedEvent(memberId, cashbackId));
   }
 
   @Test
@@ -193,14 +216,14 @@ public class MemberAggregateTests {
     when(cashbackService.getDefaultId(any())).thenReturn(DEFAULT_CASHBACK);
 
     fixture
-        .given(new MemberCreatedEvent(memberId, MemberStatus.INITIATED))
-        .when(new BankIdSignCommand(memberId, referenceId, "", "", personalNumber))
-        .expectSuccessfulHandlerExecution()
-        .expectEvents(
-            new SSNUpdatedEvent(memberId, personalNumber),
-            new NewCashbackSelectedEvent(memberId, DEFAULT_CASHBACK.toString()),
-            new MemberSignedEvent(memberId, referenceId, "", "", personalNumber),
-            new TrackingIdCreatedEvent(memberId, TRACKING_UUID));
+      .given(new MemberCreatedEvent(memberId, MemberStatus.INITIATED))
+      .when(new BankIdSignCommand(memberId, referenceId, "", "", personalNumber))
+      .expectSuccessfulHandlerExecution()
+      .expectEvents(
+        new SSNUpdatedEvent(memberId, personalNumber),
+        new NewCashbackSelectedEvent(memberId, DEFAULT_CASHBACK.toString()),
+        new MemberSignedEvent(memberId, referenceId, "", "", personalNumber),
+        new TrackingIdCreatedEvent(memberId, TRACKING_UUID));
   }
 
 
@@ -215,18 +238,18 @@ public class MemberAggregateTests {
     when(cashbackService.getDefaultId(any())).thenReturn(DEFAULT_CASHBACK);
 
     fixture
-        .given(
-            new MemberCreatedEvent(memberId, MemberStatus.INITIATED),
-            new MemberAuthenticatedEvent(memberId, referenceId),
-            new MemberStartedOnBoardingEvent(memberId, MemberStatus.ONBOARDING),
-            new TrackingIdCreatedEvent(memberId, TRACKING_UUID))
-        .when(new BankIdSignCommand(memberId, referenceId, "", "", personalNumber))
-        .expectSuccessfulHandlerExecution()
-        .expectEvents(
-            new SSNUpdatedEvent(memberId, personalNumber),
-            new NewCashbackSelectedEvent(memberId, DEFAULT_CASHBACK.toString()),
-            new MemberSignedEvent(memberId, referenceId, "", "", personalNumber)
-            );
+      .given(
+        new MemberCreatedEvent(memberId, MemberStatus.INITIATED),
+        new MemberAuthenticatedEvent(memberId, referenceId),
+        new MemberStartedOnBoardingEvent(memberId, MemberStatus.ONBOARDING),
+        new TrackingIdCreatedEvent(memberId, TRACKING_UUID))
+      .when(new BankIdSignCommand(memberId, referenceId, "", "", personalNumber))
+      .expectSuccessfulHandlerExecution()
+      .expectEvents(
+        new SSNUpdatedEvent(memberId, personalNumber),
+        new NewCashbackSelectedEvent(memberId, DEFAULT_CASHBACK.toString()),
+        new MemberSignedEvent(memberId, referenceId, "", "", personalNumber)
+      );
   }
 
   @Test
@@ -275,11 +298,11 @@ public class MemberAggregateTests {
     Long memberId = 1234L;
 
     fixture
-        .given(new MemberCreatedEvent(memberId, MemberStatus.INITIATED))
-        .when(new InactivateMemberCommand(memberId))
-        .expectSuccessfulHandlerExecution()
-        .expectEvents(
-            new MemberInactivatedEvent(memberId));
+      .given(new MemberCreatedEvent(memberId, MemberStatus.INITIATED))
+      .when(new InactivateMemberCommand(memberId))
+      .expectSuccessfulHandlerExecution()
+      .expectEvents(
+        new MemberInactivatedEvent(memberId));
 
   }
 
@@ -288,12 +311,12 @@ public class MemberAggregateTests {
     Long memberId = 1234L;
 
     fixture
-        .given(new MemberCreatedEvent(memberId, MemberStatus.INITIATED),
-            new MemberStartedOnBoardingEvent(memberId, MemberStatus.ONBOARDING))
-        .when(new InactivateMemberCommand(memberId))
-        .expectSuccessfulHandlerExecution()
-        .expectEvents(
-            new MemberInactivatedEvent(memberId));
+      .given(new MemberCreatedEvent(memberId, MemberStatus.INITIATED),
+        new MemberStartedOnBoardingEvent(memberId, MemberStatus.ONBOARDING))
+      .when(new InactivateMemberCommand(memberId))
+      .expectSuccessfulHandlerExecution()
+      .expectEvents(
+        new MemberInactivatedEvent(memberId));
 
   }
 
@@ -337,7 +360,6 @@ public class MemberAggregateTests {
   }
 
 
-
   private class AggregateFactoryM<T> extends AbstractAggregateFactory<T> {
 
     AggregateFactoryM(Class<T> aggregateType) {
@@ -346,7 +368,7 @@ public class MemberAggregateTests {
 
     @Override
     protected T doCreateAggregate(String aggregateIdentifier, DomainEventMessage firstEvent) {
-      return (T) new MemberAggregate(bisnodeClient, cashbackService, uuidGenerator, objectMapper, true);
+      return (T) new MemberAggregate(bisnodeClient, cashbackService, uuidGenerator, objectMapper);
     }
   }
 }
