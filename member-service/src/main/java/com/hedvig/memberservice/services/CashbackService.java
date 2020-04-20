@@ -56,8 +56,8 @@ public class CashbackService {
         "SOS-barnebyer ser en fantastisk jobb med å hjelpe barn som har mistet alt. I SOS-barnebyer får barna en familie og oppvekst i et trygt hjem og muligheten til å gå på skole med ambisjoner om å komme seg ut av fattigdom.",
         false,
         true,
-        "https://com-hedvig-web-content.s3.eu-central-1.amazonaws.com/Til+inntekt+for+SOS+Barnebyer.svg",
-        "https://com-hedvig-web-content.s3.eu-central-1.amazonaws.com/Til+inntekt+for+SOS+Barnebyer.svg",
+        "https://com-hedvig-web-content.s3.eu-central-1.amazonaws.com/Til+inntekt+for+SOS+Barnebyer.png",
+        "https://com-hedvig-web-content.s3.eu-central-1.amazonaws.com/Til+inntekt+for+SOS+Barnebyer.png",
         "",
         "Når Hedvig har betalt alle skader for året, går din del av overskuddet til å gi flere barn en trygg oppvekst");
 
