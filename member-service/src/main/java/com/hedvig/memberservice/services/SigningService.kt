@@ -15,6 +15,7 @@ import com.hedvig.memberservice.services.member.CannotSignInsuranceException
 import com.hedvig.memberservice.services.member.dto.MemberSignResponse
 import com.hedvig.memberservice.services.member.dto.MemberSignUnderwriterQuoteResponse
 import com.hedvig.memberservice.services.redispublisher.RedisEventPublisher
+import com.hedvig.memberservice.web.dto.IsMemberAlreadySignedResponse
 import com.hedvig.memberservice.web.dto.IsSsnAlreadySignedMemberResponse
 import com.hedvig.memberservice.web.v2.dto.SignStatusResponse
 import com.hedvig.memberservice.web.v2.dto.UnderwriterQuoteSignRequest
@@ -85,9 +86,14 @@ class SigningService(
         }
     }
 
-    fun IsSsnAlreadySignedMember(ssn: String?): IsSsnAlreadySignedMemberResponse {
+    fun isSsnAlreadySignedMember(ssn: String?): IsSsnAlreadySignedMemberResponse {
         val existing = signedMemberRepository.findBySsn(ssn)
         return IsSsnAlreadySignedMemberResponse(existing.isPresent)
+    }
+
+    fun isMemberAlreadySigned(memberId: Long): IsMemberAlreadySignedResponse {
+        val existing = signedMemberRepository.findById(memberId)
+        return IsMemberAlreadySignedResponse(existing.isPresent)
     }
 
     fun getSignStatus(@NonNull memberId: Long): SignStatusResponse? {
