@@ -12,17 +12,15 @@ import org.springframework.web.bind.annotation.RestController
 
 @RestController
 @RequestMapping(value = ["/i/member", "/_/member"])
- class InternalMembersControllerKt(
+class InternalMembersControllerKt(
     val memberRepository: MemberRepository
 ) {
 
     @PostMapping("/many")
-    fun getMembers(@RequestBody dto: ChargeMembersDTO): ResponseEntity<List<InternalMember?>?>? {
-        val members: List<InternalMember> = memberRepository
-            .findAllByIdIn(
-                dto.memberIds.map { it.toLong() }
-            )
-            .map { InternalMember.fromEntity(it) }
+    fun getMembers(@RequestBody dto: ChargeMembersDTO): ResponseEntity<List<InternalMember>> {
+        val memberIds = dto.memberIds.map { it.toLong() }
+        val membersReducedList = memberRepository.findAllByIdIn(memberIds)
+        val members = memberIds.map { memberId -> InternalMember.fromEntity(membersReducedList.first { it.id == memberId }) }
 
         if (dto.memberIds.size != members.size) {
             log.error(
