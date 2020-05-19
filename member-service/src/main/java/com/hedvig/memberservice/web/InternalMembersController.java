@@ -165,27 +165,6 @@ public class InternalMembersController {
     }
   }
 
-  @PostMapping("/many")
-  public ResponseEntity<List<InternalMember>> getMembers(@RequestBody ChargeMembersDTO dto) {
-    val members =
-      memberRepository
-        .findAllByIdIn(
-          dto.getMemberIds().stream().map(Long::parseLong).collect(Collectors.toList()))
-        .stream()
-        .map(m -> InternalMember.fromEntity(m))
-        .collect(Collectors.toList());
-
-    if (dto.getMemberIds().size() != members.size()) {
-      log.error(
-        "Length mismatch of supplied members and found members: wanted {}, found {}",
-        dto.getMemberIds().size(),
-        members.size());
-      return ResponseEntity.notFound().build();
-    }
-
-    return ResponseEntity.ok(members);
-  }
-
   @PostMapping(value = "/{memberId}/updateSSN")
   public ResponseEntity<Void> updateSSN(
     @PathVariable Long memberId,
