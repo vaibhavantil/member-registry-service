@@ -62,7 +62,7 @@ class UnderwriterSigningServiceImpl(
             is StartNorwegianAuthenticationResult.Success -> {
                 underwriterSignSessionRepository.saveOrUpdateReusableSession(underwriterSessionRef, response.orderReference)
 
-                StartNorwegianBankIdSignResponse(response.redirectUrl)
+                StartNorwegianBankIdSignResponse(response.redirectUrl.trim())
             }
             is StartNorwegianAuthenticationResult.Failed -> StartNorwegianBankIdSignResponse(
                 redirectUrl = null,
