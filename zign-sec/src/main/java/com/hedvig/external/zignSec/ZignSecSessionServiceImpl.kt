@@ -89,7 +89,7 @@ class ZignSecSessionServiceImpl(
                     when (collectResponse.result.identity.state) {
                         ZignSecCollectState.PENDING -> StartNorwegianAuthenticationResult.Success(
                             session.referenceId,
-                            session.redirectUrl
+                            session.redirectUrl.trim()
                         )
                         ZignSecCollectState.FINISHED -> startNewSession(request, type, session)
                     }
@@ -122,14 +122,14 @@ class ZignSecSessionServiceImpl(
 
         val s = session?.apply {
             this.referenceId = response.id
-            this.redirectUrl = response.redirectUrl
+            this.redirectUrl = response.redirectUrl.trim()
             this.requestPersonalNumber = request.personalNumber
             this.status = NorwegianBankIdProgressStatus.INITIATED
         } ?: ZignSecSession(
             memberId = request.memberId.toLong(),
             requestType = type,
             referenceId = response.id,
-            redirectUrl = response.redirectUrl,
+            redirectUrl = response.redirectUrl.trim(),
             requestPersonalNumber = request.personalNumber
         )
 
@@ -137,7 +137,7 @@ class ZignSecSessionServiceImpl(
 
         return StartNorwegianAuthenticationResult.Success(
             response.id,
-            response.redirectUrl
+            response.redirectUrl.trim()
         )
     }
 
