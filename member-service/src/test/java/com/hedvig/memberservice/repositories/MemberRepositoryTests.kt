@@ -156,19 +156,19 @@ class MemberRepositoryTests {
 
         memberRepository.save(signedMember)
 
-        val findByBothSsnAndEmail = memberRepository.findSignedMembersWithSameSsnOrEmail(signedMember.ssn, signedMember.email)
+        val findByBothSsnAndEmail = memberRepository.findSignedMembersBySsnOrEmail(signedMember.ssn, signedMember.email)
         assertThat(findByBothSsnAndEmail).hasSize(1)
         assertThat(findByBothSsnAndEmail[0].id).isEqualTo(signedMember.id)
 
-        val findBySsn = memberRepository.findSignedMembersWithSameSsnOrEmail(signedMember.ssn, "another@email.com")
+        val findBySsn = memberRepository.findSignedMembersBySsnOrEmail(signedMember.ssn, "another@email.com")
         assertThat(findBySsn).hasSize(1)
         assertThat(findBySsn[0].id).isEqualTo(signedMember.id)
 
-        val findsBySsn = memberRepository.findSignedMembersWithSameSsnOrEmail(null, signedMember.email)
+        val findsBySsn = memberRepository.findSignedMembersBySsnOrEmail(null, signedMember.email)
         assertThat(findsBySsn).hasSize(1)
         assertThat(findsBySsn[0].id).isEqualTo(signedMember.id)
 
-        val randomEmailAndSsn = memberRepository.findSignedMembersWithSameSsnOrEmail("random", "random")
+        val randomEmailAndSsn = memberRepository.findSignedMembersBySsnOrEmail("random", "random")
         assertThat(randomEmailAndSsn).isEmpty()
     }
 }

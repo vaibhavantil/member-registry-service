@@ -74,7 +74,7 @@ class PersonService @Autowired constructor(
     }
 
     fun hasSigned(ssn: String?, email: String): Boolean {
-        return memberRepository.findSignedMembersWithSameSsnOrEmail(ssn, email).isNotEmpty()
+        return memberRepository.findSignedMembersBySsnOrEmail(ssn, email).isNotEmpty()
     }
 
     companion object {

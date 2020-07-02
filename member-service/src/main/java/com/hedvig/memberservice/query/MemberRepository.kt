@@ -27,7 +27,7 @@ interface MemberRepository : JpaRepository<MemberEntity, Long> {
         FROM MemberEntity
         WHERE status = 'SIGNED' AND (ssn = :ssn OR email = :email)
     """)
-    fun findSignedMembersWithSameSsnOrEmail(
+    fun findSignedMembersBySsnOrEmail(
         ssn: String?,
         email: String
     ): List<MemberEntity>
