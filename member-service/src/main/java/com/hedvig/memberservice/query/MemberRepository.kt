@@ -23,6 +23,15 @@ interface MemberRepository : JpaRepository<MemberEntity, Long> {
         memberId: Long
     ): List<MemberEntity>
 
+    @Query("""
+        FROM MemberEntity
+        WHERE status = 'SIGNED' AND (ssn = :ssn OR email = :email)
+    """)
+    fun findSignedMembersWithSameSsnOrEmail(
+        ssn: String?,
+        email: String
+    ): List<MemberEntity>
+
     @Query("select count(*) from MemberEntity m where m.status = 'SIGNED'")
     fun countSignedMembers(): Long?
 
