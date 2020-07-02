@@ -25,7 +25,7 @@ interface MemberRepository : JpaRepository<MemberEntity, Long> {
 
     @Query("""
         FROM MemberEntity
-        WHERE status = 'SIGNED' AND (ssn = :ssn OR email = :email)
+        WHERE (status = 'SIGNED' OR status='TERMINATED') AND (ssn = :ssn OR email = :email)
     """)
     fun findSignedMembersBySsnOrEmail(
         ssn: String?,
