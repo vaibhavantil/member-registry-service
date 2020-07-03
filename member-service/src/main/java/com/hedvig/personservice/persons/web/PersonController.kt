@@ -1,5 +1,6 @@
 package com.hedvig.personservice.persons.web
 
+import com.hedvig.personservice.persons.web.dtos.PersonHasSignedBeforeRequest
 import com.hedvig.personservice.persons.PersonService
 import com.hedvig.personservice.persons.model.PersonFlags
 import com.hedvig.personservice.persons.web.dtos.PersonDto
@@ -78,5 +79,11 @@ class PersonController @Autowired constructor(
             ?: return ResponseEntity.notFound().build()
         val personFlags = personService.getAllPersonFlags(person)
         return ResponseEntity.ok(personFlags)
+    }
+
+    @PostMapping("/has/signed")
+    fun hasSigned(@RequestBody request: PersonHasSignedBeforeRequest): ResponseEntity<Boolean> {
+        val hasSigned = personService.hasSigned(request.ssn, request.email)
+        return ResponseEntity.ok(hasSigned)
     }
 }

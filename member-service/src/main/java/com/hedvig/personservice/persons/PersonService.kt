@@ -73,6 +73,10 @@ class PersonService @Autowired constructor(
         return calculateAllFlags(person, membersOfPerson)
     }
 
+    fun hasSigned(ssn: String?, email: String): Boolean {
+        return memberRepository.findSignedMembersBySsnOrEmail(ssn, email).isNotEmpty()
+    }
+
     companion object {
         fun calculateAllFlags(person: Person, members: List<MemberEntity>): PersonFlags = PersonFlags(
             debtFlag = DebtService.calculateDebtFlagByPerson(person),
