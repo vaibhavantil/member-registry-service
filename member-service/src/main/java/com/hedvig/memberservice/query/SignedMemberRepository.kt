@@ -1,12 +1,11 @@
-package com.hedvig.memberservice.query;
+package com.hedvig.memberservice.query
 
-import java.util.Optional;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.stereotype.Repository;
+import org.springframework.data.jpa.repository.JpaRepository
+import org.springframework.stereotype.Repository
+import java.util.*
 
 @Repository
-public interface SignedMemberRepository extends JpaRepository<SignedMemberEntity, Long> {
-  Optional<SignedMemberEntity> findById(long s);
-
-  Optional<SignedMemberEntity> findBySsn(String s);
+interface SignedMemberRepository : JpaRepository<SignedMemberEntity?, Long?> {
+    fun findById(s: Long): SignedMemberEntity?
+    fun findBySsn(s: String?): SignedMemberEntity?
 }

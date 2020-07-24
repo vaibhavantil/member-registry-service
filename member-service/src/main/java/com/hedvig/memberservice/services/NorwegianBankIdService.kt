@@ -58,7 +58,7 @@ class NorwegianBankIdService(
         when (result) {
             is NorwegianAuthenticationResult.Completed -> {
                 val signedMember = signedMemberRepository.findBySsn(result.ssn)
-                if (signedMember.isPresent) {
+                if (signedMember) {
                     if (result.memberId != signedMember.get().id) {
                         commandGateway.sendAndWait<Any>(InactivateMemberCommand(result.memberId))
                         apiGatewayService.reassignMember(result.memberId, signedMember.get().id)

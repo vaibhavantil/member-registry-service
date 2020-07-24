@@ -7,5 +7,6 @@ import java.util.*
 
 @Repository
 interface ZignSecSignEntityRepository: CrudRepository<ZignSecSignEntity, Long> {
-    fun findByIdProviderPersonId(idProviderPersonId: String): Optional<ZignSecSignEntity>
+    fun findByIdProviderPersonId(idProviderPersonId: String): ZignSecSignEntity?
+    fun findByPersonalNumber(personalNumber: String): ZignSecSignEntity?
 }

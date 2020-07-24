@@ -207,12 +207,12 @@ class ZignSecSessionServiceImpl(
 
                         val signEntity = zignSecSignEntityRepository.findByIdProviderPersonId(idProviderPersonId)
 
-                        if (signEntity.isPresent) {
+                        if (signEntity != null) {
                             norwegianAuthenticationEventPublisher.publishAuthenticationEvent(
                                 NorwegianAuthenticationResult.Completed(
                                     session.referenceId,
                                     session.memberId,
-                                    signEntity.get().personalNumber
+                                    signEntity.personalNumber
                                 )
                             )
                         } else {
