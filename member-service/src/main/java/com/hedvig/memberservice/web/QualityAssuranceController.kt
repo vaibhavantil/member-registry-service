@@ -1,6 +1,6 @@
 package com.hedvig.memberservice.web
 
-import com.hedvig.memberservice.services.QualityAssuranceService
+import com.hedvig.memberservice.services.QualityAssuranceServiceImpl
 import com.hedvig.memberservice.web.dto.UnsignMemberRequest
 import org.springframework.context.annotation.Profile
 import org.springframework.http.ResponseEntity
@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.*
 @Profile("staging", "development")
 @RequestMapping("/_/staging/")
 class QualityAssuranceController(
-    private val qualityAssuranceService: QualityAssuranceService
+    private val qualityAssuranceService: QualityAssuranceServiceImpl
 ) {
     @PostMapping("{country}/member/unsign")
     fun unsignMember(
