@@ -3,9 +3,9 @@ package com.hedvig.memberservice.services
 
 import com.hedvig.external.zignSec.repository.ZignSecSignEntityRepository
 import com.hedvig.memberservice.query.SignedMemberRepository
-import com.hedvig.memberservice.services.exceptions.CountryNotFoundException
 import com.hedvig.memberservice.services.exceptions.SignedMemberNotFoundException
 import com.hedvig.memberservice.web.QualityAssuranceController
+import com.hedvig.memberservice.web.dto.UnsignMemberMarket
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -46,16 +46,8 @@ class QualityAssuranceServiceImplTest {
     @Throws(SignedMemberNotFoundException::class)
     fun `When SSN does not exist, throw exception`() {
         thrown.expect(SignedMemberNotFoundException::class.java)
-        sut.unsignMember("SWEDEN", "123456")
+        sut.unsignMember(UnsignMemberMarket.SWEDEN, "123456")
     }
-
-    @Test
-    @Throws(CountryNotFoundException::class)
-    fun `When country does not exist, throw exception`() {
-        thrown.expect(CountryNotFoundException::class.java)
-        sut.unsignMember("ELDORADO", "123456")
-    }
-
 }
 
 @RunWith(SpringRunner::class)
