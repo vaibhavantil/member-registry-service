@@ -64,7 +64,7 @@ class QualityAssuranceServiceImplProductionTest {
     @Test
     fun `When profile is production, the service is NOT available`() {
         mockMvc.perform(
-            post("/_/staging/SWEDEN/member/unsign")
+            post("/_/staging/SWEDEN/unsignMember")
                 .header("hedvig.token", "1337")
         ).andExpect(status().isNotFound)
     }
@@ -84,7 +84,7 @@ class QualityAssuranceServiceImplStagingTest {
     @Test
     fun `When profile is staging or development, the endpoint IS available`() {
         mockMvc.perform(
-            post("/_/staging/SWEDEN/member/unsign")
+            post("/_/staging/SWEDEN/unsignMember")
                 .header("hedvig.token", "1337")
         ).andExpect(status().isBadRequest)
     }
