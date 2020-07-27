@@ -6,7 +6,6 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface SignedMemberRepository extends JpaRepository<SignedMemberEntity, Long> {
-  Optional<SignedMemberEntity> findById(long s);
-
-  Optional<SignedMemberEntity> findBySsn(String s);
+    Optional<SignedMemberEntity> findById(long s);
+    Optional<SignedMemberEntity> findBySsn(String s);
 }

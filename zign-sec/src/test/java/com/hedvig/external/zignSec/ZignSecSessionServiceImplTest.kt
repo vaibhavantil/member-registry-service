@@ -302,10 +302,10 @@ class ZignSecSessionServiceImplTest {
             Optional.of(session)
         )
         whenever(zignSecSignEntityRepository.findByIdProviderPersonId("9578-6000-4-365161")).thenReturn(
-            Optional.of(ZignSecSignEntity(
+            ZignSecSignEntity(
                 personalNumber = "1212120000",
                 idProviderPersonId = "9578-6000-4-365161"
-            ))
+            )
         )
 
         classUnderTest.handleNotification(zignSecSuccessAuthNotificationRequest)
