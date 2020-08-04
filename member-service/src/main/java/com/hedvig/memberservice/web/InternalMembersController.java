@@ -4,11 +4,9 @@ import com.hedvig.memberservice.aggregates.PickedLocale;
 import com.hedvig.memberservice.commands.*;
 import com.hedvig.memberservice.query.MemberEntity;
 import com.hedvig.memberservice.query.MemberRepository;
-import com.hedvig.memberservice.services.SigningService;
 import com.hedvig.memberservice.services.member.MemberQueryService;
 import com.hedvig.memberservice.services.trace.TraceMemberService;
 import com.hedvig.memberservice.web.dto.*;
-import lombok.val;
 import org.axonframework.commandhandling.gateway.CommandGateway;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,7 +27,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping({"/i/member", "/_/member"})
@@ -156,13 +153,22 @@ public class InternalMembersController {
   public void editMember(
     @PathVariable("memberId") String memberId,
     @RequestBody InternalMember dto,
-    @RequestHeader("Authorization") String token) {
+    @RequestHeader("Authorization") String token
+  ) {
 
     Optional<MemberEntity> member = memberRepository.findById(Long.parseLong(memberId));
 
     if (member.isPresent() && !InternalMember.fromEntity(member.get()).equals(dto)) {
       commandBus.sendAndWait(new EditMemberInformationCommand(memberId, dto, token));
     }
+  }
+
+  @PostMapping("/edit/info")
+  public void editMemberInfo(
+    @RequestBody EditMemberInfoRequest request,
+    @RequestHeader("Authorization") String token
+  ) {
+    commandBus.sendAndWait(EditMemberInfoCommand.Companion.from(request, token));
   }
 
   @PostMapping(value = "/{memberId}/updateSSN")

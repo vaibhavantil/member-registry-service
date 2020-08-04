@@ -5,28 +5,7 @@ import com.hedvig.common.UUIDGenerator;
 import com.hedvig.external.bisnodeBCI.BisnodeClient;
 import com.hedvig.external.bisnodeBCI.dto.Person;
 import com.hedvig.external.bisnodeBCI.dto.PersonSearchResult;
-import com.hedvig.memberservice.commands.AuthenticationAttemptCommand;
-import com.hedvig.memberservice.commands.BackfillPickedLocaleCommand;
-import com.hedvig.memberservice.commands.BankIdAuthenticationStatus;
-import com.hedvig.memberservice.commands.BankIdSignCommand;
-import com.hedvig.memberservice.commands.CreateMemberCommand;
-import com.hedvig.memberservice.commands.EditMemberInformationCommand;
-import com.hedvig.memberservice.commands.InactivateMemberCommand;
-import com.hedvig.memberservice.commands.InitializeAppleUserCommand;
-import com.hedvig.memberservice.commands.InsurnaceCancellationCommand;
-import com.hedvig.memberservice.commands.MemberCancelInsuranceCommand;
-import com.hedvig.memberservice.commands.MemberUpdateContactInformationCommand;
-import com.hedvig.memberservice.commands.NorwegianSignCommand;
-import com.hedvig.memberservice.commands.SelectNewCashbackCommand;
-import com.hedvig.memberservice.commands.SetFraudulentStatusCommand;
-import com.hedvig.memberservice.commands.SignMemberFromUnderwriterCommand;
-import com.hedvig.memberservice.commands.StartOnboardingWithSSNCommand;
-import com.hedvig.memberservice.commands.UpdateAcceptLanguageCommand;
-import com.hedvig.memberservice.commands.UpdateEmailCommand;
-import com.hedvig.memberservice.commands.UpdatePhoneNumberCommand;
-import com.hedvig.memberservice.commands.UpdatePickedLocaleCommand;
-import com.hedvig.memberservice.commands.UpdateSSNCommand;
-import com.hedvig.memberservice.commands.UpdateWebOnBoardingInfoCommand;
+import com.hedvig.memberservice.commands.*;
 import com.hedvig.memberservice.events.AcceptLanguageUpdatedEvent;
 import com.hedvig.memberservice.events.BirthDateUpdatedEvent;
 import com.hedvig.memberservice.events.EmailUpdatedEvent;
@@ -387,6 +366,23 @@ public class MemberAggregate {
     if (cmd.getMember().getPhoneNumber() != null
       && !Objects.equals(this.member.getPhoneNumber(), cmd.getMember().getPhoneNumber())) {
       apply(new PhoneNumberUpdatedEvent(this.id, cmd.getMember().getPhoneNumber()), MetaData.with("token", cmd.getToken()));
+    }
+  }
+
+  @CommandHandler
+  public void on(EditMemberInfoCommand cmd) {
+    String firstName = cmd.getFirstName() != null ? cmd.getFirstName() : member.getFirstName();
+    String lastName = cmd.getLastName() != null ? cmd.getLastName() : member.getLastName();
+    if (!firstName.equals(member.getFirstName()) || !lastName.equals(member.getLastName())) {
+      apply(new NameUpdatedEvent(this.id, firstName, lastName), MetaData.with("token", cmd.getToken()));
+    }
+
+    if (cmd.getEmail() != null && !cmd.getEmail().equals(member.getEmail())) {
+      apply(new EmailUpdatedEvent(this.id, cmd.getEmail()), MetaData.with("token", cmd.getToken()));
+    }
+
+    if (cmd.getPhoneNumber() != null && !cmd.getPhoneNumber().equals(member.getPhoneNumber())) {
+      apply(new PhoneNumberUpdatedEvent(this.id, cmd.getPhoneNumber()), MetaData.with("token", cmd.getToken()));
     }
   }
 
