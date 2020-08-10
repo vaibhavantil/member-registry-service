@@ -202,6 +202,7 @@ public class MemberAggregate {
   @CommandHandler
   void memberUpdateContactInformation(MemberUpdateContactInformationCommand cmd) {
     if (status == MemberStatus.SIGNED) {
+      log.error("Will not update member info since member is SIGNED (memberId={})", id);
       return;
     }
 
@@ -460,8 +461,7 @@ public class MemberAggregate {
 
   @CommandHandler
   public void on(UpdateAcceptLanguageCommand cmd) {
-    log.info("Updating accept language for member {}, new number: {}", cmd.getMemberId(),
-      cmd.getAcceptLanguage());
+    log.info("Updating accept language for member {}, new number: {}", cmd.getMemberId(), cmd.getAcceptLanguage());
 
     if (!cmd.getAcceptLanguage().isEmpty() &&
       !Objects.equals(member.getAcceptLanguage(), cmd.getAcceptLanguage())) {
@@ -473,8 +473,7 @@ public class MemberAggregate {
   public void on(UpdatePickedLocaleCommand cmd) {
 
     if (!Objects.equals(member.getPickedLocale(), cmd.getPickedLocale())) {
-      log.info("Updating picked locale for member {}, new locale: {}", cmd.getMemberId(),
-        cmd.getPickedLocale());
+      log.info("Updating picked locale for member {}, new locale: {}", cmd.getMemberId(), cmd.getPickedLocale());
 
       apply(new PickedLocaleUpdatedEvent(cmd.getMemberId(), cmd.getPickedLocale()));
     }
