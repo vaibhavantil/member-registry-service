@@ -6,29 +6,7 @@ import com.hedvig.external.bisnodeBCI.BisnodeClient;
 import com.hedvig.external.bisnodeBCI.dto.Person;
 import com.hedvig.external.bisnodeBCI.dto.PersonSearchResult;
 import com.hedvig.memberservice.commands.*;
-import com.hedvig.memberservice.events.AcceptLanguageUpdatedEvent;
-import com.hedvig.memberservice.events.BirthDateUpdatedEvent;
-import com.hedvig.memberservice.events.EmailUpdatedEvent;
-import com.hedvig.memberservice.events.FraudulentStatusUpdatedEvent;
-import com.hedvig.memberservice.events.InsuranceCancellationEvent;
-import com.hedvig.memberservice.events.LivingAddressUpdatedEvent;
-import com.hedvig.memberservice.events.MemberAuthenticatedEvent;
-import com.hedvig.memberservice.events.MemberCancellationEvent;
-import com.hedvig.memberservice.events.MemberCreatedEvent;
-import com.hedvig.memberservice.events.MemberInactivatedEvent;
-import com.hedvig.memberservice.events.MemberSignedEvent;
-import com.hedvig.memberservice.events.MemberSignedWithoutBankId;
-import com.hedvig.memberservice.events.MemberStartedOnBoardingEvent;
-import com.hedvig.memberservice.events.NameUpdatedEvent;
-import com.hedvig.memberservice.events.NewCashbackSelectedEvent;
-import com.hedvig.memberservice.events.NorwegianMemberSignedEvent;
-import com.hedvig.memberservice.events.NorwegianSSNUpdatedEvent;
-import com.hedvig.memberservice.events.OnboardingStartedWithSSNEvent;
-import com.hedvig.memberservice.events.PersonInformationFromBisnodeEvent;
-import com.hedvig.memberservice.events.PhoneNumberUpdatedEvent;
-import com.hedvig.memberservice.events.PickedLocaleUpdatedEvent;
-import com.hedvig.memberservice.events.SSNUpdatedEvent;
-import com.hedvig.memberservice.events.TrackingIdCreatedEvent;
+import com.hedvig.memberservice.events.*;
 import com.hedvig.memberservice.services.CashbackService;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
@@ -223,6 +201,9 @@ public class MemberAggregate {
 
   @CommandHandler
   void memberUpdateContactInformation(MemberUpdateContactInformationCommand cmd) {
+    if (status == MemberStatus.SIGNED) {
+      return;
+    }
 
     if ((cmd.getFirstName() != null
       && !Objects.equals(this.member.getFirstName(), cmd.getFirstName()))
