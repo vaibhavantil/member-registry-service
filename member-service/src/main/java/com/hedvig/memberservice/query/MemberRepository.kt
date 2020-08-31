@@ -43,11 +43,11 @@ interface MemberRepository : JpaRepository<MemberEntity, Long> {
         AND
             (
                 CAST(m.id as text) = :query
-                OR lower(m.firstName) LIKE ('%' || lower(:query) || '%')
-                OR lower(m.lastName) LIKE ('%' || lower(:query) || '%')
-                OR lower(m.firstName || ' ' || m.lastName) LIKE ('%' || lower(:query) || '%')
+                OR LOWER(TRIM(m.firstName)) LIKE ('%' || LOWER(:query) || '%')
+                OR LOWER(TRIM(m.lastName)) LIKE ('%' || LOWER(:query) || '%')
+                OR LOWER(TRIM(m.firstName) || ' ' || TRIM(m.lastName)) LIKE ('%' || LOWER(:query) || '%')
                 OR m.ssn LIKE ('%' || :query || '%')
-                OR lower(m.email) LIKE ('%' || lower(:query) || '%')
+                OR LOWER(m.email) LIKE ('%' || LOWER(:query) || '%')
                 OR m.phoneNumber LIKE ('%' || :query || '%')
             )
     """)
@@ -61,11 +61,11 @@ interface MemberRepository : JpaRepository<MemberEntity, Long> {
         FROM MemberEntity m
         WHERE
             CAST(m.id as text) = :query
-            OR lower(m.firstName) LIKE ('%' || lower(:query) || '%')
-            OR lower(m.lastName) LIKE ('%' || lower(:query) || '%')
-            OR lower(m.firstName || ' ' || m.lastName) LIKE ('%' || lower(:query) || '%')
+            OR LOWER(TRIM(m.firstName)) LIKE ('%' || LOWER(:query) || '%')
+            OR LOWER(TRIM(m.lastName)) LIKE ('%' || LOWER(:query) || '%')
+            OR LOWER(TRIM(m.firstName) || ' ' || TRIM(m.lastName)) LIKE ('%' || LOWER(:query) || '%')
             OR m.ssn LIKE ('%' || :query || '%')
-            OR lower(m.email) LIKE ('%' || lower(:query) || '%')
+            OR LOWER(m.email) LIKE ('%' || LOWER(:query) || '%')
             OR m.phoneNumber LIKE ('%' || :query || '%')
     """)
     fun searchAll(
