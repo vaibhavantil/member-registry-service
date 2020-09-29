@@ -518,9 +518,11 @@ class ZignSecSessionServiceImplTest {
 
     @Test
     fun testSsnAndBirthDateExtensionsWorks() {
-        assertThat("12121212120".dayMonthAndTwoDigitYearFromNorwegianSsn()).isEqualTo("1912-12-12".dayMonthAndTwoDigitYearFromDateOfBirth())
-        assertThat("20059412120".dayMonthAndTwoDigitYearFromNorwegianSsn()).isEqualTo("1994-05-20".dayMonthAndTwoDigitYearFromDateOfBirth())
-        assertThat("29018912120".dayMonthAndTwoDigitYearFromNorwegianSsn()).isEqualTo("1989-01-29".dayMonthAndTwoDigitYearFromDateOfBirth())
+        assertThat("12121212120".dayMonthAndTwoDigitYearFromNorwegianOrDanishSsn()).isEqualTo("1912-12-12".dayMonthAndTwoDigitYearFromDateOfBirth())
+        assertThat("20059412120".dayMonthAndTwoDigitYearFromNorwegianOrDanishSsn()).isEqualTo("1994-05-20".dayMonthAndTwoDigitYearFromDateOfBirth())
+        assertThat("29018912120".dayMonthAndTwoDigitYearFromNorwegianOrDanishSsn()).isEqualTo("1989-01-29".dayMonthAndTwoDigitYearFromDateOfBirth())
+        assertThat("1408300921".dayMonthAndTwoDigitYearFromNorwegianOrDanishSsn()).isEqualTo("1930-08-14".dayMonthAndTwoDigitYearFromDateOfBirth())
+        assertThat("1507161027".dayMonthAndTwoDigitYearFromNorwegianOrDanishSsn()).isEqualTo("2016-07-15".dayMonthAndTwoDigitYearFromDateOfBirth())
     }
 
     companion object {

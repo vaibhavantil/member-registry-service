@@ -178,11 +178,11 @@ class ZignSecSessionServiceImpl(
                         )
                     )
                     ZignSecBankIdProgressStatus.COMPLETED -> {
-                        //TODO: re add this when everything is in order with zign sec and personnumber also un ignore the test in ZignSecSessionServiceImplTest
+                        //TODO: re add this when everything is in order with zign sec and person number also un ignore the test in ZignSecSessionServiceImplTest
+                        //NOTE: this is also used in denmark so make sure both work on changing
                         //check that personal number is matching when signing
 //                        if (notification.identity!!.personalNumber!! != session.requestPersonalNumber!!) {
-                        //TODO: We should do probably the same hack for denmark if its posible
-                        if (notification.identity!!.dateOfBirth!!.dayMonthAndTwoDigitYearFromDateOfBirth() != session.requestPersonalNumber!!.dayMonthAndTwoDigitYearFromNorwegianSsn()) {
+                        if (notification.identity!!.dateOfBirth!!.dayMonthAndTwoDigitYearFromDateOfBirth() != session.requestPersonalNumber!!.dayMonthAndTwoDigitYearFromNorwegianOrDanishSsn()) {
                             session.status = ZignSecBankIdProgressStatus.FAILED
                             authenticationEventPublisher.publishSignEvent(
                                 ZignSecSignResult.Failed(
@@ -275,7 +275,7 @@ class ZignSecSessionServiceImpl(
     }
 }
 
-fun String.dayMonthAndTwoDigitYearFromNorwegianSsn(): Triple<String, String, String> {
+fun String.dayMonthAndTwoDigitYearFromNorwegianOrDanishSsn(): Triple<String, String, String> {
     val trimmedInput = this.trim().replace("-", "").replace(" ", "")
     val day = trimmedInput.substring(0, 2)
     val month = trimmedInput.substring(2, 4)
