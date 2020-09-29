@@ -18,6 +18,7 @@ import com.hedvig.memberservice.services.BankIdService
 import com.hedvig.memberservice.services.ZignSecBankIdService
 import com.hedvig.memberservice.util.getEndUserIp
 import com.hedvig.memberservice.web.dto.APIErrorDTO
+import com.hedvig.memberservice.web.dto.BankIdAuthCountry
 import com.hedvig.memberservice.web.dto.BankIdAuthRequest
 import com.hedvig.memberservice.web.dto.BankIdAuthResponse
 import com.hedvig.memberservice.web.dto.BankIdCollectResponse
@@ -172,12 +173,11 @@ class AuthController @Autowired constructor(
     }
 
     @PostMapping(path = ["/{country}/bankid/auth"])
-    private fun auth(@RequestHeader("hedvig.token") memberId: Long, @PathVariable("country") country: String, @RequestBody request: GenericBankIdAuthenticationRequest): ResponseEntity<StartZignSecAuthenticationResult> {
+    private fun auth(@RequestHeader("hedvig.token") memberId: Long, @PathVariable("country") country: BankIdAuthCountry, @RequestBody request: GenericBankIdAuthenticationRequest): ResponseEntity<StartZignSecAuthenticationResult> {
         return when (country) {
-            "norway" ->
+            BankIdAuthCountry.norway,
+            BankIdAuthCountry.denmark ->
                 ResponseEntity.ok(zignSecBankIdService.authenticate(memberId, request))
-            else ->
-                ResponseEntity.notFound().build()
         }
     }
 
