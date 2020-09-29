@@ -1,6 +1,7 @@
 package com.hedvig.external.zignSec.repository.entitys
 
-import com.hedvig.external.authentication.dto.NorwegianBankIdProgressStatus
+import com.hedvig.external.authentication.dto.ZignSecAuthenticationMethod
+import com.hedvig.external.authentication.dto.ZignSecBankIdProgressStatus
 import org.hibernate.annotations.CreationTimestamp
 import org.hibernate.annotations.UpdateTimestamp
 import java.time.Instant
@@ -24,9 +25,9 @@ class ZignSecSession(
     @Column(length=10_000)
     var redirectUrl: String,
     @Enumerated(javax.persistence.EnumType.STRING)
-    var status: NorwegianBankIdProgressStatus = NorwegianBankIdProgressStatus.INITIATED,
+    var status: ZignSecBankIdProgressStatus = ZignSecBankIdProgressStatus.INITIATED,
     @Enumerated(javax.persistence.EnumType.STRING)
-    val requestType: NorwegianAuthenticationType,
+    val requestType: ZignSecAuthenticationType,
     @Column(columnDefinition = "varchar(11) default null", nullable = true)
     var requestPersonalNumber: String? = null,
     @Embedded
@@ -36,14 +37,17 @@ class ZignSecSession(
     @CreationTimestamp
     val createdAt: Instant = Instant.now(),
     @UpdateTimestamp
-    var updatedAt: Instant = Instant.now()
+    var updatedAt: Instant = Instant.now(),
+    @Column(columnDefinition = "varchar(30) default NORWAY_WEB_OR_MOBILE", nullable = false)
+    var authenticationMethod: ZignSecAuthenticationMethod
 ) {
     constructor() : this(
         memberId = 1337,
-        requestType = NorwegianAuthenticationType.AUTH,
+        requestType = ZignSecAuthenticationType.AUTH,
         referenceId = UUID.randomUUID(),
         redirectUrl = "empty constructor",
-        requestPersonalNumber = null
+        requestPersonalNumber = null,
+        authenticationMethod = ZignSecAuthenticationMethod.NORWAY_WEB_OR_MOBILE
     )
 }
 

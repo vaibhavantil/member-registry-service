@@ -1,15 +1,11 @@
 package com.hedvig.memberservice.services
 
-import com.hedvig.external.authentication.dto.NorwegianAuthenticationResponseError
-import com.hedvig.external.authentication.dto.NorwegianSignResult
-import com.hedvig.external.authentication.dto.StartNorwegianAuthenticationResult
-import com.hedvig.memberservice.entities.SignStatus
-import com.hedvig.memberservice.query.MemberEntity
-import com.hedvig.memberservice.query.MemberRepository
+import com.hedvig.external.authentication.dto.ZignSecAuthenticationResponseError
+import com.hedvig.external.authentication.dto.ZignSecSignResult
+import com.hedvig.external.authentication.dto.StartZignSecAuthenticationResult
 import com.hedvig.memberservice.services.events.SignSessionCompleteEvent
 import com.hedvig.memberservice.services.member.MemberService
 import com.hedvig.memberservice.services.redispublisher.RedisEventPublisher
-import com.hedvig.memberservice.web.v2.dto.WebsignRequest
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test
 import org.junit.Before
@@ -47,7 +43,7 @@ class NorwegianSigningServiceTest {
     @Test
     fun startSignSuccessful() {
         whenever(norwegianBankIdService.sign(MEMBER_ID.toString(), SSN, SUCCESS_TARGET_URL, FAILED_TARGET_URL)).thenReturn(
-            StartNorwegianAuthenticationResult.Success(
+            StartZignSecAuthenticationResult.Success(
                 ORDER_REF,
                 REDIRECT_URL
             )
@@ -55,27 +51,27 @@ class NorwegianSigningServiceTest {
 
         val response = classUnderTest.startSign(MEMBER_ID, SSN, SUCCESS_TARGET_URL, FAILED_TARGET_URL)
 
-        assertThat(response).isInstanceOf(StartNorwegianAuthenticationResult.Success::class.java)
-        assertThat((response as StartNorwegianAuthenticationResult.Success).redirectUrl).isEqualTo(REDIRECT_URL)
+        assertThat(response).isInstanceOf(StartZignSecAuthenticationResult.Success::class.java)
+        assertThat((response as StartZignSecAuthenticationResult.Success).redirectUrl).isEqualTo(REDIRECT_URL)
     }
 
     @Test
     fun startSignFails() {
         whenever(norwegianBankIdService.sign(MEMBER_ID.toString(), SSN, SUCCESS_TARGET_URL, FAILED_TARGET_URL)).thenReturn(
-            StartNorwegianAuthenticationResult.Failed(
+            StartZignSecAuthenticationResult.Failed(
                 LIST_OF_ERRORS
             )
         )
 
         val response = classUnderTest.startSign(MEMBER_ID, SSN, SUCCESS_TARGET_URL, FAILED_TARGET_URL)
 
-        assertThat(response).isInstanceOf(StartNorwegianAuthenticationResult.Failed::class.java)
+        assertThat(response).isInstanceOf(StartZignSecAuthenticationResult.Failed::class.java)
     }
 
     @Test
     fun handleSuccessfulSigning() {
         classUnderTest.handleSignResult(
-            NorwegianSignResult.Signed(
+            ZignSecSignResult.Signed(
                 RESPONSE_ID,
                 MEMBER_ID,
                 SSN,
@@ -90,7 +86,7 @@ class NorwegianSigningServiceTest {
     @Test
     fun handleFailedSigning() {
         classUnderTest.handleSignResult(
-            NorwegianSignResult.Failed(
+            ZignSecSignResult.Failed(
                 RESPONSE_ID,
                 MEMBER_ID
             )
@@ -110,7 +106,7 @@ class NorwegianSigningServiceTest {
         private const val PROVIDER_JSON_RESPONSE = """{ "json": true }"""
         private const val SUCCESS_TARGET_URL = "success"
         private const val FAILED_TARGET_URL = "failed"
-        private val LIST_OF_ERRORS = listOf(NorwegianAuthenticationResponseError(0, "some error"))
+        private val LIST_OF_ERRORS = listOf(ZignSecAuthenticationResponseError(0, "some error"))
         private val RESPONSE_ID: UUID = UUID.randomUUID()
         private val ORDER_REF: UUID = UUID.randomUUID()
     }

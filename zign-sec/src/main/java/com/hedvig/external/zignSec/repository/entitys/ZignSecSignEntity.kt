@@ -13,6 +13,7 @@ import javax.persistence.UniqueConstraint
 class ZignSecSignEntity(
     @Id @GeneratedValue(strategy = GenerationType.SEQUENCE)
     val internalId: Long = 0,
+    //TODO: Need to change this, look up
     @Column(columnDefinition = "varchar(11)")
     val personalNumber: String,
     val idProviderPersonId: String

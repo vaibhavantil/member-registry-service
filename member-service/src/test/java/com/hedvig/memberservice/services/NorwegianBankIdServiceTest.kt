@@ -1,7 +1,7 @@
 package com.hedvig.memberservice.services
 
-import com.hedvig.external.authentication.NorwegianAuthentication
-import com.hedvig.external.authentication.dto.NorwegianAuthenticationResult
+import com.hedvig.external.authentication.ZignSecAuthentication
+import com.hedvig.external.authentication.dto.ZignSecAuthenticationResult
 import com.hedvig.integration.apigateway.ApiGatewayService
 import com.hedvig.localization.service.TextKeysLocaleResolver
 import com.hedvig.memberservice.commands.InactivateMemberCommand
@@ -28,7 +28,7 @@ import org.mockito.Mockito.`when` as whenever
 class NorwegianBankIdServiceTest {
 
     @Mock
-    lateinit var norwegianAuthentication: NorwegianAuthentication
+    lateinit var zignSecAuthentication: ZignSecAuthentication
     @Mock
     lateinit var commandGateway: CommandGateway
     @Mock
@@ -46,12 +46,12 @@ class NorwegianBankIdServiceTest {
 
     @Before
     fun before() {
-        classUnderTest = NorwegianBankIdService(norwegianAuthentication, commandGateway, redisEventPublisher, signedMemberRepository, apiGatewayService, memberRepository, textKeysLocaleResolver, "success", "fail")
+        classUnderTest = NorwegianBankIdService(zignSecAuthentication, commandGateway, redisEventPublisher, signedMemberRepository, apiGatewayService, memberRepository, textKeysLocaleResolver, "success", "fail")
     }
 
     @Test
     fun completeCompletedAuthentication_differntMemberId_inactivateMemberAndReassignsMember() {
-        val result = NorwegianAuthenticationResult.Completed(
+        val result = ZignSecAuthenticationResult.Completed(
             RESULT_ID,
             MEMBER_ID,
             SSN
@@ -74,7 +74,7 @@ class NorwegianBankIdServiceTest {
 
     @Test
     fun completeCompletedAuthentication_sameMemberId_doesNotInactivateMemberAndDoesNotReassignsMember() {
-        val result = NorwegianAuthenticationResult.Completed(
+        val result = ZignSecAuthenticationResult.Completed(
             RESULT_ID,
             MEMBER_ID,
             SSN
@@ -97,7 +97,7 @@ class NorwegianBankIdServiceTest {
 
     @Test
     fun completeCompletedAuthentication_noSignedMember_publishFailedEvent() {
-        val result = NorwegianAuthenticationResult.Completed(
+        val result = ZignSecAuthenticationResult.Completed(
             RESULT_ID,
             MEMBER_ID,
             SSN
@@ -113,7 +113,7 @@ class NorwegianBankIdServiceTest {
 
     @Test
     fun completeFailedAuthentication_sameMemberId_doesNotInactivateMemberAndDoesNotReassignsMember() {
-        val result = NorwegianAuthenticationResult.Failed(
+        val result = ZignSecAuthenticationResult.Failed(
             RESULT_ID,
             MEMBER_ID
         )

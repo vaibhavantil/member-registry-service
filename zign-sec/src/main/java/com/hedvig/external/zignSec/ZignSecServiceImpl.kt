@@ -1,6 +1,6 @@
 package com.hedvig.external.zignSec
 
-import com.hedvig.external.authentication.dto.NorwegianBankIdAuthenticationRequest
+import com.hedvig.external.authentication.dto.ZignSecBankIdAuthenticationRequest
 import com.hedvig.external.zignSec.client.ZignSecClient
 import com.hedvig.external.zignSec.client.dto.ZignSecRequestBody
 import com.hedvig.external.zignSec.client.dto.ZignSecResponse
@@ -20,8 +20,8 @@ class ZignSecServiceImpl(
     private val webhookUrl: String
 ) : ZignSecService {
 
-    override fun auth(request: NorwegianBankIdAuthenticationRequest): ZignSecResponse = client.auth(
-        bankIdSelector = WEB_OR_MOBILE,
+    override fun auth(request: ZignSecBankIdAuthenticationRequest): ZignSecResponse = client.auth(
+        bankIdSelector = request.authMethod.zignSecMethodName,
         authorization = authentication,
         host = host,
         body = ZignSecRequestBody(
@@ -38,8 +38,4 @@ class ZignSecServiceImpl(
         authorization = authentication,
         host = host
     )
-
-    companion object {
-        private const val WEB_OR_MOBILE = "nbid_oidc"
-    }
 }

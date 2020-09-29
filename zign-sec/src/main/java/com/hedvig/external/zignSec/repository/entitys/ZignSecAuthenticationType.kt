@@ -1,5 +1,5 @@
 package com.hedvig.external.zignSec.repository.entitys
 
-enum class NorwegianAuthenticationType {
+enum class ZignSecAuthenticationType {
     SIGN, AUTH
 }

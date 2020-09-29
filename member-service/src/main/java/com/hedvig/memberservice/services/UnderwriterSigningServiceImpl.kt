@@ -1,6 +1,6 @@
 package com.hedvig.memberservice.services
 
-import com.hedvig.external.authentication.dto.StartNorwegianAuthenticationResult
+import com.hedvig.external.authentication.dto.StartZignSecAuthenticationResult
 import com.hedvig.integration.underwriter.UnderwriterClient
 import com.hedvig.integration.underwriter.dtos.SignRequest
 import com.hedvig.memberservice.query.SignedMemberRepository
@@ -9,8 +9,6 @@ import com.hedvig.memberservice.query.saveOrUpdateReusableSession
 import com.hedvig.memberservice.services.dto.StartNorwegianBankIdSignResponse
 import com.hedvig.memberservice.services.dto.StartSwedishBankIdSignResponse
 import org.springframework.beans.factory.annotation.Value
-import org.springframework.boot.context.properties.ConfigurationProperties
-import org.springframework.stereotype.Component
 import org.springframework.stereotype.Service
 import java.net.URL
 import java.util.*
@@ -59,12 +57,12 @@ class UnderwriterSigningServiceImpl(
         }
 
         return when (val response = norwegianSigningService.startSign(memberId, ssn, successUrl, failUrl)) {
-            is StartNorwegianAuthenticationResult.Success -> {
+            is StartZignSecAuthenticationResult.Success -> {
                 underwriterSignSessionRepository.saveOrUpdateReusableSession(underwriterSessionRef, response.orderReference)
 
                 StartNorwegianBankIdSignResponse(response.redirectUrl.trim())
             }
-            is StartNorwegianAuthenticationResult.Failed -> StartNorwegianBankIdSignResponse(
+            is StartZignSecAuthenticationResult.Failed -> StartNorwegianBankIdSignResponse(
                 redirectUrl = null,
                 errorMessages = response.errors
             )

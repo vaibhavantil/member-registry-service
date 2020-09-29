@@ -3,13 +3,13 @@ package com.hedvig.external.zignSec
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
-import com.hedvig.external.authentication.dto.NorwegianAuthenticationResult
-import com.hedvig.external.authentication.dto.NorwegianSignResult
-import com.hedvig.external.authentication.dto.NorwegianBankIdAuthenticationRequest
-import com.hedvig.external.authentication.dto.NorwegianBankIdProgressStatus
-import com.hedvig.external.authentication.dto.StartNorwegianAuthenticationResult.Success
-import com.hedvig.external.authentication.dto.StartNorwegianAuthenticationResult.Failed
-import com.hedvig.external.event.NorwegianAuthenticationEventPublisher
+import com.hedvig.external.authentication.dto.ZignSecAuthenticationResult
+import com.hedvig.external.authentication.dto.ZignSecSignResult
+import com.hedvig.external.authentication.dto.ZignSecBankIdAuthenticationRequest
+import com.hedvig.external.authentication.dto.ZignSecBankIdProgressStatus
+import com.hedvig.external.authentication.dto.StartZignSecAuthenticationResult.Success
+import com.hedvig.external.authentication.dto.StartZignSecAuthenticationResult.Failed
+import com.hedvig.external.event.AuthenticationEventPublisher
 import com.hedvig.external.zignSec.client.dto.ZignSecCollectIdentity
 import com.hedvig.external.zignSec.client.dto.ZignSecCollectResponse
 import com.hedvig.external.zignSec.client.dto.ZignSecCollectResult
@@ -18,7 +18,7 @@ import com.hedvig.external.zignSec.client.dto.ZignSecResponse
 import com.hedvig.external.zignSec.client.dto.ZignSecResponseError
 import com.hedvig.external.zignSec.repository.ZignSecSessionRepository
 import com.hedvig.external.zignSec.repository.ZignSecSignEntityRepository
-import com.hedvig.external.zignSec.repository.entitys.NorwegianAuthenticationType
+import com.hedvig.external.zignSec.repository.entitys.ZignSecAuthenticationType
 import com.hedvig.external.zignSec.repository.entitys.ZignSecSession
 import com.hedvig.external.zignSec.repository.entitys.ZignSecSignEntity
 import org.assertj.core.api.Assertions.assertThat
@@ -52,7 +52,7 @@ class ZignSecSessionServiceImplTest {
     lateinit var zignSecService: ZignSecService
 
     @Mock
-    lateinit var norwegianAuthenticationEventPublisher: NorwegianAuthenticationEventPublisher
+    lateinit var authenticationEventPublisher: AuthenticationEventPublisher
 
     @Captor
     lateinit var captor: ArgumentCaptor<ZignSecSession>
@@ -67,7 +67,7 @@ class ZignSecSessionServiceImplTest {
     @Before
     fun before() {
         objectMapper = ObjectMapper().registerKotlinModule().registerModule(JavaTimeModule())
-        classUnderTest = ZignSecSessionServiceImpl(sessionRepository, zignSecSignEntityRepository, zignSecService, norwegianAuthenticationEventPublisher, objectMapper)
+        classUnderTest = ZignSecSessionServiceImpl(sessionRepository, zignSecSignEntityRepository, zignSecService, authenticationEventPublisher, objectMapper)
     }
 
     @Test
@@ -151,8 +151,8 @@ class ZignSecSessionServiceImplTest {
         whenever(sessionRepository.findByMemberId(startAuthRequest.memberId.toLong())).thenReturn(
             Optional.of(ZignSecSession(
                 memberId = 1337,
-                requestType = NorwegianAuthenticationType.AUTH,
-                status = NorwegianBankIdProgressStatus.INITIATED,
+                requestType = ZignSecAuthenticationType.AUTH,
+                status = ZignSecBankIdProgressStatus.INITIATED,
                 referenceId = REFERENCE_ID,
                 redirectUrl = "redirect url",
                 requestPersonalNumber = null
@@ -184,8 +184,8 @@ class ZignSecSessionServiceImplTest {
         whenever(sessionRepository.findByMemberId(startAuthRequest.memberId.toLong())).thenReturn(
             Optional.of(ZignSecSession(
                 memberId = 1337,
-                requestType = NorwegianAuthenticationType.AUTH,
-                status = NorwegianBankIdProgressStatus.INITIATED,
+                requestType = ZignSecAuthenticationType.AUTH,
+                status = ZignSecBankIdProgressStatus.INITIATED,
                 referenceId = REFERENCE_ID,
                 redirectUrl = "redirect url",
                 requestPersonalNumber = null
@@ -227,8 +227,8 @@ class ZignSecSessionServiceImplTest {
         whenever(sessionRepository.findByMemberId(startAuthRequest.memberId.toLong())).thenReturn(
             Optional.of(ZignSecSession(
                 memberId = 1337,
-                requestType = NorwegianAuthenticationType.AUTH,
-                status = NorwegianBankIdProgressStatus.INITIATED,
+                requestType = ZignSecAuthenticationType.AUTH,
+                status = ZignSecBankIdProgressStatus.INITIATED,
                 referenceId = REFERENCE_ID,
                 redirectUrl = "redirect url",
                 requestPersonalNumber = null
@@ -260,8 +260,8 @@ class ZignSecSessionServiceImplTest {
         whenever(sessionRepository.findByMemberId(startAuthRequest.memberId.toLong())).thenReturn(
             Optional.of(ZignSecSession(
                 memberId = 1337,
-                requestType = NorwegianAuthenticationType.AUTH,
-                status = NorwegianBankIdProgressStatus.COMPLETED,
+                requestType = ZignSecAuthenticationType.AUTH,
+                status = ZignSecBankIdProgressStatus.COMPLETED,
                 referenceId = REFERENCE_ID,
                 redirectUrl = "redirect url",
                 requestPersonalNumber = null
@@ -290,8 +290,8 @@ class ZignSecSessionServiceImplTest {
             referenceId = REFERENCE_ID,
             memberId = 1337,
             redirectUrl = REDIRECT_URL,
-            status = NorwegianBankIdProgressStatus.INITIATED,
-            requestType = NorwegianAuthenticationType.AUTH,
+            status = ZignSecBankIdProgressStatus.INITIATED,
+            requestType = ZignSecAuthenticationType.AUTH,
             notification = null,
             createdAt = timestamp,
             updatedAt = timestamp,
@@ -310,13 +310,13 @@ class ZignSecSessionServiceImplTest {
 
         classUnderTest.handleNotification(zignSecSuccessAuthNotificationRequest)
 
-        verify(norwegianAuthenticationEventPublisher).publishAuthenticationEvent(NorwegianAuthenticationResult.Completed(REFERENCE_ID, 1337, "1212120000"))
+        verify(authenticationEventPublisher).publishAuthenticationEvent(ZignSecAuthenticationResult.Completed(REFERENCE_ID, 1337, "1212120000"))
 
         val savedSession = sessionRepository.findByReferenceId(REFERENCE_ID).get()
         assertThat(savedSession.referenceId).isEqualTo(REFERENCE_ID)
         assertThat(savedSession.memberId).isEqualTo(1337)
-        assertThat(savedSession.status).isEqualTo(NorwegianBankIdProgressStatus.COMPLETED)
-        assertThat(savedSession.requestType).isEqualTo(NorwegianAuthenticationType.AUTH)
+        assertThat(savedSession.status).isEqualTo(ZignSecBankIdProgressStatus.COMPLETED)
+        assertThat(savedSession.requestType).isEqualTo(ZignSecAuthenticationType.AUTH)
         assertThat(savedSession.notification).isNotNull
     }
 
@@ -327,8 +327,8 @@ class ZignSecSessionServiceImplTest {
             referenceId = REFERENCE_ID,
             memberId = 1337,
             redirectUrl = REDIRECT_URL,
-            status = NorwegianBankIdProgressStatus.INITIATED,
-            requestType = NorwegianAuthenticationType.SIGN,
+            status = ZignSecBankIdProgressStatus.INITIATED,
+            requestType = ZignSecAuthenticationType.SIGN,
             notification = null,
             createdAt = timestamp,
             updatedAt = timestamp,
@@ -348,7 +348,7 @@ class ZignSecSessionServiceImplTest {
 
         classUnderTest.handleNotification(zignSecSuccessAuthNotificationRequest)
 
-        verify(norwegianAuthenticationEventPublisher).publishSignEvent(NorwegianSignResult.Signed(REFERENCE_ID, 1337, "12121200000", zignSecSuccessAuthNotificationRequest))
+        verify(authenticationEventPublisher).publishSignEvent(ZignSecSignResult.Signed(REFERENCE_ID, 1337, "12121200000", zignSecSuccessAuthNotificationRequest))
 
         assertThat(secSignEntityCaptor.value.personalNumber).isEqualTo("12121200000")
         assertThat(secSignEntityCaptor.value.idProviderPersonId).isEqualTo("9578-6000-4-365161")
@@ -356,8 +356,8 @@ class ZignSecSessionServiceImplTest {
         val savedSession = sessionRepository.findByReferenceId(REFERENCE_ID).get()
         assertThat(savedSession.referenceId).isEqualTo(REFERENCE_ID)
         assertThat(savedSession.memberId).isEqualTo(1337)
-        assertThat(savedSession.status).isEqualTo(NorwegianBankIdProgressStatus.COMPLETED)
-        assertThat(savedSession.requestType).isEqualTo(NorwegianAuthenticationType.SIGN)
+        assertThat(savedSession.status).isEqualTo(ZignSecBankIdProgressStatus.COMPLETED)
+        assertThat(savedSession.requestType).isEqualTo(ZignSecAuthenticationType.SIGN)
         assertThat(savedSession.notification).isNotNull
     }
 
@@ -367,8 +367,8 @@ class ZignSecSessionServiceImplTest {
         val session = ZignSecSession(
             referenceId = REFERENCE_ID,
             memberId = 1337,
-            status = NorwegianBankIdProgressStatus.INITIATED,
-            requestType = NorwegianAuthenticationType.SIGN,
+            status = ZignSecBankIdProgressStatus.INITIATED,
+            requestType = ZignSecAuthenticationType.SIGN,
             redirectUrl = REDIRECT_URL,
             notification = null,
             createdAt = timestamp,
@@ -382,12 +382,12 @@ class ZignSecSessionServiceImplTest {
 
         classUnderTest.handleNotification(zignSecFailedAuthNotificationRequest)
 
-        verify(norwegianAuthenticationEventPublisher).publishSignEvent(NorwegianSignResult.Failed(REFERENCE_ID, 1337))
+        verify(authenticationEventPublisher).publishSignEvent(ZignSecSignResult.Failed(REFERENCE_ID, 1337))
 
         val savedSession = sessionRepository.findByReferenceId(REFERENCE_ID).get()
         assertThat(savedSession.referenceId).isEqualTo(REFERENCE_ID)
-        assertThat(savedSession.status).isEqualTo(NorwegianBankIdProgressStatus.FAILED)
-        assertThat(savedSession.requestType).isEqualTo(NorwegianAuthenticationType.SIGN)
+        assertThat(savedSession.status).isEqualTo(ZignSecBankIdProgressStatus.FAILED)
+        assertThat(savedSession.requestType).isEqualTo(ZignSecAuthenticationType.SIGN)
     }
 
     @Test
@@ -396,8 +396,8 @@ class ZignSecSessionServiceImplTest {
         val session = ZignSecSession(
             referenceId = REFERENCE_ID,
             memberId = 1337,
-            status = NorwegianBankIdProgressStatus.COMPLETED,
-            requestType = NorwegianAuthenticationType.AUTH,
+            status = ZignSecBankIdProgressStatus.COMPLETED,
+            requestType = ZignSecAuthenticationType.AUTH,
             redirectUrl = REDIRECT_URL,
             notification = null,
             createdAt = timestamp,
@@ -411,7 +411,7 @@ class ZignSecSessionServiceImplTest {
 
         classUnderTest.handleNotification(zignSecSuccessAuthNotificationRequest)
 
-        verifyZeroInteractions(norwegianAuthenticationEventPublisher)
+        verifyZeroInteractions(authenticationEventPublisher)
         verify(sessionRepository, never()).save(any())
     }
 
@@ -423,8 +423,8 @@ class ZignSecSessionServiceImplTest {
         whenever(sessionRepository.findByMemberId(startSignRequest.memberId.toLong())).thenReturn(
             Optional.of(ZignSecSession(
                 memberId = 1337,
-                requestType = NorwegianAuthenticationType.SIGN,
-                status = NorwegianBankIdProgressStatus.INITIATED,
+                requestType = ZignSecAuthenticationType.SIGN,
+                status = ZignSecBankIdProgressStatus.INITIATED,
                 referenceId = REFERENCE_ID,
                 redirectUrl = "redirect url",
                 requestPersonalNumber = "12121212121"
@@ -443,8 +443,8 @@ class ZignSecSessionServiceImplTest {
             .thenReturn(
                 ZignSecSession(
                     memberId = 1337,
-                    requestType = NorwegianAuthenticationType.SIGN,
-                    status = NorwegianBankIdProgressStatus.INITIATED,
+                    requestType = ZignSecAuthenticationType.SIGN,
+                    status = ZignSecBankIdProgressStatus.INITIATED,
                     referenceId = REFERENCE_ID,
                     redirectUrl = "redirect url",
                     requestPersonalNumber = "12121212120"
@@ -463,8 +463,8 @@ class ZignSecSessionServiceImplTest {
         whenever(sessionRepository.findByMemberId(startAuthRequest.memberId.toLong())).thenReturn(
             Optional.of(ZignSecSession(
                 memberId = 1337,
-                requestType = NorwegianAuthenticationType.SIGN,
-                status = NorwegianBankIdProgressStatus.INITIATED,
+                requestType = ZignSecAuthenticationType.SIGN,
+                status = ZignSecBankIdProgressStatus.INITIATED,
                 referenceId = REFERENCE_ID,
                 redirectUrl = "redirect url",
                 requestPersonalNumber = "12121212120"
@@ -484,8 +484,8 @@ class ZignSecSessionServiceImplTest {
         val session = ZignSecSession(
             referenceId = REFERENCE_ID,
             memberId = 1337,
-            status = NorwegianBankIdProgressStatus.INITIATED,
-            requestType = NorwegianAuthenticationType.SIGN,
+            status = ZignSecBankIdProgressStatus.INITIATED,
+            requestType = ZignSecAuthenticationType.SIGN,
             redirectUrl = REDIRECT_URL,
             notification = null,
             createdAt = timestamp,
@@ -499,7 +499,7 @@ class ZignSecSessionServiceImplTest {
 
         classUnderTest.handleNotification(zignSecSuccessAuthNotificationRequest)
 
-        verify(norwegianAuthenticationEventPublisher).publishSignEvent(NorwegianSignResult.Failed(REFERENCE_ID, 1337))
+        verify(authenticationEventPublisher).publishSignEvent(ZignSecSignResult.Failed(REFERENCE_ID, 1337))
     }
 
     @Test
@@ -510,7 +510,7 @@ class ZignSecSessionServiceImplTest {
     }
 
     companion object {
-        val startSignRequest = NorwegianBankIdAuthenticationRequest(
+        val startSignRequest = ZignSecBankIdAuthenticationRequest(
             "1337",
             "12121212120",
             "NO",
@@ -518,7 +518,7 @@ class ZignSecSessionServiceImplTest {
             "fail"
         )
 
-        val startAuthRequest = NorwegianBankIdAuthenticationRequest(
+        val startAuthRequest = ZignSecBankIdAuthenticationRequest(
             "1337",
             null,
             "NO",

@@ -1,6 +1,6 @@
 package com.hedvig.memberservice.listeners
 
-import com.hedvig.external.event.NorwegianAuthenticationEvent
+import com.hedvig.external.event.ZignSecAuthenticationEvent
 import com.hedvig.memberservice.services.NorwegianBankIdService
 import org.springframework.context.event.EventListener
 import org.springframework.scheduling.annotation.Async
@@ -13,8 +13,8 @@ class NorwegianAuthEventListener(
 
     @Async
     @EventListener
-    fun handleNorwegianAuthEvent(norwegianAuthEvent: NorwegianAuthenticationEvent) {
-        norwegianBankIdService.completeAuthentication(norwegianAuthEvent.message)
+    fun handleNorwegianAuthEvent(zignSecAuthEvent: ZignSecAuthenticationEvent) {
+        norwegianBankIdService.completeAuthentication(zignSecAuthEvent.message)
     }
 }
 

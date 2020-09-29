@@ -2,7 +2,7 @@ package com.hedvig.memberservice.web
 
 
 import com.hedvig.common.DeprecatedException
-import com.hedvig.external.authentication.dto.StartNorwegianAuthenticationResult
+import com.hedvig.external.authentication.dto.StartZignSecAuthenticationResult
 import com.hedvig.external.bankID.bankIdTypes.CollectResponse
 import com.hedvig.external.bankID.bankIdTypes.CollectStatus
 import com.hedvig.memberservice.aggregates.exceptions.BankIdReferenceUsedException
@@ -172,7 +172,7 @@ class AuthController @Autowired constructor(
     }
 
     @PostMapping(path = ["/{country}/bankid/auth"])
-    private fun auth(@RequestHeader("hedvig.token") memberId: Long, @PathVariable("country") country: String, @RequestBody request: GenericBankIdAuthenticationRequest): ResponseEntity<StartNorwegianAuthenticationResult> {
+    private fun auth(@RequestHeader("hedvig.token") memberId: Long, @PathVariable("country") country: String, @RequestBody request: GenericBankIdAuthenticationRequest): ResponseEntity<StartZignSecAuthenticationResult> {
         return when (country) {
             "norway" ->
                 ResponseEntity.ok(norwegianBankIdService.authenticate(memberId, request))

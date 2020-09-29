@@ -1,6 +1,6 @@
 package com.hedvig.memberservice.web.v2.dto;
 
-import com.hedvig.external.authentication.dto.NorwegianBankIdProgressStatus;
+import com.hedvig.external.authentication.dto.ZignSecBankIdProgressStatus;
 import com.hedvig.memberservice.entities.SignSession;
 import com.hedvig.memberservice.entities.SignStatus;
 import javax.validation.constraints.NotNull;
@@ -27,7 +27,7 @@ public class SignStatusResponse {
     return new SignStatusResponse(session.getSignAndContractStatus(), data);
   }
 
-  public static SignStatusResponse CreateFromNorwegianStatus(@NotNull NorwegianBankIdProgressStatus status) {
+  public static SignStatusResponse CreateFromNorwegianStatus(@NotNull ZignSecBankIdProgressStatus status) {
     switch (status) {
       case INITIATED:
         return new SignStatusResponse(SignStatus.INITIATED, null);

@@ -1,7 +1,7 @@
 package com.hedvig.memberservice.services
 
-import com.hedvig.external.authentication.dto.NorwegianAuthenticationResponseError
-import com.hedvig.external.authentication.dto.StartNorwegianAuthenticationResult
+import com.hedvig.external.authentication.dto.ZignSecAuthenticationResponseError
+import com.hedvig.external.authentication.dto.StartZignSecAuthenticationResult
 import com.hedvig.external.bankID.bankIdTypes.OrderResponse
 import com.hedvig.integration.underwriter.UnderwriterClient
 import com.hedvig.integration.underwriter.dtos.SignRequest
@@ -19,7 +19,6 @@ import org.mockito.Captor
 import org.mockito.Mock
 import org.mockito.Mockito.verifyZeroInteractions
 import org.mockito.junit.MockitoJUnitRunner
-import org.springframework.http.ResponseEntity
 import java.util.*
 import org.mockito.Mockito.`when` as whenever
 
@@ -85,7 +84,7 @@ class UnderwriterSigningServiceImplTest {
     fun startNorwegianBankIdSession() {
         whenever(signedMemberRepository.findBySsn(norwegianSSN)).thenReturn(Optional.empty())
         whenever(norwegianSigningService.startSign(memberId, norwegianSSN, successTargetUrl, failUrl))
-            .thenReturn(StartNorwegianAuthenticationResult.Success(orderRefUUID, redirectUrl))
+            .thenReturn(StartZignSecAuthenticationResult.Success(orderRefUUID, redirectUrl))
 
         whenever(underwriterSignSessionRepository.save(captor.capture()))
             .thenReturn(UnderwriterSignSessionEntity(underwriterSessionRef, orderRefUUID))
@@ -101,7 +100,7 @@ class UnderwriterSigningServiceImplTest {
     fun startNorwegianBankIdSessionFails() {
         whenever(signedMemberRepository.findBySsn(norwegianSSN)).thenReturn(Optional.empty())
         whenever(norwegianSigningService.startSign(memberId, norwegianSSN, successTargetUrl, failUrl))
-            .thenReturn(StartNorwegianAuthenticationResult.Failed(listOf(NorwegianAuthenticationResponseError(1,"Some error message"))))
+            .thenReturn(StartZignSecAuthenticationResult.Failed(listOf(ZignSecAuthenticationResponseError(1,"Some error message"))))
 
         val response = sut.startNorwegianBankIdSignSession(underwriterSessionRef, memberId, norwegianSSN, successTargetUrl, failUrl)
 
