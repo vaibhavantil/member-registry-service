@@ -2,6 +2,7 @@ package com.hedvig.memberservice;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hedvig.common.UUIDGenerator;
+import com.hedvig.external.authentication.dto.ZignSecAuthenticationMethod;
 import com.hedvig.external.bisnodeBCI.BisnodeClient;
 import com.hedvig.memberservice.aggregates.MemberAggregate;
 import com.hedvig.memberservice.aggregates.MemberStatus;
@@ -11,7 +12,7 @@ import com.hedvig.memberservice.commands.BankIdAuthenticationStatus;
 import com.hedvig.memberservice.commands.BankIdSignCommand;
 import com.hedvig.memberservice.commands.InactivateMemberCommand;
 import com.hedvig.memberservice.commands.MemberUpdateContactInformationCommand;
-import com.hedvig.memberservice.commands.NorwegianSignCommand;
+import com.hedvig.memberservice.commands.ZignSecSignCommand;
 import com.hedvig.memberservice.commands.SelectNewCashbackCommand;
 import com.hedvig.memberservice.commands.StartOnboardingWithSSNCommand;
 import com.hedvig.memberservice.commands.UpdatePickedLocaleCommand;
@@ -266,7 +267,7 @@ public class MemberAggregateTests {
         new MemberCreatedEvent(memberId, MemberStatus.INITIATED),
         new MemberStartedOnBoardingEvent(memberId, MemberStatus.ONBOARDING),
         new TrackingIdCreatedEvent(memberId, TRACKING_UUID))
-      .when(new NorwegianSignCommand(memberId, referenceId, personalNumber, provideJsonResponse))
+      .when(new ZignSecSignCommand(memberId, referenceId, personalNumber, provideJsonResponse, ZignSecAuthenticationMethod.NORWAY_WEB_OR_MOBILE))
       .expectSuccessfulHandlerExecution()
       .expectEvents(
         new NorwegianSSNUpdatedEvent(memberId, personalNumber),
@@ -274,6 +275,8 @@ public class MemberAggregateTests {
         new NorwegianMemberSignedEvent(memberId, personalNumber, provideJsonResponse, referenceId)
       );
   }
+
+  //TODO: danishSignCommand_validJSON_ThenEmitThreeEvents() {
 
   @Test
   public void norwegianSignCommand_invalidJSON_expectException() {
@@ -289,7 +292,7 @@ public class MemberAggregateTests {
         new MemberCreatedEvent(memberId, MemberStatus.INITIATED),
         new MemberStartedOnBoardingEvent(memberId, MemberStatus.ONBOARDING),
         new TrackingIdCreatedEvent(memberId, TRACKING_UUID))
-      .when(new NorwegianSignCommand(memberId, referenceId, personalNumber, provideJsonResponse))
+      .when(new ZignSecSignCommand(memberId, referenceId, personalNumber, provideJsonResponse))
       .expectException(RuntimeException.class);
   }
 

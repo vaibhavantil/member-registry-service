@@ -4,6 +4,7 @@ import com.hedvig.external.authentication.ZignSecAuthentication
 import com.hedvig.external.authentication.dto.ZignSecAuthenticationResult
 import com.hedvig.external.authentication.dto.ZignSecBankIdAuthenticationRequest
 import com.hedvig.external.authentication.dto.StartZignSecAuthenticationResult
+import com.hedvig.external.authentication.dto.ZignSecAuthenticationMethod
 import com.hedvig.integration.apigateway.ApiGatewayService
 import com.hedvig.localization.service.TextKeysLocaleResolver
 import com.hedvig.memberservice.commands.InactivateMemberCommand
@@ -18,7 +19,7 @@ import org.springframework.stereotype.Service
 import java.util.*
 
 @Service
-class NorwegianBankIdService(
+class ZignSecBankIdService(
     private val zignSecAuthentication: ZignSecAuthentication,
     private val commandGateway: CommandGateway,
     private val redisEventPublisher: RedisEventPublisher,
@@ -38,7 +39,8 @@ class NorwegianBankIdService(
                 request.personalNumber,
                 resolveTwoLetterLanguageFromMember(memberId),
                 authenticationSuccessUrl,
-                authenticationFailUrl
+                authenticationFailUrl,
+                ZignSecAuthenticationMethod.NORWAY_WEB_OR_MOBILE
             )
         )
     }
@@ -50,7 +52,8 @@ class NorwegianBankIdService(
                 ssn,
                 resolveTwoLetterLanguageFromMember(memberId.toLong()),
                 successUrl,
-                failUrl
+                failUrl,
+                ZignSecAuthenticationMethod.NORWAY_WEB_OR_MOBILE
             )
         )
 

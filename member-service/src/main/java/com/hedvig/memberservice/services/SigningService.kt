@@ -7,7 +7,6 @@ import com.hedvig.integration.underwriter.dtos.QuoteToSignStatusDto
 import com.hedvig.integration.underwriter.dtos.SignMethod
 import com.hedvig.memberservice.commands.SignMemberFromUnderwriterCommand
 import com.hedvig.memberservice.commands.UpdateWebOnBoardingInfoCommand
-import com.hedvig.memberservice.jobs.BankIdCollector
 import com.hedvig.memberservice.jobs.ContractsCreatedCollector
 import com.hedvig.memberservice.query.MemberRepository
 import com.hedvig.memberservice.query.SignedMemberRepository
@@ -29,7 +28,6 @@ import org.quartz.SimpleScheduleBuilder
 import org.quartz.TriggerBuilder
 import org.slf4j.LoggerFactory
 import org.springframework.lang.NonNull
-import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Service
 import java.lang.IllegalArgumentException
 import javax.transaction.Transactional
@@ -42,7 +40,7 @@ class SigningService(
     private val memberRepository: MemberRepository,
     private val commandGateway: CommandGateway,
     private val swedishBankIdSigningService: SwedishBankIdSigningService,
-    private val norwegianSigningService: NorwegianSigningService,
+    private val zignSecSigningService: ZignSecSigningService,
     private val redisEventPublisher: RedisEventPublisher,
     private val scheduler: Scheduler
 ) {
@@ -108,8 +106,8 @@ class SigningService(
                         .orElseGet { null }
                 }
                 SignMethod.NORWEGIAN_BANK_ID -> {
-                    norwegianSigningService.getSignStatus(memberId)?.let {
-                        SignStatusResponse.CreateFromNorwegianStatus(it)
+                    zignSecSigningService.getSignStatus(memberId)?.let {
+                        SignStatusResponse.CreateFromZignSecStatus(it)
                     }
                 }
             }

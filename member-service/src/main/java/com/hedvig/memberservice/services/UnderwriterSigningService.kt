@@ -22,10 +22,14 @@ interface UnderwriterSigningService {
         failUrl: String
     ): StartNorwegianBankIdSignResponse
 
+    //TODO: startDanishBankIdSignSession
+
     fun isUnderwriterHandlingSignSession(orderReference: UUID): Boolean
 
     fun swedishBankIdSignSessionWasCompleted(orderReference: String, signature: String, oscpResponse: String)
 
     fun norwegianBankIdSignSessionWasCompleted(orderReference: UUID)
+
+    //TODO: danishBankIdSignSessionWasCompleted
 }
 

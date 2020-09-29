@@ -15,7 +15,7 @@ import com.hedvig.memberservice.query.CollectType
 import com.hedvig.memberservice.query.MemberRepository
 import com.hedvig.memberservice.query.SignedMemberRepository
 import com.hedvig.memberservice.services.BankIdService
-import com.hedvig.memberservice.services.NorwegianBankIdService
+import com.hedvig.memberservice.services.ZignSecBankIdService
 import com.hedvig.memberservice.util.getEndUserIp
 import com.hedvig.memberservice.web.dto.APIErrorDTO
 import com.hedvig.memberservice.web.dto.BankIdAuthRequest
@@ -51,7 +51,7 @@ class AuthController @Autowired constructor(
     private val signedMemberRepository: SignedMemberRepository,
     private val collectRepo: CollectRepository,
     private val bankIdService: BankIdService,
-    private val norwegianBankIdService: NorwegianBankIdService) {
+    private val zignSecBankIdService: ZignSecBankIdService) {
 
     @PostMapping(path = ["bankid/auth"])
     fun auth(@RequestHeader(value = "x-forwarded-for", required = false) forwardedIp: String?, @RequestBody request: BankIdAuthRequest): ResponseEntity<BankIdAuthResponse> {
@@ -175,7 +175,7 @@ class AuthController @Autowired constructor(
     private fun auth(@RequestHeader("hedvig.token") memberId: Long, @PathVariable("country") country: String, @RequestBody request: GenericBankIdAuthenticationRequest): ResponseEntity<StartZignSecAuthenticationResult> {
         return when (country) {
             "norway" ->
-                ResponseEntity.ok(norwegianBankIdService.authenticate(memberId, request))
+                ResponseEntity.ok(zignSecBankIdService.authenticate(memberId, request))
             else ->
                 ResponseEntity.notFound().build()
         }

@@ -8,3 +8,5 @@ data class UnderwriterStartNorwegianBankIdSignSessionRequest(
     val successUrl: String,
     val failUrl: String
 )
+
+//TODO: Guessing we need a danish one!

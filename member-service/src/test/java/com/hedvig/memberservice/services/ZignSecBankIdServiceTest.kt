@@ -25,7 +25,7 @@ import java.util.*
 import org.mockito.Mockito.`when` as whenever
 
 @RunWith(MockitoJUnitRunner::class)
-class NorwegianBankIdServiceTest {
+class ZignSecBankIdServiceTest {
 
     @Mock
     lateinit var zignSecAuthentication: ZignSecAuthentication
@@ -42,11 +42,11 @@ class NorwegianBankIdServiceTest {
     @Mock
     lateinit var textKeysLocaleResolver: TextKeysLocaleResolver
 
-    lateinit var classUnderTest: NorwegianBankIdService
+    lateinit var classUnderTest: ZignSecBankIdService
 
     @Before
     fun before() {
-        classUnderTest = NorwegianBankIdService(zignSecAuthentication, commandGateway, redisEventPublisher, signedMemberRepository, apiGatewayService, memberRepository, textKeysLocaleResolver, "success", "fail")
+        classUnderTest = ZignSecBankIdService(zignSecAuthentication, commandGateway, redisEventPublisher, signedMemberRepository, apiGatewayService, memberRepository, textKeysLocaleResolver, "success", "fail")
     }
 
     @Test

@@ -3,6 +3,7 @@ package com.hedvig.memberservice.services
 import com.hedvig.external.authentication.dto.ZignSecAuthenticationResponseError
 import com.hedvig.external.authentication.dto.ZignSecSignResult
 import com.hedvig.external.authentication.dto.StartZignSecAuthenticationResult
+import com.hedvig.external.authentication.dto.ZignSecAuthenticationMethod
 import com.hedvig.memberservice.services.events.SignSessionCompleteEvent
 import com.hedvig.memberservice.services.member.MemberService
 import com.hedvig.memberservice.services.redispublisher.RedisEventPublisher
@@ -18,14 +19,15 @@ import org.springframework.context.ApplicationEventPublisher
 import java.util.*
 import org.mockito.Mockito.`when` as whenever
 
+//TODO: Create danish tests
 @RunWith(MockitoJUnitRunner::class)
-class NorwegianSigningServiceTest {
+class ZignSecSigningServiceTest {
 
     @Mock
     lateinit var memberService: MemberService
 
     @Mock
-    lateinit var norwegianBankIdService: NorwegianBankIdService
+    lateinit var zignSecBankIdService: ZignSecBankIdService
 
     @Mock
     lateinit var applicationEventPublisher: ApplicationEventPublisher
@@ -33,16 +35,16 @@ class NorwegianSigningServiceTest {
     @Mock
     lateinit var redisEventPublisher: RedisEventPublisher
 
-    lateinit var classUnderTest: NorwegianSigningService
+    lateinit var classUnderTest: ZignSecSigningService
 
     @Before
     fun before() {
-        classUnderTest = NorwegianSigningService(memberService, norwegianBankIdService, applicationEventPublisher, redisEventPublisher)
+        classUnderTest = ZignSecSigningService(memberService, zignSecBankIdService, applicationEventPublisher, redisEventPublisher)
     }
 
     @Test
     fun startSignSuccessful() {
-        whenever(norwegianBankIdService.sign(MEMBER_ID.toString(), SSN, SUCCESS_TARGET_URL, FAILED_TARGET_URL)).thenReturn(
+        whenever(zignSecBankIdService.sign(MEMBER_ID.toString(), SSN, SUCCESS_TARGET_URL, FAILED_TARGET_URL)).thenReturn(
             StartZignSecAuthenticationResult.Success(
                 ORDER_REF,
                 REDIRECT_URL
@@ -57,7 +59,7 @@ class NorwegianSigningServiceTest {
 
     @Test
     fun startSignFails() {
-        whenever(norwegianBankIdService.sign(MEMBER_ID.toString(), SSN, SUCCESS_TARGET_URL, FAILED_TARGET_URL)).thenReturn(
+        whenever(zignSecBankIdService.sign(MEMBER_ID.toString(), SSN, SUCCESS_TARGET_URL, FAILED_TARGET_URL)).thenReturn(
             StartZignSecAuthenticationResult.Failed(
                 LIST_OF_ERRORS
             )
@@ -75,11 +77,12 @@ class NorwegianSigningServiceTest {
                 RESPONSE_ID,
                 MEMBER_ID,
                 SSN,
-                PROVIDER_JSON_RESPONSE
+                PROVIDER_JSON_RESPONSE,
+                ZignSecAuthenticationMethod.NORWAY_WEB_OR_MOBILE
             )
         )
 
-        verify(memberService).norwegianBankIdSignComplete(MEMBER_ID, RESPONSE_ID, SSN, PROVIDER_JSON_RESPONSE)
+        verify(memberService).signComplete(MEMBER_ID, RESPONSE_ID, SSN, PROVIDER_JSON_RESPONSE)
         verify(applicationEventPublisher).publishEvent(SignSessionCompleteEvent(MEMBER_ID))
     }
 
@@ -88,7 +91,8 @@ class NorwegianSigningServiceTest {
         classUnderTest.handleSignResult(
             ZignSecSignResult.Failed(
                 RESPONSE_ID,
-                MEMBER_ID
+                MEMBER_ID,
+                ZignSecAuthenticationMethod.NORWAY_WEB_OR_MOBILE
             )
         )
 

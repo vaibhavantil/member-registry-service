@@ -11,16 +11,16 @@ import org.springframework.stereotype.Service
 import javax.transaction.Transactional
 
 @Service
-class NorwegianSigningService(
+class ZignSecSigningService(
     private val memberService: MemberService,
-    private val norwegianBankIdService: NorwegianBankIdService,
+    private val zignSecBankIdService: ZignSecBankIdService,
     private val applicationEventPublisher: ApplicationEventPublisher,
     private val redisEventPublisher: RedisEventPublisher
 ) {
 
     @Transactional
     fun startSign(memberId: Long, ssn: String, successUrl: String, failUrl: String): StartZignSecAuthenticationResult {
-        val result = norwegianBankIdService.sign(
+        val result = zignSecBankIdService.sign(
             memberId.toString(),
             ssn,
             successUrl,
@@ -30,12 +30,12 @@ class NorwegianSigningService(
         return result
     }
 
-    fun getSignStatus(memberId: Long) = norwegianBankIdService.getStatus(memberId)
+    fun getSignStatus(memberId: Long) = zignSecBankIdService.getStatus(memberId)
 
     fun handleSignResult(result: ZignSecSignResult) {
         when (result) {
             is ZignSecSignResult.Signed -> {
-                memberService.norwegianBankIdSignComplete(result.memberId, result.id, result.ssn, result.providerJsonResponse)
+                memberService.signComplete(result.memberId, result.id, result.ssn, result.providerJsonResponse)
                 applicationEventPublisher.publishEvent(SignSessionCompleteEvent(result.memberId))
             }
             is ZignSecSignResult.Failed -> {
@@ -45,9 +45,9 @@ class NorwegianSigningService(
         }
     }
 
-    fun notifyContractsCreated(memberId: Long) = norwegianBankIdService.notifyContractsCreated(memberId)
+    fun notifyContractsCreated(memberId: Long) = zignSecBankIdService.notifyContractsCreated(memberId)
 
     companion object {
-        private val logger = LoggerFactory.getLogger(NorwegianSigningService::class.java)
+        private val logger = LoggerFactory.getLogger(ZignSecSigningService::class.java)
     }
 }

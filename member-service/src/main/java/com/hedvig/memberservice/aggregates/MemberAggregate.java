@@ -2,12 +2,15 @@ package com.hedvig.memberservice.aggregates;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hedvig.common.UUIDGenerator;
+import com.hedvig.external.authentication.dto.ZignSecAuthenticationMethod;
 import com.hedvig.external.bisnodeBCI.BisnodeClient;
 import com.hedvig.external.bisnodeBCI.dto.Person;
 import com.hedvig.external.bisnodeBCI.dto.PersonSearchResult;
 import com.hedvig.memberservice.commands.*;
 import com.hedvig.memberservice.events.*;
 import com.hedvig.memberservice.services.CashbackService;
+import com.sun.xml.bind.v2.TODO;
+import kotlin.NotImplementedError;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.axonframework.commandhandling.CommandHandler;
@@ -269,21 +272,31 @@ public class MemberAggregate {
   }
 
   @CommandHandler
-  void norwegianBankIdSignHandler(NorwegianSignCommand cmd) {
+  void ZignSecSignHandler(ZignSecSignCommand cmd) {
     if (!isValidJSON(cmd.getProvideJsonResponse()))
       throw new RuntimeException("Invalid json from provider");
 
-    if (cmd.getPersonalNumber() != null
-      && !Objects.equals(this.member.getSsn(), cmd.getPersonalNumber())) {
-      apply(new NorwegianSSNUpdatedEvent(this.id, cmd.getPersonalNumber()));
-    }
-
     apply(new NewCashbackSelectedEvent(this.id, cashbackService.getDefaultId(member.getPickedLocale()).toString()));
 
+    ZignSecAuthenticationMethod zignSecMethod = cmd.getZignSecMethod();
+    if (zignSecMethod == ZignSecAuthenticationMethod.NORWAY_WEB_OR_MOBILE) {
+      if (cmd.getPersonalNumber() != null
+        && !Objects.equals(this.member.getSsn(), cmd.getPersonalNumber())) {
+        apply(new NorwegianSSNUpdatedEvent(this.id, cmd.getPersonalNumber()));
+      }
 
-    apply(
-      new NorwegianMemberSignedEvent(
-        this.id, cmd.getPersonalNumber(), cmd.getProvideJsonResponse(), cmd.getReferenceId()));
+      apply(
+        new NorwegianMemberSignedEvent(
+          this.id, cmd.getPersonalNumber(), cmd.getProvideJsonResponse(), cmd.getReferenceId()));
+
+      return;
+    } else if (zignSecMethod == ZignSecAuthenticationMethod.DENMARK) {
+      //TODO: implement
+      throw new NotImplementedError("implement");
+      //return;
+    }
+
+    throw new RuntimeException("ZignSec authentication method: "+ zignSecMethod.getZignSecMethodName() + " is not implemented!");
   }
 
   public boolean isValidJSON(final String json) {

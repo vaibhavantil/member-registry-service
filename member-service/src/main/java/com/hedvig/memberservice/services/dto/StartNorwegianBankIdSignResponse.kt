@@ -7,3 +7,5 @@ data class StartNorwegianBankIdSignResponse(
     val internalErrorMessage: String? = null,
     val errorMessages: List<ZignSecAuthenticationResponseError>? = null
 )
+
+//TODO: Guessing we need to add a danish one!

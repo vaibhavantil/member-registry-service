@@ -9,6 +9,7 @@ import com.hedvig.external.authentication.dto.ZignSecBankIdAuthenticationRequest
 import com.hedvig.external.authentication.dto.ZignSecBankIdProgressStatus
 import com.hedvig.external.authentication.dto.StartZignSecAuthenticationResult.Success
 import com.hedvig.external.authentication.dto.StartZignSecAuthenticationResult.Failed
+import com.hedvig.external.authentication.dto.ZignSecAuthenticationMethod
 import com.hedvig.external.event.AuthenticationEventPublisher
 import com.hedvig.external.zignSec.client.dto.ZignSecCollectIdentity
 import com.hedvig.external.zignSec.client.dto.ZignSecCollectResponse
@@ -39,6 +40,7 @@ import java.lang.RuntimeException
 import java.time.Instant
 import java.util.*
 
+//TODO: Also test ZignSecAuthenticationMethod.DENMARK
 @RunWith(MockitoJUnitRunner::class)
 class ZignSecSessionServiceImplTest {
 
@@ -155,7 +157,8 @@ class ZignSecSessionServiceImplTest {
                 status = ZignSecBankIdProgressStatus.INITIATED,
                 referenceId = REFERENCE_ID,
                 redirectUrl = "redirect url",
-                requestPersonalNumber = null
+                requestPersonalNumber = null,
+                authenticationMethod = ZignSecAuthenticationMethod.NORWAY_WEB_OR_MOBILE
             ))
         )
 
@@ -188,7 +191,8 @@ class ZignSecSessionServiceImplTest {
                 status = ZignSecBankIdProgressStatus.INITIATED,
                 referenceId = REFERENCE_ID,
                 redirectUrl = "redirect url",
-                requestPersonalNumber = null
+                requestPersonalNumber = null,
+                authenticationMethod = ZignSecAuthenticationMethod.NORWAY_WEB_OR_MOBILE
             ))
         )
 
@@ -231,7 +235,8 @@ class ZignSecSessionServiceImplTest {
                 status = ZignSecBankIdProgressStatus.INITIATED,
                 referenceId = REFERENCE_ID,
                 redirectUrl = "redirect url",
-                requestPersonalNumber = null
+                requestPersonalNumber = null,
+                authenticationMethod = ZignSecAuthenticationMethod.NORWAY_WEB_OR_MOBILE
             ))
         )
 
@@ -264,7 +269,8 @@ class ZignSecSessionServiceImplTest {
                 status = ZignSecBankIdProgressStatus.COMPLETED,
                 referenceId = REFERENCE_ID,
                 redirectUrl = "redirect url",
-                requestPersonalNumber = null
+                requestPersonalNumber = null,
+                authenticationMethod = ZignSecAuthenticationMethod.NORWAY_WEB_OR_MOBILE
             ))
         )
 
@@ -295,7 +301,8 @@ class ZignSecSessionServiceImplTest {
             notification = null,
             createdAt = timestamp,
             updatedAt = timestamp,
-            requestPersonalNumber = null
+            requestPersonalNumber = null,
+            authenticationMethod = ZignSecAuthenticationMethod.NORWAY_WEB_OR_MOBILE
         )
 
         whenever(sessionRepository.findByReferenceId(REFERENCE_ID)).thenReturn(
@@ -332,7 +339,8 @@ class ZignSecSessionServiceImplTest {
             notification = null,
             createdAt = timestamp,
             updatedAt = timestamp,
-            requestPersonalNumber = "12121200000"
+            requestPersonalNumber = "12121200000",
+            authenticationMethod = ZignSecAuthenticationMethod.NORWAY_WEB_OR_MOBILE
         )
 
         whenever(sessionRepository.findByReferenceId(REFERENCE_ID)).thenReturn(
@@ -348,7 +356,7 @@ class ZignSecSessionServiceImplTest {
 
         classUnderTest.handleNotification(zignSecSuccessAuthNotificationRequest)
 
-        verify(authenticationEventPublisher).publishSignEvent(ZignSecSignResult.Signed(REFERENCE_ID, 1337, "12121200000", zignSecSuccessAuthNotificationRequest))
+        verify(authenticationEventPublisher).publishSignEvent(ZignSecSignResult.Signed(REFERENCE_ID, 1337, "12121200000", zignSecSuccessAuthNotificationRequest, ZignSecAuthenticationMethod.NORWAY_WEB_OR_MOBILE))
 
         assertThat(secSignEntityCaptor.value.personalNumber).isEqualTo("12121200000")
         assertThat(secSignEntityCaptor.value.idProviderPersonId).isEqualTo("9578-6000-4-365161")
@@ -373,7 +381,8 @@ class ZignSecSessionServiceImplTest {
             notification = null,
             createdAt = timestamp,
             updatedAt = timestamp,
-            requestPersonalNumber = ""
+            requestPersonalNumber = "",
+            authenticationMethod = ZignSecAuthenticationMethod.NORWAY_WEB_OR_MOBILE
         )
 
         whenever(sessionRepository.findByReferenceId(REFERENCE_ID)).thenReturn(
@@ -382,7 +391,7 @@ class ZignSecSessionServiceImplTest {
 
         classUnderTest.handleNotification(zignSecFailedAuthNotificationRequest)
 
-        verify(authenticationEventPublisher).publishSignEvent(ZignSecSignResult.Failed(REFERENCE_ID, 1337))
+        verify(authenticationEventPublisher).publishSignEvent(ZignSecSignResult.Failed(REFERENCE_ID, 1337, ZignSecAuthenticationMethod.NORWAY_WEB_OR_MOBILE))
 
         val savedSession = sessionRepository.findByReferenceId(REFERENCE_ID).get()
         assertThat(savedSession.referenceId).isEqualTo(REFERENCE_ID)
@@ -402,7 +411,8 @@ class ZignSecSessionServiceImplTest {
             notification = null,
             createdAt = timestamp,
             updatedAt = timestamp,
-            requestPersonalNumber = null
+            requestPersonalNumber = null,
+            authenticationMethod = ZignSecAuthenticationMethod.NORWAY_WEB_OR_MOBILE
         )
 
         whenever(sessionRepository.findByReferenceId(REFERENCE_ID)).thenReturn(
@@ -427,7 +437,8 @@ class ZignSecSessionServiceImplTest {
                 status = ZignSecBankIdProgressStatus.INITIATED,
                 referenceId = REFERENCE_ID,
                 redirectUrl = "redirect url",
-                requestPersonalNumber = "12121212121"
+                requestPersonalNumber = "12121212121",
+                authenticationMethod = ZignSecAuthenticationMethod.NORWAY_WEB_OR_MOBILE
             ))
         )
 
@@ -447,7 +458,8 @@ class ZignSecSessionServiceImplTest {
                     status = ZignSecBankIdProgressStatus.INITIATED,
                     referenceId = REFERENCE_ID,
                     redirectUrl = "redirect url",
-                    requestPersonalNumber = "12121212120"
+                    requestPersonalNumber = "12121212120",
+                    authenticationMethod = ZignSecAuthenticationMethod.NORWAY_WEB_OR_MOBILE
                 )
             )
 
@@ -467,7 +479,8 @@ class ZignSecSessionServiceImplTest {
                 status = ZignSecBankIdProgressStatus.INITIATED,
                 referenceId = REFERENCE_ID,
                 redirectUrl = "redirect url",
-                requestPersonalNumber = "12121212120"
+                requestPersonalNumber = "12121212120",
+                authenticationMethod = ZignSecAuthenticationMethod.NORWAY_WEB_OR_MOBILE
             ))
         )
 
@@ -490,7 +503,8 @@ class ZignSecSessionServiceImplTest {
             notification = null,
             createdAt = timestamp,
             updatedAt = timestamp,
-            requestPersonalNumber = "01010100000"
+            requestPersonalNumber = "01010100000",
+            authenticationMethod = ZignSecAuthenticationMethod.NORWAY_WEB_OR_MOBILE
         )
 
         whenever(sessionRepository.findByReferenceId(REFERENCE_ID)).thenReturn(
@@ -499,7 +513,7 @@ class ZignSecSessionServiceImplTest {
 
         classUnderTest.handleNotification(zignSecSuccessAuthNotificationRequest)
 
-        verify(authenticationEventPublisher).publishSignEvent(ZignSecSignResult.Failed(REFERENCE_ID, 1337))
+        verify(authenticationEventPublisher).publishSignEvent(ZignSecSignResult.Failed(REFERENCE_ID, 1337, ZignSecAuthenticationMethod.NORWAY_WEB_OR_MOBILE))
     }
 
     @Test
@@ -515,7 +529,8 @@ class ZignSecSessionServiceImplTest {
             "12121212120",
             "NO",
             "success",
-            "fail"
+            "fail",
+            ZignSecAuthenticationMethod.NORWAY_WEB_OR_MOBILE
         )
 
         val startAuthRequest = ZignSecBankIdAuthenticationRequest(
@@ -523,7 +538,8 @@ class ZignSecSessionServiceImplTest {
             null,
             "NO",
             "success",
-            "fail"
+            "fail",
+            ZignSecAuthenticationMethod.NORWAY_WEB_OR_MOBILE
         )
 
         val REDIRECT_URL = "redirect_url"

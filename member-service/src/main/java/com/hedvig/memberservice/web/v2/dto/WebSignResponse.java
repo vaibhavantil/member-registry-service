@@ -14,5 +14,6 @@ public class WebSignResponse {
   SignStatus status;
   OrderResponse bankIdOrderResponse;
   NorwegianBankIdResponse norwegianSignResponse;
+  //TODO: Think this one is more or less depricated but let's support danish here as well with a DanishBankIdResponse
 
 }

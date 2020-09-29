@@ -32,7 +32,7 @@ class UnderwriterSigningServiceImplTest {
     @Mock
     lateinit var swedishBankIdSigningService: SwedishBankIdSigningService
     @Mock
-    lateinit var norwegianSigningService: NorwegianSigningService
+    lateinit var zignSecSigningService: ZignSecSigningService
     @Mock
     lateinit var signedMemberRepository: SignedMemberRepository
 
@@ -45,7 +45,7 @@ class UnderwriterSigningServiceImplTest {
 
     @Before
     fun setup() {
-        sut = UnderwriterSigningServiceImpl(underwriterSignSessionRepository, underwriterClient, swedishBankIdSigningService, norwegianSigningService, signedMemberRepository, arrayOf("hedvig.com"))
+        sut = UnderwriterSigningServiceImpl(underwriterSignSessionRepository, underwriterClient, swedishBankIdSigningService, zignSecSigningService, signedMemberRepository, arrayOf("hedvig.com"))
     }
 
     @Test
@@ -83,7 +83,7 @@ class UnderwriterSigningServiceImplTest {
     @Test
     fun startNorwegianBankIdSession() {
         whenever(signedMemberRepository.findBySsn(norwegianSSN)).thenReturn(Optional.empty())
-        whenever(norwegianSigningService.startSign(memberId, norwegianSSN, successTargetUrl, failUrl))
+        whenever(zignSecSigningService.startSign(memberId, norwegianSSN, successTargetUrl, failUrl))
             .thenReturn(StartZignSecAuthenticationResult.Success(orderRefUUID, redirectUrl))
 
         whenever(underwriterSignSessionRepository.save(captor.capture()))
@@ -99,7 +99,7 @@ class UnderwriterSigningServiceImplTest {
     @Test
     fun startNorwegianBankIdSessionFails() {
         whenever(signedMemberRepository.findBySsn(norwegianSSN)).thenReturn(Optional.empty())
-        whenever(norwegianSigningService.startSign(memberId, norwegianSSN, successTargetUrl, failUrl))
+        whenever(zignSecSigningService.startSign(memberId, norwegianSSN, successTargetUrl, failUrl))
             .thenReturn(StartZignSecAuthenticationResult.Failed(listOf(ZignSecAuthenticationResponseError(1,"Some error message"))))
 
         val response = sut.startNorwegianBankIdSignSession(underwriterSessionRef, memberId, norwegianSSN, successTargetUrl, failUrl)

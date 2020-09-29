@@ -27,7 +27,7 @@ public class SignStatusResponse {
     return new SignStatusResponse(session.getSignAndContractStatus(), data);
   }
 
-  public static SignStatusResponse CreateFromNorwegianStatus(@NotNull ZignSecBankIdProgressStatus status) {
+  public static SignStatusResponse CreateFromZignSecStatus(@NotNull ZignSecBankIdProgressStatus status) {
     switch (status) {
       case INITIATED:
         return new SignStatusResponse(SignStatus.INITIATED, null);
@@ -39,7 +39,7 @@ public class SignStatusResponse {
         return new SignStatusResponse(SignStatus.COMPLETED, null);
     }
 
-    throw new RuntimeException("Could not return SignStatusResponse from NorwegianBankIdProgressStatus: " + status +".");
+    throw new RuntimeException("Could not return SignStatusResponse from ZignSecBankIdProgressStatus: " + status +".");
   }
 
 }

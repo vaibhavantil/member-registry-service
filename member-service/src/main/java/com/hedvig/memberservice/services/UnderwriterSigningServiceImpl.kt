@@ -13,14 +13,12 @@ import org.springframework.stereotype.Service
 import java.net.URL
 import java.util.*
 
-
-
 @Service
 class UnderwriterSigningServiceImpl(
     private val underwriterSignSessionRepository: UnderwriterSignSessionRepository,
     private val underwriterClient: UnderwriterClient,
     private val swedishBankIdSigningService: SwedishBankIdSigningService,
-    private val norwegianSigningService: NorwegianSigningService,
+    private val zignSecSigningService: ZignSecSigningService,
     private val signedMemberRepository: SignedMemberRepository,
     @Value("\${zignsec.validSigningTargetHosts}")
     private val validTargetHosts: Array<String>
@@ -56,7 +54,7 @@ class UnderwriterSigningServiceImpl(
             )
         }
 
-        return when (val response = norwegianSigningService.startSign(memberId, ssn, successUrl, failUrl)) {
+        return when (val response = zignSecSigningService.startSign(memberId, ssn, successUrl, failUrl)) {
             is StartZignSecAuthenticationResult.Success -> {
                 underwriterSignSessionRepository.saveOrUpdateReusableSession(underwriterSessionRef, response.orderReference)
 
