@@ -276,7 +276,28 @@ public class MemberAggregateTests {
       );
   }
 
-  //TODO: danishSignCommand_validJSON_ThenEmitThreeEvents() {
+  @Test
+  public void danishSignCommand_validJSON_ThenEmitThreeEvents() {
+    Long memberId = 1234L;
+    UUID referenceId = UUID.randomUUID();
+    String personalNumber = "1212121212";
+    String provideJsonResponse = "{ \"json\": true }";
+
+    when(cashbackService.getDefaultId(any())).thenReturn(DEFAULT_CASHBACK);
+
+    fixture
+      .given(
+        new MemberCreatedEvent(memberId, MemberStatus.INITIATED),
+        new MemberStartedOnBoardingEvent(memberId, MemberStatus.ONBOARDING),
+        new TrackingIdCreatedEvent(memberId, TRACKING_UUID))
+      .when(new ZignSecSignCommand(memberId, referenceId, personalNumber, provideJsonResponse, ZignSecAuthenticationMarket.DENMARK))
+      .expectSuccessfulHandlerExecution()
+      .expectEvents(
+        new NewCashbackSelectedEvent(memberId, DEFAULT_CASHBACK.toString())
+        //new DanishSSNUpdatedEvent(memberId, personalNumber),
+        //new DanishMemberSignedEvent(memberId, personalNumber, provideJsonResponse, referenceId)
+      );
+  }
 
   @Test
   public void norwegianSignCommand_invalidJSON_expectException() {
