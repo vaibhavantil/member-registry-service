@@ -20,7 +20,6 @@ import org.springframework.context.ApplicationEventPublisher
 import java.util.*
 import org.mockito.Mockito.`when` as whenever
 
-//TODO: Create danish tests
 @RunWith(MockitoJUnitRunner::class)
 class ZignSecSigningServiceTest {
 
@@ -59,6 +58,21 @@ class ZignSecSigningServiceTest {
     }
 
     @Test
+    fun startDanishSignSuccessful() {
+        whenever(zignSecBankIdService.sign(MEMBER_ID.toString(), DANISH_SSN, SUCCESS_TARGET_URL, FAILED_TARGET_URL, ZignSecAuthenticationMarket.NORWAY)).thenReturn(
+            StartZignSecAuthenticationResult.Success(
+                ORDER_REF,
+                REDIRECT_URL
+            )
+        )
+
+        val response = classUnderTest.startSign(MEMBER_ID, DANISH_SSN, SUCCESS_TARGET_URL, FAILED_TARGET_URL, ZignSecAuthenticationMarket.DENMARK)
+
+        assertThat(response).isInstanceOf(StartZignSecAuthenticationResult.Success::class.java)
+        assertThat((response as StartZignSecAuthenticationResult.Success).redirectUrl).isEqualTo(REDIRECT_URL)
+    }
+
+    @Test
     fun startSignFails() {
         whenever(zignSecBankIdService.sign(MEMBER_ID.toString(), SSN, SUCCESS_TARGET_URL, FAILED_TARGET_URL, ZignSecAuthenticationMarket.NORWAY)).thenReturn(
             StartZignSecAuthenticationResult.Failed(
@@ -88,6 +102,23 @@ class ZignSecSigningServiceTest {
     }
 
     @Test
+    fun handleDanishSuccessfulSigning() {
+        classUnderTest.handleSignResult(
+            ZignSecSignResult.Signed(
+                RESPONSE_ID,
+                MEMBER_ID,
+                DANISH_SSN,
+                PROVIDER_JSON_RESPONSE,
+                ZignSecAuthenticationMethod.DENMARK
+            )
+        )
+
+        verify(memberService).signComplete(MEMBER_ID, RESPONSE_ID, DANISH_SSN, PROVIDER_JSON_RESPONSE, ZignSecAuthenticationMethod.DENMARK)
+        verify(applicationEventPublisher).publishEvent(SignSessionCompleteEvent(MEMBER_ID))
+    }
+
+
+    @Test
     fun handleFailedSigning() {
         classUnderTest.handleSignResult(
             ZignSecSignResult.Failed(
@@ -105,6 +136,7 @@ class ZignSecSigningServiceTest {
     companion object {
         private const val MEMBER_ID: Long = 1337
         private const val SSN: String = "12121212120"
+        private const val DANISH_SSN: String = "1212121212"
         private const val EMAIL: String = "em@i.l"
         private const val IP_ADDRESS: String = ""
         private const val REDIRECT_URL: String = "redirect_url"
