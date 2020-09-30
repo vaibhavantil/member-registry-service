@@ -4,6 +4,7 @@ import com.hedvig.external.authentication.dto.ZignSecAuthenticationResponseError
 import com.hedvig.external.authentication.dto.ZignSecSignResult
 import com.hedvig.external.authentication.dto.StartZignSecAuthenticationResult
 import com.hedvig.external.authentication.dto.ZignSecAuthenticationMethod
+import com.hedvig.memberservice.commands.models.ZignSecAuthenticationMarket
 import com.hedvig.memberservice.services.events.SignSessionCompleteEvent
 import com.hedvig.memberservice.services.member.MemberService
 import com.hedvig.memberservice.services.redispublisher.RedisEventPublisher
@@ -44,7 +45,7 @@ class ZignSecSigningServiceTest {
 
     @Test
     fun startSignSuccessful() {
-        whenever(zignSecBankIdService.sign(MEMBER_ID.toString(), SSN, SUCCESS_TARGET_URL, FAILED_TARGET_URL)).thenReturn(
+        whenever(zignSecBankIdService.sign(MEMBER_ID.toString(), SSN, SUCCESS_TARGET_URL, FAILED_TARGET_URL, ZignSecAuthenticationMarket.NORWAY)).thenReturn(
             StartZignSecAuthenticationResult.Success(
                 ORDER_REF,
                 REDIRECT_URL
@@ -59,7 +60,7 @@ class ZignSecSigningServiceTest {
 
     @Test
     fun startSignFails() {
-        whenever(zignSecBankIdService.sign(MEMBER_ID.toString(), SSN, SUCCESS_TARGET_URL, FAILED_TARGET_URL)).thenReturn(
+        whenever(zignSecBankIdService.sign(MEMBER_ID.toString(), SSN, SUCCESS_TARGET_URL, FAILED_TARGET_URL, ZignSecAuthenticationMarket.NORWAY)).thenReturn(
             StartZignSecAuthenticationResult.Failed(
                 LIST_OF_ERRORS
             )
@@ -82,7 +83,7 @@ class ZignSecSigningServiceTest {
             )
         )
 
-        verify(memberService).signComplete(MEMBER_ID, RESPONSE_ID, SSN, PROVIDER_JSON_RESPONSE)
+        verify(memberService).signComplete(MEMBER_ID, RESPONSE_ID, SSN, PROVIDER_JSON_RESPONSE, ZignSecAuthenticationMethod.NORWAY_WEB_OR_MOBILE)
         verify(applicationEventPublisher).publishEvent(SignSessionCompleteEvent(MEMBER_ID))
     }
 

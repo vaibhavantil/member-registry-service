@@ -10,6 +10,7 @@ import com.hedvig.memberservice.commands.AuthenticationAttemptCommand
 import com.hedvig.memberservice.commands.BankIdAuthenticationStatus
 import com.hedvig.memberservice.commands.BankIdSignCommand
 import com.hedvig.memberservice.commands.InactivateMemberCommand
+import com.hedvig.memberservice.commands.models.ZignSecAuthenticationMarket
 import com.hedvig.memberservice.query.CollectRepository
 import com.hedvig.memberservice.query.CollectType
 import com.hedvig.memberservice.query.MemberRepository
@@ -175,9 +176,10 @@ class AuthController @Autowired constructor(
     @PostMapping(path = ["/{country}/bankid/auth"])
     private fun auth(@RequestHeader("hedvig.token") memberId: Long, @PathVariable("country") country: BankIdAuthCountry, @RequestBody request: GenericBankIdAuthenticationRequest): ResponseEntity<StartZignSecAuthenticationResult> {
         return when (country) {
-            BankIdAuthCountry.norway,
+            BankIdAuthCountry.norway ->
+                ResponseEntity.ok(zignSecBankIdService.authenticate(memberId, request, ZignSecAuthenticationMarket.NORWAY))
             BankIdAuthCountry.denmark ->
-                ResponseEntity.ok(zignSecBankIdService.authenticate(memberId, request))
+                ResponseEntity.ok(zignSecBankIdService.authenticate(memberId, request, ZignSecAuthenticationMarket.DENMARK))
         }
     }
 

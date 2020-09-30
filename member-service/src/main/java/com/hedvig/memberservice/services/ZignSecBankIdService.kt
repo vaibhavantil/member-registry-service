@@ -4,10 +4,10 @@ import com.hedvig.external.authentication.ZignSecAuthentication
 import com.hedvig.external.authentication.dto.ZignSecAuthenticationResult
 import com.hedvig.external.authentication.dto.ZignSecBankIdAuthenticationRequest
 import com.hedvig.external.authentication.dto.StartZignSecAuthenticationResult
-import com.hedvig.external.authentication.dto.ZignSecAuthenticationMethod
 import com.hedvig.integration.apigateway.ApiGatewayService
 import com.hedvig.localization.service.TextKeysLocaleResolver
 import com.hedvig.memberservice.commands.InactivateMemberCommand
+import com.hedvig.memberservice.commands.models.ZignSecAuthenticationMarket
 import com.hedvig.memberservice.query.MemberRepository
 import com.hedvig.memberservice.query.SignedMemberRepository
 import com.hedvig.memberservice.services.redispublisher.AuthSessionUpdatedEventStatus
@@ -32,7 +32,10 @@ class ZignSecBankIdService(
     @Value("\${redirect.authentication.failUrl}")
     private val authenticationFailUrl: String
 ) {
-    fun authenticate(memberId: Long, request: GenericBankIdAuthenticationRequest): StartZignSecAuthenticationResult {
+    fun authenticate(
+        memberId: Long,
+        request: GenericBankIdAuthenticationRequest,
+        zignSecAuthenticationMarket: ZignSecAuthenticationMarket): StartZignSecAuthenticationResult {
         return zignSecAuthentication.auth(
             ZignSecBankIdAuthenticationRequest(
                 memberId.toString(),
@@ -40,12 +43,16 @@ class ZignSecBankIdService(
                 resolveTwoLetterLanguageFromMember(memberId),
                 authenticationSuccessUrl,
                 authenticationFailUrl,
-                ZignSecAuthenticationMethod.NORWAY_WEB_OR_MOBILE
+                zignSecAuthenticationMarket.getAuthenticationMethod()
             )
         )
     }
 
-    fun sign(memberId: String, ssn: String, successUrl: String, failUrl: String) =
+    fun sign(
+        memberId: String,
+        ssn: String, successUrl: String,
+        failUrl: String,
+        zignSecAuthenticationMarket: ZignSecAuthenticationMarket) =
         zignSecAuthentication.sign(
             ZignSecBankIdAuthenticationRequest(
                 memberId,
@@ -53,7 +60,7 @@ class ZignSecBankIdService(
                 resolveTwoLetterLanguageFromMember(memberId.toLong()),
                 successUrl,
                 failUrl,
-                ZignSecAuthenticationMethod.NORWAY_WEB_OR_MOBILE
+                zignSecAuthenticationMarket.getAuthenticationMethod()
             )
         )
 

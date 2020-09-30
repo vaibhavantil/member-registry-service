@@ -3,18 +3,22 @@ package com.hedvig.external.authentication.dto
 import java.util.*
 
 sealed class ZignSecSignResult {
+
+    abstract val id: UUID
+    abstract val authenticationMethod: ZignSecAuthenticationMethod
+
     data class Signed(
-        val id: UUID,
+        override val id: UUID,
         val memberId: Long,
         val ssn: String,
         val providerJsonResponse: String,
-        val authenticationMethod: ZignSecAuthenticationMethod
+        override val authenticationMethod: ZignSecAuthenticationMethod
     ) : ZignSecSignResult()
 
     data class Failed(
-        val id: UUID,
+        override val id: UUID,
         val memberId: Long,
-        val authenticationMethod: ZignSecAuthenticationMethod
+        override val authenticationMethod: ZignSecAuthenticationMethod
     ) : ZignSecSignResult()
 }
 

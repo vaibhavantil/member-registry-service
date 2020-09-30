@@ -2,11 +2,11 @@ package com.hedvig.memberservice.aggregates;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hedvig.common.UUIDGenerator;
-import com.hedvig.external.authentication.dto.ZignSecAuthenticationMethod;
 import com.hedvig.external.bisnodeBCI.BisnodeClient;
 import com.hedvig.external.bisnodeBCI.dto.Person;
 import com.hedvig.external.bisnodeBCI.dto.PersonSearchResult;
 import com.hedvig.memberservice.commands.*;
+import com.hedvig.memberservice.commands.models.ZignSecAuthenticationMarket;
 import com.hedvig.memberservice.events.*;
 import com.hedvig.memberservice.services.CashbackService;
 import kotlin.NotImplementedError;
@@ -277,8 +277,8 @@ public class MemberAggregate {
 
     apply(new NewCashbackSelectedEvent(this.id, cashbackService.getDefaultId(member.getPickedLocale()).toString()));
 
-    ZignSecAuthenticationMethod zignSecMethod = cmd.getZignSecMethod();
-    if (zignSecMethod == ZignSecAuthenticationMethod.NORWAY_WEB_OR_MOBILE) {
+    ZignSecAuthenticationMarket zignSecAuthMarket = cmd.getZignSecAuthMarket();
+    if (zignSecAuthMarket == ZignSecAuthenticationMarket.NORWAY) {
       if (cmd.getPersonalNumber() != null
         && !Objects.equals(this.member.getSsn(), cmd.getPersonalNumber())) {
         apply(new NorwegianSSNUpdatedEvent(this.id, cmd.getPersonalNumber()));
@@ -289,13 +289,13 @@ public class MemberAggregate {
           this.id, cmd.getPersonalNumber(), cmd.getProvideJsonResponse(), cmd.getReferenceId()));
 
       return;
-    } else if (zignSecMethod == ZignSecAuthenticationMethod.DENMARK) {
+    } else if (zignSecAuthMarket == ZignSecAuthenticationMarket.DENMARK) {
       //TODO: implement
       throw new NotImplementedError("implement");
       //return;
     }
 
-    throw new RuntimeException("ZignSec authentication method: "+ zignSecMethod.getZignSecMethodName() + " is not implemented!");
+    throw new RuntimeException("ZignSec authentication market: "+ zignSecAuthMarket.name() + " is not implemented!");
   }
 
   public boolean isValidJSON(final String json) {

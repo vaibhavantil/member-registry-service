@@ -1,6 +1,6 @@
 package com.hedvig.memberservice.commands
 
-import com.hedvig.external.authentication.dto.ZignSecAuthenticationMethod
+import com.hedvig.memberservice.commands.models.ZignSecAuthenticationMarket
 import org.axonframework.commandhandling.TargetAggregateIdentifier
 import java.util.*
 
@@ -9,5 +9,5 @@ data class ZignSecSignCommand(
     val referenceId: UUID,
     val personalNumber: String,
     val provideJsonResponse: String,
-    val zignSecMethod: ZignSecAuthenticationMethod
+    val zignSecAuthMarket: ZignSecAuthenticationMarket
 )

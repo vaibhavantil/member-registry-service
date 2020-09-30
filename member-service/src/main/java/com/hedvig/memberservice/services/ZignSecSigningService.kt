@@ -2,6 +2,7 @@ package com.hedvig.memberservice.services
 
 import com.hedvig.external.authentication.dto.ZignSecSignResult
 import com.hedvig.external.authentication.dto.StartZignSecAuthenticationResult
+import com.hedvig.memberservice.commands.models.ZignSecAuthenticationMarket
 import com.hedvig.memberservice.services.events.SignSessionCompleteEvent
 import com.hedvig.memberservice.services.member.MemberService
 import com.hedvig.memberservice.services.redispublisher.RedisEventPublisher
@@ -24,7 +25,8 @@ class ZignSecSigningService(
             memberId.toString(),
             ssn,
             successUrl,
-            failUrl
+            failUrl,
+            ZignSecAuthenticationMarket.NORWAY
         )
         redisEventPublisher.onSignSessionUpdate(memberId)
         return result
@@ -35,7 +37,7 @@ class ZignSecSigningService(
     fun handleSignResult(result: ZignSecSignResult) {
         when (result) {
             is ZignSecSignResult.Signed -> {
-                memberService.signComplete(result.memberId, result.id, result.ssn, result.providerJsonResponse)
+                memberService.signComplete(result.memberId, result.id, result.ssn, result.providerJsonResponse, result.authenticationMethod)
                 applicationEventPublisher.publishEvent(SignSessionCompleteEvent(result.memberId))
             }
             is ZignSecSignResult.Failed -> {
