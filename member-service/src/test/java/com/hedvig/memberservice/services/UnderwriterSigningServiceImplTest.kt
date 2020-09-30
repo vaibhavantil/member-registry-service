@@ -5,6 +5,7 @@ import com.hedvig.external.authentication.dto.StartZignSecAuthenticationResult
 import com.hedvig.external.bankID.bankIdTypes.OrderResponse
 import com.hedvig.integration.underwriter.UnderwriterClient
 import com.hedvig.integration.underwriter.dtos.SignRequest
+import com.hedvig.memberservice.commands.models.ZignSecAuthenticationMarket
 import com.hedvig.memberservice.entities.UnderwriterSignSessionEntity
 import com.hedvig.memberservice.query.SignedMemberEntity
 import com.hedvig.memberservice.query.SignedMemberRepository
@@ -83,7 +84,7 @@ class UnderwriterSigningServiceImplTest {
     @Test
     fun startNorwegianBankIdSession() {
         whenever(signedMemberRepository.findBySsn(norwegianSSN)).thenReturn(Optional.empty())
-        whenever(zignSecSigningService.startSign(memberId, norwegianSSN, successTargetUrl, failUrl))
+        whenever(zignSecSigningService.startSign(memberId, norwegianSSN, successTargetUrl, failUrl, ZignSecAuthenticationMarket.NORWAY))
             .thenReturn(StartZignSecAuthenticationResult.Success(orderRefUUID, redirectUrl))
 
         whenever(underwriterSignSessionRepository.save(captor.capture()))
@@ -99,7 +100,7 @@ class UnderwriterSigningServiceImplTest {
     @Test
     fun startNorwegianBankIdSessionFails() {
         whenever(signedMemberRepository.findBySsn(norwegianSSN)).thenReturn(Optional.empty())
-        whenever(zignSecSigningService.startSign(memberId, norwegianSSN, successTargetUrl, failUrl))
+        whenever(zignSecSigningService.startSign(memberId, norwegianSSN, successTargetUrl, failUrl, ZignSecAuthenticationMarket.NORWAY))
             .thenReturn(StartZignSecAuthenticationResult.Failed(listOf(ZignSecAuthenticationResponseError(1,"Some error message"))))
 
         val response = sut.startNorwegianBankIdSignSession(underwriterSessionRef, memberId, norwegianSSN, successTargetUrl, failUrl)

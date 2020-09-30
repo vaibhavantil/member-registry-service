@@ -20,13 +20,13 @@ class ZignSecSigningService(
 ) {
 
     @Transactional
-    fun startSign(memberId: Long, ssn: String, successUrl: String, failUrl: String): StartZignSecAuthenticationResult {
+    fun startSign(memberId: Long, ssn: String, successUrl: String, failUrl: String, zignSecAuthenticationMarket: ZignSecAuthenticationMarket): StartZignSecAuthenticationResult {
         val result = zignSecBankIdService.sign(
             memberId.toString(),
             ssn,
             successUrl,
             failUrl,
-            ZignSecAuthenticationMarket.NORWAY
+            zignSecAuthenticationMarket
         )
         redisEventPublisher.onSignSessionUpdate(memberId)
         return result

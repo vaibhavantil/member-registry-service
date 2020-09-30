@@ -3,10 +3,11 @@ package com.hedvig.memberservice.services
 import com.hedvig.external.authentication.dto.StartZignSecAuthenticationResult
 import com.hedvig.integration.underwriter.UnderwriterClient
 import com.hedvig.integration.underwriter.dtos.SignRequest
+import com.hedvig.memberservice.commands.models.ZignSecAuthenticationMarket
 import com.hedvig.memberservice.query.SignedMemberRepository
 import com.hedvig.memberservice.query.UnderwriterSignSessionRepository
 import com.hedvig.memberservice.query.saveOrUpdateReusableSession
-import com.hedvig.memberservice.services.dto.StartNorwegianBankIdSignResponse
+import com.hedvig.memberservice.services.dto.StartZignSecBankIdSignResponse
 import com.hedvig.memberservice.services.dto.StartSwedishBankIdSignResponse
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
@@ -39,28 +40,55 @@ class UnderwriterSigningServiceImpl(
         return StartSwedishBankIdSignResponse(response.bankIdOrderResponse.autoStartToken)
     }
 
-    override fun startNorwegianBankIdSignSession(underwriterSessionRef: UUID, memberId: Long, ssn: String, successUrl: String, failUrl: String): StartNorwegianBankIdSignResponse {
+    override fun startNorwegianBankIdSignSession(
+        underwriterSessionRef: UUID,
+        memberId: Long,
+        ssn: String,
+        successUrl: String,
+        failUrl: String
+    ): StartZignSecBankIdSignResponse {
+        return startZignSecSignSession(underwriterSessionRef, memberId, ssn, successUrl, failUrl, ZignSecAuthenticationMarket.NORWAY)
+    }
+
+    override fun startDanishBankIdSignSession(
+        underwriterSessionRef: UUID,
+        memberId: Long,
+        ssn: String,
+        successUrl: String,
+        failUrl: String
+    ): StartZignSecBankIdSignResponse {
+        return startZignSecSignSession(underwriterSessionRef, memberId, ssn, successUrl, failUrl, ZignSecAuthenticationMarket.DENMARK)
+    }
+
+    private fun startZignSecSignSession(
+        underwriterSessionRef: UUID,
+        memberId: Long,
+        ssn: String,
+        successUrl: String,
+        failUrl: String,
+        zignSecAuthenticationMarket: ZignSecAuthenticationMarket
+    ): StartZignSecBankIdSignResponse {
         if (!hasValidHost(successUrl) || !hasValidHost(failUrl)) {
-            return StartNorwegianBankIdSignResponse(
+            return StartZignSecBankIdSignResponse(
                 redirectUrl = null,
                 internalErrorMessage = "Not an valid target url"
             )
         }
 
         if (isAlreadySigned(ssn)) {
-            return StartNorwegianBankIdSignResponse(
+            return StartZignSecBankIdSignResponse(
                 redirectUrl = null,
                 internalErrorMessage = "Member already signed"
             )
         }
 
-        return when (val response = zignSecSigningService.startSign(memberId, ssn, successUrl, failUrl)) {
+        return when (val response = zignSecSigningService.startSign(memberId, ssn, successUrl, failUrl, zignSecAuthenticationMarket)) {
             is StartZignSecAuthenticationResult.Success -> {
                 underwriterSignSessionRepository.saveOrUpdateReusableSession(underwriterSessionRef, response.orderReference)
 
-                StartNorwegianBankIdSignResponse(response.redirectUrl.trim())
+                StartZignSecBankIdSignResponse(response.redirectUrl.trim())
             }
-            is StartZignSecAuthenticationResult.Failed -> StartNorwegianBankIdSignResponse(
+            is StartZignSecAuthenticationResult.Failed -> StartZignSecBankIdSignResponse(
                 redirectUrl = null,
                 errorMessages = response.errors
             )
@@ -88,6 +116,14 @@ class UnderwriterSigningServiceImpl(
     }
 
     override fun norwegianBankIdSignSessionWasCompleted(orderReference: UUID) {
+        completeZignSecSession(orderReference)
+    }
+
+    override fun danishBankIdSignSessionWasCompleted(orderReference: UUID) {
+        completeZignSecSession(orderReference)
+    }
+
+    private fun completeZignSecSession(orderReference: UUID) {
         val session = underwriterSignSessionRepository.findBySignReference(orderReference)
             ?: throw IllegalCallerException("Called norwegianBankIdSignSessionWasCompleted but could not find underwriter sign session use isUnderwriterIsHandlingSignSession before calling this method")
 

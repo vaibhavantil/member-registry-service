@@ -45,6 +45,18 @@ class InternalSignController(
         )
     )
 
-    //TODO: danish test
+    @PostMapping("danish/bankid/{memberId}")
+    fun startDanishSing(
+        @PathVariable("memberId") memberId: Long,
+        @RequestBody request: UnderwriterStartNorwegianBankIdSignSessionRequest
+    ) = ResponseEntity.ok(
+        underwriterSigningService.startDanishBankIdSignSession(
+            request.underwriterSessionReference,
+            memberId,
+            request.ssn,
+            request.successUrl,
+            request.failUrl
+        )
+    )
 }
 

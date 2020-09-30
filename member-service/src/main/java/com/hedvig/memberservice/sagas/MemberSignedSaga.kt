@@ -103,6 +103,8 @@ class MemberSignedSaga {
         snsNotificationService.sendMemberSignedNotification(e.memberId)
     }
 
+    //todo onDanishMemberSignedEvent
+
     companion object {
         private val log = LoggerFactory.getLogger(MemberSignedSaga::class.java)
     }

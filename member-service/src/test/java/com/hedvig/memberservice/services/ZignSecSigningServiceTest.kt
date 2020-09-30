@@ -52,7 +52,7 @@ class ZignSecSigningServiceTest {
             )
         )
 
-        val response = classUnderTest.startSign(MEMBER_ID, SSN, SUCCESS_TARGET_URL, FAILED_TARGET_URL)
+        val response = classUnderTest.startSign(MEMBER_ID, SSN, SUCCESS_TARGET_URL, FAILED_TARGET_URL, ZignSecAuthenticationMarket.NORWAY)
 
         assertThat(response).isInstanceOf(StartZignSecAuthenticationResult.Success::class.java)
         assertThat((response as StartZignSecAuthenticationResult.Success).redirectUrl).isEqualTo(REDIRECT_URL)
@@ -66,7 +66,7 @@ class ZignSecSigningServiceTest {
             )
         )
 
-        val response = classUnderTest.startSign(MEMBER_ID, SSN, SUCCESS_TARGET_URL, FAILED_TARGET_URL)
+        val response = classUnderTest.startSign(MEMBER_ID, SSN, SUCCESS_TARGET_URL, FAILED_TARGET_URL, ZignSecAuthenticationMarket.NORWAY)
 
         assertThat(response).isInstanceOf(StartZignSecAuthenticationResult.Failed::class.java)
     }
