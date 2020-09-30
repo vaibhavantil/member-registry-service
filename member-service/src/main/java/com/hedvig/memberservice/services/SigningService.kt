@@ -62,6 +62,7 @@ class SigningService(
                 return when (quote.signMethod) {
                     SignMethod.SWEDISH_BANK_ID -> swedishBankIdSigningService.startSign(request, memberId, quote.isSwitching)
                     SignMethod.NORWEGIAN_BANK_ID -> throw IllegalArgumentException("Sign method norwegian bank id doesn't support web sign. Use graphql `signQuotes` mutation instead!")
+                    SignMethod.DANISH_BANK_ID -> throw IllegalArgumentException("Sign method danish bank id doesn't support web sign. Use graphql `signQuotes` mutation instead!")
                 }
             }
             is QuoteToSignStatusDto.NotEligibleToSign -> throw CannotSignInsuranceException()
@@ -105,7 +106,8 @@ class SigningService(
                         .map { SignStatusResponse.CreateFromEntity(it) }
                         .orElseGet { null }
                 }
-                SignMethod.NORWEGIAN_BANK_ID -> {
+                SignMethod.NORWEGIAN_BANK_ID,
+                SignMethod.DANISH_BANK_ID -> {
                     zignSecSigningService.getSignStatus(memberId)?.let {
                         SignStatusResponse.CreateFromZignSecStatus(it)
                     }
