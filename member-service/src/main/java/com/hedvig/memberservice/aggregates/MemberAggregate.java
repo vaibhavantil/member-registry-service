@@ -9,7 +9,6 @@ import com.hedvig.memberservice.commands.*;
 import com.hedvig.memberservice.commands.models.ZignSecAuthenticationMarket;
 import com.hedvig.memberservice.events.*;
 import com.hedvig.memberservice.services.CashbackService;
-import kotlin.NotImplementedError;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.axonframework.commandhandling.CommandHandler;
@@ -291,11 +290,14 @@ public class MemberAggregate {
       return;
     } else if (zignSecAuthMarket == ZignSecAuthenticationMarket.DENMARK) {
       //TODO: implement
-      throw new NotImplementedError("implement");
-      //return;
+
+      apply(
+        new DanishMemberSignedEvent(
+          this.id, cmd.getPersonalNumber(), cmd.getProvideJsonResponse(), cmd.getReferenceId()));
+      return;
     }
 
-    throw new RuntimeException("ZignSec authentication market: "+ zignSecAuthMarket.name() + " is not implemented!");
+    throw new RuntimeException("ZignSec authentication market: " + zignSecAuthMarket.name() + " is not implemented!");
   }
 
   public boolean isValidJSON(final String json) {
@@ -528,6 +530,11 @@ public class MemberAggregate {
 
   @EventSourcingHandler
   public void on(NorwegianMemberSignedEvent e) {
+    this.status = MemberStatus.SIGNED;
+  }
+
+  @EventSourcingHandler
+  public void on(DanishMemberSignedEvent e) {
     this.status = MemberStatus.SIGNED;
   }
 
