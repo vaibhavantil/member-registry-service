@@ -159,7 +159,7 @@ class SigningServiceTest {
                 )
             ))
 
-        val (_, _, _, bankIdOrderResponse) = sut.startWebSign(MEMBER_ID, WebsignRequest(EMAIL, SSN, IP_ADDRESS))
+        val (_, _, _) = sut.startWebSign(MEMBER_ID, WebsignRequest(EMAIL, SSN, IP_ADDRESS))
 
         verify(commandGateway).sendAndWait<Any>(updateWebOnBoardingInfoCommandArgumentCaptor.capture())
 

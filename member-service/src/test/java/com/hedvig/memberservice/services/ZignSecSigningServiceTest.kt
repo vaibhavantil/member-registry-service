@@ -59,7 +59,7 @@ class ZignSecSigningServiceTest {
 
     @Test
     fun startDanishSignSuccessful() {
-        whenever(zignSecBankIdService.sign(MEMBER_ID.toString(), DANISH_SSN, SUCCESS_TARGET_URL, FAILED_TARGET_URL, ZignSecAuthenticationMarket.NORWAY)).thenReturn(
+        whenever(zignSecBankIdService.sign(MEMBER_ID.toString(), DANISH_SSN, SUCCESS_TARGET_URL, FAILED_TARGET_URL, ZignSecAuthenticationMarket.DENMARK)).thenReturn(
             StartZignSecAuthenticationResult.Success(
                 ORDER_REF,
                 REDIRECT_URL

@@ -192,16 +192,6 @@ public class MemberSignedSagaTest {
     then(underwriterApi).should().memberSigned("1337", "", "", "");
   }
 
-
-  /**
-   *
-   *
-   *
-   *
-   *
-   */
-
-
   @Test
   public void onDanishMemberSignedEvent_whenUnderwriterApiThrowsRuntimeException_willCallSigningService() {
     when(underwriterSigningService.isUnderwriterHandlingSignSession(UUID.fromString("123e4567-e89b-12d3-a456-426655440001"))).thenReturn(false);
@@ -225,7 +215,7 @@ public class MemberSignedSagaTest {
   public void onDanishMemberSignedEvent_whenUnderwriterServiceThrowsRuntimeException_willCallSigningService() {
     val uuid = UUID.fromString("123e4567-e89b-12d3-a456-426655440001");
     when(underwriterSigningService.isUnderwriterHandlingSignSession(uuid)).thenReturn(true);
-    willThrow(RuntimeException.class).given(underwriterSigningService).norwegianBankIdSignSessionWasCompleted(uuid);
+    willThrow(RuntimeException.class).given(underwriterSigningService).danishBankIdSignSessionWasCompleted(uuid);
 
     val saga = new MemberSignedSaga();
     saga.setUnderwriterApi(underwriterApi);
@@ -255,7 +245,7 @@ public class MemberSignedSagaTest {
     saga.onDanishMemberSignedEvent(
       e, new GenericEventMessage(e));
 
-    then(underwriterSigningService).should().norwegianBankIdSignSessionWasCompleted(e.getReferenceId());
+    then(underwriterSigningService).should().danishBankIdSignSessionWasCompleted(e.getReferenceId());
     verifyZeroInteractions(underwriterApi);
   }
 

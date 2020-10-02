@@ -33,7 +33,7 @@ public class SignController {
 
     val result = signingService.startWebSign(hedvigToken, websignRequest);
 
-    return ResponseEntity.ok(new WebSignResponse(result.getSignId(),result.getStatus(), result.getBankIdOrderResponse(), result.getNorwegianBankIdResponse()));
+    return ResponseEntity.ok(new WebSignResponse(result.getSignId(),result.getStatus(), result.getBankIdOrderResponse()));
   }
 
   @PostMapping("underwriter")
