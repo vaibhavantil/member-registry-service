@@ -96,6 +96,15 @@ public class MemberEventListener {
   }
 
   @EventHandler
+  void on(DanishSSNUpdatedEvent e) {
+    MemberEntity m = userRepo.findById(e.getMemberId()).get();
+
+    m.setSsn(e.getSsn());
+
+    userRepo.save(m);
+  }
+
+  @EventHandler
   void on(TrackingIdCreatedEvent e) {
     // Assign a unique tracking id per SSN
 

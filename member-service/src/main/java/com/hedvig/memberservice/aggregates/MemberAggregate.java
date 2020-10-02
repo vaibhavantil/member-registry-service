@@ -289,7 +289,10 @@ public class MemberAggregate {
 
       return;
     } else if (zignSecAuthMarket == ZignSecAuthenticationMarket.DENMARK) {
-      //TODO: implement
+      if (cmd.getPersonalNumber() != null
+        && !Objects.equals(this.member.getSsn(), cmd.getPersonalNumber())) {
+        apply(new DanishSSNUpdatedEvent(this.id, cmd.getPersonalNumber()));
+      }
 
       apply(
         new DanishMemberSignedEvent(
@@ -590,6 +593,11 @@ public class MemberAggregate {
 
   @EventSourcingHandler
   public void on(NorwegianSSNUpdatedEvent e) {
+    this.member.setSsn(e.getSsn());
+  }
+
+  @EventSourcingHandler
+  public void on(DanishSSNUpdatedEvent e) {
     this.member.setSsn(e.getSsn());
   }
 

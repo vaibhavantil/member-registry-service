@@ -16,21 +16,7 @@ import com.hedvig.memberservice.commands.SelectNewCashbackCommand;
 import com.hedvig.memberservice.commands.StartOnboardingWithSSNCommand;
 import com.hedvig.memberservice.commands.UpdatePickedLocaleCommand;
 import com.hedvig.memberservice.commands.models.ZignSecAuthenticationMarket;
-import com.hedvig.memberservice.events.EmailUpdatedEvent;
-import com.hedvig.memberservice.events.LivingAddressUpdatedEvent;
-import com.hedvig.memberservice.events.MemberAuthenticatedEvent;
-import com.hedvig.memberservice.events.MemberCreatedEvent;
-import com.hedvig.memberservice.events.MemberInactivatedEvent;
-import com.hedvig.memberservice.events.MemberSignedEvent;
-import com.hedvig.memberservice.events.MemberStartedOnBoardingEvent;
-import com.hedvig.memberservice.events.NameUpdatedEvent;
-import com.hedvig.memberservice.events.NewCashbackSelectedEvent;
-import com.hedvig.memberservice.events.NorwegianMemberSignedEvent;
-import com.hedvig.memberservice.events.NorwegianSSNUpdatedEvent;
-import com.hedvig.memberservice.events.OnboardingStartedWithSSNEvent;
-import com.hedvig.memberservice.events.PickedLocaleUpdatedEvent;
-import com.hedvig.memberservice.events.SSNUpdatedEvent;
-import com.hedvig.memberservice.events.TrackingIdCreatedEvent;
+import com.hedvig.memberservice.events.*;
 import com.hedvig.memberservice.services.CashbackService;
 import com.hedvig.memberservice.web.dto.Address;
 import com.hedvig.memberservice.web.dto.StartOnboardingWithSSNRequest;
@@ -293,9 +279,9 @@ public class MemberAggregateTests {
       .when(new ZignSecSignCommand(memberId, referenceId, personalNumber, provideJsonResponse, ZignSecAuthenticationMarket.DENMARK))
       .expectSuccessfulHandlerExecution()
       .expectEvents(
-        new NewCashbackSelectedEvent(memberId, DEFAULT_CASHBACK.toString())
-        //new DanishSSNUpdatedEvent(memberId, personalNumber),
-        //new DanishMemberSignedEvent(memberId, personalNumber, provideJsonResponse, referenceId)
+        new NewCashbackSelectedEvent(memberId, DEFAULT_CASHBACK.toString()),
+        new DanishSSNUpdatedEvent(memberId, personalNumber),
+        new DanishMemberSignedEvent(memberId, personalNumber, provideJsonResponse, referenceId)
       );
   }
 
