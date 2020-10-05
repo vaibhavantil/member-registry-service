@@ -11,25 +11,12 @@ import com.hedvig.memberservice.commands.BankIdAuthenticationStatus;
 import com.hedvig.memberservice.commands.BankIdSignCommand;
 import com.hedvig.memberservice.commands.InactivateMemberCommand;
 import com.hedvig.memberservice.commands.MemberUpdateContactInformationCommand;
-import com.hedvig.memberservice.commands.NorwegianSignCommand;
+import com.hedvig.memberservice.commands.ZignSecSignCommand;
 import com.hedvig.memberservice.commands.SelectNewCashbackCommand;
 import com.hedvig.memberservice.commands.StartOnboardingWithSSNCommand;
 import com.hedvig.memberservice.commands.UpdatePickedLocaleCommand;
-import com.hedvig.memberservice.events.EmailUpdatedEvent;
-import com.hedvig.memberservice.events.LivingAddressUpdatedEvent;
-import com.hedvig.memberservice.events.MemberAuthenticatedEvent;
-import com.hedvig.memberservice.events.MemberCreatedEvent;
-import com.hedvig.memberservice.events.MemberInactivatedEvent;
-import com.hedvig.memberservice.events.MemberSignedEvent;
-import com.hedvig.memberservice.events.MemberStartedOnBoardingEvent;
-import com.hedvig.memberservice.events.NameUpdatedEvent;
-import com.hedvig.memberservice.events.NewCashbackSelectedEvent;
-import com.hedvig.memberservice.events.NorwegianMemberSignedEvent;
-import com.hedvig.memberservice.events.NorwegianSSNUpdatedEvent;
-import com.hedvig.memberservice.events.OnboardingStartedWithSSNEvent;
-import com.hedvig.memberservice.events.PickedLocaleUpdatedEvent;
-import com.hedvig.memberservice.events.SSNUpdatedEvent;
-import com.hedvig.memberservice.events.TrackingIdCreatedEvent;
+import com.hedvig.memberservice.commands.models.ZignSecAuthenticationMarket;
+import com.hedvig.memberservice.events.*;
 import com.hedvig.memberservice.services.CashbackService;
 import com.hedvig.memberservice.web.dto.Address;
 import com.hedvig.memberservice.web.dto.StartOnboardingWithSSNRequest;
@@ -266,12 +253,35 @@ public class MemberAggregateTests {
         new MemberCreatedEvent(memberId, MemberStatus.INITIATED),
         new MemberStartedOnBoardingEvent(memberId, MemberStatus.ONBOARDING),
         new TrackingIdCreatedEvent(memberId, TRACKING_UUID))
-      .when(new NorwegianSignCommand(memberId, referenceId, personalNumber, provideJsonResponse))
+      .when(new ZignSecSignCommand(memberId, referenceId, personalNumber, provideJsonResponse, ZignSecAuthenticationMarket.NORWAY))
       .expectSuccessfulHandlerExecution()
       .expectEvents(
-        new NorwegianSSNUpdatedEvent(memberId, personalNumber),
         new NewCashbackSelectedEvent(memberId, DEFAULT_CASHBACK.toString()),
+        new NorwegianSSNUpdatedEvent(memberId, personalNumber),
         new NorwegianMemberSignedEvent(memberId, personalNumber, provideJsonResponse, referenceId)
+      );
+  }
+
+  @Test
+  public void danishSignCommand_validJSON_ThenEmitThreeEvents() {
+    Long memberId = 1234L;
+    UUID referenceId = UUID.randomUUID();
+    String personalNumber = "1212121212";
+    String provideJsonResponse = "{ \"json\": true }";
+
+    when(cashbackService.getDefaultId(any())).thenReturn(DEFAULT_CASHBACK);
+
+    fixture
+      .given(
+        new MemberCreatedEvent(memberId, MemberStatus.INITIATED),
+        new MemberStartedOnBoardingEvent(memberId, MemberStatus.ONBOARDING),
+        new TrackingIdCreatedEvent(memberId, TRACKING_UUID))
+      .when(new ZignSecSignCommand(memberId, referenceId, personalNumber, provideJsonResponse, ZignSecAuthenticationMarket.DENMARK))
+      .expectSuccessfulHandlerExecution()
+      .expectEvents(
+        new NewCashbackSelectedEvent(memberId, DEFAULT_CASHBACK.toString()),
+        new DanishSSNUpdatedEvent(memberId, personalNumber),
+        new DanishMemberSignedEvent(memberId, personalNumber, provideJsonResponse, referenceId)
       );
   }
 
@@ -289,7 +299,7 @@ public class MemberAggregateTests {
         new MemberCreatedEvent(memberId, MemberStatus.INITIATED),
         new MemberStartedOnBoardingEvent(memberId, MemberStatus.ONBOARDING),
         new TrackingIdCreatedEvent(memberId, TRACKING_UUID))
-      .when(new NorwegianSignCommand(memberId, referenceId, personalNumber, provideJsonResponse))
+      .when(new ZignSecSignCommand(memberId, referenceId, personalNumber, provideJsonResponse, ZignSecAuthenticationMarket.NORWAY))
       .expectException(RuntimeException.class);
   }
 

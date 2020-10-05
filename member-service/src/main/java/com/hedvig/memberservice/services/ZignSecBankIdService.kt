@@ -1,12 +1,13 @@
 package com.hedvig.memberservice.services
 
-import com.hedvig.external.authentication.NorwegianAuthentication
-import com.hedvig.external.authentication.dto.NorwegianAuthenticationResult
-import com.hedvig.external.authentication.dto.NorwegianBankIdAuthenticationRequest
-import com.hedvig.external.authentication.dto.StartNorwegianAuthenticationResult
+import com.hedvig.external.authentication.ZignSecAuthentication
+import com.hedvig.external.authentication.dto.ZignSecAuthenticationResult
+import com.hedvig.external.authentication.dto.ZignSecBankIdAuthenticationRequest
+import com.hedvig.external.authentication.dto.StartZignSecAuthenticationResult
 import com.hedvig.integration.apigateway.ApiGatewayService
 import com.hedvig.localization.service.TextKeysLocaleResolver
 import com.hedvig.memberservice.commands.InactivateMemberCommand
+import com.hedvig.memberservice.commands.models.ZignSecAuthenticationMarket
 import com.hedvig.memberservice.query.MemberRepository
 import com.hedvig.memberservice.query.SignedMemberRepository
 import com.hedvig.memberservice.services.redispublisher.AuthSessionUpdatedEventStatus
@@ -18,8 +19,8 @@ import org.springframework.stereotype.Service
 import java.util.*
 
 @Service
-class NorwegianBankIdService(
-    private val norwegianAuthentication: NorwegianAuthentication,
+class ZignSecBankIdService(
+    private val zignSecAuthentication: ZignSecAuthentication,
     private val commandGateway: CommandGateway,
     private val redisEventPublisher: RedisEventPublisher,
     private val signedMemberRepository: SignedMemberRepository,
@@ -31,32 +32,39 @@ class NorwegianBankIdService(
     @Value("\${redirect.authentication.failUrl}")
     private val authenticationFailUrl: String
 ) {
-    fun authenticate(memberId: Long, request: GenericBankIdAuthenticationRequest): StartNorwegianAuthenticationResult {
-        return norwegianAuthentication.auth(
-            NorwegianBankIdAuthenticationRequest(
-                memberId.toString(),
-                request.personalNumber,
-                resolveTwoLetterLanguageFromMember(memberId),
-                authenticationSuccessUrl,
-                authenticationFailUrl
-            )
+    fun authenticate(
+        memberId: Long,
+        request: GenericBankIdAuthenticationRequest,
+        zignSecAuthenticationMarket: ZignSecAuthenticationMarket) = zignSecAuthentication.auth(
+        ZignSecBankIdAuthenticationRequest(
+            memberId.toString(),
+            request.personalNumber,
+            resolveTwoLetterLanguageFromMember(memberId),
+            authenticationSuccessUrl,
+            authenticationFailUrl,
+            zignSecAuthenticationMarket.getAuthenticationMethod()
         )
-    }
+    )
 
-    fun sign(memberId: String, ssn: String, successUrl: String, failUrl: String) =
-        norwegianAuthentication.sign(
-            NorwegianBankIdAuthenticationRequest(
+    fun sign(
+        memberId: String,
+        ssn: String, successUrl: String,
+        failUrl: String,
+        zignSecAuthenticationMarket: ZignSecAuthenticationMarket) =
+        zignSecAuthentication.sign(
+            ZignSecBankIdAuthenticationRequest(
                 memberId,
                 ssn,
                 resolveTwoLetterLanguageFromMember(memberId.toLong()),
                 successUrl,
-                failUrl
+                failUrl,
+                zignSecAuthenticationMarket.getAuthenticationMethod()
             )
         )
 
-    fun completeAuthentication(result: NorwegianAuthenticationResult) {
+    fun completeAuthentication(result: ZignSecAuthenticationResult) {
         when (result) {
-            is NorwegianAuthenticationResult.Completed -> {
+            is ZignSecAuthenticationResult.Completed -> {
                 val signedMember = signedMemberRepository.findBySsn(result.ssn)
                 if (signedMember.isPresent) {
                     if (result.memberId != signedMember.get().id) {
@@ -68,14 +76,14 @@ class NorwegianBankIdService(
                     redisEventPublisher.onAuthSessionUpdated(result.memberId, AuthSessionUpdatedEventStatus.FAILED)
                 }
             }
-            is NorwegianAuthenticationResult.Failed ->
+            is ZignSecAuthenticationResult.Failed ->
                 redisEventPublisher.onAuthSessionUpdated(result.memberId, AuthSessionUpdatedEventStatus.FAILED)
         }
     }
 
-    fun getStatus(memberId: Long) = norwegianAuthentication.getStatus(memberId)
+    fun getStatus(memberId: Long) = zignSecAuthentication.getStatus(memberId)
 
-    fun notifyContractsCreated(memberId: Long) = norwegianAuthentication.notifyContractsCreated(memberId)
+    fun notifyContractsCreated(memberId: Long) = zignSecAuthentication.notifyContractsCreated(memberId)
 
     private fun resolveTwoLetterLanguageFromMember(memberId: Long): String {
         val acceptLanguage = memberRepository.findById(memberId).get().acceptLanguage

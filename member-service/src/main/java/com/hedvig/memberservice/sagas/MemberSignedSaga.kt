@@ -2,6 +2,7 @@ package com.hedvig.memberservice.sagas
 
 import com.hedvig.integration.underwriter.UnderwriterApi
 import com.hedvig.integration.underwriter.dtos.SignMethod
+import com.hedvig.memberservice.events.DanishMemberSignedEvent
 import com.hedvig.memberservice.events.MemberSignedEvent
 import com.hedvig.memberservice.events.MemberSignedWithoutBankId
 import com.hedvig.memberservice.events.NorwegianMemberSignedEvent
@@ -80,27 +81,50 @@ class MemberSignedSaga {
         e: NorwegianMemberSignedEvent,
         eventMessage: EventMessage<MemberSignedWithoutBankId>
     ) {
-        val isUnderwriterHandlingSession = e.referenceId?.let {
-            underwriterSigningService.isUnderwriterHandlingSignSession(e.referenceId)
+        generifiedZignSecSign(e.memberId, e.referenceId, SignMethod.NORWEGIAN_BANK_ID) { referenceId ->
+            underwriterSigningService.norwegianBankIdSignSessionWasCompleted(referenceId)
+        }
+    }
+
+    @SagaEventHandler(associationProperty = "memberId")
+    @StartSaga
+    @EndSaga
+    fun onDanishMemberSignedEvent(
+        e: DanishMemberSignedEvent,
+        eventMessage: EventMessage<MemberSignedWithoutBankId>
+    ) {
+        generifiedZignSecSign(e.memberId, e.referenceId, SignMethod.DANISH_BANK_ID) { referenceId ->
+            underwriterSigningService.danishBankIdSignSessionWasCompleted(referenceId)
+        }
+    }
+
+    private fun generifiedZignSecSign(
+        memberId: Long,
+        referenceId: UUID?,
+        signMethod: SignMethod,
+        underwritingSign: (referenceId: UUID) -> Unit
+    ) {
+        val isUnderwriterHandlingSession = referenceId?.let {
+            underwriterSigningService.isUnderwriterHandlingSignSession(it)
         } ?: false
 
         if (isUnderwriterHandlingSession) {
             try {
-                underwriterSigningService.norwegianBankIdSignSessionWasCompleted(e.referenceId!!)
+                underwritingSign(referenceId!!)
             } catch (ex: RuntimeException) {
-                log.error("Could not complete norwegian bank id signing session in about signed member [MemberId: ${e.memberId}] Exception $ex")
+                log.error("Could not complete generified ZignSec bank id signing session in about signed member [MemberId: ${memberId}] Exception $ex")
             }
         } else {
             try {
-                underwriterApi.memberSigned(e.memberId.toString(), "", "", "")
+                underwriterApi.memberSigned(memberId.toString(), "", "", "")
             } catch (ex: RuntimeException) {
-                log.error("Could not notify underwriter about signed member [MemberId: ${e.memberId}] Exception $ex")
+                log.error("Could not notify underwriter about signed member [MemberId: ${memberId}] Exception $ex")
             }
         }
 
-        signingService.productSignConfirmed(e.memberId)
-        signingService.scheduleContractsCreatedJob(e.memberId, SignMethod.NORWEGIAN_BANK_ID)
-        snsNotificationService.sendMemberSignedNotification(e.memberId)
+        signingService.productSignConfirmed(memberId)
+        signingService.scheduleContractsCreatedJob(memberId, signMethod)
+        snsNotificationService.sendMemberSignedNotification(memberId)
     }
 
     companion object {

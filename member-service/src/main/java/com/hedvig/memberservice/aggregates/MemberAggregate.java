@@ -6,6 +6,7 @@ import com.hedvig.external.bisnodeBCI.BisnodeClient;
 import com.hedvig.external.bisnodeBCI.dto.Person;
 import com.hedvig.external.bisnodeBCI.dto.PersonSearchResult;
 import com.hedvig.memberservice.commands.*;
+import com.hedvig.memberservice.commands.models.ZignSecAuthenticationMarket;
 import com.hedvig.memberservice.events.*;
 import com.hedvig.memberservice.services.CashbackService;
 import lombok.extern.slf4j.Slf4j;
@@ -269,21 +270,37 @@ public class MemberAggregate {
   }
 
   @CommandHandler
-  void norwegianBankIdSignHandler(NorwegianSignCommand cmd) {
+  void ZignSecSignHandler(ZignSecSignCommand cmd) {
     if (!isValidJSON(cmd.getProvideJsonResponse()))
       throw new RuntimeException("Invalid json from provider");
 
-    if (cmd.getPersonalNumber() != null
-      && !Objects.equals(this.member.getSsn(), cmd.getPersonalNumber())) {
-      apply(new NorwegianSSNUpdatedEvent(this.id, cmd.getPersonalNumber()));
-    }
-
     apply(new NewCashbackSelectedEvent(this.id, cashbackService.getDefaultId(member.getPickedLocale()).toString()));
 
+    ZignSecAuthenticationMarket zignSecAuthMarket = cmd.getZignSecAuthMarket();
+    if (zignSecAuthMarket == ZignSecAuthenticationMarket.NORWAY) {
+      if (cmd.getPersonalNumber() != null
+        && !Objects.equals(this.member.getSsn(), cmd.getPersonalNumber())) {
+        apply(new NorwegianSSNUpdatedEvent(this.id, cmd.getPersonalNumber()));
+      }
 
-    apply(
-      new NorwegianMemberSignedEvent(
-        this.id, cmd.getPersonalNumber(), cmd.getProvideJsonResponse(), cmd.getReferenceId()));
+      apply(
+        new NorwegianMemberSignedEvent(
+          this.id, cmd.getPersonalNumber(), cmd.getProvideJsonResponse(), cmd.getReferenceId()));
+
+      return;
+    } else if (zignSecAuthMarket == ZignSecAuthenticationMarket.DENMARK) {
+      if (cmd.getPersonalNumber() != null
+        && !Objects.equals(this.member.getSsn(), cmd.getPersonalNumber())) {
+        apply(new DanishSSNUpdatedEvent(this.id, cmd.getPersonalNumber()));
+      }
+
+      apply(
+        new DanishMemberSignedEvent(
+          this.id, cmd.getPersonalNumber(), cmd.getProvideJsonResponse(), cmd.getReferenceId()));
+      return;
+    }
+
+    throw new RuntimeException("ZignSec authentication market: " + zignSecAuthMarket.name() + " is not implemented!");
   }
 
   public boolean isValidJSON(final String json) {
@@ -520,6 +537,11 @@ public class MemberAggregate {
   }
 
   @EventSourcingHandler
+  public void on(DanishMemberSignedEvent e) {
+    this.status = MemberStatus.SIGNED;
+  }
+
+  @EventSourcingHandler
   public void on(EmailUpdatedEvent e) {
     this.member.setEmail(e.getEmail());
   }
@@ -571,6 +593,11 @@ public class MemberAggregate {
 
   @EventSourcingHandler
   public void on(NorwegianSSNUpdatedEvent e) {
+    this.member.setSsn(e.getSsn());
+  }
+
+  @EventSourcingHandler
+  public void on(DanishSSNUpdatedEvent e) {
     this.member.setSsn(e.getSsn());
   }
 

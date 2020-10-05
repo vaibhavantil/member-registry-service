@@ -64,7 +64,7 @@ class SigningServiceTest {
     lateinit var swedishBankIdSigningService: SwedishBankIdSigningService
 
     @Mock
-    lateinit var norwegianSigningService: NorwegianSigningService
+    lateinit var zignSecSigningService: ZignSecSigningService
 
     @Mock
     lateinit var redisEventPublisher: RedisEventPublisher
@@ -85,7 +85,7 @@ class SigningServiceTest {
         whenever(signedMemberRepository.findBySsn(ArgumentMatchers.any())).thenReturn(Optional.empty())
 
         sut = SigningService(underwriterApi, signedMemberRepository, botService, memberRepository, commandGateway,
-            swedishBankIdSigningService, norwegianSigningService, redisEventPublisher, scheduler)
+            swedishBankIdSigningService, zignSecSigningService, redisEventPublisher, scheduler)
     }
 
     @Test
@@ -159,7 +159,7 @@ class SigningServiceTest {
                 )
             ))
 
-        val (_, _, _, bankIdOrderResponse) = sut.startWebSign(MEMBER_ID, WebsignRequest(EMAIL, SSN, IP_ADDRESS))
+        val (_, _, _) = sut.startWebSign(MEMBER_ID, WebsignRequest(EMAIL, SSN, IP_ADDRESS))
 
         verify(commandGateway).sendAndWait<Any>(updateWebOnBoardingInfoCommandArgumentCaptor.capture())
 

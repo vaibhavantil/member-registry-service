@@ -1,5 +1,5 @@
 package com.hedvig.external.authentication.dto
 
-enum class NorwegianBankIdProgressStatus{
+enum class ZignSecBankIdProgressStatus{
     INITIATED, IN_PROGRESS, FAILED, COMPLETED
 }

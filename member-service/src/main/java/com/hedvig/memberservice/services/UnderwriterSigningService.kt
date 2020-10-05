@@ -1,6 +1,6 @@
 package com.hedvig.memberservice.services
 
-import com.hedvig.memberservice.services.dto.StartNorwegianBankIdSignResponse
+import com.hedvig.memberservice.services.dto.StartZignSecBankIdSignResponse
 import com.hedvig.memberservice.services.dto.StartSwedishBankIdSignResponse
 import java.util.*
 
@@ -20,12 +20,22 @@ interface UnderwriterSigningService {
         ssn: String,
         successUrl: String,
         failUrl: String
-    ): StartNorwegianBankIdSignResponse
+    ): StartZignSecBankIdSignResponse
+
+    fun startDanishBankIdSignSession(
+        underwriterSessionRef: UUID,
+        memberId: Long,
+        ssn: String,
+        successUrl: String,
+        failUrl: String
+    ): StartZignSecBankIdSignResponse
 
     fun isUnderwriterHandlingSignSession(orderReference: UUID): Boolean
 
     fun swedishBankIdSignSessionWasCompleted(orderReference: String, signature: String, oscpResponse: String)
 
     fun norwegianBankIdSignSessionWasCompleted(orderReference: UUID)
+
+    fun danishBankIdSignSessionWasCompleted(orderReference: UUID)
 }
 

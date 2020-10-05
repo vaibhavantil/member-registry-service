@@ -1,18 +1,18 @@
 package com.hedvig.external.zignSec
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import com.hedvig.external.authentication.dto.NorwegianAuthenticationResult
-import com.hedvig.external.authentication.dto.NorwegianSignResult
-import com.hedvig.external.authentication.dto.StartNorwegianAuthenticationResult
-import com.hedvig.external.authentication.dto.NorwegianAuthenticationResponseError
-import com.hedvig.external.authentication.dto.NorwegianBankIdAuthenticationRequest
-import com.hedvig.external.authentication.dto.NorwegianBankIdProgressStatus
-import com.hedvig.external.event.NorwegianAuthenticationEventPublisher
+import com.hedvig.external.authentication.dto.ZignSecAuthenticationResult
+import com.hedvig.external.authentication.dto.ZignSecSignResult
+import com.hedvig.external.authentication.dto.StartZignSecAuthenticationResult
+import com.hedvig.external.authentication.dto.ZignSecAuthenticationResponseError
+import com.hedvig.external.authentication.dto.ZignSecBankIdAuthenticationRequest
+import com.hedvig.external.authentication.dto.ZignSecBankIdProgressStatus
+import com.hedvig.external.event.AuthenticationEventPublisher
 import com.hedvig.external.zignSec.client.dto.ZignSecCollectState
 import com.hedvig.external.zignSec.client.dto.ZignSecNotificationRequest
 import com.hedvig.external.zignSec.repository.ZignSecSessionRepository
 import com.hedvig.external.zignSec.repository.ZignSecSignEntityRepository
-import com.hedvig.external.zignSec.repository.entitys.NorwegianAuthenticationType
+import com.hedvig.external.zignSec.repository.entitys.ZignSecAuthenticationType
 import com.hedvig.external.zignSec.repository.entitys.ZignSecNotification
 import com.hedvig.external.zignSec.repository.entitys.ZignSecSession
 import com.hedvig.external.zignSec.repository.entitys.ZignSecSignEntity
@@ -24,24 +24,24 @@ class ZignSecSessionServiceImpl(
     private val sessionRepository: ZignSecSessionRepository,
     private val zignSecSignEntityRepository: ZignSecSignEntityRepository,
     private val zignSecService: ZignSecService,
-    private val norwegianAuthenticationEventPublisher: NorwegianAuthenticationEventPublisher,
+    private val authenticationEventPublisher: AuthenticationEventPublisher,
     private val objectMapper: ObjectMapper
 ) : ZignSecSessionService {
 
-    override fun auth(request: NorwegianBankIdAuthenticationRequest): StartNorwegianAuthenticationResult =
-        authenticate(request, NorwegianAuthenticationType.AUTH)
+    override fun auth(request: ZignSecBankIdAuthenticationRequest): StartZignSecAuthenticationResult =
+        authenticate(request, ZignSecAuthenticationType.AUTH)
 
-    override fun sign(request: NorwegianBankIdAuthenticationRequest): StartNorwegianAuthenticationResult =
-        authenticate(request, NorwegianAuthenticationType.SIGN)
+    override fun sign(request: ZignSecBankIdAuthenticationRequest): StartZignSecAuthenticationResult =
+        authenticate(request, ZignSecAuthenticationType.SIGN)
 
-    override fun getStatus(memberId: Long): NorwegianBankIdProgressStatus? {
+    override fun getStatus(memberId: Long): ZignSecBankIdProgressStatus? {
         val optionalSession = sessionRepository.findByMemberId(memberId)
 
         return if (optionalSession.isPresent) {
             val session = optionalSession.get()
-            if (session.requestType == NorwegianAuthenticationType.SIGN) {
-                if (session.status == NorwegianBankIdProgressStatus.COMPLETED) {
-                    if (session.isContractsCreated) NorwegianBankIdProgressStatus.COMPLETED else NorwegianBankIdProgressStatus.IN_PROGRESS
+            if (session.requestType == ZignSecAuthenticationType.SIGN) {
+                if (session.status == ZignSecBankIdProgressStatus.COMPLETED) {
+                    if (session.isContractsCreated) ZignSecBankIdProgressStatus.COMPLETED else ZignSecBankIdProgressStatus.IN_PROGRESS
                 } else {
                     optionalSession.get().status
                 }
@@ -59,7 +59,7 @@ class ZignSecSessionServiceImpl(
         sessionRepository.save(session)
     }
 
-    private fun authenticate(request: NorwegianBankIdAuthenticationRequest, type: NorwegianAuthenticationType): StartNorwegianAuthenticationResult {
+    private fun authenticate(request: ZignSecBankIdAuthenticationRequest, type: ZignSecAuthenticationType): StartZignSecAuthenticationResult {
         val optional = sessionRepository.findByMemberId(request.memberId.toLong())
 
         return if (optional.isPresent) {
@@ -67,9 +67,9 @@ class ZignSecSessionServiceImpl(
 
             if (session.requestType != type) {
                 sessionRepository.delete(session)
-                return StartNorwegianAuthenticationResult.Failed(
+                return StartZignSecAuthenticationResult.Failed(
                     errors = listOf(
-                        NorwegianAuthenticationResponseError(0, "Illegal change of method. Tried to change from type: ${session.requestType} to $type")
+                        ZignSecAuthenticationResponseError(0, "Illegal change of method. Tried to change from type: ${session.requestType} to $type")
                     )
                 )
             }
@@ -79,43 +79,43 @@ class ZignSecSessionServiceImpl(
             }
 
             when (session.status) {
-                NorwegianBankIdProgressStatus.INITIATED,
-                NorwegianBankIdProgressStatus.IN_PROGRESS -> {
+                ZignSecBankIdProgressStatus.INITIATED,
+                ZignSecBankIdProgressStatus.IN_PROGRESS -> {
                     val collectResponse = try {
                         zignSecService.collect(session.referenceId)
                     } catch (e: Exception) {
                         return startNewSession(request, type, session)
                     }
                     when (collectResponse.result.identity.state) {
-                        ZignSecCollectState.PENDING -> StartNorwegianAuthenticationResult.Success(
+                        ZignSecCollectState.PENDING -> StartZignSecAuthenticationResult.Success(
                             session.referenceId,
                             session.redirectUrl.trim()
                         )
                         ZignSecCollectState.FINISHED -> startNewSession(request, type, session)
                     }
                 }
-                NorwegianBankIdProgressStatus.FAILED,
-                NorwegianBankIdProgressStatus.COMPLETED -> startNewSession(request, type, session)
+                ZignSecBankIdProgressStatus.FAILED,
+                ZignSecBankIdProgressStatus.COMPLETED -> startNewSession(request, type, session)
             }
         } else {
             startNewSession(request, type, null)
         }
     }
 
-    private fun startNewSession(request: NorwegianBankIdAuthenticationRequest, type: NorwegianAuthenticationType, session: ZignSecSession?): StartNorwegianAuthenticationResult {
+    private fun startNewSession(request: ZignSecBankIdAuthenticationRequest, type: ZignSecAuthenticationType, session: ZignSecSession?): StartZignSecAuthenticationResult {
         val response = zignSecService.auth(request)
 
         if (response.errors.isNotEmpty() || response.redirectUrl == null) {
-            val errors = response.errors.map { NorwegianAuthenticationResponseError(it.code, it.description) }.toMutableList()
+            val errors = response.errors.map { ZignSecAuthenticationResponseError(it.code, it.description) }.toMutableList()
 
             if (errors.isEmpty() && response.redirectUrl == null) {
-                errors.add(NorwegianAuthenticationResponseError(
+                errors.add(ZignSecAuthenticationResponseError(
                     -1,
                     "No errors and no redirect error from ZignSec"
                 ))
             }
 
-            return StartNorwegianAuthenticationResult.Failed(
+            return StartZignSecAuthenticationResult.Failed(
                 errors
             )
         }
@@ -124,18 +124,19 @@ class ZignSecSessionServiceImpl(
             this.referenceId = response.id
             this.redirectUrl = response.redirectUrl.trim()
             this.requestPersonalNumber = request.personalNumber
-            this.status = NorwegianBankIdProgressStatus.INITIATED
+            this.status = ZignSecBankIdProgressStatus.INITIATED
         } ?: ZignSecSession(
             memberId = request.memberId.toLong(),
             requestType = type,
             referenceId = response.id,
             redirectUrl = response.redirectUrl.trim(),
-            requestPersonalNumber = request.personalNumber
+            requestPersonalNumber = request.personalNumber,
+            authenticationMethod = request.authMethod
         )
 
         sessionRepository.save(s)
 
-        return StartNorwegianAuthenticationResult.Success(
+        return StartZignSecAuthenticationResult.Success(
             response.id,
             response.redirectUrl.trim()
         )
@@ -146,10 +147,10 @@ class ZignSecSessionServiceImpl(
         val session = sessionRepository.findByReferenceId(request.id).get()
 
         when (session.status) {
-            NorwegianBankIdProgressStatus.INITIATED,
-            NorwegianBankIdProgressStatus.IN_PROGRESS -> updateSession(session, request, jsonRequest)
-            NorwegianBankIdProgressStatus.FAILED,
-            NorwegianBankIdProgressStatus.COMPLETED -> {
+            ZignSecBankIdProgressStatus.INITIATED,
+            ZignSecBankIdProgressStatus.IN_PROGRESS -> updateSession(session, request, jsonRequest)
+            ZignSecBankIdProgressStatus.FAILED,
+            ZignSecBankIdProgressStatus.COMPLETED -> {
                 if (session.status != getSessionStatusFromNotification(request)) {
                     logger.error("ZignSec webhook notification is trying to change status on session that is failed or completed [Session: $session] [Request: $request]")
                 }
@@ -164,27 +165,30 @@ class ZignSecSessionServiceImpl(
         session.status = getSessionStatusFromNotification(request)
 
         when (session.requestType) {
-            NorwegianAuthenticationType.SIGN -> {
+            ZignSecAuthenticationType.SIGN -> {
                 when (session.status) {
-                    NorwegianBankIdProgressStatus.INITIATED,
-                    NorwegianBankIdProgressStatus.IN_PROGRESS -> { /* strange but no-op */
+                    ZignSecBankIdProgressStatus.INITIATED,
+                    ZignSecBankIdProgressStatus.IN_PROGRESS -> { /* strange but no-op */
                     }
-                    NorwegianBankIdProgressStatus.FAILED -> norwegianAuthenticationEventPublisher.publishSignEvent(
-                        NorwegianSignResult.Failed(
+                    ZignSecBankIdProgressStatus.FAILED -> authenticationEventPublisher.publishSignEvent(
+                        ZignSecSignResult.Failed(
                             session.referenceId,
-                            session.memberId
+                            session.memberId,
+                            session.authenticationMethod
                         )
                     )
-                    NorwegianBankIdProgressStatus.COMPLETED -> {
-                        //TODO: re add this when everything is in order with zign sec and personnumber also un ignore the test in ZignSecSessionServiceImplTest
+                    ZignSecBankIdProgressStatus.COMPLETED -> {
+                        //TODO: re add this when everything is in order with zign sec and person number also un ignore the test in ZignSecSessionServiceImplTest
+                        //NOTE: this is also used in denmark so make sure both work on changing
                         //check that personal number is matching when signing
 //                        if (notification.identity!!.personalNumber!! != session.requestPersonalNumber!!) {
-                        if (notification.identity!!.dateOfBirth!!.dayMonthAndTwoDigitYearFromDateOfBirth() != session.requestPersonalNumber!!.dayMonthAndTwoDigitYearFromNorwegianSsn()) {
-                            session.status = NorwegianBankIdProgressStatus.FAILED
-                            norwegianAuthenticationEventPublisher.publishSignEvent(
-                                NorwegianSignResult.Failed(
+                        if (notification.identity!!.dateOfBirth!!.dayMonthAndTwoDigitYearFromDateOfBirth() != session.requestPersonalNumber!!.dayMonthAndTwoDigitYearFromNorwegianOrDanishSsn()) {
+                            session.status = ZignSecBankIdProgressStatus.FAILED
+                            authenticationEventPublisher.publishSignEvent(
+                                ZignSecSignResult.Failed(
                                     session.referenceId,
-                                    session.memberId
+                                    session.memberId,
+                                    session.authenticationMethod
                                 )
                             )
                         } else {
@@ -193,23 +197,23 @@ class ZignSecSessionServiceImpl(
                     }
                 }
             }
-            NorwegianAuthenticationType.AUTH -> {
+            ZignSecAuthenticationType.AUTH -> {
                 when (session.status) {
-                    NorwegianBankIdProgressStatus.INITIATED,
-                    NorwegianBankIdProgressStatus.IN_PROGRESS -> { /* strange but no-op */
+                    ZignSecBankIdProgressStatus.INITIATED,
+                    ZignSecBankIdProgressStatus.IN_PROGRESS -> { /* strange but no-op */
                     }
-                    NorwegianBankIdProgressStatus.FAILED -> norwegianAuthenticationEventPublisher.publishAuthenticationEvent(
-                        NorwegianAuthenticationResult.Failed(
+                    ZignSecBankIdProgressStatus.FAILED -> authenticationEventPublisher.publishAuthenticationEvent(
+                        ZignSecAuthenticationResult.Failed(
                             session.referenceId,
                             session.memberId))
-                    NorwegianBankIdProgressStatus.COMPLETED -> {
+                    ZignSecBankIdProgressStatus.COMPLETED -> {
                         val idProviderPersonId = session.notification!!.identity!!.idProviderPersonId!!
 
                         val signEntity = zignSecSignEntityRepository.findByIdProviderPersonId(idProviderPersonId)
 
                         if (signEntity != null) {
-                            norwegianAuthenticationEventPublisher.publishAuthenticationEvent(
-                                NorwegianAuthenticationResult.Completed(
+                            authenticationEventPublisher.publishAuthenticationEvent(
+                                ZignSecAuthenticationResult.Completed(
                                     session.referenceId,
                                     session.memberId,
                                     signEntity.personalNumber
@@ -217,8 +221,8 @@ class ZignSecSessionServiceImpl(
                             )
                         } else {
                             logger.error("Member tried to login whit no ZignSecSignEntity [MemberId:${session.memberId}] [idProviderPersonId: $idProviderPersonId] [SessionId:${session.sessionId}] [session:$session]")
-                            norwegianAuthenticationEventPublisher.publishAuthenticationEvent(
-                                NorwegianAuthenticationResult.Failed(
+                            authenticationEventPublisher.publishAuthenticationEvent(
+                                ZignSecAuthenticationResult.Failed(
                                     session.referenceId,
                                     session.memberId
                                 )
@@ -234,10 +238,11 @@ class ZignSecSessionServiceImpl(
 
     private fun memberSigned(session: ZignSecSession, jsonRequest: String) {
         assert(!session.requestPersonalNumber.isNullOrEmpty() && !session.notification?.identity?.idProviderPersonId.isNullOrEmpty()) {
-            norwegianAuthenticationEventPublisher.publishSignEvent(
-                NorwegianSignResult.Failed(
+            authenticationEventPublisher.publishSignEvent(
+                ZignSecSignResult.Failed(
                     session.referenceId,
-                    session.memberId
+                    session.memberId,
+                    session.authenticationMethod
                 )
             )
             return@assert "Must have requestPersonalNumber on session to sign member"
@@ -248,20 +253,21 @@ class ZignSecSessionServiceImpl(
             idProviderPersonId = session.notification!!.identity!!.idProviderPersonId!!
         )
         zignSecSignEntityRepository.save(signEntity)
-        norwegianAuthenticationEventPublisher.publishSignEvent(
-            NorwegianSignResult.Signed(
+        authenticationEventPublisher.publishSignEvent(
+            ZignSecSignResult.Signed(
                 session.referenceId,
                 session.memberId,
                 session.requestPersonalNumber!!,
-                jsonRequest
+                jsonRequest,
+                session.authenticationMethod
             )
         )
     }
 
     private fun getSessionStatusFromNotification(request: ZignSecNotificationRequest) = if (request.errors.isEmpty()) {
-        NorwegianBankIdProgressStatus.COMPLETED
+        ZignSecBankIdProgressStatus.COMPLETED
     } else {
-        NorwegianBankIdProgressStatus.FAILED
+        ZignSecBankIdProgressStatus.FAILED
     }
 
     companion object {
@@ -269,8 +275,7 @@ class ZignSecSessionServiceImpl(
     }
 }
 
-
-fun String.dayMonthAndTwoDigitYearFromNorwegianSsn(): Triple<String, String, String> {
+fun String.dayMonthAndTwoDigitYearFromNorwegianOrDanishSsn(): Triple<String, String, String> {
     val trimmedInput = this.trim().replace("-", "").replace(" ", "")
     val day = trimmedInput.substring(0, 2)
     val month = trimmedInput.substring(2, 4)

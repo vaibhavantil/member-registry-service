@@ -1,8 +1,10 @@
 package com.hedvig.memberservice.services.member;
 
+import com.hedvig.external.authentication.dto.ZignSecAuthenticationMethod;
 import com.hedvig.external.bankID.bankIdTypes.CollectResponse;
 import com.hedvig.memberservice.commands.BankIdSignCommand;
-import com.hedvig.memberservice.commands.NorwegianSignCommand;
+import com.hedvig.memberservice.commands.ZignSecSignCommand;
+import com.hedvig.memberservice.commands.models.ZignSecAuthenticationMarket;
 import org.axonframework.commandhandling.gateway.CommandGateway;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
@@ -26,10 +28,15 @@ public class MemberService {
             collectResponse.getCompletionData().getUser().getPersonalNumber()));
   }
 
-  public void norwegianBankIdSignComplete(final long memberId, @NonNull final UUID referenceId, @NonNull final String peronalNumber, @NonNull final String providerJsonResponse) {
+  public void signComplete(
+    final long memberId,
+    @NonNull final UUID referenceId,
+    @NonNull final String peronalNumber,
+    @NonNull final String providerJsonResponse,
+    @NonNull final ZignSecAuthenticationMethod authenticationMethod) {
     this.commandGateway.sendAndWait(
       new
-        NorwegianSignCommand(memberId, referenceId, peronalNumber, providerJsonResponse)
+              ZignSecSignCommand(memberId, referenceId, peronalNumber, providerJsonResponse, ZignSecAuthenticationMarket.Companion.fromAuthenticationMethod(authenticationMethod))
     );
   }
 }

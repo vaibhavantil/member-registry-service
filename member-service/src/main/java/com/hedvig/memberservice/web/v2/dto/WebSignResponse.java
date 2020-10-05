@@ -2,7 +2,6 @@ package com.hedvig.memberservice.web.v2.dto;
 
 import com.hedvig.external.bankID.bankIdTypes.OrderResponse;
 import com.hedvig.memberservice.entities.SignStatus;
-import com.hedvig.memberservice.services.member.dto.NorwegianBankIdResponse;
 import lombok.NonNull;
 import lombok.Value;
 
@@ -13,6 +12,4 @@ public class WebSignResponse {
   Long signId;
   SignStatus status;
   OrderResponse bankIdOrderResponse;
-  NorwegianBankIdResponse norwegianSignResponse;
-
 }
