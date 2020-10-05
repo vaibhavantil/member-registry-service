@@ -81,8 +81,8 @@ class MemberSignedSaga {
         e: NorwegianMemberSignedEvent,
         eventMessage: EventMessage<MemberSignedWithoutBankId>
     ) {
-        generifiedZignSecSign(e.memberId, e.referenceId, SignMethod.NORWEGIAN_BANK_ID) {
-            underwriterSigningService.norwegianBankIdSignSessionWasCompleted(e.referenceId!!)
+        generifiedZignSecSign(e.memberId, e.referenceId, SignMethod.NORWEGIAN_BANK_ID) { referenceId ->
+            underwriterSigningService.norwegianBankIdSignSessionWasCompleted(referenceId)
         }
     }
 
@@ -93,8 +93,8 @@ class MemberSignedSaga {
         e: DanishMemberSignedEvent,
         eventMessage: EventMessage<MemberSignedWithoutBankId>
     ) {
-        generifiedZignSecSign(e.memberId, e.referenceId, SignMethod.DANISH_BANK_ID) {
-            underwriterSigningService.danishBankIdSignSessionWasCompleted(e.referenceId!!)
+        generifiedZignSecSign(e.memberId, e.referenceId, SignMethod.DANISH_BANK_ID) { referenceId ->
+            underwriterSigningService.danishBankIdSignSessionWasCompleted(referenceId)
         }
     }
 
@@ -102,7 +102,7 @@ class MemberSignedSaga {
         memberId: Long,
         referenceId: UUID?,
         signMethod: SignMethod,
-        underwritingSign: (UUID) -> Unit
+        underwritingSign: (referenceId: UUID) -> Unit
     ) {
         val isUnderwriterHandlingSession = referenceId?.let {
             underwriterSigningService.isUnderwriterHandlingSignSession(it)
