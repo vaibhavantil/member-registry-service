@@ -35,18 +35,16 @@ class ZignSecBankIdService(
     fun authenticate(
         memberId: Long,
         request: GenericBankIdAuthenticationRequest,
-        zignSecAuthenticationMarket: ZignSecAuthenticationMarket): StartZignSecAuthenticationResult {
-        return zignSecAuthentication.auth(
-            ZignSecBankIdAuthenticationRequest(
-                memberId.toString(),
-                request.personalNumber,
-                resolveTwoLetterLanguageFromMember(memberId),
-                authenticationSuccessUrl,
-                authenticationFailUrl,
-                zignSecAuthenticationMarket.getAuthenticationMethod()
-            )
+        zignSecAuthenticationMarket: ZignSecAuthenticationMarket) = zignSecAuthentication.auth(
+        ZignSecBankIdAuthenticationRequest(
+            memberId.toString(),
+            request.personalNumber,
+            resolveTwoLetterLanguageFromMember(memberId),
+            authenticationSuccessUrl,
+            authenticationFailUrl,
+            zignSecAuthenticationMarket.getAuthenticationMethod()
         )
-    }
+    )
 
     fun sign(
         memberId: String,
