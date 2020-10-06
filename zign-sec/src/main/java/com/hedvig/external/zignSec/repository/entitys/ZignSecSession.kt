@@ -38,7 +38,8 @@ class ZignSecSession(
     val createdAt: Instant = Instant.now(),
     @UpdateTimestamp
     var updatedAt: Instant = Instant.now(),
-    @Column(columnDefinition = "varchar(30) default NORWAY_WEB_OR_MOBILE", nullable = false)
+    @Column(columnDefinition = "varchar(30) default 'NORWAY_WEB_OR_MOBILE'", nullable = false)
+    @Enumerated(javax.persistence.EnumType.STRING)
     var authenticationMethod: ZignSecAuthenticationMethod
 ) {
     constructor() : this(
