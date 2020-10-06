@@ -13,6 +13,7 @@ import javax.persistence.Enumerated
 import javax.persistence.GeneratedValue
 import javax.persistence.GenerationType
 import javax.persistence.Id
+import javax.persistence.EnumType.STRING
 
 @Entity
 class ZignSecSession(
@@ -24,9 +25,9 @@ class ZignSecSession(
     var referenceId: UUID,
     @Column(length=10_000)
     var redirectUrl: String,
-    @Enumerated(javax.persistence.EnumType.STRING)
+    @Enumerated(STRING)
     var status: ZignSecBankIdProgressStatus = ZignSecBankIdProgressStatus.INITIATED,
-    @Enumerated(javax.persistence.EnumType.STRING)
+    @Enumerated(STRING)
     val requestType: ZignSecAuthenticationType,
     @Column(columnDefinition = "varchar(11) default null", nullable = true)
     var requestPersonalNumber: String? = null,
@@ -38,7 +39,8 @@ class ZignSecSession(
     val createdAt: Instant = Instant.now(),
     @UpdateTimestamp
     var updatedAt: Instant = Instant.now(),
-    @Column(columnDefinition = "varchar(30) default NORWAY_WEB_OR_MOBILE", nullable = false)
+    @Column(columnDefinition = "varchar(30) default 'NORWAY_WEB_OR_MOBILE'", nullable = false)
+    @Enumerated(STRING)
     var authenticationMethod: ZignSecAuthenticationMethod
 ) {
     constructor() : this(
