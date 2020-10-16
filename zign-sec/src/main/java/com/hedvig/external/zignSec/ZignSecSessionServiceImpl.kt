@@ -74,7 +74,10 @@ class ZignSecSessionServiceImpl(
                 )
             }
 
-            if (session.requestPersonalNumber != request.personalNumber) {
+            if (
+                session.requestPersonalNumber != request.personalNumber ||
+                session.authenticationMethod != request.authMethod
+            ) {
                 return startNewSession(request, type, session)
             }
 
