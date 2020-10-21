@@ -14,7 +14,13 @@ enum class PickedLocale {
         override val locale: Locale = Locale("nb", "NO")
     },
     en_NO {
-           override val locale: Locale = Locale("en", "NO")
+        override val locale: Locale = Locale("en", "NO")
+    },
+    da_DK {
+        override val locale: Locale = Locale("da", "DK")
+    },
+    en_DK {
+        override val locale: Locale = Locale("en", "DK")
     };
 
     abstract val locale: Locale
