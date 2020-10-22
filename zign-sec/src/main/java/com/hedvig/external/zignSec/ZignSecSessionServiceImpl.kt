@@ -35,7 +35,7 @@ class ZignSecSessionServiceImpl(
         authenticate(request, ZignSecAuthenticationType.SIGN)
 
     override fun getStatus(memberId: Long): ZignSecBankIdProgressStatus? {
-        val optionalSession = sessionRepository.findByMemberId(memberId)
+        val optionalSession = sessionRepository.findByMemberIdOrderByCreatedAtDesc(memberId)
 
         return if (optionalSession.isPresent) {
             val session = optionalSession.get()
