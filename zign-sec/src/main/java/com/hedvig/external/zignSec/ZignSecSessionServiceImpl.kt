@@ -54,13 +54,13 @@ class ZignSecSessionServiceImpl(
     }
 
     override fun notifyContractsCreated(memberId: Long) {
-        val session = sessionRepository.findByMemberId(memberId).get()
+        val session = sessionRepository.findByMemberIdOrderByCreatedAtDesc(memberId).get()
         session.isContractsCreated = true
         sessionRepository.save(session)
     }
 
     private fun authenticate(request: ZignSecBankIdAuthenticationRequest, type: ZignSecAuthenticationType): StartZignSecAuthenticationResult {
-        val optional = sessionRepository.findByMemberId(request.memberId.toLong())
+        val optional = sessionRepository.findByMemberIdOrderByCreatedAtDesc(request.memberId.toLong())
 
         return if (optional.isPresent) {
             val session = optional.get()
