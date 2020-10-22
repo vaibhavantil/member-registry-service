@@ -150,7 +150,7 @@ class ZignSecSessionServiceImplTest {
 
     @Test
     fun authReuseInitiatedPendingSession() {
-        whenever(sessionRepository.findByMemberIdOrderByCreatedAtDesc(startAuthRequest.memberId.toLong())).thenReturn(
+        whenever(sessionRepository.findByMemberId(startAuthRequest.memberId.toLong())).thenReturn(
             Optional.of(ZignSecSession(
                 memberId = 1337,
                 requestType = ZignSecAuthenticationType.AUTH,
@@ -184,7 +184,7 @@ class ZignSecSessionServiceImplTest {
     fun authDontReuseFinishedSession() {
         val id = UUID.randomUUID()
 
-        whenever(sessionRepository.findByMemberIdOrderByCreatedAtDesc(startAuthRequest.memberId.toLong())).thenReturn(
+        whenever(sessionRepository.findByMemberId(startAuthRequest.memberId.toLong())).thenReturn(
             Optional.of(ZignSecSession(
                 memberId = 1337,
                 requestType = ZignSecAuthenticationType.AUTH,
@@ -228,7 +228,7 @@ class ZignSecSessionServiceImplTest {
     fun authStartNewSessionIfCollectFails() {
         val id = UUID.randomUUID()
 
-        whenever(sessionRepository.findByMemberIdOrderByCreatedAtDesc(startAuthRequest.memberId.toLong())).thenReturn(
+        whenever(sessionRepository.findByMemberId(startAuthRequest.memberId.toLong())).thenReturn(
             Optional.of(ZignSecSession(
                 memberId = 1337,
                 requestType = ZignSecAuthenticationType.AUTH,
@@ -262,7 +262,7 @@ class ZignSecSessionServiceImplTest {
     fun authDontReuseCompletedSession() {
         val id = UUID.randomUUID()
 
-        whenever(sessionRepository.findByMemberIdOrderByCreatedAtDesc(startAuthRequest.memberId.toLong())).thenReturn(
+        whenever(sessionRepository.findByMemberId(startAuthRequest.memberId.toLong())).thenReturn(
             Optional.of(ZignSecSession(
                 memberId = 1337,
                 requestType = ZignSecAuthenticationType.AUTH,
@@ -430,7 +430,7 @@ class ZignSecSessionServiceImplTest {
     fun signDontReuseSessionWithOldPersonalNumber() {
         val id = UUID.randomUUID()
 
-        whenever(sessionRepository.findByMemberIdOrderByCreatedAtDesc(startSignRequest.memberId.toLong())).thenReturn(
+        whenever(sessionRepository.findByMemberId(startSignRequest.memberId.toLong())).thenReturn(
             Optional.of(ZignSecSession(
                 memberId = 1337,
                 requestType = ZignSecAuthenticationType.SIGN,
@@ -472,7 +472,7 @@ class ZignSecSessionServiceImplTest {
 
     @Test
     fun failSessionIfMethodChanges() {
-        whenever(sessionRepository.findByMemberIdOrderByCreatedAtDesc(startAuthRequest.memberId.toLong())).thenReturn(
+        whenever(sessionRepository.findByMemberId(startAuthRequest.memberId.toLong())).thenReturn(
             Optional.of(ZignSecSession(
                 memberId = 1337,
                 requestType = ZignSecAuthenticationType.SIGN,

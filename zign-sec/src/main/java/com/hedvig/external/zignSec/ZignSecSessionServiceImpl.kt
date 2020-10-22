@@ -35,7 +35,7 @@ class ZignSecSessionServiceImpl(
         authenticate(request, ZignSecAuthenticationType.SIGN)
 
     override fun getStatus(memberId: Long): ZignSecBankIdProgressStatus? {
-        val optionalSession = sessionRepository.findByMemberIdOrderByCreatedAtDesc(memberId)
+        val optionalSession = sessionRepository.findByMemberId(memberId)
 
         return if (optionalSession.isPresent) {
             val session = optionalSession.get()
@@ -54,13 +54,13 @@ class ZignSecSessionServiceImpl(
     }
 
     override fun notifyContractsCreated(memberId: Long) {
-        val session = sessionRepository.findByMemberIdOrderByCreatedAtDesc(memberId).get()
+        val session = sessionRepository.findByMemberId(memberId).get()
         session.isContractsCreated = true
         sessionRepository.save(session)
     }
 
     private fun authenticate(request: ZignSecBankIdAuthenticationRequest, type: ZignSecAuthenticationType): StartZignSecAuthenticationResult {
-        val optional = sessionRepository.findByMemberIdOrderByCreatedAtDesc(request.memberId.toLong())
+        val optional = sessionRepository.findByMemberId(request.memberId.toLong())
 
         return if (optional.isPresent) {
             val session = optional.get()

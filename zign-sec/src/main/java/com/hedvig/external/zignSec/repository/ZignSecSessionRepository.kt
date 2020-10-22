@@ -7,6 +7,6 @@ import java.util.*
 
 @Repository
 interface ZignSecSessionRepository: CrudRepository<ZignSecSession, UUID> {
-    fun findByMemberIdOrderByCreatedAtDesc(memberId: Long): Optional<ZignSecSession>
+    fun findByMemberId(memberId: Long): Optional<ZignSecSession>
     fun findByReferenceId(referenceId: UUID): Optional<ZignSecSession>
 }
