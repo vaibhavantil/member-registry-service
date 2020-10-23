@@ -128,6 +128,7 @@ class ZignSecSessionServiceImpl(
             this.redirectUrl = response.redirectUrl.trim()
             this.requestPersonalNumber = request.personalNumber
             this.status = ZignSecBankIdProgressStatus.INITIATED
+            this.authenticationMethod = request.authMethod
         } ?: ZignSecSession(
             memberId = request.memberId.toLong(),
             requestType = type,
