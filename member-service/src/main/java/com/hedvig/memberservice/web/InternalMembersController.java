@@ -122,24 +122,6 @@ public class InternalMembersController {
     return memberQueryService.search(req);
   }
 
-  @RequestMapping(value = "/{memberId}/cancelMembership", method = RequestMethod.POST)
-  public ResponseEntity<?> memberCancellation(
-    @PathVariable Long memberId, @RequestBody MemberCancelInsurance body) {
-    log.info("Dispatching MemberCancellation for member ({})", memberId);
-    commandBus.sendAndWait(new MemberCancelInsuranceCommand(memberId, body.getCancellationDate()));
-    return ResponseEntity.accepted().build();
-  }
-
-  @RequestMapping(value = "/{memberId}/memberCancelInsurance", method = RequestMethod.POST)
-  public ResponseEntity<?> insuranceCancellation(
-    @PathVariable Long memberId, @RequestBody InsuranceCancellationDTO request) {
-    log.info("Dispatching Insurance Cancelation for member ({})", memberId);
-    commandBus.sendAndWait(
-      new InsurnaceCancellationCommand(
-        memberId, request.getInsuranceId(), request.getCancellationDate()));
-    return ResponseEntity.accepted().build();
-  }
-
   @RequestMapping(value = "/{memberId}/setFraudulentStatus", method = RequestMethod.POST)
   public ResponseEntity<?> fraudulentStatus(
     @PathVariable Long memberId, @RequestBody MemberFraudulentStatusDTO request, @RequestHeader("Authorization") String token) {

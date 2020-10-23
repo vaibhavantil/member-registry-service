@@ -105,7 +105,6 @@ public class MembersController {
         .orElseGet(() -> cashbackService.getDefaultCashback(me.pickedLocale));
     }
 
-    InsuranceStatusDTO insuranceStatus = this.productApi.getInsuranceStatus(hid);
     Optional<TrackingIdEntity> tId = trackingRepo.findByMemberId(hid);
 
     MemberMeDTO p = new MemberMeDTO(
@@ -118,15 +117,14 @@ public class MembersController {
       me.getEmail(),
       me.getStreet(),
       0,
-      insuranceStatus.getInsuranceStatus().equals("ACTIVE") ? "Betalas via autogiro"
-        : "Betalning sätts upp när försäkringen aktiveras", // ""XXXX XXXX 1234",
-      cashbackOption == null ? null : cashbackOption.name, insuranceStatus.getInsuranceStatus(),
-      insuranceStatus.getInsuranceStatus().equals("ACTIVE") ? LocalDate.now().withDayOfMonth(25)
-        : null,
+      "",
+      cashbackOption == null ? null : cashbackOption.name,
+      "",
+      LocalDate.MAX,
       cashbackOption == null ? null : cashbackOption.signature,
       cashbackOption == null ? null : String.format(cashbackOption.paragraph, me.getFirstName()),
       cashbackOption == null ? null : cashbackOption.selectedUrl,
-      insuranceStatus.getSafetyIncreasers().size() == 1 && insuranceStatus.getSafetyIncreasers().get(0).isEmpty() ? Lists.newArrayList() : insuranceStatus.getSafetyIncreasers(),
+      Lists.newArrayList(),
       tId.map(TrackingIdEntity::getTrackingId).orElse(null),
       me.getPhoneNumber());
 

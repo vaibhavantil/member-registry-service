@@ -123,33 +123,6 @@ public class MemberAggregate {
     apply(new TrackingIdCreatedEvent(this.id, uuidGenerator.generateRandom()));
   }
 
-  @CommandHandler
-  public void on(MemberCancelInsuranceCommand memberCommand) {
-    val localCancellationDate =
-      memberCommand.getInactivationDate().atStartOfDay(ZoneId.of("Europe/Stockholm"));
-    log.info(
-      "Applying MemberCancellationEvent {}, {}",
-      memberCommand.getMemberId(),
-      localCancellationDate.toInstant());
-    apply(
-      new MemberCancellationEvent(
-        memberCommand.getMemberId(), localCancellationDate.toInstant()));
-  }
-
-  @CommandHandler
-  public void on(InsurnaceCancellationCommand cmd) {
-    // FIXME: pass a ZonedDatetime here
-    val localCancellationDate =
-      cmd.getInactivationDate().atStartOfDay(ZoneId.of("Europe/Stockholm")).plusHours(2);
-    log.info(
-      "Applying InsuranceCancellation {}, {}",
-      cmd.getMemberId(),
-      localCancellationDate.toInstant());
-    apply(
-      new InsuranceCancellationEvent(
-        cmd.getMemberId(), cmd.getInsuranceId(), localCancellationDate.toInstant()));
-  }
-
   private String formatName(String name) {
     String lowercase = name.toLowerCase();
     return Character.toUpperCase(lowercase.charAt(0)) + lowercase.substring(1);
