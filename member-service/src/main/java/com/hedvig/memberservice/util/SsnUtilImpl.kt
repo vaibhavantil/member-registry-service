@@ -8,27 +8,33 @@ class SsnUtilImpl : SsnUtil {
         }
 
         val trimmedSSN = ssn.replace("-", "")
-        return if (trimmedSSN.length == 10) {
-            //DANISH
-            if ((trimmedSSN.toCharArray()[9].toInt() % 2) == 0) {
-                Gender.FEMALE
-            } else {
-                Gender.MALE
+
+        return when (trimmedSSN.length) {
+            10 -> {
+                //DANISH
+                if ((trimmedSSN.toCharArray()[9].toInt() % 2) == 0) {
+                    Gender.FEMALE
+                } else {
+                    Gender.MALE
+                }
             }
-        } else if (trimmedSSN.length == 11) {
-            //NORWAY
-            if ((trimmedSSN.toCharArray()[8].toInt() % 2) == 0) {
-                Gender.FEMALE
-            } else {
-                Gender.MALE
+            11 -> {
+                //NORWAY
+                if ((trimmedSSN.toCharArray()[8].toInt() % 2) == 0) {
+                    Gender.FEMALE
+                } else {
+                    Gender.MALE
+                }
             }
-        } else {
-            //SWEDISH
-            if ((trimmedSSN.toCharArray()[10].toInt() % 2) == 0) {
-                Gender.FEMALE
-            } else {
-                Gender.MALE
+            12 -> {
+                //SWEDISH
+                if ((trimmedSSN.toCharArray()[10].toInt() % 2) == 0) {
+                    Gender.FEMALE
+                } else {
+                    Gender.MALE
+                }
             }
+            else -> null
         }
     }
 
