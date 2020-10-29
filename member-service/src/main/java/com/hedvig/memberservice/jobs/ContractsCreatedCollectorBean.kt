@@ -32,6 +32,7 @@ class ContractsCreatedCollectorBean(
             when (SignMethod.valueOf(context.mergedJobDataMap.getString("signMethod"))) {
                 SignMethod.SWEDISH_BANK_ID -> swedishSigningService.notifyContractsCreated(memberId)
                 SignMethod.NORWEGIAN_BANK_ID -> zignSecSigningService.notifyContractsCreated(memberId)
+                SignMethod.DANISH_BANK_ID -> zignSecSigningService.notifyContractsCreated(memberId)
             }
             redisEventPublisher.onSignSessionUpdate(memberId)
 
