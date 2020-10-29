@@ -7,10 +7,28 @@ class SsnUtilImpl : SsnUtil {
             return null
         }
 
-        return if ((ssn.replace("-", "").toCharArray()[10].toInt() % 2) == 0) {
-            Gender.FEMALE
+        val trimmedSSN = ssn.replace("-", "")
+        return if (trimmedSSN.length == 10) {
+            //DANISH
+            if ((trimmedSSN.toCharArray()[9].toInt() % 2) == 0) {
+                Gender.FEMALE
+            } else {
+                Gender.MALE
+            }
+        } else if (trimmedSSN.length == 11) {
+            //NORWAY
+            if ((trimmedSSN.toCharArray()[8].toInt() % 2) == 0) {
+                Gender.FEMALE
+            } else {
+                Gender.MALE
+            }
         } else {
-            Gender.MALE
+            //SWEDISH
+            if ((trimmedSSN.toCharArray()[10].toInt() % 2) == 0) {
+                Gender.FEMALE
+            } else {
+                Gender.MALE
+            }
         }
     }
 
