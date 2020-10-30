@@ -5,7 +5,6 @@ import com.hedvig.external.zignSec.repository.ZignSecSignEntityRepository
 import com.hedvig.memberservice.query.SignedMemberRepository
 import com.hedvig.memberservice.services.exceptions.SignedMemberNotFoundException
 import com.hedvig.memberservice.web.QualityAssuranceController
-import com.hedvig.memberservice.web.dto.UnsignMemberMarket
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -46,7 +45,7 @@ class QualityAssuranceServiceImplTest {
     @Throws(SignedMemberNotFoundException::class)
     fun `When SSN does not exist, throw exception`() {
         thrown.expect(SignedMemberNotFoundException::class.java)
-        sut.unsignMember(UnsignMemberMarket.SWEDEN, "123456")
+        sut.unsignMember( "123456")
     }
 }
 
@@ -84,7 +83,7 @@ class QualityAssuranceServiceImplStagingTest {
     @Test
     fun `When profile is staging or development, the endpoint IS available`() {
         mockMvc.perform(
-            post("/_/staging/SWEDEN/unsignMember")
+            post("/_/staging/unsignMember")
                 .header("hedvig.token", "1337")
         ).andExpect(status().isBadRequest)
     }
