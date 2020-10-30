@@ -85,10 +85,10 @@ class ZignSecBankIdService(
 
     fun notifyContractsCreated(memberId: Long) = zignSecAuthentication.notifyContractsCreated(memberId)
 
-    private fun resolveTwoLetterLanguageFromMember(memberId: Long): String = "DK"/* {
+    private fun resolveTwoLetterLanguageFromMember(memberId: Long): String {
         val acceptLanguage = memberRepository.findById(memberId).get().acceptLanguage
         return getTwoLetterLanguageFromLocale(textKeysLocaleResolver.resolveLocale(acceptLanguage))
-    }*/
+    }
 
     private fun getTwoLetterLanguageFromLocale(locale: Locale) = when (locale.language) {
         "sv" -> "SV"
