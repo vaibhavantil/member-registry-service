@@ -101,7 +101,7 @@ public class MembersController {
     CashbackOption cashbackOption = null;
 
     if (me.getCashbackId() != null) {
-      cashbackOption = cashbackService.getCashbackOption(UUID.fromString(me.getCashbackId()))
+      cashbackOption = cashbackService.getCashbackOption(UUID.fromString(me.getCashbackId()), me.pickedLocale)
         .orElseGet(() -> cashbackService.getDefaultCashback(me.pickedLocale));
     }
 

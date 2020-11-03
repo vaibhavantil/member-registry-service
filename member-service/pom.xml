@@ -289,6 +289,12 @@
     </dependency>
 
     <dependency>
+      <groupId>com.hedvig</groupId>
+      <artifactId>lokalise-client</artifactId>
+      <version>1.0.1</version>
+    </dependency>
+
+    <dependency>
       <groupId>org.javassist</groupId>
       <artifactId>javassist</artifactId>
       <version>3.23.1-GA</version>
