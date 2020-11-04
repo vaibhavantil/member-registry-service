@@ -20,7 +20,7 @@ class CashbackController @Autowired constructor(
 ) {
     @GetMapping("options")
     fun options(
-        @RequestHeader(value = "hedvig.token") hid: Long
+        @RequestHeader(value = "hedvig.token") memberId: Long
     ): ResponseEntity<List<CashbackOption>> {
         val member = memberRepository.findById(hid)
         if (member.isPresent) {
