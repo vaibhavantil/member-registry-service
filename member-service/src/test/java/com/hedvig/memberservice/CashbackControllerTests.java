@@ -4,7 +4,7 @@ import com.hedvig.memberservice.aggregates.PickedLocale;
 import com.hedvig.memberservice.commands.SelectNewCashbackCommand;
 import com.hedvig.memberservice.query.MemberEntity;
 import com.hedvig.memberservice.query.MemberRepository;
-import com.hedvig.memberservice.services.CashbackService;
+import com.hedvig.memberservice.services.cashback.CashbackService;
 import com.hedvig.memberservice.web.CashbackController;
 import com.hedvig.memberservice.web.dto.CashbackOption;
 import com.hedvig.memberservice.web.dto.StartOnboardingWithSSNRequest;
@@ -35,7 +35,8 @@ public class CashbackControllerTests {
 
   @MockBean CommandGateway commandGateway;
 
-  @MockBean CashbackService cashbackService;
+  @MockBean
+  CashbackService cashbackService;
 
   private CashbackOption createCashbackOption(UUID newOptionId) {
     return new CashbackOption(newOptionId, "", "", "", false, true, "", "", "", "");

@@ -4,7 +4,7 @@ import com.hedvig.integration.productsPricing.ProductApi
 import com.hedvig.memberservice.commands.UpdateAcceptLanguageCommand
 import com.hedvig.memberservice.query.MemberRepository
 import com.hedvig.memberservice.query.TrackingIdRepository
-import com.hedvig.memberservice.services.CashbackService
+import com.hedvig.memberservice.services.cashback.CashbackService
 import com.ninjasquad.springmockk.MockkBean
 import io.mockk.slot
 import io.mockk.verify

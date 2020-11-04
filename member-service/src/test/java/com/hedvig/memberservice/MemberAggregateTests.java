@@ -17,7 +17,7 @@ import com.hedvig.memberservice.commands.StartOnboardingWithSSNCommand;
 import com.hedvig.memberservice.commands.UpdatePickedLocaleCommand;
 import com.hedvig.memberservice.commands.models.ZignSecAuthenticationMarket;
 import com.hedvig.memberservice.events.*;
-import com.hedvig.memberservice.services.CashbackService;
+import com.hedvig.memberservice.services.cashback.CashbackService;
 import com.hedvig.memberservice.web.dto.Address;
 import com.hedvig.memberservice.web.dto.StartOnboardingWithSSNRequest;
 import com.hedvig.memberservice.web.dto.UpdateContactInformationRequest;

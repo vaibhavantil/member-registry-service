@@ -3,15 +3,13 @@ package com.hedvig.memberservice.web
 import com.hedvig.memberservice.aggregates.PickedLocale
 import com.hedvig.memberservice.commands.SelectNewCashbackCommand
 import com.hedvig.memberservice.query.MemberRepository
-import com.hedvig.memberservice.services.CashbackService
+import com.hedvig.memberservice.services.cashback.CashbackService
 import com.hedvig.memberservice.web.dto.CashbackOption
-import com.hedvig.memberservice.web.dto.PickedLocaleDTO
 import org.axonframework.commandhandling.gateway.CommandGateway
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 import java.util.*
-import java.util.stream.Collectors
 
 @RestController
 @RequestMapping("/cashback")
