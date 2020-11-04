@@ -57,16 +57,16 @@ class LocalizedCashbackService(
     }?.let { localize(it, pickedLocale.locale) }
 
     private fun localize(nonLocalized: NonLocalizedCashbackOption, locale: Locale) = CashbackOption(
-        nonLocalized.id,
-        localizationService.getTranslation(nonLocalized.nameKey, locale),
-        localizationService.getTranslation(nonLocalized.titleKey, locale),
-        localizationService.getTranslation(nonLocalized.descriptionKey,locale),
-        nonLocalized.selected,
-        nonLocalized.charity,
-        nonLocalized.imageUrl,
-        nonLocalized.selectedUrl,
-        localizationService.getTranslation(nonLocalized.signatureKey, locale),
-        localizationService.getTranslation(nonLocalized.paragraphKey, locale)
+        id = nonLocalized.id,
+        name = localizationService.getTranslation(nonLocalized.nameKey, locale),
+        title = localizationService.getTranslation(nonLocalized.titleKey, locale),
+        description = localizationService.getTranslation(nonLocalized.descriptionKey,locale),
+        selected = nonLocalized.selected,
+        charity = nonLocalized.charity,
+        imageUrl = nonLocalized.imageUrl,
+        selectedUrl = nonLocalized.selectedUrl,
+        signature = localizationService.getTranslation(nonLocalized.signatureKey, locale),
+        paragraph = localizationService.getTranslation(nonLocalized.paragraphKey, locale)
     )
 
     private val option3 = NonLocalizedCashbackOption(

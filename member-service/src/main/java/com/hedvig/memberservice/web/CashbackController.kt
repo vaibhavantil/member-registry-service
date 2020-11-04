@@ -22,7 +22,7 @@ class CashbackController @Autowired constructor(
     fun options(
         @RequestHeader(value = "hedvig.token") memberId: Long
     ): ResponseEntity<List<CashbackOption>> {
-        val member = memberRepository.findById(hid)
+        val member = memberRepository.findById(memberId)
         if (member.isPresent) {
             val cashbackOptions: List<CashbackOption> = cashbackService
                 .getOptions(member.get().pickedLocale)
