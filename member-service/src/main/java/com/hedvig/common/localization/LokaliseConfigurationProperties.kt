@@ -6,7 +6,6 @@ import org.springframework.context.annotation.Configuration
 
 @Configuration
 @ConfigurationProperties(prefix = "lokalise")
-//@ConditionalOnProperty(value = ["localizedCashback"], matchIfMissing = false)
 class LokaliseConfigurationProperties {
     lateinit var projectId: String
     lateinit var apiToken: String

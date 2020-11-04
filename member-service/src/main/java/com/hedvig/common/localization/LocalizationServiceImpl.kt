@@ -7,7 +7,6 @@ import org.springframework.stereotype.Component
 import java.util.*
 
 @Component
-//@ConditionalOnProperty(value = ["localizedCashback"], matchIfMissing = false)
 class LocalizationServiceImplForReal(
     @Value("\${lokalise.useFakes}")
     private val useFakes: Boolean,

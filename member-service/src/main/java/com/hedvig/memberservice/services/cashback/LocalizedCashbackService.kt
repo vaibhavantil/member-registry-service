@@ -21,32 +21,40 @@ class LocalizedCashbackService(
     private val localizationService: LocalizationService
 ) : CashbackService {
 
-    init {
-        println()
-    }
-
     override fun getCashbackOption(cashbackId: UUID?, pickedLocale: PickedLocale): Optional<CashbackOption> {
-        try {
-            val cashbackOption = norwegianOptions[cashbackId]
-            if (cashbackOption != null) return Optional.ofNullable(localize(cashbackOption, pickedLocale.locale))
-        } catch (ex: NullPointerException) {
+        val cashbackOption = norwegianOptions[cashbackId]
+        if (cashbackOption != null) {
+            return Optional.ofNullable(localize(cashbackOption, pickedLocale.locale))
         }
         return Optional.ofNullable(swedishOptions[cashbackId]?.let { localize(it, pickedLocale.locale) })
     }
 
-    override fun getOptions(pickedLocale: PickedLocale) =
-        if (isNorwegian(pickedLocale)) {
-            norwegianOptions.values.toList().map { localize(it, pickedLocale.locale) }
-        } else swedishOptions.values.toList().map { localize(it, pickedLocale.locale) }
+    override fun getOptions(pickedLocale: PickedLocale) = when (pickedLocale) {
+        PickedLocale.sv_SE,
+        PickedLocale.en_SE -> swedishOptions
+        PickedLocale.nb_NO,
+        PickedLocale.en_NO -> norwegianOptions
+        PickedLocale.da_DK,
+        PickedLocale.en_DK -> danishOptions
+    }.values.toList().map{ localize(it, pickedLocale.locale) }
 
-    override fun getDefaultId(pickedLocale: PickedLocale): UUID = if (isNorwegian(pickedLocale)) {
-        UUID.fromString("02c99ad8-75aa-11ea-bc55-0242ac130003")
-    } else {
-        UUID.fromString("97b2d1d8-af4a-11e7-9b2b-bbc138162bb2")
+    override fun getDefaultId(pickedLocale: PickedLocale): UUID = when (pickedLocale) {
+        PickedLocale.sv_SE,
+        PickedLocale.en_SE -> UUID.fromString("97b2d1d8-af4a-11e7-9b2b-bbc138162bb2")
+        PickedLocale.nb_NO,
+        PickedLocale.en_NO -> UUID.fromString("02c99ad8-75aa-11ea-bc55-0242ac130003")
+        PickedLocale.da_DK,
+        PickedLocale.en_DK -> UUID.fromString("00000000-0000-0000-0000-000000000000")
     }
 
-    override fun getDefaultCashback(pickedLocale: PickedLocale) =
-        swedishOptions[getDefaultId(pickedLocale)]?.let { localize(it, pickedLocale.locale) }
+    override fun getDefaultCashback(pickedLocale: PickedLocale) = when (pickedLocale) {
+        PickedLocale.sv_SE,
+        PickedLocale.en_SE -> swedishOptions[getDefaultId(pickedLocale)]
+        PickedLocale.nb_NO,
+        PickedLocale.en_NO -> norwegianOptions[getDefaultId(pickedLocale)]
+        PickedLocale.da_DK,
+        PickedLocale.en_DK -> danishOptions[getDefaultId(pickedLocale)]
+    }?.let { localize(it, pickedLocale.locale) }
 
     private fun localize(nonLocalized: NonLocalizedCashbackOption, locale: Locale) = CashbackOption(
         nonLocalized.id,
@@ -60,10 +68,6 @@ class LocalizedCashbackService(
         localizationService.getTranslation(nonLocalized.signatureKey, locale),
         localizationService.getTranslation(nonLocalized.paragraphKey, locale)
     )
-
-    private fun isNorwegian(pickedLocale: PickedLocale): Boolean {
-        return pickedLocale === PickedLocale.nb_NO || pickedLocale === PickedLocale.en_NO
-    }
 
     private val option3 = NonLocalizedCashbackOption(
         UUID.fromString("97b2d1d8-af4a-11e7-9b2b-bbc138162bb2"),
@@ -108,4 +112,6 @@ class LocalizedCashbackService(
     private val norwegianOptions = mapOf(
         norwayOption.id to norwayOption
     )
+
+    private val danishOptions = mapOf<UUID, NonLocalizedCashbackOption>()
 }
