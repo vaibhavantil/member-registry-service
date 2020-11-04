@@ -14,8 +14,8 @@ import java.util.*
 @RestController
 @RequestMapping("/cashback")
 class CashbackController @Autowired constructor(
-    var commandGateway: CommandGateway,
-    val memberRepository: MemberRepository,
+    private val commandGateway: CommandGateway,
+    private val memberRepository: MemberRepository,
     private val cashbackService: CashbackService
 ) {
     @GetMapping("options")
