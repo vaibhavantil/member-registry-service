@@ -71,19 +71,19 @@ class LocalizedCashbackService(
 
     private val option3 = NonLocalizedCashbackOption(
         UUID.fromString("97b2d1d8-af4a-11e7-9b2b-bbc138162bb2"),
-        "CASHBACK_SOSBARNBYAR_NAME",
-        "CASHBACK_SOSBARNBYAR_NAME",
+        "CASHBACK_SOSBARNBYAR_TITLE",
+        "CASHBACK_SOSBARNBYAR_TITLE",
         "CASHBACK_SOSBARNBYAR_DESCRIPTION",
         false,
         true,
         "https://s3.eu-central-1.amazonaws.com/com-hedvig-web-content/sos-barnbyar-logo.png",
         "https://s3.eu-central-1.amazonaws.com/com-hedvig-web-content/sos-barnbyar-logo.png",
         "",
-        "CASHBACK_SOSBARNBYAR_PARAGRAPH"
+        "CASHBACK_SOSBARNBYAR_DESCRIPTION"
     )
     private val option2 = NonLocalizedCashbackOption(
         UUID.fromString("11143ee0-af4b-11e7-a359-4f8b8d55e69f"),
-        "CASHBACK_BARNCANCERFONDEN_NAME",
+        "CASHBACK_BARNCANCERFONDEN_TITLE",
         "CASHBACK_BARNCANCERFONDEN_TITLE",
         "CASHBACK_BARNCANCERFONDEN_DESCRIPTION",
         false,
@@ -91,7 +91,7 @@ class LocalizedCashbackService(
         "https://s3.eu-central-1.amazonaws.com/com-hedvig-web-content/barncancerfonden-2.png",
         "https://s3.eu-central-1.amazonaws.com/com-hedvig-web-content/barncancerfonden-2.png",
         "",
-        "CASHBACK_BARNCANCERFONDEN_PARAGRAPH"
+        "CASHBACK_BARNCANCERFONDEN_DESCRIPTION"
     )
     private val norwayOption = NonLocalizedCashbackOption(
         UUID.fromString("02c99ad8-75aa-11ea-bc55-0242ac130003"),
