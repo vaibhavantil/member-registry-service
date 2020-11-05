@@ -7,7 +7,7 @@ import org.springframework.stereotype.Component
 import java.util.*
 
 @Component
-class LocalizationServiceImplForReal(
+class LocalizationServiceImpl(
     @Value("\${lokalise.useFakes}")
     private val useFakes: Boolean,
     configuration: LokaliseConfigurationProperties
