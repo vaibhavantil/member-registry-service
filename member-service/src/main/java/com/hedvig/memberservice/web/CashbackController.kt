@@ -45,7 +45,7 @@ class CashbackController @Autowired constructor(
         if (member.isEmpty) {
             return ResponseEntity.notFound().build()
         }
-        val opt = cashbackService.getCashbackOption(optionId, member.get().pickedLocale ?: DEFAULT_LOCALE)
+        val opt = cashbackService.getCashbackOption(optionId, member.get().pickedLocale)
         return if (opt.isPresent && member.isPresent) {
             commandGateway.sendAndWait<Any>(SelectNewCashbackCommand(hid, optionId))
             ResponseEntity.noContent().build() // ok().build();
@@ -54,5 +54,4 @@ class CashbackController @Autowired constructor(
         }
     }
 
-    private val DEFAULT_LOCALE = PickedLocale.sv_SE
 }
