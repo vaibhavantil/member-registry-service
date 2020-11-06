@@ -2,7 +2,6 @@ package com.hedvig.memberservice.web;
 
 import com.google.common.collect.Lists;
 import com.hedvig.integration.productsPricing.ProductApi;
-import com.hedvig.integration.productsPricing.dto.InsuranceStatusDTO;
 import com.hedvig.memberservice.aggregates.PickedLocale;
 import com.hedvig.memberservice.commands.UpdateEmailCommand;
 import com.hedvig.memberservice.commands.UpdatePhoneNumberCommand;
@@ -11,7 +10,7 @@ import com.hedvig.memberservice.query.MemberEntity;
 import com.hedvig.memberservice.query.MemberRepository;
 import com.hedvig.memberservice.query.TrackingIdEntity;
 import com.hedvig.memberservice.query.TrackingIdRepository;
-import com.hedvig.memberservice.services.CashbackService;
+import com.hedvig.memberservice.services.cashback.CashbackService;
 import com.hedvig.memberservice.web.dto.*;
 import org.axonframework.commandhandling.gateway.CommandGateway;
 import org.slf4j.Logger;
@@ -101,7 +100,7 @@ public class MembersController {
     CashbackOption cashbackOption = null;
 
     if (me.getCashbackId() != null) {
-      cashbackOption = cashbackService.getCashbackOption(UUID.fromString(me.getCashbackId()))
+      cashbackOption = cashbackService.getCashbackOption(UUID.fromString(me.getCashbackId()), me.pickedLocale)
         .orElseGet(() -> cashbackService.getDefaultCashback(me.pickedLocale));
     }
 

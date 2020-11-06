@@ -3,7 +3,6 @@ package com.hedvig.memberservice.services
 import com.hedvig.external.authentication.ZignSecAuthentication
 import com.hedvig.external.authentication.dto.ZignSecAuthenticationResult
 import com.hedvig.integration.apigateway.ApiGatewayService
-import com.hedvig.localization.service.TextKeysLocaleResolver
 import com.hedvig.memberservice.commands.InactivateMemberCommand
 import com.hedvig.memberservice.query.MemberRepository
 import com.hedvig.memberservice.query.SignedMemberEntity
@@ -39,14 +38,12 @@ class ZignSecBankIdServiceTest {
     lateinit var apiGatewayService: ApiGatewayService
     @Mock
     lateinit var memberRepository: MemberRepository
-    @Mock
-    lateinit var textKeysLocaleResolver: TextKeysLocaleResolver
 
     lateinit var classUnderTest: ZignSecBankIdService
 
     @Before
     fun before() {
-        classUnderTest = ZignSecBankIdService(zignSecAuthentication, commandGateway, redisEventPublisher, signedMemberRepository, apiGatewayService, memberRepository, textKeysLocaleResolver, "success", "fail")
+        classUnderTest = ZignSecBankIdService(zignSecAuthentication, commandGateway, redisEventPublisher, signedMemberRepository, apiGatewayService, memberRepository, "success", "fail")
     }
 
     @Test
