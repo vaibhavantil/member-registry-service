@@ -162,24 +162,6 @@ public class InternalMembersController {
     return ResponseEntity.noContent().build();
   }
 
-  //TODO: THIS IS A ONE OFF TO BACKFILL PICKED LOCALE. REMOVE AFTER USE!
-  @PostMapping(value = "/backfill/pickedLocale")
-  public ResponseEntity<Void> backfillPickedLocale(
-  ) {
-    Pageable pageable = PageRequest.of(0, 1000);
-    while (true){
-      Slice<Long> page = memberRepository.findIdsWithNoPickedLocale(pageable);
-
-      page.getContent().forEach(
-        id -> commandBus.sendAndWait(new BackfillPickedLocaleCommand(id))
-      );
-
-      if (!page.hasNext()) { break; }
-      pageable = page.nextPageable();
-    }
-    return ResponseEntity.noContent().build();
-  }
-
   @GetMapping("/{memberId}/pickedLocale")
   public ResponseEntity<PickedLocaleDTO> getPickedLocale(@PathVariable Long memberId) {
 
