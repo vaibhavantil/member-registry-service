@@ -17,5 +17,5 @@ class LocalizedCashbackServiceTest {
 }
 
 class MockLocalizationService: LocalizationService {
-    override fun getTranslation(key: String, locale: Locale) = "mock"
+    override fun getTranslation(key: String, locale: Locale, replacements: Map<String, String>) = "mock"
 }
