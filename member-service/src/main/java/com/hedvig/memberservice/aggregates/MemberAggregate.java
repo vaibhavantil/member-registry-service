@@ -467,13 +467,6 @@ public class MemberAggregate {
     }
   }
 
-  @CommandHandler
-  public void on(BackfillPickedLocaleCommand cmd) {
-    if (member.getPickedLocale() == null) {
-      apply(new PickedLocaleUpdatedEvent(cmd.getMemberId(), PickedLocale.sv_SE));
-    }
-  }
-
   @EventSourcingHandler
   public void on(MemberCreatedEvent e) {
     this.id = e.getId();
