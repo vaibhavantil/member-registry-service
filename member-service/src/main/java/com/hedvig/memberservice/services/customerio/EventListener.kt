@@ -44,7 +44,7 @@ class EventListener @Autowired constructor(
                 CountryCode.SE -> "Europe/Stockholm"
                 CountryCode.NO -> "Europe/Oslo"
                 null -> null
-                else -> RuntimeException("Unsupported country code detected $countryCode")
+                else -> throw RuntimeException("Unsupported country code detected $countryCode")
             }
 
             val traits = ImmutableMap
