@@ -5,6 +5,7 @@ import com.hedvig.integration.notificationService.NotificationService
 import com.hedvig.memberservice.events.EmailUpdatedEvent
 import com.hedvig.memberservice.events.NameUpdatedEvent
 import com.hedvig.memberservice.query.MemberRepository
+import com.hedvig.resolver.LocaleResolver
 import com.neovisionaries.i18n.CountryCode
 import org.axonframework.config.ProcessingGroup
 import org.axonframework.eventhandling.EventHandler
@@ -36,16 +37,18 @@ class EventListener @Autowired constructor(
         val member = memberRepository.findById(evt.memberId)
 
         if(member.isPresent) {
+            val locale = member.get().pickedLocale?.locale ?:
+            LocaleResolver.resolveNullableLocale(member.get().acceptLanguage)
 
-            val timeZone = when (val countryCode = CountryCode.getByLocale(member.get().pickedLocale?.locale)) {
+            val timeZone = when (val countryCode = CountryCode.getByLocale(locale)) {
                 CountryCode.SE -> "Europe/Stockholm"
                 CountryCode.NO -> "Europe/Oslo"
-                null -> "Europe/Stockholm"
+                null -> null
                 else -> RuntimeException("Unsupported country code detected $countryCode")
             }
 
             val traits = ImmutableMap
-                .of<String, Any>(
+                .of<String, Any?>(
                     "email", evt.email,
                     "timezone", timeZone
                 )
@@ -55,7 +58,7 @@ class EventListener @Autowired constructor(
         }
     }
 
-    private fun sendWithSleep(traitsMap: Map<String, Any>, memberId: String) {
+    private fun sendWithSleep(traitsMap: Map<String, Any?>, memberId: String) {
 
         notificationService.updateCustomer(memberId, traitsMap)
 
