@@ -36,9 +36,9 @@ class EventListener @Autowired constructor(
     fun on(evt: EmailUpdatedEvent) {
         val member = memberRepository.findById(evt.memberId)
 
-        if(member.isPresent) {
-            val locale = member.get().pickedLocale?.locale ?:
-            LocaleResolver.resolveNullableLocale(member.get().acceptLanguage)
+        if (member.isPresent) {
+            val locale = member.get().pickedLocale?.locale
+                ?: LocaleResolver.resolveNullableLocale(member.get().acceptLanguage)
 
             val timeZone = when (val countryCode = CountryCode.getByLocale(locale)) {
                 CountryCode.SE -> "Europe/Stockholm"
@@ -47,11 +47,10 @@ class EventListener @Autowired constructor(
                 else -> throw RuntimeException("Unsupported country code detected $countryCode")
             }
 
-            val traits = ImmutableMap
-                .of<String, Any?>(
-                    "email", evt.email,
-                    "timezone", timeZone
-                )
+            val traits = mapOf(
+                "email" to evt.email,
+                "timezone" to timeZone
+            )
             sendWithSleep(traits, Objects.toString(evt.memberId))
         } else {
             logger.error("Could not update email for member ${evt.memberId} member not found in MemberRepository")
