@@ -15,7 +15,6 @@ import org.springframework.stereotype.Component
 import java.util.*
 
 @Component
-@ConditionalOnProperty(name = ["localizedCashback"], havingValue = "true")
 class CashbackServiceImpl(
     private val contentServiceClient: ContentServiceClient,
     private val memberRepository: MemberRepository,
