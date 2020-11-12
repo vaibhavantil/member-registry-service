@@ -1,10 +1,9 @@
 package com.hedvig.memberservice;
 
-import com.hedvig.memberservice.aggregates.PickedLocale;
 import com.hedvig.memberservice.commands.SelectNewCashbackCommand;
 import com.hedvig.memberservice.query.MemberEntity;
 import com.hedvig.memberservice.query.MemberRepository;
-import com.hedvig.memberservice.services.cashback.CashbackService;
+import com.hedvig.memberservice.services.CashbackService;
 import com.hedvig.memberservice.web.CashbackController;
 import com.hedvig.memberservice.web.dto.CashbackOption;
 import com.hedvig.memberservice.web.dto.StartOnboardingWithSSNRequest;
@@ -35,8 +34,7 @@ public class CashbackControllerTests {
 
   @MockBean CommandGateway commandGateway;
 
-  @MockBean
-  CashbackService cashbackService;
+  @MockBean CashbackService cashbackService;
 
   private CashbackOption createCashbackOption(UUID newOptionId) {
     return new CashbackOption(newOptionId, "", "", "", false, true, "", "", "", "");
@@ -46,15 +44,13 @@ public class CashbackControllerTests {
   public void PostCashbackOption() throws Exception {
     final long memberId = 1337L;
 
-    PickedLocale pickedLocale = PickedLocale.sv_SE;
     MemberEntity member = new MemberEntity();
     member.setId(memberId);
-    member.setPickedLocale(pickedLocale);
     final UUID newOptionId = UUID.fromString("d24c427e-d110-11e7-a47e-0b4e39412e98");
 
     CashbackOption cashbackOption = createCashbackOption(newOptionId);
 
-    when(cashbackService.getCashbackOption(newOptionId, pickedLocale)).thenReturn(Optional.of(cashbackOption));
+    when(cashbackService.getCashbackOption(newOptionId)).thenReturn(Optional.of(cashbackOption));
     when(memberRepo.findById(memberId)).thenReturn(Optional.of(member));
 
     mockMvc
@@ -72,14 +68,12 @@ public class CashbackControllerTests {
   public void PostCashbackOption_WHEN_OptionId_IsnotFound() throws Exception {
     final long memberId = 1337l;
 
-    PickedLocale pickedLocale = PickedLocale.sv_SE;
     final UUID newOptionId = UUID.fromString("d24c427e-d110-11e7-a47e-0b4e39412e99");
 
     MemberEntity member = new MemberEntity();
     member.setId(memberId);
-    member.setPickedLocale(pickedLocale);
 
-    when(cashbackService.getCashbackOption(newOptionId, pickedLocale)).thenReturn(Optional.empty());
+    when(cashbackService.getCashbackOption(newOptionId)).thenReturn(Optional.empty());
     when(memberRepo.findById(memberId)).thenReturn(Optional.of(member));
 
     mockMvc
@@ -100,12 +94,10 @@ public class CashbackControllerTests {
 
     final CashbackOption cashbackOption = createCashbackOption(newOptionId);
 
-    PickedLocale pickedLocale = PickedLocale.sv_SE;
     MemberEntity member = new MemberEntity();
     member.setId(memberId);
-    member.setPickedLocale(pickedLocale);
 
-    when(cashbackService.getCashbackOption(newOptionId, pickedLocale)).thenReturn(Optional.of(cashbackOption));
+    when(cashbackService.getCashbackOption(newOptionId)).thenReturn(Optional.of(cashbackOption));
     when(memberRepo.findById(memberId)).thenReturn(Optional.empty());
 
     new StartOnboardingWithSSNRequest("");

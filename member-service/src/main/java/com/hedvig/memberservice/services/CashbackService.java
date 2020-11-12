@@ -1,4 +1,4 @@
-package com.hedvig.memberservice.services.cashback;
+package com.hedvig.memberservice.services;
 
 import com.hedvig.memberservice.aggregates.PickedLocale;
 import com.hedvig.memberservice.web.dto.CashbackOption;
@@ -10,17 +10,14 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
-import org.jetbrains.annotations.NotNull;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
 @Component
-@ConditionalOnProperty(name = {"localizedCashback"}, havingValue="false", matchIfMissing = true)
-public class OldCashbackService implements CashbackService {
+public class CashbackService {
   Map<UUID, CashbackOption> swedishOptions = new HashMap<>();
   Map<UUID, CashbackOption> norwegianOptions = new HashMap<>();
 
-  public OldCashbackService() {
+  public CashbackService() {
 
     CashbackOption option3 =
       new CashbackOption(
@@ -68,9 +65,7 @@ public class OldCashbackService implements CashbackService {
 
   }
 
-  @NotNull
-  @Override
-  public Optional<CashbackOption> getCashbackOption(UUID cashbackId, @NotNull PickedLocale pickedLocale) {
+  public Optional<CashbackOption> getCashbackOption(UUID cashbackId) {
     try {
       CashbackOption cashbackOption = norwegianOptions.get(cashbackId);
       if (cashbackOption != null)
@@ -81,8 +76,6 @@ public class OldCashbackService implements CashbackService {
     return Optional.ofNullable(swedishOptions.get(cashbackId));
   }
 
-  @NotNull
-  @Override
   public List<CashbackOption> getOptions(PickedLocale pickedLocale) {
     if (isNorwegian(pickedLocale)) {
       return new ArrayList<>(norwegianOptions.values());
@@ -90,16 +83,14 @@ public class OldCashbackService implements CashbackService {
     return new ArrayList<>(swedishOptions.values());
   }
 
-  @NotNull
-  @Override
-  public UUID getDefaultId(@NotNull PickedLocale pickedLocale) {
+  public UUID getDefaultId(PickedLocale pickedLocale) {
     if (isNorwegian(pickedLocale))
       return UUID.fromString("02c99ad8-75aa-11ea-bc55-0242ac130003");
 
     return UUID.fromString("97b2d1d8-af4a-11e7-9b2b-bbc138162bb2");
   }
 
-  public CashbackOption getDefaultCashback(@NotNull PickedLocale pickedLocale) {
+  public CashbackOption getDefaultCashback(PickedLocale pickedLocale) {
     return swedishOptions.get(getDefaultId(pickedLocale));
   }
 
