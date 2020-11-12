@@ -3,7 +3,6 @@ package com.hedvig.memberservice.services
 import com.hedvig.external.authentication.ZignSecAuthentication
 import com.hedvig.external.authentication.dto.ZignSecAuthenticationResult
 import com.hedvig.external.authentication.dto.ZignSecBankIdAuthenticationRequest
-import com.hedvig.external.authentication.dto.StartZignSecAuthenticationResult
 import com.hedvig.integration.apigateway.ApiGatewayService
 import com.hedvig.memberservice.commands.InactivateMemberCommand
 import com.hedvig.memberservice.commands.models.ZignSecAuthenticationMarket

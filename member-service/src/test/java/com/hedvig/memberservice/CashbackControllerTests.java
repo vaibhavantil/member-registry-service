@@ -1,17 +1,9 @@
 package com.hedvig.memberservice;
 
-import com.hedvig.integration.contentservice.ContentServiceClient;
-import com.hedvig.memberservice.aggregates.PickedLocale;
-import com.hedvig.memberservice.commands.SelectNewCashbackCommand;
 import com.hedvig.memberservice.query.MemberEntity;
-import com.hedvig.memberservice.query.MemberRepository;
 import com.hedvig.memberservice.services.cashback.CashbackService;
-import com.hedvig.memberservice.services.cashback.CashbackServiceImpl;
 import com.hedvig.memberservice.web.CashbackController;
 import com.hedvig.memberservice.web.dto.CashbackOption;
-import com.hedvig.memberservice.web.dto.StartOnboardingWithSSNRequest;
-import org.axonframework.commandhandling.gateway.CommandGateway;
-import org.axonframework.spring.config.EnableAxon;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,10 +35,8 @@ public class CashbackControllerTests {
   public void PostCashbackOption() throws Exception {
     final long memberId = 1337L;
 
-    PickedLocale pickedLocale = PickedLocale.sv_SE;
     MemberEntity member = new MemberEntity();
     member.setId(memberId);
-    member.setPickedLocale(pickedLocale);
     final UUID newOptionId = UUID.fromString("d24c427e-d110-11e7-a47e-0b4e39412e98");
 
     CashbackOption cashbackOption = createCashbackOption(newOptionId);
