@@ -227,7 +227,7 @@ public class MemberAggregate {
       apply(new SSNUpdatedEvent(this.id, cmd.getPersonalNumber()));
     }
 
-    apply(new NewCashbackSelectedEvent(this.id, cashbackService.getDefaultId(member.getPickedLocale()).toString()));
+    apply(new NewCashbackSelectedEvent(this.id, cashbackService.getDefaultId(this.id).toString()));
 
 
     apply(
@@ -245,7 +245,7 @@ public class MemberAggregate {
     if (!isValidJSON(cmd.getProvideJsonResponse()))
       throw new RuntimeException("Invalid json from provider");
 
-    apply(new NewCashbackSelectedEvent(this.id, cashbackService.getDefaultId(member.getPickedLocale()).toString()));
+    apply(new NewCashbackSelectedEvent(this.id, cashbackService.getDefaultId(this.id).toString()));
 
     ZignSecAuthenticationMarket zignSecAuthMarket = cmd.getZignSecAuthMarket();
     if (zignSecAuthMarket == ZignSecAuthenticationMarket.NORWAY) {
@@ -412,7 +412,7 @@ public class MemberAggregate {
     apply(
       new NewCashbackSelectedEvent(
         cmd.getMemberId(),
-        cashbackService.getDefaultId(member.getPickedLocale()).toString())
+        cashbackService.getDefaultId(this.id).toString())
     );
 
     apply(

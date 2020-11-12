@@ -36,6 +36,7 @@ import org.springframework.web.client.RestClientException;
 import java.util.UUID;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.when;
 
 @RunWith(SpringRunner.class)
@@ -110,7 +111,7 @@ public class MemberAggregateTests {
 
     when(uuidGenerator.generateRandom()).thenReturn(TRACKING_UUID);
 
-    when(cashbackService.getDefaultId(any())).thenReturn(DEFAULT_CASHBACK);
+    when(cashbackService.getDefaultId(anyLong())).thenReturn(DEFAULT_CASHBACK);
 
     val bankIdAuthStatus =
       makeBankIdAuthenticationStatus(
@@ -200,7 +201,7 @@ public class MemberAggregateTests {
 
     when(uuidGenerator.generateRandom()).thenReturn(TRACKING_UUID);
 
-    when(cashbackService.getDefaultId(any())).thenReturn(DEFAULT_CASHBACK);
+    when(cashbackService.getDefaultId(anyLong())).thenReturn(DEFAULT_CASHBACK);
 
     fixture
       .given(new MemberCreatedEvent(memberId, MemberStatus.INITIATED))
@@ -222,7 +223,7 @@ public class MemberAggregateTests {
 
     when(uuidGenerator.generateRandom()).thenReturn(TRACKING_UUID);
 
-    when(cashbackService.getDefaultId(any())).thenReturn(DEFAULT_CASHBACK);
+    when(cashbackService.getDefaultId(anyLong())).thenReturn(DEFAULT_CASHBACK);
 
     fixture
       .given(
@@ -246,7 +247,7 @@ public class MemberAggregateTests {
     String personalNumber = "12121212120";
     String provideJsonResponse = "{ \"json\": true }";
 
-    when(cashbackService.getDefaultId(any())).thenReturn(DEFAULT_CASHBACK);
+    when(cashbackService.getDefaultId(anyLong())).thenReturn(DEFAULT_CASHBACK);
 
     fixture
       .given(
@@ -269,7 +270,7 @@ public class MemberAggregateTests {
     String personalNumber = "1212121212";
     String provideJsonResponse = "{ \"json\": true }";
 
-    when(cashbackService.getDefaultId(any())).thenReturn(DEFAULT_CASHBACK);
+    when(cashbackService.getDefaultId(anyLong())).thenReturn(DEFAULT_CASHBACK);
 
     fixture
       .given(
@@ -292,7 +293,7 @@ public class MemberAggregateTests {
     String personalNumber = "12121212120";
     String provideJsonResponse = "not a valid json";
 
-    when(cashbackService.getDefaultId(any())).thenReturn(DEFAULT_CASHBACK);
+    when(cashbackService.getDefaultId(anyLong())).thenReturn(DEFAULT_CASHBACK);
 
     fixture
       .given(
@@ -351,7 +352,7 @@ public class MemberAggregateTests {
 
     when(uuidGenerator.generateRandom()).thenReturn(TRACKING_UUID);
 
-    when(cashbackService.getDefaultId(any())).thenReturn(DEFAULT_CASHBACK);
+    when(cashbackService.getDefaultId(anyLong())).thenReturn(DEFAULT_CASHBACK);
 
     fixture
       .given(

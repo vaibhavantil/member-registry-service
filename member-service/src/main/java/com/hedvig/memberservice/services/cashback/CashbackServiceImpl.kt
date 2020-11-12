@@ -3,11 +3,13 @@ package com.hedvig.memberservice.services.cashback
 import com.hedvig.integration.contentservice.ContentServiceClient
 import com.hedvig.memberservice.aggregates.PickedLocale
 import com.hedvig.memberservice.aggregates.toPickedLocale
+import com.hedvig.memberservice.commands.SelectNewCashbackCommand
 import com.hedvig.memberservice.query.MemberEntity
 import com.hedvig.memberservice.query.MemberRepository
 import com.hedvig.memberservice.services.exceptions.MemberNotFoundException
 import com.hedvig.memberservice.web.dto.CashbackOption
 import com.hedvig.resolver.LocaleResolver
+import org.axonframework.commandhandling.gateway.CommandGateway
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.stereotype.Component
 import java.util.*
@@ -16,9 +18,23 @@ import java.util.*
 @ConditionalOnProperty(name = ["localizedCashback"], havingValue = "true")
 class CashbackServiceImpl(
     private val contentServiceClient: ContentServiceClient,
-    private val memberRepository: MemberRepository
+    private val memberRepository: MemberRepository,
+    private val commandGateway: CommandGateway
 ) : CashbackService {
-    override fun getCashbackOption(memberId: Long): Optional<CashbackOption> {
+
+    override fun selectCashbackOption(memberId: Long, uuid: UUID): Boolean {
+        val pickedLocale = findMemberOrThrow(memberId).resolvePickedLocaleOrThrow()
+
+        val cashbackOptions = contentServiceClient.cashbackOptions(pickedLocale.name).body!!
+        return if (cashbackOptions.any { it.id == uuid }) {
+            commandGateway.sendAndWait<Any>(SelectNewCashbackCommand(memberId, uuid))
+            true
+        } else {
+            false
+        }
+    }
+
+    override fun getMembersCashbackOption(memberId: Long): Optional<CashbackOption> {
         val member = findMemberOrThrow(memberId)
 
         if (member.cashbackId == null)
@@ -62,8 +78,8 @@ class CashbackServiceImpl(
     }
 
     companion object {
-        private val DEFAULT_SWEDISH_CASHBACK_OPTION: UUID = UUID.fromString("97b2d1d8-af4a-11e7-9b2b-bbc138162bb2")
-        private val DEFAULT_NORWEGIAN_CASHBACK_OPTION: UUID = UUID.fromString("02c99ad8-75aa-11ea-bc55-0242ac130003")
-        private val DEFAULT_DANISH_CASHBACK_OPTION: UUID = UUID.fromString("a04ea632-70a3-4ec9-bc19-84d5069947e3")
+        val DEFAULT_SWEDISH_CASHBACK_OPTION: UUID = UUID.fromString("97b2d1d8-af4a-11e7-9b2b-bbc138162bb2")
+        val DEFAULT_NORWEGIAN_CASHBACK_OPTION: UUID = UUID.fromString("02c99ad8-75aa-11ea-bc55-0242ac130003")
+        val DEFAULT_DANISH_CASHBACK_OPTION: UUID = UUID.fromString("a04ea632-70a3-4ec9-bc19-84d5069947e3")
     }
 }
