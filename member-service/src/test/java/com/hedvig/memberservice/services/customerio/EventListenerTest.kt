@@ -66,7 +66,7 @@ class EventListenerTest {
     }
 
     @Test
-    fun no_picked_locale_sets_timezone_to_stockholm() {
+    fun no_picked_locale_sets_timezone_to_null() {
 
         val member = MemberEntity()
         member.pickedLocale = null
@@ -79,7 +79,7 @@ class EventListenerTest {
         val slot = slot<Map<String, Any?>>()
         verify { notificationService.updateCustomer(any(), capture(slot)) }
 
-        assert(slot.captured["timezone"] == "Europe/Stockholm")
+        assert(slot.captured["timezone"] == null)
     }
 
     @Test

@@ -3,9 +3,7 @@ package com.hedvig.memberservice.services
 import com.hedvig.external.authentication.ZignSecAuthentication
 import com.hedvig.external.authentication.dto.ZignSecAuthenticationResult
 import com.hedvig.external.authentication.dto.ZignSecBankIdAuthenticationRequest
-import com.hedvig.external.authentication.dto.StartZignSecAuthenticationResult
 import com.hedvig.integration.apigateway.ApiGatewayService
-import com.hedvig.localization.service.TextKeysLocaleResolver
 import com.hedvig.memberservice.commands.InactivateMemberCommand
 import com.hedvig.memberservice.commands.models.ZignSecAuthenticationMarket
 import com.hedvig.memberservice.query.MemberRepository
@@ -13,6 +11,7 @@ import com.hedvig.memberservice.query.SignedMemberRepository
 import com.hedvig.memberservice.services.redispublisher.AuthSessionUpdatedEventStatus
 import com.hedvig.memberservice.services.redispublisher.RedisEventPublisher
 import com.hedvig.memberservice.web.dto.GenericBankIdAuthenticationRequest
+import com.hedvig.resolver.LocaleResolver
 import org.axonframework.commandhandling.gateway.CommandGateway
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
@@ -26,7 +25,6 @@ class ZignSecBankIdService(
     private val signedMemberRepository: SignedMemberRepository,
     private val apiGatewayService: ApiGatewayService,
     private val memberRepository: MemberRepository,
-    private val textKeysLocaleResolver: TextKeysLocaleResolver,
     @Value("\${redirect.authentication.successUrl}")
     private val authenticationSuccessUrl: String,
     @Value("\${redirect.authentication.failUrl}")
@@ -87,7 +85,7 @@ class ZignSecBankIdService(
 
     private fun resolveTwoLetterLanguageFromMember(memberId: Long): String {
         val acceptLanguage = memberRepository.findById(memberId).get().acceptLanguage
-        return getTwoLetterLanguageFromLocale(textKeysLocaleResolver.resolveLocale(acceptLanguage))
+        return getTwoLetterLanguageFromLocale(LocaleResolver.resolveLocale(acceptLanguage))
     }
 
     private fun getTwoLetterLanguageFromLocale(locale: Locale) = when (locale.language) {

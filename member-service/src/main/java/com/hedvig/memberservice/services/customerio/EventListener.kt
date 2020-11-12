@@ -5,6 +5,7 @@ import com.hedvig.integration.notificationService.NotificationService
 import com.hedvig.memberservice.events.EmailUpdatedEvent
 import com.hedvig.memberservice.events.NameUpdatedEvent
 import com.hedvig.memberservice.query.MemberRepository
+import com.hedvig.resolver.LocaleResolver
 import com.neovisionaries.i18n.CountryCode
 import org.axonframework.config.ProcessingGroup
 import org.axonframework.eventhandling.EventHandler
@@ -35,27 +36,28 @@ class EventListener @Autowired constructor(
     fun on(evt: EmailUpdatedEvent) {
         val member = memberRepository.findById(evt.memberId)
 
-        if(member.isPresent) {
+        if (member.isPresent) {
+            val locale = member.get().pickedLocale?.locale
+                ?: LocaleResolver.resolveNullableLocale(member.get().acceptLanguage)
 
-            val timeZone = when (val countryCode = CountryCode.getByLocale(member.get().pickedLocale?.locale)) {
+            val timeZone = when (val countryCode = CountryCode.getByLocale(locale)) {
                 CountryCode.SE -> "Europe/Stockholm"
                 CountryCode.NO -> "Europe/Oslo"
-                null -> "Europe/Stockholm"
-                else -> RuntimeException("Unsupported country code detected $countryCode")
+                null -> null
+                else -> throw RuntimeException("Unsupported country code detected $countryCode")
             }
 
-            val traits = ImmutableMap
-                .of<String, Any>(
-                    "email", evt.email,
-                    "timezone", timeZone
-                )
+            val traits = mapOf(
+                "email" to evt.email,
+                "timezone" to timeZone
+            )
             sendWithSleep(traits, Objects.toString(evt.memberId))
         } else {
             logger.error("Could not update email for member ${evt.memberId} member not found in MemberRepository")
         }
     }
 
-    private fun sendWithSleep(traitsMap: Map<String, Any>, memberId: String) {
+    private fun sendWithSleep(traitsMap: Map<String, Any?>, memberId: String) {
 
         notificationService.updateCustomer(memberId, traitsMap)
 
