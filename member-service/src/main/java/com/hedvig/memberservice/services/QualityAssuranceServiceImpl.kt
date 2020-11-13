@@ -24,6 +24,6 @@ class QualityAssuranceServiceImpl(
         zignSecSignEntity?.let {
             zignSecSignEntityRepository.delete(zignSecSignEntity)
         }
-        return signedMemberEntity.isPresent && zignSecSignEntity != null
+        return signedMemberEntity.isPresent || zignSecSignEntity != null
     }
 }
