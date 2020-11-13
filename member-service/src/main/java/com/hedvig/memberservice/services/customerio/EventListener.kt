@@ -43,6 +43,7 @@ class EventListener @Autowired constructor(
             val timeZone = when (val countryCode = CountryCode.getByLocale(locale)) {
                 CountryCode.SE -> "Europe/Stockholm"
                 CountryCode.NO -> "Europe/Oslo"
+                CountryCode.DK -> "Europe/Copenhagen"
                 null -> null
                 else -> throw RuntimeException("Unsupported country code detected $countryCode")
             }
