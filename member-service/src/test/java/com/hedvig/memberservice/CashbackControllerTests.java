@@ -1,14 +1,9 @@
 package com.hedvig.memberservice;
 
-import com.hedvig.memberservice.commands.SelectNewCashbackCommand;
 import com.hedvig.memberservice.query.MemberEntity;
-import com.hedvig.memberservice.query.MemberRepository;
-import com.hedvig.memberservice.services.CashbackService;
+import com.hedvig.memberservice.services.cashback.CashbackService;
 import com.hedvig.memberservice.web.CashbackController;
 import com.hedvig.memberservice.web.dto.CashbackOption;
-import com.hedvig.memberservice.web.dto.StartOnboardingWithSSNRequest;
-import org.axonframework.commandhandling.gateway.CommandGateway;
-import org.axonframework.spring.config.EnableAxon;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,15 +21,11 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @RunWith(SpringRunner.class)
 @WebMvcTest(controllers = CashbackController.class)
-@EnableAxon
 public class CashbackControllerTests {
   @Autowired private MockMvc mockMvc;
 
-  @MockBean MemberRepository memberRepo;
-
-  @MockBean CommandGateway commandGateway;
-
-  @MockBean CashbackService cashbackService;
+  @MockBean
+  CashbackService cashbackService;
 
   private CashbackOption createCashbackOption(UUID newOptionId) {
     return new CashbackOption(newOptionId, "", "", "", false, true, "", "", "", "");
@@ -50,8 +41,7 @@ public class CashbackControllerTests {
 
     CashbackOption cashbackOption = createCashbackOption(newOptionId);
 
-    when(cashbackService.getCashbackOption(newOptionId)).thenReturn(Optional.of(cashbackOption));
-    when(memberRepo.findById(memberId)).thenReturn(Optional.of(member));
+    when(cashbackService.getMembersCashbackOption(memberId)).thenReturn(Optional.of(cashbackOption));
 
     mockMvc
         .perform(
@@ -60,56 +50,7 @@ public class CashbackControllerTests {
                 .header("hedvig.token", memberId))
         .andExpect(status().isNoContent());
 
-    verify(commandGateway, times(1))
-        .sendAndWait(new SelectNewCashbackCommand(memberId, newOptionId));
-  }
-
-  @Test
-  public void PostCashbackOption_WHEN_OptionId_IsnotFound() throws Exception {
-    final long memberId = 1337l;
-
-    final UUID newOptionId = UUID.fromString("d24c427e-d110-11e7-a47e-0b4e39412e99");
-
-    MemberEntity member = new MemberEntity();
-    member.setId(memberId);
-
-    when(cashbackService.getCashbackOption(newOptionId)).thenReturn(Optional.empty());
-    when(memberRepo.findById(memberId)).thenReturn(Optional.of(member));
-
-    mockMvc
-        .perform(
-            post("/cashback", "")
-                .param("optionId", newOptionId.toString())
-                .header("hedvig.token", memberId))
-        .andExpect(status().isNotFound());
-
-    verify(commandGateway, times(0))
-        .sendAndWait(new SelectNewCashbackCommand(memberId, newOptionId));
-  }
-
-  @Test
-  public void PostCashbackOption_WHEN_member_IsNotFound() throws Exception {
-    final long memberId = 1337l;
-    final UUID newOptionId = UUID.fromString("d24c427e-d110-11e7-a47e-0b4e39412e98");
-
-    final CashbackOption cashbackOption = createCashbackOption(newOptionId);
-
-    MemberEntity member = new MemberEntity();
-    member.setId(memberId);
-
-    when(cashbackService.getCashbackOption(newOptionId)).thenReturn(Optional.of(cashbackOption));
-    when(memberRepo.findById(memberId)).thenReturn(Optional.empty());
-
-    new StartOnboardingWithSSNRequest("");
-
-    mockMvc
-        .perform(
-            post("/cashback", "")
-                .param("optionId", newOptionId.toString())
-                .header("hedvig.token", memberId))
-        .andExpect(status().isNotFound());
-
-    verify(commandGateway, times(0))
-        .sendAndWait(new SelectNewCashbackCommand(memberId, newOptionId));
+    verify(cashbackService, times(1))
+      .selectCashbackOption(memberId, newOptionId);
   }
 }

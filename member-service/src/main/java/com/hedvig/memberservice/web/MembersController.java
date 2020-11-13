@@ -2,8 +2,6 @@ package com.hedvig.memberservice.web;
 
 import com.google.common.collect.Lists;
 import com.hedvig.integration.productsPricing.ProductApi;
-import com.hedvig.integration.productsPricing.dto.InsuranceStatusDTO;
-import com.hedvig.memberservice.aggregates.PickedLocale;
 import com.hedvig.memberservice.commands.UpdateEmailCommand;
 import com.hedvig.memberservice.commands.UpdatePhoneNumberCommand;
 import com.hedvig.memberservice.commands.UpdatePickedLocaleCommand;
@@ -11,7 +9,8 @@ import com.hedvig.memberservice.query.MemberEntity;
 import com.hedvig.memberservice.query.MemberRepository;
 import com.hedvig.memberservice.query.TrackingIdEntity;
 import com.hedvig.memberservice.query.TrackingIdRepository;
-import com.hedvig.memberservice.services.CashbackService;
+import com.hedvig.memberservice.services.cashback.CashbackService;
+import com.hedvig.memberservice.services.cashback.CashbackServiceImpl;
 import com.hedvig.memberservice.web.dto.*;
 import org.axonframework.commandhandling.gateway.CommandGateway;
 import org.slf4j.Logger;
@@ -25,7 +24,6 @@ import javax.validation.Valid;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Optional;
-import java.util.UUID;
 
 @RestController()
 @RequestMapping("/member/")
@@ -94,15 +92,15 @@ public class MembersController {
       m2.setStatus(null);
       m2.setSsn("");
       m2.setEmail("");
-      m2.setCashbackId(cashbackService.getDefaultId(PickedLocale.sv_SE).toString());
+      m2.setCashbackId(CashbackServiceImpl.Companion.getDEFAULT_SWEDISH_CASHBACK_OPTION().toString());
       return m2;
     });
 
     CashbackOption cashbackOption = null;
 
     if (me.getCashbackId() != null) {
-      cashbackOption = cashbackService.getCashbackOption(UUID.fromString(me.getCashbackId()))
-        .orElseGet(() -> cashbackService.getDefaultCashback(me.pickedLocale));
+      cashbackOption = cashbackService.getMembersCashbackOption(me.id)
+        .orElseGet(() -> cashbackService.getDefaultCashback(me.id));
     }
 
     Optional<TrackingIdEntity> tId = trackingRepo.findByMemberId(hid);

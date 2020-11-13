@@ -25,3 +25,13 @@ enum class PickedLocale {
 
     abstract val locale: Locale
 }
+
+fun Locale.toPickedLocale() = when {
+    this.country == "SE" && this.language == Locale("sv").language -> PickedLocale.sv_SE
+    this.country == "SE" && this.language == Locale("en").language -> PickedLocale.en_SE
+    this.country == "NO" && this.language == Locale("nb").language -> PickedLocale.nb_NO
+    this.country == "NO" && this.language == Locale("en").language -> PickedLocale.en_NO
+    this.country == "DK" && this.language == Locale("da").language -> PickedLocale.da_DK
+    this.country == "DK" && this.language == Locale("en").language -> PickedLocale.en_DK
+    else -> throw RuntimeException("No matching picked_locale for [Locale: $this]")
+}
