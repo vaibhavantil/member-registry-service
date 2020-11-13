@@ -1,5 +1,6 @@
 package com.hedvig.memberservice;
 
+import com.hedvig.memberservice.aggregates.PickedLocale;
 import com.hedvig.memberservice.query.MemberEntity;
 import com.hedvig.memberservice.services.cashback.CashbackService;
 import com.hedvig.memberservice.web.CashbackController;
@@ -51,6 +52,56 @@ public class CashbackControllerTests {
         .andExpect(status().isNoContent());
 
     verify(cashbackService, times(1))
-      .selectCashbackOption(memberId, newOptionId);
+      .selectCashbackOption(memberId, newOptionId, null);
+  }
+
+  @Test
+  public void PostCashbackOptionLocaleHeader() throws Exception {
+    final long memberId = 1337L;
+
+    MemberEntity member = new MemberEntity();
+    member.setId(memberId);
+    final UUID newOptionId = UUID.fromString("d24c427e-d110-11e7-a47e-0b4e39412e98");
+
+    CashbackOption cashbackOption = createCashbackOption(newOptionId);
+
+    when(cashbackService.getMembersCashbackOption(memberId)).thenReturn(Optional.of(cashbackOption));
+
+    mockMvc
+      .perform(
+        post("/cashback", "")
+          .param("optionId", newOptionId.toString())
+          .header("hedvig.token", memberId)
+          .header("Locale", "sv_SE")
+      )
+      .andExpect(status().isNoContent());
+
+    verify(cashbackService, times(1))
+      .selectCashbackOption(memberId, newOptionId, PickedLocale.sv_SE);
+  }
+
+  @Test
+  public void PostCashbackOptionAcceptLanguageHeader() throws Exception {
+    final long memberId = 1337L;
+
+    MemberEntity member = new MemberEntity();
+    member.setId(memberId);
+    final UUID newOptionId = UUID.fromString("d24c427e-d110-11e7-a47e-0b4e39412e98");
+
+    CashbackOption cashbackOption = createCashbackOption(newOptionId);
+
+    when(cashbackService.getMembersCashbackOption(memberId)).thenReturn(Optional.of(cashbackOption));
+
+    mockMvc
+      .perform(
+        post("/cashback", "")
+          .param("optionId", newOptionId.toString())
+          .header("hedvig.token", memberId)
+          .header("Accept-Language", "sv-SE")
+      )
+      .andExpect(status().isNoContent());
+
+    verify(cashbackService, times(1))
+      .selectCashbackOption(memberId, newOptionId, PickedLocale.sv_SE);
   }
 }

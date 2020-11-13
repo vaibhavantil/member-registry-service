@@ -58,13 +58,13 @@ class CashbackServiceImplTest {
             contentServiceClient.cashbackOptions(member.pickedLocale.name)
         } returns ResponseEntity.ok(listOf(createCashbackOption(existingCashbackOption)))
 
-        classToTest.selectCashbackOption(memberId, existingCashbackOption)
+        classToTest.selectCashbackOption(memberId, existingCashbackOption, null)
 
         verify { commandGateway.sendAndWait(SelectNewCashbackCommand(memberId, existingCashbackOption)) }
     }
 
     @Test
-    fun `when selecting non existing cashback option  SelectNewCashbackCommand is not sent`() {
+    fun `when selecting non existing cashback option SelectNewCashbackCommand is not sent`() {
         val nonExistingCashbackOption = UUID.randomUUID()
         val member = createMember(nonExistingCashbackOption)
 
@@ -75,7 +75,7 @@ class CashbackServiceImplTest {
             contentServiceClient.cashbackOptions(member.pickedLocale.name)
         } returns ResponseEntity.ok(listOf())
 
-        classToTest.selectCashbackOption(memberId, nonExistingCashbackOption)
+        classToTest.selectCashbackOption(memberId, nonExistingCashbackOption, null)
 
         verify(exactly = 0) {
             commandGateway.sendAndWait(any())
@@ -120,7 +120,7 @@ class CashbackServiceImplTest {
             contentServiceClient.cashbackOptions(member.pickedLocale.name)
         } returns ResponseEntity.ok(listOf())
 
-        classToTest.getOptions(memberId)
+        classToTest.getOptions(memberId, null)
 
         verify { contentServiceClient.cashbackOptions(any()) }
     }
@@ -139,7 +139,7 @@ class CashbackServiceImplTest {
             contentServiceClient.cashbackOptions(any())
         } returns ResponseEntity.ok(listOf())
 
-        classToTest.getOptions(memberId)
+        classToTest.getOptions(memberId, null)
 
         verify { contentServiceClient.cashbackOptions(PickedLocale.sv_SE.toString()) }
     }
@@ -192,6 +192,41 @@ class CashbackServiceImplTest {
 
         classToTest.getDefaultCashback(memberId)
         verify { contentServiceClient.cashbackOption(any(), any()) }
+    }
+
+    @Test
+    fun `when selecting existing cashback option on override locale SelectNewCashbackCommand is applied`() {
+        val existingCashbackOption = UUID.randomUUID()
+        val member = createMember(existingCashbackOption, PickedLocale.sv_SE)
+        val overrideLocale = PickedLocale.da_DK
+
+        every {
+            memberRepository.findById(memberId)
+        } returns Optional.of(member)
+        every {
+            contentServiceClient.cashbackOptions(overrideLocale.name)
+        } returns ResponseEntity.ok(listOf(createCashbackOption(existingCashbackOption)))
+
+        classToTest.selectCashbackOption(memberId, existingCashbackOption, overrideLocale)
+
+        verify { commandGateway.sendAndWait(SelectNewCashbackCommand(memberId, existingCashbackOption)) }
+    }
+
+
+    @Test
+    fun `getting cashback options for member with override locale fetches them from content service`() {
+        val member = createMember(UUID.randomUUID())
+        val overrideLocale = PickedLocale.da_DK
+        every {
+            memberRepository.findById(memberId)
+        } returns Optional.of(member)
+        every {
+            contentServiceClient.cashbackOptions(overrideLocale.name)
+        } returns ResponseEntity.ok(listOf())
+
+        classToTest.getOptions(memberId, overrideLocale)
+
+        verify { contentServiceClient.cashbackOptions(overrideLocale.name) }
     }
 
     private fun createCashbackOption(id: UUID) = CashbackOptionDTO(
