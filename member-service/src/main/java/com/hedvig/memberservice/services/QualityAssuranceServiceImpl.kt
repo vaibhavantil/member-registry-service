@@ -24,12 +24,6 @@ class QualityAssuranceServiceImpl(
         zignSecSignEntity?.let {
             zignSecSignEntityRepository.delete(zignSecSignEntity)
         }
-        if (!signedMemberEntity.isPresent && zignSecSignEntity == null) {
-            throw SignedMemberNotFoundException(
-                ssn = ssn,
-                repositoryName = "SignedMemberRepository and ZignSecSignEntityRepository"
-            )
-        }
-        return true
+        return signedMemberEntity.isPresent && zignSecSignEntity != null
     }
 }
