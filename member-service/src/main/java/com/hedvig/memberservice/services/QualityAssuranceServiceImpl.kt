@@ -2,7 +2,6 @@ package com.hedvig.memberservice.services
 
 import com.hedvig.external.zignSec.repository.ZignSecSignEntityRepository
 import com.hedvig.memberservice.query.SignedMemberRepository
-import com.hedvig.memberservice.services.exceptions.SignedMemberNotFoundException
 import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Service
 
@@ -24,12 +23,6 @@ class QualityAssuranceServiceImpl(
         zignSecSignEntity?.let {
             zignSecSignEntityRepository.delete(zignSecSignEntity)
         }
-        if (!signedMemberEntity.isPresent && zignSecSignEntity == null) {
-            throw SignedMemberNotFoundException(
-                ssn = ssn,
-                repositoryName = "SignedMemberRepository and ZignSecSignEntityRepository"
-            )
-        }
-        return true
+        return signedMemberEntity.isPresent || zignSecSignEntity != null
     }
 }
