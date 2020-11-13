@@ -64,7 +64,7 @@ class CashbackServiceImplTest {
     }
 
     @Test
-    fun `when selecting non existing cashback option `() {
+    fun `when selecting non existing cashback option  SelectNewCashbackCommand is not sent`() {
         val nonExistingCashbackOption = UUID.randomUUID()
         val member = createMember(nonExistingCashbackOption)
 
@@ -145,7 +145,7 @@ class CashbackServiceImplTest {
     }
 
     @Test
-    fun `getting default cashback option id for swedish member returns `() {
+    fun `getting default cashback option id for swedish member returns default swedish cashback option`() {
         val member = createMember(UUID.randomUUID())
         every {
             memberRepository.findById(memberId)
@@ -157,7 +157,7 @@ class CashbackServiceImplTest {
     }
 
     @Test
-    fun `getting default cashback option id for norwegian member returns `() {
+    fun `getting default cashback option id for norwegian member returns default norwegian cashback option default danish cashback option`() {
         val member = createMember(UUID.randomUUID(), PickedLocale.en_NO)
         every {
             memberRepository.findById(memberId)

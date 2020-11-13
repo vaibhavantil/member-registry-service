@@ -72,9 +72,8 @@ class CashbackServiceImpl(
         ?: LocaleResolver.resolveNullableLocale(this.acceptLanguage)?.toPickedLocale()
         ?: throw RuntimeException("Could not resolve locale for member: ${this.id}")
 
-    private fun findMemberOrThrow(memberId: Long) = memberRepository.findById(memberId).orElseGet {
-        throw MemberNotFoundException(memberId)
-    }
+    private fun findMemberOrThrow(memberId: Long) =
+        memberRepository.findById(memberId).orElseThrow { MemberNotFoundException(memberId) }
 
     companion object {
         val DEFAULT_SWEDISH_CASHBACK_OPTION: UUID = UUID.fromString("97b2d1d8-af4a-11e7-9b2b-bbc138162bb2")
