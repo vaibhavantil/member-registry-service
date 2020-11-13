@@ -2,7 +2,6 @@ package com.hedvig.memberservice.services
 
 import com.hedvig.external.zignSec.repository.ZignSecSignEntityRepository
 import com.hedvig.memberservice.query.SignedMemberRepository
-import com.hedvig.memberservice.services.exceptions.SignedMemberNotFoundException
 import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Service
 
