@@ -8,6 +8,7 @@ import com.hedvig.memberservice.entities.SignSession
 import com.hedvig.memberservice.entities.SignSessionRepository
 import com.hedvig.memberservice.entities.SignStatus
 import com.hedvig.memberservice.jobs.BankIdCollector
+import com.hedvig.memberservice.jobs.BankidMetrics
 import com.hedvig.memberservice.services.member.MemberService
 import com.hedvig.memberservice.services.member.dto.MemberSignResponse
 import com.hedvig.memberservice.services.member.dto.StartSwedishSignResponse
@@ -33,7 +34,8 @@ class SwedishBankIdSigningService(
     @Value("\${hedvig.bankid.signmessage.switcher}")
     private val switcherMessage: String,
     @Value("\${hedvig.bankid.signmessage.nonSwitcher}")
-    private val nonSwitcherMessage: String
+    private val nonSwitcherMessage: String,
+    private val bankidMetrics: BankidMetrics
 ) {
 
     fun startSign(request: WebsignRequest, memberId: Long, isSwitching: Boolean): MemberSignResponse {
@@ -56,6 +58,8 @@ class SwedishBankIdSigningService(
             session.newOrderStarted(result)
             signSessionRepository.save(session)
             scheduleCollectJob(result)
+
+            bankidMetrics.startBankIdSign()
 
             return StartSwedishSignResponse(
                 signId = session.sessionId,
@@ -101,9 +105,11 @@ class SwedishBankIdSigningService(
                         val collectResponse = CollectResponse(response.status, response.hintCode)
                         s.newCollectResponse(collectResponse)
                         if (response.status == CollectStatus.complete) {
+                            bankidMetrics.completeBankIdSign()
                             memberService.bankIdSignComplete(s.memberId, response)
                             s.status = SignStatus.COMPLETED
                         } else if (response.status == CollectStatus.failed) {
+                            bankidMetrics.failBankIdSign()
                             s.status = SignStatus.FAILED
                         }
                         signSessionRepository.save(s)
