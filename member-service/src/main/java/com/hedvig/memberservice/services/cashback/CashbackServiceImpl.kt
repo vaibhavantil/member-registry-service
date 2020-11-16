@@ -21,8 +21,8 @@ class CashbackServiceImpl(
     private val commandGateway: CommandGateway
 ) : CashbackService {
 
-    override fun selectCashbackOption(memberId: Long, uuid: UUID, overrideLocale: PickedLocale?): Boolean {
-        val pickedLocale = overrideLocale ?: findMemberOrThrow(memberId).resolvePickedLocaleOrThrow()
+    override fun selectCashbackOption(memberId: Long, uuid: UUID, localeOverride: PickedLocale?): Boolean {
+        val pickedLocale = localeOverride ?: findMemberOrThrow(memberId).resolvePickedLocaleOrThrow()
 
         val cashbackOptions = contentServiceClient.cashbackOptions(pickedLocale.name).body!!
         return if (cashbackOptions.any { it.id == uuid }) {
@@ -46,10 +46,10 @@ class CashbackServiceImpl(
         return cashbackOption?.let { Optional.of(it.toCashbackOption(true)) } ?: Optional.empty()
     }
 
-    override fun getOptions(memberId: Long, overrideLocale: PickedLocale?): List<CashbackOption> {
-        val member =  findMemberOrThrow(memberId)
+    override fun getOptions(memberId: Long, localeOverride: PickedLocale?): List<CashbackOption> {
+        val member = findMemberOrThrow(memberId)
 
-        val locale = overrideLocale ?: member.resolvePickedLocaleOrThrow()
+        val locale = localeOverride ?: member.resolvePickedLocaleOrThrow()
 
         val cashbackOptions = contentServiceClient.cashbackOptions(locale.name).body!!
 
