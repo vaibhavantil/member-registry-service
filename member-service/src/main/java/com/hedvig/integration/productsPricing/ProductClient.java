@@ -13,7 +13,7 @@ import javax.validation.Valid;
 public interface ProductClient {
 
   @RequestMapping(value = "/i/campaign/member/create", method = RequestMethod.POST)
-  ResponseEntity<Void> createdCampaignMember(@RequestBody MemberCreatedRequest req);
+  ResponseEntity<Void> createCampaignOwnerMember(@RequestBody MemberCreatedRequest req);
 
   @RequestMapping(value = "/i/campaign/member/update/name", method = RequestMethod.POST)
   ResponseEntity<Void> updateCampaignMemberName(@RequestBody MemberNameUpdateRequest req);

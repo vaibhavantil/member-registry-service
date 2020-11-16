@@ -27,6 +27,7 @@
     <kotlin.compiler.incremental>true</kotlin.compiler.incremental>
     <kotlin.code.style>official</kotlin.code.style>
     <mockito.version>2.22.0</mockito.version>
+    <axon.version>3.4.3</axon.version>
   </properties>
 
   <repositories>
@@ -108,12 +109,12 @@
     <dependency>
       <groupId>org.axonframework</groupId>
       <artifactId>axon-spring-boot-starter</artifactId>
-      <version>3.3.3</version>
+      <version>${axon.version}</version>
     </dependency>
     <dependency>
       <groupId>org.axonframework</groupId>
       <artifactId>axon-test</artifactId>
-      <version>3.3.3</version>
+      <version>${axon.version}</version>
     </dependency>
     <dependency>
       <groupId>com.h2database</groupId>
