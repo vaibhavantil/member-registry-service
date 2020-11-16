@@ -1,7 +1,6 @@
 package com.hedvig.config;
 
 import com.hedvig.memberservice.aggregates.MemberAggregate;
-import com.hedvig.memberservice.sagas.MemberCreatedSaga;
 import com.hedvig.memberservice.sagas.MemberSignedSaga;
 import com.hedvig.memberservice.sagas.NameUpdateSaga;
 import lombok.val;
@@ -14,7 +13,6 @@ import org.axonframework.spring.eventsourcing.SpringPrototypeAggregateFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Profile;
 
 @Configuration
 public class AxonConfig {
@@ -27,19 +25,6 @@ public class AxonConfig {
 
     return springPrototypeAggregateFactory;
   }
-
-
-  @Bean("memberCreatedSagaConfiguration")
-  public SagaConfiguration<MemberCreatedSaga> memberCreatedSagaConfiguration() {
-    val config = SagaConfiguration.trackingSagaManager(MemberCreatedSaga.class);
-    config.configureTrackingProcessor(
-      x ->
-        TrackingEventProcessorConfiguration.forSingleThreadedProcessing()
-          .andInitialTrackingToken(StreamableMessageSource::createTailToken));
-
-    return config;
-  }
-
 
   @Bean("memberSignedSagaConfiguration")
   public SagaConfiguration<MemberSignedSaga> memberSignedSagaConfiguration() {
@@ -78,5 +63,11 @@ public class AxonConfig {
         x ->
             TrackingEventProcessorConfiguration.forSingleThreadedProcessing()
                 .andInitialTrackingToken(StreamableMessageSource::createTailToken));
+
+    config.registerTrackingEventProcessor(
+        "CreateCampaignOwner",
+        x ->
+            TrackingEventProcessorConfiguration.forSingleThreadedProcessing()
+                .andInitialTrackingToken(StreamableMessageSource::createHeadToken));
   }
 }

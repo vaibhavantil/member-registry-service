@@ -1,21 +1,22 @@
 package com.hedvig.memberservice.events;
 
 import com.hedvig.memberservice.aggregates.MemberStatus;
-import java.time.Instant;
 import lombok.Value;
+
+import java.time.Instant;
 
 @Value
 public class MemberCreatedEvent {
 
-  private Long id;
+    public Long id;
 
-  private MemberStatus status;
+    public MemberStatus status;
 
-  private Instant createdOn;
+    public Instant createdOn;
 
-  public MemberCreatedEvent(Long id, MemberStatus status) {
-    this.id = id;
-    this.status = status;
-    this.createdOn = Instant.now();
-  }
+    public MemberCreatedEvent(Long id, MemberStatus status) {
+        this.id = id;
+        this.status = status;
+        this.createdOn = Instant.now();
+    }
 }
