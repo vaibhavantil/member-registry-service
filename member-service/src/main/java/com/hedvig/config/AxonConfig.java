@@ -29,8 +29,8 @@ public class AxonConfig {
   }
 
 
-  @Bean("memberCreatedSagaSagaConfiguration")
-  public SagaConfiguration<MemberCreatedSaga> memberCreatedSagaSagaConfiguration() {
+  @Bean("memberCreatedSagaConfiguration")
+  public SagaConfiguration<MemberCreatedSaga> memberCreatedSagaConfiguration() {
     val config = SagaConfiguration.trackingSagaManager(MemberCreatedSaga.class);
     config.configureTrackingProcessor(
       x ->
