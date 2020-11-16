@@ -71,8 +71,7 @@ class CashbackServiceImpl(
     }
 
     private fun MemberEntity.resolvePickedLocaleOrThrow() = this.pickedLocale
-        ?: LocaleResolver.resolveNullableLocale(this.acceptLanguage)?.toPickedLocale()
-        ?: throw RuntimeException("Could not resolve locale for member: ${this.id}")
+        ?: LocaleResolver.resolveLocale(this.acceptLanguage).toPickedLocale()
 
     private fun findMemberOrThrow(memberId: Long) =
         memberRepository.findById(memberId).orElseThrow { MemberNotFoundException(memberId) }
