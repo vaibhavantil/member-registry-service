@@ -8,7 +8,7 @@ import com.hedvig.memberservice.entities.SignSession
 import com.hedvig.memberservice.entities.SignSessionRepository
 import com.hedvig.memberservice.entities.SignStatus
 import com.hedvig.memberservice.jobs.BankIdCollector
-import com.hedvig.memberservice.jobs.BankidMetrics
+import com.hedvig.memberservice.jobs.SwedishBankIdMetrics
 import com.hedvig.memberservice.services.member.MemberService
 import com.hedvig.memberservice.services.member.dto.MemberSignResponse
 import com.hedvig.memberservice.services.member.dto.StartSwedishSignResponse
@@ -35,7 +35,7 @@ class SwedishBankIdSigningService(
     private val switcherMessage: String,
     @Value("\${hedvig.bankid.signmessage.nonSwitcher}")
     private val nonSwitcherMessage: String,
-    private val bankidMetrics: BankidMetrics
+    private val swedishBankIdMetrics: SwedishBankIdMetrics
 ) {
 
     fun startSign(request: WebsignRequest, memberId: Long, isSwitching: Boolean): MemberSignResponse {
@@ -59,7 +59,7 @@ class SwedishBankIdSigningService(
             signSessionRepository.save(session)
             scheduleCollectJob(result)
 
-            bankidMetrics.startBankIdSign()
+            swedishBankIdMetrics.startBankIdSign()
 
             return StartSwedishSignResponse(
                 signId = session.sessionId,
@@ -105,11 +105,11 @@ class SwedishBankIdSigningService(
                         val collectResponse = CollectResponse(response.status, response.hintCode)
                         s.newCollectResponse(collectResponse)
                         if (response.status == CollectStatus.complete) {
-                            bankidMetrics.completeBankIdSign()
+                            swedishBankIdMetrics.completeBankIdSign()
                             memberService.bankIdSignComplete(s.memberId, response)
                             s.status = SignStatus.COMPLETED
                         } else if (response.status == CollectStatus.failed) {
-                            bankidMetrics.failBankIdSign()
+                            swedishBankIdMetrics.failBankIdSign()
                             s.status = SignStatus.FAILED
                         }
                         signSessionRepository.save(s)
