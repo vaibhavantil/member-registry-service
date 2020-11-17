@@ -91,6 +91,7 @@ class ZignSecBankIdService(
     private fun getTwoLetterLanguageFromLocale(locale: Locale) = when (locale.language) {
         "sv" -> "SV"
         "en" -> "EN"
+        "da" -> "DA"
         else -> "NO"
     }
 }
