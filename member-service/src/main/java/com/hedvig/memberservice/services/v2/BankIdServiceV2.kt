@@ -11,6 +11,7 @@ import com.hedvig.memberservice.query.CollectRepository
 import com.hedvig.memberservice.query.CollectType
 import com.hedvig.memberservice.query.SignedMemberRepository
 import com.hedvig.integration.apigateway.ApiGatewayService
+import com.hedvig.memberservice.jobs.SwedishBankIdMetrics
 import com.hedvig.memberservice.services.redispublisher.AuthSessionUpdatedEventStatus
 import com.hedvig.memberservice.services.redispublisher.RedisEventPublisher
 import org.axonframework.commandhandling.gateway.CommandGateway
@@ -31,7 +32,8 @@ class BankIdServiceV2(
     private val redisEventPublisher: RedisEventPublisher,
     private val scheduler: Scheduler,
     private val collectRepository: CollectRepository,
-    private val apiGatewayService: ApiGatewayService
+    private val apiGatewayService: ApiGatewayService,
+    private val swedishBankIdMetrics: SwedishBankIdMetrics
 
 ) {
 
@@ -41,6 +43,7 @@ class BankIdServiceV2(
 
         trackAuthToken(status.orderRef, memberId)
         scheduleCollectJob(status.orderRef)
+        swedishBankIdMetrics.startBankIdV2Auth()
 
         return status
     }
@@ -64,6 +67,7 @@ class BankIdServiceV2(
                     }
                 }
                 CollectStatus.failed -> {
+                    swedishBankIdMetrics.failedBankIdV2Auth()
                     when (bankIdRes.hintCode) {
                         "userCancel", "cancelled"-> {
                             redisEventPublisher.onAuthSessionUpdated(memberId, AuthSessionUpdatedEventStatus.FAILED)
@@ -78,6 +82,7 @@ class BankIdServiceV2(
                     }
                 }
                 CollectStatus.complete -> {
+                    swedishBankIdMetrics.completeBankIdV2Auth()
                     val personalNumber = bankIdRes.completionData.user.personalNumber
                     val signedMember = signedMemberRepository.findBySsn(personalNumber)
                     if (signedMember.isPresent) {

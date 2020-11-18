@@ -11,9 +11,7 @@ import com.hedvig.external.bankID.bankIdTypes.OrderResponse
 import com.hedvig.memberservice.entities.SignSession
 import com.hedvig.memberservice.entities.SignSessionRepository
 import com.hedvig.memberservice.entities.SignStatus
-import com.hedvig.memberservice.query.MemberEntity
-import com.hedvig.memberservice.query.MemberRepository
-import com.hedvig.memberservice.query.SignedMemberRepository
+import com.hedvig.memberservice.jobs.SwedishBankIdMetrics
 import com.hedvig.memberservice.services.member.MemberService
 import com.hedvig.memberservice.web.v2.dto.WebsignRequest
 import org.assertj.core.api.Assertions.assertThat
@@ -56,6 +54,9 @@ class SwedishBankIdSigningServiceTest {
     @Mock
     lateinit var memberService: MemberService
 
+    @Mock
+    lateinit var swedishBankIdMetrics: SwedishBankIdMetrics
+
     @Rule
     @JvmField
     var thrown = ExpectedException.none()
@@ -72,7 +73,7 @@ class SwedishBankIdSigningServiceTest {
     fun setup() {
         sut = SwedishBankIdSigningService(
             bankIdRestService, signSessionRepository,
-            scheduler, memberService, SWITCHER_MESSAGE, NON_SWITCHER_MESSAGE
+            scheduler, memberService, SWITCHER_MESSAGE, NON_SWITCHER_MESSAGE, swedishBankIdMetrics
         )
     }
 

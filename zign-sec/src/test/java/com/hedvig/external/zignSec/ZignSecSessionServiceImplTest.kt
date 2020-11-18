@@ -56,6 +56,9 @@ class ZignSecSessionServiceImplTest {
     @Mock
     lateinit var authenticationEventPublisher: AuthenticationEventPublisher
 
+    @Mock
+    lateinit var metrics: Metrics
+
     @Captor
     lateinit var captor: ArgumentCaptor<ZignSecSession>
 
@@ -69,7 +72,7 @@ class ZignSecSessionServiceImplTest {
     @Before
     fun before() {
         objectMapper = ObjectMapper().registerKotlinModule().registerModule(JavaTimeModule())
-        classUnderTest = ZignSecSessionServiceImpl(sessionRepository, zignSecSignEntityRepository, zignSecService, authenticationEventPublisher, objectMapper)
+        classUnderTest = ZignSecSessionServiceImpl(sessionRepository, zignSecSignEntityRepository, zignSecService, authenticationEventPublisher, objectMapper, metrics)
     }
 
     @Test

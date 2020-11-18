@@ -25,7 +25,8 @@ class ZignSecSessionServiceImpl(
     private val zignSecSignEntityRepository: ZignSecSignEntityRepository,
     private val zignSecService: ZignSecService,
     private val authenticationEventPublisher: AuthenticationEventPublisher,
-    private val objectMapper: ObjectMapper
+    private val objectMapper: ObjectMapper,
+    private val metrics: Metrics
 ) : ZignSecSessionService {
 
     override fun auth(request: ZignSecBankIdAuthenticationRequest): StartZignSecAuthenticationResult =
@@ -106,6 +107,8 @@ class ZignSecSessionServiceImpl(
     }
 
     private fun startNewSession(request: ZignSecBankIdAuthenticationRequest, type: ZignSecAuthenticationType, session: ZignSecSession?): StartZignSecAuthenticationResult {
+        metrics.authStartSession(request, type)
+
         val response = zignSecService.auth(request)
 
         if (response.errors.isNotEmpty() || response.redirectUrl == null) {
@@ -118,6 +121,7 @@ class ZignSecSessionServiceImpl(
                 ))
             }
 
+            metrics.authRequestFailed(request, type)
             return StartZignSecAuthenticationResult.Failed(
                 errors
             )
@@ -140,6 +144,7 @@ class ZignSecSessionServiceImpl(
 
         sessionRepository.save(s)
 
+        metrics.authRequestSuccess(request.authMethod, type)
         return StartZignSecAuthenticationResult.Success(
             response.id,
             response.redirectUrl.trim()
@@ -174,14 +179,18 @@ class ZignSecSessionServiceImpl(
                     ZignSecBankIdProgressStatus.INITIATED,
                     ZignSecBankIdProgressStatus.IN_PROGRESS -> { /* strange but no-op */
                     }
-                    ZignSecBankIdProgressStatus.FAILED -> authenticationEventPublisher.publishSignEvent(
-                        ZignSecSignResult.Failed(
-                            session.referenceId,
-                            session.memberId,
-                            session.authenticationMethod
+                    ZignSecBankIdProgressStatus.FAILED -> {
+                        metrics.authSessionFailed(session.authenticationMethod, session.requestType)
+                        authenticationEventPublisher.publishSignEvent(
+                            ZignSecSignResult.Failed(
+                                session.referenceId,
+                                session.memberId,
+                                session.authenticationMethod
+                            )
                         )
-                    )
+                    }
                     ZignSecBankIdProgressStatus.COMPLETED -> {
+                        metrics.authSessionSuccess(session.authenticationMethod, session.requestType)
                         //TODO: re add this when everything is in order with zign sec and person number also un ignore the test in ZignSecSessionServiceImplTest
                         //NOTE: this is also used in denmark so make sure both work on changing
                         //check that personal number is matching when signing
@@ -206,11 +215,16 @@ class ZignSecSessionServiceImpl(
                     ZignSecBankIdProgressStatus.INITIATED,
                     ZignSecBankIdProgressStatus.IN_PROGRESS -> { /* strange but no-op */
                     }
-                    ZignSecBankIdProgressStatus.FAILED -> authenticationEventPublisher.publishAuthenticationEvent(
-                        ZignSecAuthenticationResult.Failed(
-                            session.referenceId,
-                            session.memberId))
+                    ZignSecBankIdProgressStatus.FAILED -> {
+                        metrics.authSessionFailed(session.authenticationMethod, session.requestType)
+                        authenticationEventPublisher.publishAuthenticationEvent(
+                            ZignSecAuthenticationResult.Failed(
+                                session.referenceId,
+                                session.memberId))
+                    }
                     ZignSecBankIdProgressStatus.COMPLETED -> {
+                        metrics.authSessionSuccess(session.authenticationMethod, session.requestType)
+
                         val idProviderPersonId = session.notification!!.identity!!.idProviderPersonId!!
 
                         val signEntity = zignSecSignEntityRepository.findByIdProviderPersonId(idProviderPersonId)
