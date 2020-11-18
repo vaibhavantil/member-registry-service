@@ -3,6 +3,7 @@ package com.hedvig.external.zignSec
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
+import com.hedvig.external.Metrics
 import com.hedvig.external.authentication.dto.ZignSecAuthenticationResult
 import com.hedvig.external.authentication.dto.ZignSecSignResult
 import com.hedvig.external.authentication.dto.ZignSecBankIdAuthenticationRequest
@@ -56,6 +57,9 @@ class ZignSecSessionServiceImplTest {
     @Mock
     lateinit var authenticationEventPublisher: AuthenticationEventPublisher
 
+    @Mock
+    lateinit var metrics: Metrics
+
     @Captor
     lateinit var captor: ArgumentCaptor<ZignSecSession>
 
@@ -69,7 +73,7 @@ class ZignSecSessionServiceImplTest {
     @Before
     fun before() {
         objectMapper = ObjectMapper().registerKotlinModule().registerModule(JavaTimeModule())
-        classUnderTest = ZignSecSessionServiceImpl(sessionRepository, zignSecSignEntityRepository, zignSecService, authenticationEventPublisher, objectMapper)
+        classUnderTest = ZignSecSessionServiceImpl(sessionRepository, zignSecSignEntityRepository, zignSecService, authenticationEventPublisher, objectMapper, metrics)
     }
 
     @Test
