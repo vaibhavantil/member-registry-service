@@ -3,7 +3,6 @@ package com.hedvig.external.zignSec
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
-import com.hedvig.external.Metrics
 import com.hedvig.external.authentication.dto.ZignSecAuthenticationResult
 import com.hedvig.external.authentication.dto.ZignSecSignResult
 import com.hedvig.external.authentication.dto.ZignSecBankIdAuthenticationRequest

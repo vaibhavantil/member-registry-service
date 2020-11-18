@@ -1,7 +1,6 @@
 package com.hedvig.external.zignSec
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import com.hedvig.external.Metrics
 import com.hedvig.external.authentication.dto.ZignSecAuthenticationResult
 import com.hedvig.external.authentication.dto.ZignSecSignResult
 import com.hedvig.external.authentication.dto.StartZignSecAuthenticationResult
@@ -108,6 +107,8 @@ class ZignSecSessionServiceImpl(
     }
 
     private fun startNewSession(request: ZignSecBankIdAuthenticationRequest, type: ZignSecAuthenticationType, session: ZignSecSession?): StartZignSecAuthenticationResult {
+        metrics.authStartSession(request, type)
+
         val response = zignSecService.auth(request)
 
         if (response.errors.isNotEmpty() || response.redirectUrl == null) {
@@ -179,7 +180,7 @@ class ZignSecSessionServiceImpl(
                     ZignSecBankIdProgressStatus.IN_PROGRESS -> { /* strange but no-op */
                     }
                     ZignSecBankIdProgressStatus.FAILED -> {
-                        metrics.signSessionFailed(session.authenticationMethod, session.requestType)
+                        metrics.authSessionFailed(session.authenticationMethod, session.requestType)
                         authenticationEventPublisher.publishSignEvent(
                             ZignSecSignResult.Failed(
                                 session.referenceId,
@@ -189,7 +190,7 @@ class ZignSecSessionServiceImpl(
                         )
                     }
                     ZignSecBankIdProgressStatus.COMPLETED -> {
-                        metrics.signSessionSuccess(session.authenticationMethod, session.requestType)
+                        metrics.authSessionSuccess(session.authenticationMethod, session.requestType)
                         //TODO: re add this when everything is in order with zign sec and person number also un ignore the test in ZignSecSessionServiceImplTest
                         //NOTE: this is also used in denmark so make sure both work on changing
                         //check that personal number is matching when signing
@@ -215,14 +216,14 @@ class ZignSecSessionServiceImpl(
                     ZignSecBankIdProgressStatus.IN_PROGRESS -> { /* strange but no-op */
                     }
                     ZignSecBankIdProgressStatus.FAILED -> {
-                        metrics.signSessionFailed(session.authenticationMethod, session.requestType)
+                        metrics.authSessionFailed(session.authenticationMethod, session.requestType)
                         authenticationEventPublisher.publishAuthenticationEvent(
                             ZignSecAuthenticationResult.Failed(
                                 session.referenceId,
                                 session.memberId))
                     }
                     ZignSecBankIdProgressStatus.COMPLETED -> {
-                        metrics.signSessionSuccess(session.authenticationMethod, session.requestType)
+                        metrics.authSessionSuccess(session.authenticationMethod, session.requestType)
 
                         val idProviderPersonId = session.notification!!.identity!!.idProviderPersonId!!
 

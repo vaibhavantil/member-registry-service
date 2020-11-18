@@ -1,4 +1,4 @@
-package com.hedvig.external
+package com.hedvig.external.zignSec
 
 import com.hedvig.external.authentication.dto.ZignSecAuthenticationMethod
 import com.hedvig.external.authentication.dto.ZignSecBankIdAuthenticationRequest
@@ -21,15 +21,14 @@ class Metrics(private val registry:MeterRegistry) {
     }
 
     fun authRequestSuccess(authMethod: ZignSecAuthenticationMethod, type: ZignSecAuthenticationType) {
-        sessionStartedCounter[authMethod]?.get(type)?.increment()
         authRequestSuccessCounters[authMethod]?.get(type)?.increment()
     }
 
-    fun signSessionFailed(authenticationMethod: ZignSecAuthenticationMethod, requestType: ZignSecAuthenticationType) {
+    fun authSessionFailed(authenticationMethod: ZignSecAuthenticationMethod, requestType: ZignSecAuthenticationType) {
         sessionFailedCounter[authenticationMethod]?.get(requestType)?.increment()
     }
 
-    fun signSessionSuccess(authenticationMethod: ZignSecAuthenticationMethod, requestType: ZignSecAuthenticationType) {
+    fun authSessionSuccess(authenticationMethod: ZignSecAuthenticationMethod, requestType: ZignSecAuthenticationType) {
         sessionSuccessCounter[authenticationMethod]?.get(requestType)?.increment()
     }
 
@@ -45,5 +44,9 @@ class Metrics(private val registry:MeterRegistry) {
         return types
             .map { t -> t to registry.counter(counterName, "type", t.name.toLowerCase(), *tags)  }
             .toMap()
+    }
+
+    fun authStartSession(request: ZignSecBankIdAuthenticationRequest, type: ZignSecAuthenticationType) {
+        sessionStartedCounter[request.authMethod]?.get(type)?.increment()
     }
 }
