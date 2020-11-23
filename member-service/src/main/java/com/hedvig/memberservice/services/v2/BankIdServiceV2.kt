@@ -67,7 +67,7 @@ class BankIdServiceV2(
                     }
                 }
                 CollectStatus.failed -> {
-                    swedishBankIdMetrics.failedBankIdV2Auth()
+                    swedishBankIdMetrics.failedBankIdV2Auth(bankIdRes.hintCode)
                     when (bankIdRes.hintCode) {
                         "userCancel", "cancelled"-> {
                             redisEventPublisher.onAuthSessionUpdated(memberId, AuthSessionUpdatedEventStatus.FAILED)

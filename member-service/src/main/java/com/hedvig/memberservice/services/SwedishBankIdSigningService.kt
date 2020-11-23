@@ -109,7 +109,7 @@ class SwedishBankIdSigningService(
                             memberService.bankIdSignComplete(s.memberId, response)
                             s.status = SignStatus.COMPLETED
                         } else if (response.status == CollectStatus.failed) {
-                            swedishBankIdMetrics.failBankIdSign()
+                            swedishBankIdMetrics.failBankIdSign(response.hintCode)
                             s.status = SignStatus.FAILED
                         }
                         signSessionRepository.save(s)
