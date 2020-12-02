@@ -29,7 +29,7 @@ class UnderwriterSigningServiceImpl(
         if (isAlreadySigned(ssn)) {
             return StartSwedishBankIdSignResponse(
                 autoStartToken = null,
-                internalErrorMessage = "Member already signed"
+                internalErrorMessage = "Could not start sign"
             )
         }
 
