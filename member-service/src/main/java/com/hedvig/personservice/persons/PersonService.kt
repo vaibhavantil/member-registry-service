@@ -1,12 +1,13 @@
 package com.hedvig.personservice.persons
 
 import com.hedvig.memberservice.aggregates.FraudulentStatus
+import com.hedvig.memberservice.aggregates.MemberStatus
 import com.hedvig.memberservice.query.MemberEntity
 import com.hedvig.memberservice.query.MemberRepository
 import com.hedvig.personservice.debts.DebtService
-import com.hedvig.personservice.persons.domain.commands.RemoveWhitelistCommand
 import com.hedvig.personservice.persons.domain.commands.CheckPersonDebtCommand
 import com.hedvig.personservice.persons.domain.commands.CreatePersonCommand
+import com.hedvig.personservice.persons.domain.commands.RemoveWhitelistCommand
 import com.hedvig.personservice.persons.domain.commands.WhitelistPersonCommand
 import com.hedvig.personservice.persons.model.Flag
 import com.hedvig.personservice.persons.model.Person
@@ -15,14 +16,15 @@ import com.hedvig.personservice.persons.query.PersonRepository
 import org.axonframework.commandhandling.gateway.CommandGateway
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Lazy
+import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 
 @Service
 class PersonService @Autowired constructor(
-        private val commandGateway: CommandGateway,
-        private val personRepository: PersonRepository,
-        private val memberRepository: MemberRepository,
-        @Lazy private val debtService: DebtService
+    private val commandGateway: CommandGateway,
+    private val personRepository: PersonRepository,
+    private val memberRepository: MemberRepository,
+    @Lazy private val debtService: DebtService
 ) {
 
     fun createPerson(ssn: String) {
@@ -73,7 +75,11 @@ class PersonService @Autowired constructor(
         return calculateAllFlags(person, membersOfPerson)
     }
 
-    fun hasSigned(ssn: String?, email: String): Boolean {
+    fun hasSigned(memberId: String, ssn: String?, email: String): Boolean {
+        val member = memberRepository.findByIdOrNull(memberId.toLong())
+        if (member != null && member.status == MemberStatus.SIGNED) {
+            return true
+        }
         return memberRepository.findSignedMembersBySsnOrEmail(ssn, email).isNotEmpty()
     }
 
@@ -84,7 +90,7 @@ class PersonService @Autowired constructor(
         )
 
         fun calculateOverallFlag(personFlags: PersonFlags): Flag {
-            return when(personFlags.debtFlag) {
+            return when (personFlags.debtFlag) {
                 Flag.GREEN -> Flag.GREEN
                 Flag.AMBER -> Flag.GREEN
                 Flag.RED -> Flag.RED

@@ -13,20 +13,24 @@ interface MemberRepository : JpaRepository<MemberEntity, Long> {
 
     fun findAllByIdIn(ids: List<Long>): List<MemberEntity>
 
-    @Query("""
+    @Query(
+        """
       FROM MemberEntity
       WHERE status != 'SIGNED' AND (ssn = :ssn OR email = :email) AND id != :memberId
-    """)
+    """
+    )
     fun findNonSignedBySsnOrEmailAndNotId(
         ssn: String,
         email: String,
         memberId: Long
     ): List<MemberEntity>
 
-    @Query("""
+    @Query(
+        """
         FROM MemberEntity
         WHERE (status = 'SIGNED' OR status='TERMINATED') AND (ssn = :ssn OR email = :email)
-    """)
+    """
+    )
     fun findSignedMembersBySsnOrEmail(
         ssn: String?,
         email: String
@@ -35,7 +39,8 @@ interface MemberRepository : JpaRepository<MemberEntity, Long> {
     @Query("select count(*) from MemberEntity m where m.status = 'SIGNED'")
     fun countSignedMembers(): Long?
 
-    @Query("""
+    @Query(
+        """
         SELECT m
         FROM MemberEntity m
         WHERE
@@ -50,13 +55,15 @@ interface MemberRepository : JpaRepository<MemberEntity, Long> {
                 OR LOWER(m.email) LIKE ('%' || LOWER(:query) || '%')
                 OR m.phoneNumber LIKE ('%' || :query || '%')
             )
-    """)
+    """
+    )
     fun searchSignedOrTerminated(
         @Param("query") query: String,
         p: Pageable
     ): Page<MemberEntity>
 
-    @Query("""
+    @Query(
+        """
         SELECT m
         FROM MemberEntity m
         WHERE
@@ -67,7 +74,8 @@ interface MemberRepository : JpaRepository<MemberEntity, Long> {
             OR m.ssn LIKE ('%' || :query || '%')
             OR LOWER(m.email) LIKE ('%' || LOWER(:query) || '%')
             OR m.phoneNumber LIKE ('%' || :query || '%')
-    """)
+    """
+    )
     fun searchAll(
         @Param("query") query: String,
         p: Pageable
@@ -75,11 +83,12 @@ interface MemberRepository : JpaRepository<MemberEntity, Long> {
 
     fun findByStatus(status: MemberStatus): List<MemberEntity>
 
-    fun findAllByStatusAndSsnNotIn(status:MemberStatus, ssns: List<String>): List<MemberEntity>
+    fun findAllByStatusAndSsnNotIn(status: MemberStatus, ssns: List<String>): List<MemberEntity>
 
-
-    @Query("""
+    @Query(
+        """
         SELECT m.id from MemberEntity m WHERE m.pickedLocale is null and (first_name is null or first_name != 'GDPR')
-    """)
+    """
+    )
     fun findIdsWithNoPickedLocale(pageable: Pageable): Page<Long>
 }
