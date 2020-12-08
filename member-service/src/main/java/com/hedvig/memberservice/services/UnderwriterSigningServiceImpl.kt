@@ -78,7 +78,7 @@ class UnderwriterSigningServiceImpl(
         if (isAlreadySigned(ssn)) {
             return StartZignSecBankIdSignResponse(
                 redirectUrl = null,
-                internalErrorMessage = "Member already signed"
+                internalErrorMessage = "Could not start sign"
             )
         }
 
