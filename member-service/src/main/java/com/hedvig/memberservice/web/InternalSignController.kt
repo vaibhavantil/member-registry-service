@@ -1,7 +1,8 @@
 package com.hedvig.memberservice.web
 
-import com.hedvig.memberservice.services.UnderwriterSigningService
+import com.hedvig.memberservice.services.signing.underwriter.UnderwriterSigningService
 import com.hedvig.memberservice.web.dto.UnderwriterStartRedirectBankIdSignSessionRequest
+import com.hedvig.memberservice.web.dto.UnderwriterStartSimpleSignSessionRequest
 import com.hedvig.memberservice.web.dto.UnderwriterStartSwedishBankIdSignSessionRequest
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.PathVariable
@@ -32,7 +33,7 @@ class InternalSignController(
     )
 
     @PostMapping("norwegian/bankid/{memberId}")
-    fun startNorwegianSing(
+    fun startNorwegianSign(
         @PathVariable("memberId") memberId: Long,
         @RequestBody request: UnderwriterStartRedirectBankIdSignSessionRequest
     ) = ResponseEntity.ok(
@@ -46,7 +47,7 @@ class InternalSignController(
     )
 
     @PostMapping("danish/bankid/{memberId}")
-    fun startDanishSing(
+    fun startDanishSign(
         @PathVariable("memberId") memberId: Long,
         @RequestBody request: UnderwriterStartRedirectBankIdSignSessionRequest
     ) = ResponseEntity.ok(
@@ -56,6 +57,18 @@ class InternalSignController(
             request.ssn,
             request.successUrl,
             request.failUrl
+        )
+    )
+
+    @PostMapping("simple/{memberId}")
+    fun startSimpleSign(
+        @PathVariable("memberId") memberId: Long,
+        @RequestBody request: UnderwriterStartSimpleSignSessionRequest
+    ) = ResponseEntity.ok(
+        underwriterSigningService.startSimpleSignSession(
+            request.underwriterSessionReference,
+            memberId,
+            request.ssn
         )
     )
 }

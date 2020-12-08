@@ -1,7 +1,6 @@
 package com.hedvig.memberservice.jobs;
 
-import com.hedvig.memberservice.services.SigningService;
-import com.hedvig.memberservice.services.SwedishBankIdSigningService;
+import com.hedvig.memberservice.services.signing.sweden.SwedishBankIdSigningService;
 import lombok.val;
 import org.quartz.JobExecutionContext;
 import org.quartz.SchedulerException;

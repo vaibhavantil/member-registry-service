@@ -1,4 +1,4 @@
-package com.hedvig.memberservice.services.dto
+package com.hedvig.memberservice.services.signing.sweden.dto
 
 data class StartSwedishBankIdSignResponse(
     val autoStartToken: String?,

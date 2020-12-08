@@ -1,4 +1,4 @@
-package com.hedvig.memberservice.services
+package com.hedvig.memberservice.services.signing.zignsec
 
 import com.hedvig.external.authentication.ZignSecAuthentication
 import com.hedvig.external.authentication.dto.ZignSecAuthenticationResult

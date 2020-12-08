@@ -9,6 +9,7 @@ import com.hedvig.memberservice.query.SignedMemberEntity
 import com.hedvig.memberservice.query.SignedMemberRepository
 import com.hedvig.memberservice.services.redispublisher.AuthSessionUpdatedEventStatus
 import com.hedvig.memberservice.services.redispublisher.RedisEventPublisher
+import com.hedvig.memberservice.services.signing.zignsec.ZignSecBankIdService
 import org.axonframework.commandhandling.gateway.CommandGateway
 import org.junit.Test
 

@@ -1,8 +1,9 @@
-package com.hedvig.memberservice.services
+package com.hedvig.memberservice.services.signing.underwriter
 
-import com.hedvig.memberservice.services.dto.StartZignSecBankIdSignResponse
-import com.hedvig.memberservice.services.dto.StartSwedishBankIdSignResponse
-import java.util.*
+import com.hedvig.memberservice.services.signing.simple.dto.StartSimpleSignResponse
+import com.hedvig.memberservice.services.signing.sweden.dto.StartSwedishBankIdSignResponse
+import com.hedvig.memberservice.services.signing.zignsec.dto.StartZignSecBankIdSignResponse
+import java.util.UUID
 
 interface UnderwriterSigningService {
 
@@ -29,6 +30,8 @@ interface UnderwriterSigningService {
         successUrl: String,
         failUrl: String
     ): StartZignSecBankIdSignResponse
+
+    fun startSimpleSignSession(underwriterSessionReference: UUID, memberId: Long, ssn: String): StartSimpleSignResponse
 
     fun isUnderwriterHandlingSignSession(orderReference: UUID): Boolean
 

@@ -1,4 +1,4 @@
-package com.hedvig.memberservice.services.dto
+package com.hedvig.memberservice.services.signing.zignsec.dto
 
 import com.hedvig.external.authentication.dto.ZignSecAuthenticationResponseError
 

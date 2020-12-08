@@ -7,8 +7,8 @@ import com.hedvig.memberservice.events.MemberSignedEvent
 import com.hedvig.memberservice.events.MemberSignedWithoutBankId
 import com.hedvig.memberservice.events.NorwegianMemberSignedEvent
 import com.hedvig.memberservice.services.SNSNotificationService
-import com.hedvig.memberservice.services.SigningService
-import com.hedvig.memberservice.services.UnderwriterSigningService
+import com.hedvig.memberservice.services.signing.SigningService
+import com.hedvig.memberservice.services.signing.underwriter.UnderwriterSigningService
 import org.axonframework.eventhandling.EventMessage
 import org.axonframework.eventhandling.saga.EndSaga
 import org.axonframework.eventhandling.saga.SagaEventHandler

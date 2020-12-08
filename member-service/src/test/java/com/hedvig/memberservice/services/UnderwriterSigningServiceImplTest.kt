@@ -11,6 +11,11 @@ import com.hedvig.memberservice.query.SignedMemberEntity
 import com.hedvig.memberservice.query.SignedMemberRepository
 import com.hedvig.memberservice.query.UnderwriterSignSessionRepository
 import com.hedvig.memberservice.services.member.dto.StartSwedishSignResponse
+import com.hedvig.memberservice.services.signing.simple.SimpleSigningService
+import com.hedvig.memberservice.services.signing.sweden.SwedishBankIdSigningService
+import com.hedvig.memberservice.services.signing.underwriter.UnderwriterSigningService
+import com.hedvig.memberservice.services.signing.underwriter.UnderwriterSigningServiceImpl
+import com.hedvig.memberservice.services.signing.zignsec.ZignSecSigningService
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Before
 import org.junit.Test
@@ -36,6 +41,8 @@ class UnderwriterSigningServiceImplTest {
     lateinit var zignSecSigningService: ZignSecSigningService
     @Mock
     lateinit var signedMemberRepository: SignedMemberRepository
+    @Mock
+    lateinit var simpleSigningService: SimpleSigningService
 
     @Captor
     lateinit var captor: ArgumentCaptor<UnderwriterSignSessionEntity>
@@ -46,7 +53,7 @@ class UnderwriterSigningServiceImplTest {
 
     @Before
     fun setup() {
-        sut = UnderwriterSigningServiceImpl(underwriterSignSessionRepository, underwriterClient, swedishBankIdSigningService, zignSecSigningService, signedMemberRepository, arrayOf("hedvig.com"))
+        sut = UnderwriterSigningServiceImpl(underwriterSignSessionRepository, underwriterClient, swedishBankIdSigningService, zignSecSigningService, simpleSigningService, signedMemberRepository, arrayOf("hedvig.com"))
     }
 
     @Test

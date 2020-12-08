@@ -7,7 +7,7 @@ import com.hedvig.memberservice.entities.SignSession;
 import com.hedvig.memberservice.entities.SignStatus;
 import com.hedvig.memberservice.services.BankIdRestService;
 import com.hedvig.memberservice.services.MemberHasExistingInsuranceException;
-import com.hedvig.memberservice.services.SigningService;
+import com.hedvig.memberservice.services.signing.SigningService;
 import com.hedvig.memberservice.services.member.dto.MemberSignResponse;
 import com.hedvig.memberservice.web.v2.dto.SignStatusResponse;
 import lombok.val;
@@ -19,8 +19,6 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
-
-import java.util.Optional;
 
 import static org.hamcrest.Matchers.*;
 import static org.hamcrest.core.IsNull.nullValue;
