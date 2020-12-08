@@ -1,6 +1,5 @@
 package com.hedvig.personservice.persons.web.dtos
 
-import com.hedvig.personservice.persons.PersonService
 import com.hedvig.personservice.persons.model.Flag
 import com.hedvig.personservice.persons.model.Person
 

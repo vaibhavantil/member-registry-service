@@ -1,13 +1,19 @@
 package com.hedvig.personservice.persons.web
 
-import com.hedvig.personservice.persons.web.dtos.HasPersonSignedBeforeRequest
 import com.hedvig.personservice.persons.PersonService
 import com.hedvig.personservice.persons.model.PersonFlags
+import com.hedvig.personservice.persons.web.dtos.HasSignedBeforeRequest
 import com.hedvig.personservice.persons.web.dtos.PersonDto
 import com.hedvig.personservice.persons.web.dtos.PersonStatusDto
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.ResponseEntity
-import org.springframework.web.bind.annotation.*
+import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.PathVariable
+import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.RequestBody
+import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RequestParam
+import org.springframework.web.bind.annotation.RestController
 
 @RestController
 @RequestMapping("/_/person")
@@ -82,8 +88,8 @@ class PersonController @Autowired constructor(
     }
 
     @PostMapping("/has/signed")
-    fun hasSigned(@RequestBody request: HasPersonSignedBeforeRequest): ResponseEntity<Boolean> {
-        val hasSigned = personService.hasSigned(request.ssn, request.email)
+    fun hasSigned(@RequestBody request: HasSignedBeforeRequest): ResponseEntity<Boolean> {
+        val hasSigned = personService.hasSigned(request.memberId, request.ssn, request.email)
         return ResponseEntity.ok(hasSigned)
     }
 }
