@@ -31,10 +31,10 @@ class UnderwriterSigningServiceImpl(
 ) : UnderwriterSigningService {
 
     override fun startSwedishBankIdSignSession(underwriterSessionRef: UUID, memberId: Long, ssn: String, ipAddress: String, isSwitching: Boolean): StartSwedishBankIdSignResponse {
-        if (isAlreadySigned(ssn)) {
+        ensureSsnIsNotSigned(ssn) {
             return StartSwedishBankIdSignResponse(
                 autoStartToken = null,
-                internalErrorMessage = "Could not start sign"
+                internalErrorMessage = it
             )
         }
 
@@ -80,10 +80,10 @@ class UnderwriterSigningServiceImpl(
             )
         }
 
-        if (isAlreadySigned(ssn)) {
+        ensureSsnIsNotSigned(ssn) {
             return StartZignSecBankIdSignResponse(
                 redirectUrl = null,
-                internalErrorMessage = "Could not start sign"
+                internalErrorMessage = it
             )
         }
 
@@ -104,10 +104,10 @@ class UnderwriterSigningServiceImpl(
         validTargetHosts.contains(URL(url).host)
 
     override fun startSimpleSignSession(underwriterSessionReference: UUID, memberId: Long, ssn: String): StartSimpleSignResponse {
-        if (isAlreadySigned(ssn)) {
+        ensureSsnIsNotSigned(ssn) {
             return StartSimpleSignResponse(
                 successfullyStarted = false,
-                internalErrorMessage = "Could not start sign"
+                internalErrorMessage = it
             )
         }
 
@@ -115,6 +115,13 @@ class UnderwriterSigningServiceImpl(
         underwriterSignSessionRepository.saveOrUpdateReusableSession(underwriterSessionReference, singReference)
         return StartSimpleSignResponse(successfullyStarted = true)
     }
+
+    private inline fun <T> ensureSsnIsNotSigned(ssn: String, returner: (String) -> T): T? =
+        if (signedMemberRepository.findBySsn(ssn).isPresent) {
+            returner.invoke("Could not start sign")
+        } else {
+            null
+        }
 
     override fun isUnderwriterHandlingSignSession(orderReference: UUID): Boolean =
         underwriterSignSessionRepository.findBySignReference(orderReference) != null
