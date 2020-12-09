@@ -19,7 +19,7 @@ class SimpleSigningServiceImpl(
 
     override fun startSign(memberId: Long, ssn: String): UUID {
         val sessionId = UUID.randomUUID()
-        repository.save(SimpleSignSession(sessionId, memberId))
+        repository.save(SimpleSignSession(sessionId, memberId, ssn))
         return sessionId
     }
 

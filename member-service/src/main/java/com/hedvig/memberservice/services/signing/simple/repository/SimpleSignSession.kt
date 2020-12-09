@@ -11,5 +11,6 @@ class SimpleSignSession(
     val referenceId: UUID,
     @Column(unique = true)
     val memberId: Long,
+    val ssn: String,
     var isContractsCreated: Boolean = false
 )
