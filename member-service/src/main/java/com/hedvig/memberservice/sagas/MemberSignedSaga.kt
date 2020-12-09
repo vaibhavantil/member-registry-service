@@ -39,7 +39,7 @@ class MemberSignedSaga {
     @SagaEventHandler(associationProperty = "id")
     @StartSaga
     @EndSaga
-    fun onMemberSignedEvent(e: MemberSignedEvent, eventMessage: EventMessage<MemberSignedEvent>) {
+    fun onMemberSignedEvent(e: MemberSignedEvent) {
         val isUnderwriterHandlingSession = underwriterSigningService.isUnderwriterHandlingSignSession(UUID.fromString(e.getReferenceId()))
         if (isUnderwriterHandlingSession) {
             try {
@@ -64,10 +64,7 @@ class MemberSignedSaga {
     @SagaEventHandler(associationProperty = "memberId")
     @StartSaga
     @EndSaga
-    fun onMemberSignedFromUnderwriterEvent(
-        e: MemberSignedWithoutBankId,
-        eventMessage: EventMessage<MemberSignedWithoutBankId>
-    ) {
+    fun onMemberSignedFromUnderwriterEvent(e: MemberSignedWithoutBankId) {
         log.debug("Product has already been signed [MemberId: ${e.memberId}]")
 
         signingService.productSignConfirmed(e.memberId)
@@ -77,10 +74,7 @@ class MemberSignedSaga {
     @SagaEventHandler(associationProperty = "memberId")
     @StartSaga
     @EndSaga
-    fun onNorwegianMemberSignedEvent(
-        e: NorwegianMemberSignedEvent,
-        eventMessage: EventMessage<MemberSignedWithoutBankId>
-    ) {
+    fun onNorwegianMemberSignedEvent(e: NorwegianMemberSignedEvent) {
         generifiedZignSecSign(e.memberId, e.referenceId, SignMethod.NORWEGIAN_BANK_ID) { referenceId ->
             underwriterSigningService.norwegianBankIdSignSessionWasCompleted(referenceId)
         }
@@ -89,10 +83,7 @@ class MemberSignedSaga {
     @SagaEventHandler(associationProperty = "memberId")
     @StartSaga
     @EndSaga
-    fun onDanishMemberSignedEvent(
-        e: DanishMemberSignedEvent,
-        eventMessage: EventMessage<MemberSignedWithoutBankId>
-    ) {
+    fun onDanishMemberSignedEvent(e: DanishMemberSignedEvent) {
         generifiedZignSecSign(e.memberId, e.referenceId, SignMethod.DANISH_BANK_ID) { referenceId ->
             underwriterSigningService.danishBankIdSignSessionWasCompleted(referenceId)
         }
