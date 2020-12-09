@@ -111,7 +111,7 @@ class UnderwriterSigningServiceImpl(
             )
         }
 
-        val singReference = simpleSigningService.startSign(memberId, ssn)
+        val signReference = simpleSigningService.startSign(memberId, ssn)
         underwriterSignSessionRepository.saveOrUpdateReusableSession(underwriterSessionReference, singReference)
         return StartSimpleSignResponse(successfullyStarted = true)
     }
