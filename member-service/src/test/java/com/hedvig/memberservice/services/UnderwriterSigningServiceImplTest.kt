@@ -4,7 +4,6 @@ import com.hedvig.external.authentication.dto.ZignSecAuthenticationResponseError
 import com.hedvig.external.authentication.dto.StartZignSecAuthenticationResult
 import com.hedvig.external.bankID.bankIdTypes.OrderResponse
 import com.hedvig.integration.underwriter.UnderwriterClient
-import com.hedvig.integration.underwriter.dtos.SignRequest
 import com.hedvig.memberservice.commands.models.ZignSecAuthenticationMarket
 import com.hedvig.memberservice.entities.UnderwriterSignSessionEntity
 import com.hedvig.memberservice.query.SignedMemberEntity
