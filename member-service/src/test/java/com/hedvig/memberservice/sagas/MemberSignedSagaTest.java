@@ -47,8 +47,7 @@ public class MemberSignedSagaTest {
 
     final MemberSignedEvent e = new MemberSignedEvent(1337L, "123e4567-e89b-12d3-a456-426655440000", "signature",
       "oscpResponse", "19121212121212");
-    saga.onMemberSignedEvent(
-      e, new GenericEventMessage<>(e));
+    saga.onMemberSignedEvent(e);
 
     then(signingService).should().completeSwedishSession(e.getReferenceId());
     then(signingService).should().productSignConfirmed(e.getId());
@@ -69,8 +68,7 @@ public class MemberSignedSagaTest {
 
     final MemberSignedEvent e = new MemberSignedEvent(1337L, "123e4567-e89b-12d3-a456-426655440000", "signature",
       "oscpResponse", "19121212121212");
-    saga.onMemberSignedEvent(
-      e, new GenericEventMessage<>(e));
+    saga.onMemberSignedEvent(e);
 
     then(signingService).should().completeSwedishSession(e.getReferenceId());
     then(signingService).should().productSignConfirmed(e.getId());
@@ -89,8 +87,7 @@ public class MemberSignedSagaTest {
 
     final MemberSignedEvent e = new MemberSignedEvent(1337L, "123e4567-e89b-12d3-a456-426655440000", "signature",
       "oscpResponse", "19121212121212");
-    saga.onMemberSignedEvent(
-      e, new GenericEventMessage<>(e));
+    saga.onMemberSignedEvent(e);
 
     then(underwriterSigningService).should().swedishBankIdSignSessionWasCompleted(e.getReferenceId(), e.getSignature(), e.getOscpResponse());
     verifyZeroInteractions(underwriterApi);
@@ -110,8 +107,7 @@ public class MemberSignedSagaTest {
 
     final MemberSignedEvent e = new MemberSignedEvent(1337L, "123e4567-e89b-12d3-a456-426655440000", "signature",
       "oscpResponse", "19121212121212");
-    saga.onMemberSignedEvent(
-      e, new GenericEventMessage<>(e));
+    saga.onMemberSignedEvent(e);
 
     then(underwriterApi).should().memberSigned(e.id.toString(), e.referenceId, e.signature, e.oscpResponse);
   }
@@ -128,8 +124,7 @@ public class MemberSignedSagaTest {
     saga.setUnderwriterSigningService(underwriterSigningService);
 
     final NorwegianMemberSignedEvent e = new NorwegianMemberSignedEvent(1337L, "12121212120", "{ \"json\":true }", UUID.fromString("123e4567-e89b-12d3-a456-426655440000"));
-    saga.onNorwegianMemberSignedEvent(
-      e, new GenericEventMessage(e));
+    saga.onNorwegianMemberSignedEvent(e);
 
     then(signingService).should().productSignConfirmed(e.getMemberId());
     then(snsNotificationService).should().sendMemberSignedNotification(e.getMemberId());
@@ -148,8 +143,7 @@ public class MemberSignedSagaTest {
     saga.setUnderwriterSigningService(underwriterSigningService);
 
     final NorwegianMemberSignedEvent e = new NorwegianMemberSignedEvent(1337L, "12121212120", "{ \"json\":true }", UUID.fromString("123e4567-e89b-12d3-a456-426655440000"));
-    saga.onNorwegianMemberSignedEvent(
-      e, new GenericEventMessage(e));
+    saga.onNorwegianMemberSignedEvent(e);
 
     then(signingService).should().productSignConfirmed(e.getMemberId());
     then(snsNotificationService).should().sendMemberSignedNotification(e.getMemberId());
@@ -166,8 +160,7 @@ public class MemberSignedSagaTest {
     saga.setUnderwriterSigningService(underwriterSigningService);
 
     final NorwegianMemberSignedEvent e = new NorwegianMemberSignedEvent(1337L, "12121212120", "{ \"json\":true }", UUID.fromString("123e4567-e89b-12d3-a456-426655440000"));
-    saga.onNorwegianMemberSignedEvent(
-      e, new GenericEventMessage(e));
+    saga.onNorwegianMemberSignedEvent(e);
 
     then(underwriterSigningService).should().norwegianBankIdSignSessionWasCompleted(e.getReferenceId());
     verifyZeroInteractions(underwriterApi);
@@ -186,8 +179,7 @@ public class MemberSignedSagaTest {
     verifyNoMoreInteractions(underwriterSigningService);
 
     final NorwegianMemberSignedEvent e = new NorwegianMemberSignedEvent(1337L, "12121212120", "{ \"json\":true }", UUID.fromString("123e4567-e89b-12d3-a456-426655440000"));
-    saga.onNorwegianMemberSignedEvent(
-      e, new GenericEventMessage(e));
+    saga.onNorwegianMemberSignedEvent(e);
 
     then(underwriterApi).should().memberSigned("1337", "", "", "");
   }
@@ -204,8 +196,7 @@ public class MemberSignedSagaTest {
     saga.setUnderwriterSigningService(underwriterSigningService);
 
     final DanishMemberSignedEvent e = new DanishMemberSignedEvent(1337L, "1212121212", "{ \"json\":true }", UUID.fromString("123e4567-e89b-12d3-a456-426655440001"));
-    saga.onDanishMemberSignedEvent(
-      e, new GenericEventMessage(e));
+    saga.onDanishMemberSignedEvent(e);
 
     then(signingService).should().productSignConfirmed(e.getMemberId());
     then(snsNotificationService).should().sendMemberSignedNotification(e.getMemberId());
@@ -224,8 +215,7 @@ public class MemberSignedSagaTest {
     saga.setUnderwriterSigningService(underwriterSigningService);
 
     final DanishMemberSignedEvent e = new DanishMemberSignedEvent(1337L, "1212121212", "{ \"json\":true }", UUID.fromString("123e4567-e89b-12d3-a456-426655440001"));
-    saga.onDanishMemberSignedEvent(
-      e, new GenericEventMessage(e));
+    saga.onDanishMemberSignedEvent(e);
 
     then(signingService).should().productSignConfirmed(e.getMemberId());
     then(snsNotificationService).should().sendMemberSignedNotification(e.getMemberId());
@@ -242,8 +232,7 @@ public class MemberSignedSagaTest {
     saga.setUnderwriterSigningService(underwriterSigningService);
 
     final DanishMemberSignedEvent e = new DanishMemberSignedEvent(1337L, "1212121212", "{ \"json\":true }", UUID.fromString("123e4567-e89b-12d3-a456-426655440001"));
-    saga.onDanishMemberSignedEvent(
-      e, new GenericEventMessage(e));
+    saga.onDanishMemberSignedEvent(e);
 
     then(underwriterSigningService).should().danishBankIdSignSessionWasCompleted(e.getReferenceId());
     verifyZeroInteractions(underwriterApi);
@@ -262,8 +251,7 @@ public class MemberSignedSagaTest {
     verifyNoMoreInteractions(underwriterSigningService);
 
     final DanishMemberSignedEvent e = new DanishMemberSignedEvent(1337L, "1212121212", "{ \"json\":true }", UUID.fromString("123e4567-e89b-12d3-a456-426655440001"));
-    saga.onDanishMemberSignedEvent(
-      e, new GenericEventMessage(e));
+    saga.onDanishMemberSignedEvent(e);
 
     then(underwriterApi).should().memberSigned("1337", "", "", "");
   }
