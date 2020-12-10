@@ -316,8 +316,8 @@ public class MemberAggregate {
 
   @CommandHandler
   public void on(MemberSimpleSignedCommand memberSimpleSignedCommand) {
-    apply(new SSNUpdatedEvent(this.id, memberSimpleSignedCommand.getSsn()));
     apply(new MemberSimpleSignedEvent(memberSimpleSignedCommand.getId(), memberSimpleSignedCommand.getSsn(), memberSimpleSignedCommand.getReferenceId()));
+    apply(new SSNUpdatedEvent(this.id, memberSimpleSignedCommand.getSsn()));
   }
 
   @CommandHandler
