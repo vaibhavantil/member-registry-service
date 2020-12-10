@@ -31,10 +31,10 @@ class UnderwriterSigningServiceImpl(
 ) : UnderwriterSigningService {
 
     override fun startSwedishBankIdSignSession(underwriterSessionRef: UUID, memberId: Long, ssn: String, ipAddress: String, isSwitching: Boolean): StartSwedishBankIdSignResponse {
-        ensureSsnIsNotSigned(ssn) {
+        ensureSsnIsNotSigned(ssn) { errorMessage ->
             return StartSwedishBankIdSignResponse(
                 autoStartToken = null,
-                internalErrorMessage = it
+                internalErrorMessage = errorMessage
             )
         }
 
@@ -80,10 +80,10 @@ class UnderwriterSigningServiceImpl(
             )
         }
 
-        ensureSsnIsNotSigned(ssn) {
+        ensureSsnIsNotSigned(ssn) { errorMessage ->
             return StartZignSecBankIdSignResponse(
                 redirectUrl = null,
-                internalErrorMessage = it
+                internalErrorMessage = errorMessage
             )
         }
 
@@ -104,10 +104,10 @@ class UnderwriterSigningServiceImpl(
         validTargetHosts.contains(URL(url).host)
 
     override fun startSimpleSignSession(underwriterSessionReference: UUID, memberId: Long, ssn: String): StartSimpleSignResponse {
-        ensureSsnIsNotSigned(ssn) {
+        ensureSsnIsNotSigned(ssn) { errorMessage ->
             return StartSimpleSignResponse(
                 successfullyStarted = false,
-                internalErrorMessage = it
+                internalErrorMessage = errorMessage
             )
         }
 
@@ -116,7 +116,7 @@ class UnderwriterSigningServiceImpl(
         return StartSimpleSignResponse(successfullyStarted = true)
     }
 
-    private inline fun <T> ensureSsnIsNotSigned(ssn: String, returner: (String) -> T): T? =
+    private inline fun <T> ensureSsnIsNotSigned(ssn: String, returner: (errorMessage: String) -> T): T? =
         if (signedMemberRepository.findBySsn(ssn).isPresent) {
             returner.invoke("Could not start sign")
         } else {
