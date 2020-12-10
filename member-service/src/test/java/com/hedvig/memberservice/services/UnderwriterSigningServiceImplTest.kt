@@ -15,6 +15,8 @@ import com.hedvig.memberservice.services.signing.simple.SimpleSigningService
 import com.hedvig.memberservice.services.signing.sweden.SwedishBankIdSigningService
 import com.hedvig.memberservice.services.signing.underwriter.UnderwriterSigningServiceImpl
 import com.hedvig.memberservice.services.signing.zignsec.ZignSecSigningService
+import com.hedvig.memberservice.web.dto.UnderwriterStartSignSessionRequest
+import com.hedvig.memberservice.web.dto.UnderwriterStartSignSessionResponse
 import io.mockk.Called
 import io.mockk.every
 import io.mockk.mockk
@@ -159,8 +161,8 @@ class UnderwriterSigningServiceImplTest {
 
         val response = sut.startDanishBankIdSignSession(UUID.randomUUID(), 123L, "", "https://hedvig.com/success", "https://hedvig.com/fail")
 
-        AssertionsForClassTypes.assertThat(response.redirectUrl).isNull()
-        AssertionsForClassTypes.assertThat(response.internalErrorMessage).isNotNull()
+        assertThat(response.redirectUrl).isNull()
+        assertThat(response.internalErrorMessage).isNotNull()
     }
 
     @Test
@@ -169,10 +171,11 @@ class UnderwriterSigningServiceImplTest {
             signedMemberRepository.findBySsn(any())
         } returns Optional.of(SignedMemberEntity())
 
-        val response = sut.startSimpleSignSession(UUID.randomUUID(), 123L, "")
+        val response = sut.startSign(123L, UnderwriterStartSignSessionRequest.SimpleSign(UUID.randomUUID(), ""))
 
-        AssertionsForClassTypes.assertThat(response.successfullyStarted).isFalse()
-        AssertionsForClassTypes.assertThat(response.internalErrorMessage).isNotNull()
+        require(response is UnderwriterStartSignSessionResponse.SimpleSign)
+        assertThat(response.successfullyStarted).isFalse()
+        assertThat(response.internalErrorMessage).isNotNull()
     }
 
     companion object {
