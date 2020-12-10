@@ -115,7 +115,7 @@ class MemberSignedSaga {
             try {
                 underwritingSign(referenceId!!)
             } catch (ex: RuntimeException) {
-                log.error("Could not complete generified ZignSec bank id signing session in about signed member [MemberId: ${memberId}] Exception $ex")
+                log.error("Could not complete generified underwriter signing session in about signed member [MemberId: ${memberId}] Exception $ex")
             }
         } else {
             try {

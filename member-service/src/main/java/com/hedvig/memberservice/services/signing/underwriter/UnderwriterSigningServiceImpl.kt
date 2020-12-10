@@ -167,7 +167,7 @@ class UnderwriterSigningServiceImpl(
 
     override fun underwriterSignSessionWasCompleted(orderReference: UUID) {
         val session = underwriterSignSessionRepository.findBySignReference(orderReference)
-            ?: throw IllegalCallerException("Called norwegianBankIdSignSessionWasCompleted but could not find underwriter sign session use isUnderwriterIsHandlingSignSession before calling this method")
+            ?: throw IllegalCallerException("Called underwriterSignSessionWasCompleted but could not find underwriter sign session use isUnderwriterIsHandlingSignSession before calling this method")
 
         underwriterClient.singSessionComplete(session.underwriterSignSessionReference)
     }
