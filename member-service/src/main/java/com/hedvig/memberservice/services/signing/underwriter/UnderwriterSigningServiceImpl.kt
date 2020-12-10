@@ -140,15 +140,7 @@ class UnderwriterSigningServiceImpl(
         )
     }
 
-    override fun norwegianBankIdSignSessionWasCompleted(orderReference: UUID) {
-        completeZignSecSession(orderReference)
-    }
-
-    override fun danishBankIdSignSessionWasCompleted(orderReference: UUID) {
-        completeZignSecSession(orderReference)
-    }
-
-    private fun completeZignSecSession(orderReference: UUID) {
+    override fun underwriterSignSessionWasCompleted(orderReference: UUID) {
         val session = underwriterSignSessionRepository.findBySignReference(orderReference)
             ?: throw IllegalCallerException("Called norwegianBankIdSignSessionWasCompleted but could not find underwriter sign session use isUnderwriterIsHandlingSignSession before calling this method")
 

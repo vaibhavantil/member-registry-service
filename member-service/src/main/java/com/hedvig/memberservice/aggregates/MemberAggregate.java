@@ -20,6 +20,8 @@ import org.axonframework.spring.stereotype.Aggregate;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.IOException;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
@@ -86,6 +88,12 @@ public class MemberAggregate {
       applyChain = apply(new SSNUpdatedEvent(this.id, ssn));
       // -- Tracking id generation for the new member id
       generateTrackingId();
+      LocalDate birthDate = getBirthdateFromSwedishSsn(ssn);
+      if (birthDate != null) {
+          applyChain = applyChain.andThenApply(
+              () -> new BirthDateUpdatedEvent(this.id, birthDate)
+          );
+      }
 
       try {
         applyChain = getPersonInformationFromBisnode(applyChain, ssn);
@@ -115,6 +123,21 @@ public class MemberAggregate {
     } else {
       apply(authenticatedEvent);
     }
+  }
+
+  private void getBirthdateFromSwedishSsnAndApplyEvent(Long memberId, String ssn) {
+    LocalDate birthDate = getBirthdateFromSwedishSsn(ssn);
+    if (birthDate != null) {
+      apply(new BirthDateUpdatedEvent(memberId, birthDate));
+    }
+  }
+
+  private LocalDate getBirthdateFromSwedishSsn(String ssn) {
+      if (ssn != null) {
+          final DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyyMMdd");
+          return LocalDate.parse(ssn.substring(0, 8), dtf);
+      }
+      return null;
   }
 
   private void generateTrackingId() {
@@ -164,6 +187,7 @@ public class MemberAggregate {
   void startOnboardingWithSSNCommand(StartOnboardingWithSSNCommand command) {
     if (this.status == MemberStatus.INITIATED || this.status == MemberStatus.ONBOARDING) {
       apply(new OnboardingStartedWithSSNEvent(this.id, command.getSsn()));
+      getBirthdateFromSwedishSsnAndApplyEvent(this.id, command.getSsn());
       apply(new MemberStartedOnBoardingEvent(this.id, MemberStatus.ONBOARDING));
     } else {
       throw new RuntimeException(
@@ -226,6 +250,7 @@ public class MemberAggregate {
       && !Objects.equals(this.member.getSsn(), cmd.getPersonalNumber())) {
       apply(new SSNUpdatedEvent(this.id, cmd.getPersonalNumber()));
     }
+    getBirthdateFromSwedishSsnAndApplyEvent(cmd.getId(), cmd.getPersonalNumber());
 
     apply(new NewCashbackSelectedEvent(this.id, cashbackService.getDefaultId(this.id).toString()));
 
@@ -287,6 +312,12 @@ public class MemberAggregate {
   @CommandHandler
   public void on(SignMemberFromUnderwriterCommand signMemberFromUnderwriterCommand) {
     apply(new MemberSignedWithoutBankId(signMemberFromUnderwriterCommand.getId(), signMemberFromUnderwriterCommand.getSsn()));
+  }
+
+  @CommandHandler
+  public void on(MemberSimpleSignedCommand memberSimpleSignedCommand) {
+    apply(new SSNUpdatedEvent(this.id, memberSimpleSignedCommand.getSsn()));
+    apply(new MemberSimpleSignedEvent(memberSimpleSignedCommand.getId(), memberSimpleSignedCommand.getSsn(), memberSimpleSignedCommand.getReferenceId()));
   }
 
   @CommandHandler
@@ -380,6 +411,7 @@ public class MemberAggregate {
     if (cmd.getSSN() != null
       && !Objects.equals(member.getSsn(), cmd.getSSN())) {
       apply(new SSNUpdatedEvent(this.id, cmd.getSSN()));
+      getBirthdateFromSwedishSsnAndApplyEvent(this.id, cmd.getSSN());
     }
 
     if (cmd.getEmail() != null
@@ -392,6 +424,7 @@ public class MemberAggregate {
   public void on(UpdateSSNCommand cmd) {
     log.debug("Updating ssn for member {}, ssn: {}", cmd.getMemberId(), cmd.getSSN());
     apply(new SSNUpdatedEvent(cmd.getMemberId(), cmd.getSSN()));
+    getBirthdateFromSwedishSsnAndApplyEvent(cmd.getMemberId(), cmd.getSSN());
   }
 
   @CommandHandler
@@ -408,6 +441,7 @@ public class MemberAggregate {
         cmd.getPersonalNumber()
       )
     );
+    getBirthdateFromSwedishSsnAndApplyEvent(cmd.getMemberId(), cmd.getPersonalNumber());
 
     apply(
       new NewCashbackSelectedEvent(

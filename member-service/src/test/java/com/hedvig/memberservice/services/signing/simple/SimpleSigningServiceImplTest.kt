@@ -1,5 +1,6 @@
 package com.hedvig.memberservice.services.signing.simple
 
+import com.hedvig.memberservice.commands.MemberSimpleSignedCommand
 import com.hedvig.memberservice.services.signing.simple.dto.SimpleSignStatus
 import com.hedvig.memberservice.services.signing.simple.repository.SimpleSignSession
 import com.hedvig.memberservice.services.signing.simple.repository.SimpleSigningSessionRepository
@@ -7,7 +8,9 @@ import io.mockk.every
 import io.mockk.junit5.MockKExtension
 import io.mockk.mockk
 import io.mockk.slot
+import io.mockk.verify
 import org.assertj.core.api.Assertions.assertThat
+import org.axonframework.commandhandling.gateway.CommandGateway
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import java.util.UUID
@@ -16,7 +19,9 @@ import java.util.UUID
 class SimpleSigningServiceImplTest {
 
     private val repository: SimpleSigningSessionRepository = mockk()
-    private val cut = SimpleSigningServiceImpl(repository)
+    private val commandGateway: CommandGateway = mockk(relaxed = true)
+
+    private val cut = SimpleSigningServiceImpl(repository, commandGateway)
 
     @Test
     fun `start sign should store simple sign session`() {
@@ -28,8 +33,9 @@ class SimpleSigningServiceImplTest {
             repository.save(capture(slot))
         } returns SimpleSignSession(UUID.randomUUID(), memberId, ssn)
 
-        cut.startSign(memberId, ssn)
+        val result = cut.startSign(memberId, ssn)
 
+        verify { commandGateway.sendAndWait(MemberSimpleSignedCommand(memberId, ssn, result)) }
         assertThat(slot.captured.memberId).isEqualTo(memberId)
         assertThat(slot.captured.ssn).isEqualTo(ssn)
         assertThat(slot.captured.isContractsCreated).isEqualTo(false)

@@ -139,7 +139,7 @@ public class MemberSignedSagaTest {
   public void onNorwegianMemberSignedEvent_whenUnderwriterServiceThrowsRuntimeException_willCallSigningService() {
     val uuid = UUID.fromString("123e4567-e89b-12d3-a456-426655440000");
     when(underwriterSigningService.isUnderwriterHandlingSignSession(uuid)).thenReturn(true);
-    willThrow(RuntimeException.class).given(underwriterSigningService).norwegianBankIdSignSessionWasCompleted(uuid);
+    willThrow(RuntimeException.class).given(underwriterSigningService).underwriterSignSessionWasCompleted(uuid);
 
     val saga = new MemberSignedSaga();
     saga.setUnderwriterApi(underwriterApi);
@@ -169,7 +169,7 @@ public class MemberSignedSagaTest {
     saga.onNorwegianMemberSignedEvent(
       e, new GenericEventMessage(e));
 
-    then(underwriterSigningService).should().norwegianBankIdSignSessionWasCompleted(e.getReferenceId());
+    then(underwriterSigningService).should().underwriterSignSessionWasCompleted(e.getReferenceId());
     verifyZeroInteractions(underwriterApi);
   }
 
@@ -215,7 +215,7 @@ public class MemberSignedSagaTest {
   public void onDanishMemberSignedEvent_whenUnderwriterServiceThrowsRuntimeException_willCallSigningService() {
     val uuid = UUID.fromString("123e4567-e89b-12d3-a456-426655440001");
     when(underwriterSigningService.isUnderwriterHandlingSignSession(uuid)).thenReturn(true);
-    willThrow(RuntimeException.class).given(underwriterSigningService).danishBankIdSignSessionWasCompleted(uuid);
+    willThrow(RuntimeException.class).given(underwriterSigningService).underwriterSignSessionWasCompleted(uuid);
 
     val saga = new MemberSignedSaga();
     saga.setUnderwriterApi(underwriterApi);
@@ -245,7 +245,7 @@ public class MemberSignedSagaTest {
     saga.onDanishMemberSignedEvent(
       e, new GenericEventMessage(e));
 
-    then(underwriterSigningService).should().danishBankIdSignSessionWasCompleted(e.getReferenceId());
+    then(underwriterSigningService).should().underwriterSignSessionWasCompleted(e.getReferenceId());
     verifyZeroInteractions(underwriterApi);
   }
 

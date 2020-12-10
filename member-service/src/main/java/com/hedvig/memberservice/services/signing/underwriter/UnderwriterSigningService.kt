@@ -37,8 +37,6 @@ interface UnderwriterSigningService {
 
     fun swedishBankIdSignSessionWasCompleted(orderReference: String, signature: String, oscpResponse: String)
 
-    fun norwegianBankIdSignSessionWasCompleted(orderReference: UUID)
-
-    fun danishBankIdSignSessionWasCompleted(orderReference: UUID)
+    fun underwriterSignSessionWasCompleted(orderReference: UUID)
 }
 

@@ -1,12 +1,15 @@
 package com.hedvig.memberservice.services.signing.simple
 
+import com.hedvig.memberservice.commands.MemberSimpleSignedCommand
 import com.hedvig.memberservice.services.signing.simple.dto.SimpleSignStatus
 import com.hedvig.memberservice.services.signing.simple.repository.SimpleSignSession
 import com.hedvig.memberservice.services.signing.simple.repository.SimpleSigningSessionRepository
+import org.axonframework.commandhandling.gateway.CommandGateway
 import java.util.UUID
 
 class SimpleSigningServiceImpl(
-    private val repository: SimpleSigningSessionRepository
+    private val repository: SimpleSigningSessionRepository,
+    private val commandGateway: CommandGateway
 ) : SimpleSigningService {
     override fun getSignStatus(memberId: Long): SimpleSignStatus? =
         repository.findByMemberId(memberId)?.let { session ->
@@ -20,6 +23,7 @@ class SimpleSigningServiceImpl(
     override fun startSign(memberId: Long, ssn: String): UUID {
         val sessionId = UUID.randomUUID()
         repository.save(SimpleSignSession(sessionId, memberId, ssn))
+        commandGateway.sendAndWait<Void>(MemberSimpleSignedCommand(memberId, ssn, sessionId))
         return sessionId
     }
 
