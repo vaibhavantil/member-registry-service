@@ -13,6 +13,7 @@ import com.hedvig.memberservice.entities.SignSessionRepository
 import com.hedvig.memberservice.entities.SignStatus
 import com.hedvig.memberservice.jobs.SwedishBankIdMetrics
 import com.hedvig.memberservice.services.member.MemberService
+import com.hedvig.memberservice.services.signing.sweden.SwedishBankIdSigningService
 import com.hedvig.memberservice.web.v2.dto.WebsignRequest
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Before

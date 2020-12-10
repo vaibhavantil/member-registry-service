@@ -1,6 +1,6 @@
 package com.hedvig.memberservice.web.dto
 
-import java.util.*
+import java.util.UUID
 
 data class UnderwriterStartRedirectBankIdSignSessionRequest(
     val underwriterSessionReference: UUID,

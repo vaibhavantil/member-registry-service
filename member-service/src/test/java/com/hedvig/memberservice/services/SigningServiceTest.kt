@@ -21,6 +21,10 @@ import com.hedvig.memberservice.query.SignedMemberRepository
 import com.hedvig.memberservice.services.member.CannotSignInsuranceException
 import com.hedvig.memberservice.services.member.dto.MemberSignResponse
 import com.hedvig.memberservice.services.redispublisher.RedisEventPublisher
+import com.hedvig.memberservice.services.signing.SigningService
+import com.hedvig.memberservice.services.signing.simple.SimpleSigningService
+import com.hedvig.memberservice.services.signing.sweden.SwedishBankIdSigningService
+import com.hedvig.memberservice.services.signing.zignsec.ZignSecSigningService
 import com.hedvig.memberservice.web.v2.dto.WebsignRequest
 import org.assertj.core.api.Assertions.assertThat
 import org.axonframework.commandhandling.gateway.CommandGateway
@@ -70,6 +74,9 @@ class SigningServiceTest {
     lateinit var redisEventPublisher: RedisEventPublisher
 
     @Mock
+    lateinit var simpleSigningService: SimpleSigningService
+
+    @Mock
     lateinit var scheduler: Scheduler
 
     @Rule @JvmField
@@ -85,7 +92,7 @@ class SigningServiceTest {
         whenever(signedMemberRepository.findBySsn(ArgumentMatchers.any())).thenReturn(Optional.empty())
 
         sut = SigningService(underwriterApi, signedMemberRepository, botService, memberRepository, commandGateway,
-            swedishBankIdSigningService, zignSecSigningService, redisEventPublisher, scheduler)
+            swedishBankIdSigningService, zignSecSigningService, simpleSigningService, redisEventPublisher, scheduler)
     }
 
     @Test

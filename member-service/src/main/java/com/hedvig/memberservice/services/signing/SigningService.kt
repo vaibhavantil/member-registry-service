@@ -1,4 +1,4 @@
-package com.hedvig.memberservice.services
+package com.hedvig.memberservice.services.signing
 
 import com.hedvig.integration.botService.BotService
 import com.hedvig.integration.botService.dto.UpdateUserContextDTO
@@ -10,10 +10,14 @@ import com.hedvig.memberservice.commands.UpdateWebOnBoardingInfoCommand
 import com.hedvig.memberservice.jobs.ContractsCreatedCollector
 import com.hedvig.memberservice.query.MemberRepository
 import com.hedvig.memberservice.query.SignedMemberRepository
+import com.hedvig.memberservice.services.MemberHasExistingInsuranceException
+import com.hedvig.memberservice.services.signing.sweden.SwedishBankIdSigningService
+import com.hedvig.memberservice.services.signing.zignsec.ZignSecSigningService
 import com.hedvig.memberservice.services.member.CannotSignInsuranceException
 import com.hedvig.memberservice.services.member.dto.MemberSignResponse
 import com.hedvig.memberservice.services.member.dto.MemberSignUnderwriterQuoteResponse
 import com.hedvig.memberservice.services.redispublisher.RedisEventPublisher
+import com.hedvig.memberservice.services.signing.simple.SimpleSigningService
 import com.hedvig.memberservice.web.dto.IsMemberAlreadySignedResponse
 import com.hedvig.memberservice.web.dto.IsSsnAlreadySignedMemberResponse
 import com.hedvig.memberservice.web.v2.dto.SignStatusResponse
@@ -41,6 +45,7 @@ class SigningService(
     private val commandGateway: CommandGateway,
     private val swedishBankIdSigningService: SwedishBankIdSigningService,
     private val zignSecSigningService: ZignSecSigningService,
+    private val simpleSigningService: SimpleSigningService,
     private val redisEventPublisher: RedisEventPublisher,
     private val scheduler: Scheduler
 ) {
@@ -61,8 +66,9 @@ class SigningService(
 
                 return when (quote.signMethod) {
                     SignMethod.SWEDISH_BANK_ID -> swedishBankIdSigningService.startSign(request, memberId, quote.isSwitching)
-                    SignMethod.NORWEGIAN_BANK_ID -> throw IllegalArgumentException("Sign method norwegian bank id doesn't support web sign. Use graphql `signQuotes` mutation instead!")
-                    SignMethod.DANISH_BANK_ID -> throw IllegalArgumentException("Sign method danish bank id doesn't support web sign. Use graphql `signQuotes` mutation instead!")
+                    SignMethod.NORWEGIAN_BANK_ID,
+                    SignMethod.SIMPLE_SIGN,
+                    SignMethod.DANISH_BANK_ID -> throw IllegalArgumentException("Sign method ${quote.signMethod} is not supported in web sign. Use graphql `signQuotes` mutation instead!")
                 }
             }
             is QuoteToSignStatusDto.NotEligibleToSign -> throw CannotSignInsuranceException()
@@ -78,7 +84,8 @@ class SigningService(
         }
         return try {
             val signMember = commandGateway.send<Any>(
-                SignMemberFromUnderwriterCommand(memberId, request.ssn))
+                SignMemberFromUnderwriterCommand(memberId, request.ssn)
+            )
             MemberSignUnderwriterQuoteResponse(memberId, signMember.isDone)
         } catch (exception: Exception) {
             throw CannotSignInsuranceException()
@@ -112,6 +119,11 @@ class SigningService(
                         SignStatusResponse.CreateFromZignSecStatus(it)
                     }
                 }
+                SignMethod.SIMPLE_SIGN -> {
+                    simpleSigningService.getSignStatus(memberId)?.let {
+                        SignStatusResponse.CreateFromSimpleSignStatus(it)
+                    }
+                }
             }
         } else {
             null
@@ -137,8 +149,10 @@ class SigningService(
                         .withMisfireHandlingInstructionNowWithRemainingCount()
                 )
                 .build()
-            scheduler.scheduleJob(jobDetail,
-                trigger)
+            scheduler.scheduleJob(
+                jobDetail,
+                trigger
+            )
         } catch (e: SchedulerException) {
             throw RuntimeException(e.message, e)
         }
@@ -161,7 +175,8 @@ class SigningService(
             member.getStreet(),
             member.getCity(),
             member.zipCode,
-            true)
+            true
+        )
 
         try {
             botService.initBotServiceSessionWebOnBoarding(memberId, userContext)

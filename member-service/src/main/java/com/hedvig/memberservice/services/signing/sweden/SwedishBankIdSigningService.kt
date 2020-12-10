@@ -1,4 +1,4 @@
-package com.hedvig.memberservice.services
+package com.hedvig.memberservice.services.signing.sweden
 
 import com.hedvig.external.bankID.bankIdTypes.BankIdError
 import com.hedvig.external.bankID.bankIdTypes.CollectStatus
@@ -9,6 +9,7 @@ import com.hedvig.memberservice.entities.SignSessionRepository
 import com.hedvig.memberservice.entities.SignStatus
 import com.hedvig.memberservice.jobs.BankIdCollector
 import com.hedvig.memberservice.jobs.SwedishBankIdMetrics
+import com.hedvig.memberservice.services.BankIdRestService
 import com.hedvig.memberservice.services.member.MemberService
 import com.hedvig.memberservice.services.member.dto.MemberSignResponse
 import com.hedvig.memberservice.services.member.dto.StartSwedishSignResponse

@@ -4,7 +4,7 @@ package com.hedvig.memberservice.web
 import com.hedvig.external.authentication.dto.StartZignSecAuthenticationResult
 import com.hedvig.memberservice.commands.models.ZignSecAuthenticationMarket
 import com.hedvig.memberservice.services.BankIdService
-import com.hedvig.memberservice.services.ZignSecBankIdService
+import com.hedvig.memberservice.services.signing.zignsec.ZignSecBankIdService
 import com.hedvig.memberservice.util.getEndUserIp
 import com.hedvig.memberservice.web.dto.BankIdAuthCountry
 import com.hedvig.memberservice.web.dto.BankIdAuthRequest

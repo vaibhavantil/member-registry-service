@@ -1,7 +1,8 @@
 package com.hedvig.memberservice.web
 
-import com.hedvig.memberservice.services.UnderwriterSigningService
+import com.hedvig.memberservice.services.signing.underwriter.UnderwriterSigningService
 import com.hedvig.memberservice.web.dto.UnderwriterStartRedirectBankIdSignSessionRequest
+import com.hedvig.memberservice.web.dto.UnderwriterStartSignSessionRequest
 import com.hedvig.memberservice.web.dto.UnderwriterStartSwedishBankIdSignSessionRequest
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.PathVariable
@@ -17,6 +18,7 @@ class InternalSignController(
     private val underwriterSigningService: UnderwriterSigningService
 ) {
 
+    @Deprecated("use `startSign`")
     @PostMapping("swedish/bankid/{memberId}")
     fun startSwedishBankIdSign(
         @PathVariable("memberId") memberId: Long,
@@ -31,8 +33,9 @@ class InternalSignController(
         )
     )
 
+    @Deprecated("use `startSign`")
     @PostMapping("norwegian/bankid/{memberId}")
-    fun startNorwegianSing(
+    fun startNorwegianSign(
         @PathVariable("memberId") memberId: Long,
         @RequestBody request: UnderwriterStartRedirectBankIdSignSessionRequest
     ) = ResponseEntity.ok(
@@ -45,8 +48,9 @@ class InternalSignController(
         )
     )
 
+    @Deprecated("use `startSign`")
     @PostMapping("danish/bankid/{memberId}")
-    fun startDanishSing(
+    fun startDanishSign(
         @PathVariable("memberId") memberId: Long,
         @RequestBody request: UnderwriterStartRedirectBankIdSignSessionRequest
     ) = ResponseEntity.ok(
@@ -58,5 +62,11 @@ class InternalSignController(
             request.failUrl
         )
     )
+
+    @PostMapping("{memberId}")
+    fun startSign(
+        @PathVariable("memberId") memberId: Long,
+        @RequestBody request: UnderwriterStartSignSessionRequest
+    ) = ResponseEntity.ok(underwriterSigningService.startSign(memberId, request))
 }
 

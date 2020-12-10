@@ -1,6 +1,6 @@
 package com.hedvig.memberservice.web.v2;
 
-import com.hedvig.memberservice.services.SigningService;
+import com.hedvig.memberservice.services.signing.SigningService;
 import com.hedvig.memberservice.services.member.dto.ErrorCodes;
 import com.hedvig.memberservice.services.member.dto.ErrorResponseDto;
 import com.hedvig.memberservice.web.dto.IsMemberAlreadySignedResponse;

@@ -1,4 +1,4 @@
-package com.hedvig.memberservice.services
+package com.hedvig.memberservice.services.signing.underwriter
 
 import com.hedvig.external.authentication.dto.StartZignSecAuthenticationResult
 import com.hedvig.integration.underwriter.UnderwriterClient
@@ -7,8 +7,16 @@ import com.hedvig.memberservice.commands.models.ZignSecAuthenticationMarket
 import com.hedvig.memberservice.query.SignedMemberRepository
 import com.hedvig.memberservice.query.UnderwriterSignSessionRepository
 import com.hedvig.memberservice.query.saveOrUpdateReusableSession
-import com.hedvig.memberservice.services.dto.StartZignSecBankIdSignResponse
-import com.hedvig.memberservice.services.dto.StartSwedishBankIdSignResponse
+import com.hedvig.memberservice.services.signing.sweden.SwedishBankIdSigningService
+import com.hedvig.memberservice.services.signing.zignsec.ZignSecSigningService
+import com.hedvig.memberservice.services.signing.zignsec.dto.StartZignSecBankIdSignResponse
+import com.hedvig.memberservice.services.signing.sweden.dto.StartSwedishBankIdSignResponse
+import com.hedvig.memberservice.services.signing.simple.SimpleSigningService
+import com.hedvig.memberservice.services.signing.sweden.dto.toUnderwriterStartSignSessionResponse
+import com.hedvig.memberservice.services.signing.zignsec.dto.toUnderwriterStartSignSessionResponse
+import com.hedvig.memberservice.web.dto.UnderwriterStartSignSessionRequest
+import com.hedvig.memberservice.web.dto.UnderwriterStartSignSessionResponse
+import com.hedvig.memberservice.web.dto.toZignSecAuthenticationMarket
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 import java.net.URL
@@ -20,16 +28,17 @@ class UnderwriterSigningServiceImpl(
     private val underwriterClient: UnderwriterClient,
     private val swedishBankIdSigningService: SwedishBankIdSigningService,
     private val zignSecSigningService: ZignSecSigningService,
+    private val simpleSigningService: SimpleSigningService,
     private val signedMemberRepository: SignedMemberRepository,
     @Value("\${zignsec.validSigningTargetHosts}")
     private val validTargetHosts: Array<String>
 ) : UnderwriterSigningService {
 
     override fun startSwedishBankIdSignSession(underwriterSessionRef: UUID, memberId: Long, ssn: String, ipAddress: String, isSwitching: Boolean): StartSwedishBankIdSignResponse {
-        if (isAlreadySigned(ssn)) {
+        ensureSsnIsNotSigned(ssn) { errorMessage ->
             return StartSwedishBankIdSignResponse(
                 autoStartToken = null,
-                internalErrorMessage = "Could not start sign"
+                internalErrorMessage = errorMessage
             )
         }
 
@@ -75,10 +84,10 @@ class UnderwriterSigningServiceImpl(
             )
         }
 
-        if (isAlreadySigned(ssn)) {
+        ensureSsnIsNotSigned(ssn) { errorMessage ->
             return StartZignSecBankIdSignResponse(
                 redirectUrl = null,
-                internalErrorMessage = "Could not start sign"
+                internalErrorMessage = errorMessage
             )
         }
 
@@ -97,6 +106,47 @@ class UnderwriterSigningServiceImpl(
 
     private fun hasValidHost(url: String): Boolean =
         validTargetHosts.contains(URL(url).host)
+
+    override fun startSign(memberId: Long, request: UnderwriterStartSignSessionRequest): UnderwriterStartSignSessionResponse {
+        return when (request) {
+            is UnderwriterStartSignSessionRequest.SwedishBankId -> startSwedishBankIdSignSession(
+                request.underwriterSessionReference, memberId, request.ssn, request.ipAddress, request.isSwitching
+            ).toUnderwriterStartSignSessionResponse()
+            is UnderwriterStartSignSessionRequest.BankIdRedirect -> {
+                startZignSecSignSession(
+                    request.underwriterSessionReference,
+                    memberId,
+                    request.ssn,
+                    request.successUrl,
+                    request.failUrl,
+                    request.country.toZignSecAuthenticationMarket()
+                ).toUnderwriterStartSignSessionResponse()
+            }
+            is UnderwriterStartSignSessionRequest.SimpleSign -> startSimpleSignSession(
+                request.underwriterSessionReference, memberId, request.ssn
+            )
+        }
+    }
+
+    private fun startSimpleSignSession(underwriterSessionReference: UUID, memberId: Long, ssn: String): UnderwriterStartSignSessionResponse.SimpleSign {
+        ensureSsnIsNotSigned(ssn) { errorMessage ->
+            return UnderwriterStartSignSessionResponse.SimpleSign(
+                successfullyStarted = false,
+                internalErrorMessage = errorMessage
+            )
+        }
+
+        val signReference = simpleSigningService.startSign(memberId, ssn)
+        underwriterSignSessionRepository.saveOrUpdateReusableSession(underwriterSessionReference, signReference)
+        return UnderwriterStartSignSessionResponse.SimpleSign(successfullyStarted = true)
+    }
+
+    private inline fun <T> ensureSsnIsNotSigned(ssn: String, returner: (errorMessage: String) -> T): T? =
+        if (signedMemberRepository.findBySsn(ssn).isPresent) {
+            returner.invoke("Could not start sign")
+        } else {
+            null
+        }
 
     override fun isUnderwriterHandlingSignSession(orderReference: UUID): Boolean =
         underwriterSignSessionRepository.findBySignReference(orderReference) != null
