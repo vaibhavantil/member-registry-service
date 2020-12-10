@@ -5,8 +5,10 @@ import com.hedvig.memberservice.services.signing.simple.dto.SimpleSignStatus
 import com.hedvig.memberservice.services.signing.simple.repository.SimpleSignSession
 import com.hedvig.memberservice.services.signing.simple.repository.SimpleSigningSessionRepository
 import org.axonframework.commandhandling.gateway.CommandGateway
+import org.springframework.stereotype.Service
 import java.util.UUID
 
+@Service
 class SimpleSigningServiceImpl(
     private val repository: SimpleSigningSessionRepository,
     private val commandGateway: CommandGateway
