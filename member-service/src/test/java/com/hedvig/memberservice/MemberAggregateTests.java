@@ -423,6 +423,22 @@ public class MemberAggregateTests {
             );
     }
 
+    @Test
+    public void updateBirthDateCommand_whenMemberIsCreated_should() {
+        Long memberId = 1234L;
+        LocalDate birthDate = LocalDate.of(1978, 2, 3);
+
+        fixture
+            .given(
+                new MemberCreatedEvent(memberId, MemberStatus.INITIATED)
+            )
+            .when(new UpdateBirthDateCommand(memberId, birthDate))
+            .expectSuccessfulHandlerExecution()
+            .expectEvents(
+                new BirthDateUpdatedEvent(memberId, birthDate)
+            );
+    }
+
     private class AggregateFactoryM<T> extends AbstractAggregateFactory<T> {
 
         AggregateFactoryM(Class<T> aggregateType) {

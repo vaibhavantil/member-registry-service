@@ -2,6 +2,7 @@ package com.hedvig.memberservice.web.v2
 
 import com.hedvig.integration.botService.BotService
 import com.hedvig.memberservice.commands.CreateMemberCommand
+import com.hedvig.memberservice.correction.CorrectSwedishSsnEventComponent
 import com.hedvig.memberservice.query.MemberEntity
 import com.hedvig.memberservice.query.MemberRepository
 import com.hedvig.memberservice.web.v2.dto.HelloHedvigResponse
@@ -24,7 +25,8 @@ class MembersControllerV2 @Autowired constructor(
     val memberRepository: MemberRepository,
     val randomGenerator: SecureRandom = SecureRandom.getInstance("SHA1PRNG"),
     val commandGateway: CommandGateway,
-    val botService: BotService
+    val botService: BotService,
+    val correctSwedishSsnEventComponent: CorrectSwedishSsnEventComponent
 ) {
     @PostMapping("/helloHedvig", produces = ["application/json"])
     fun helloHedvig(
@@ -48,6 +50,12 @@ class MembersControllerV2 @Autowired constructor(
 
         log.info("New member created with id: " + id!!)
         return ResponseEntity.ok().body(HelloHedvigResponse(id))
+    }
+
+    //this will be removed once used
+    @GetMapping("/correctSwedishSsnEvent")
+    fun correction(): ResponseEntity<Int> {
+        return ResponseEntity.ok().body(correctSwedishSsnEventComponent.addCorrectionEventsOnAllSwedishMembers())
     }
 
     companion object {

@@ -501,6 +501,11 @@ public class MemberAggregate {
     }
   }
 
+  @CommandHandler
+  public void on(UpdateBirthDateCommand cmd) {
+      apply(new BirthDateUpdatedEvent(cmd.getMemberId(), cmd.getBirthDate()));
+  }
+
   @EventSourcingHandler
   public void on(MemberCreatedEvent e) {
     this.id = e.getId();
