@@ -72,6 +72,8 @@ public class InternalMembersController {
     return ResponseEntity.noContent().build();
   }
 
+  //THIS is only used by bot service don't use
+  @Deprecated
   @RequestMapping(value = "/{memberId}/startOnboardingWithSSN", method = RequestMethod.POST)
   public ResponseEntity<?> startOnboardingWithSSN(
     @PathVariable Long memberId, @RequestBody StartOnboardingWithSSNRequest request) {
@@ -158,7 +160,7 @@ public class InternalMembersController {
     @PathVariable Long memberId,
     @RequestBody UpdateSSNRequest request
   ) {
-    commandBus.sendAndWait(new UpdateSSNCommand(memberId, request.getSsn()));
+    commandBus.sendAndWait(new UpdateSSNCommand(memberId, request.getSsn(), request.getNationality()));
     return ResponseEntity.noContent().build();
   }
 

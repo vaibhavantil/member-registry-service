@@ -16,14 +16,14 @@ sealed class UnderwriterStartSignSessionRequest {
 
     data class SwedishBankId(
         override val underwriterSessionReference: UUID,
-        val ssn: String,
+        val nationalIdentification: NationalIdentification,
         val ipAddress: String,
         val isSwitching: Boolean
     ) : UnderwriterStartSignSessionRequest()
 
     data class BankIdRedirect(
         override val underwriterSessionReference: UUID,
-        val ssn: String,
+        val nationalIdentification: NationalIdentification,
         val successUrl: String,
         val failUrl: String,
         val country: RedirectCountry
@@ -31,7 +31,7 @@ sealed class UnderwriterStartSignSessionRequest {
 
     data class SimpleSign(
         override val underwriterSessionReference: UUID,
-        val ssn: String
+        val nationalIdentification: NationalIdentification
     ) : UnderwriterStartSignSessionRequest()
 }
 

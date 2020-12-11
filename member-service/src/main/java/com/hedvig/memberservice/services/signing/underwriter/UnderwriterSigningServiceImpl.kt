@@ -14,6 +14,8 @@ import com.hedvig.memberservice.services.signing.sweden.dto.StartSwedishBankIdSi
 import com.hedvig.memberservice.services.signing.simple.SimpleSigningService
 import com.hedvig.memberservice.services.signing.sweden.dto.toUnderwriterStartSignSessionResponse
 import com.hedvig.memberservice.services.signing.zignsec.dto.toUnderwriterStartSignSessionResponse
+import com.hedvig.memberservice.web.dto.NationalIdentification
+import com.hedvig.memberservice.web.dto.Nationality
 import com.hedvig.memberservice.web.dto.UnderwriterStartSignSessionRequest
 import com.hedvig.memberservice.web.dto.UnderwriterStartSignSessionResponse
 import com.hedvig.memberservice.web.dto.toZignSecAuthenticationMarket
@@ -110,33 +112,33 @@ class UnderwriterSigningServiceImpl(
     override fun startSign(memberId: Long, request: UnderwriterStartSignSessionRequest): UnderwriterStartSignSessionResponse {
         return when (request) {
             is UnderwriterStartSignSessionRequest.SwedishBankId -> startSwedishBankIdSignSession(
-                request.underwriterSessionReference, memberId, request.ssn, request.ipAddress, request.isSwitching
+                request.underwriterSessionReference, memberId, request.nationalIdentification.identification, request.ipAddress, request.isSwitching
             ).toUnderwriterStartSignSessionResponse()
             is UnderwriterStartSignSessionRequest.BankIdRedirect -> {
                 startZignSecSignSession(
                     request.underwriterSessionReference,
                     memberId,
-                    request.ssn,
+                    request.nationalIdentification.identification,
                     request.successUrl,
                     request.failUrl,
                     request.country.toZignSecAuthenticationMarket()
                 ).toUnderwriterStartSignSessionResponse()
             }
             is UnderwriterStartSignSessionRequest.SimpleSign -> startSimpleSignSession(
-                request.underwriterSessionReference, memberId, request.ssn
+                request.underwriterSessionReference, memberId, request.nationalIdentification
             )
         }
     }
 
-    private fun startSimpleSignSession(underwriterSessionReference: UUID, memberId: Long, ssn: String): UnderwriterStartSignSessionResponse.SimpleSign {
-        ensureSsnIsNotSigned(ssn) { errorMessage ->
+    private fun startSimpleSignSession(underwriterSessionReference: UUID, memberId: Long, nationalIdentification: NationalIdentification): UnderwriterStartSignSessionResponse.SimpleSign {
+        ensureSsnIsNotSigned(nationalIdentification.identification) { errorMessage ->
             return UnderwriterStartSignSessionResponse.SimpleSign(
                 successfullyStarted = false,
                 internalErrorMessage = errorMessage
             )
         }
 
-        val signReference = simpleSigningService.startSign(memberId, ssn)
+        val signReference = simpleSigningService.startSign(memberId, nationalIdentification)
         underwriterSignSessionRepository.saveOrUpdateReusableSession(underwriterSessionReference, signReference)
         return UnderwriterStartSignSessionResponse.SimpleSign(successfullyStarted = true)
     }

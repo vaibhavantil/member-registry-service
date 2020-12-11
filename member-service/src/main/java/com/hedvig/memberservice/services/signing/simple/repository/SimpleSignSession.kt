@@ -1,5 +1,6 @@
 package com.hedvig.memberservice.services.signing.simple.repository
 
+import com.hedvig.memberservice.web.dto.Nationality
 import java.util.UUID
 import javax.persistence.Column
 import javax.persistence.Entity
@@ -11,6 +12,7 @@ class SimpleSignSession(
     val referenceId: UUID,
     @Column(unique = true)
     val memberId: Long,
-    val ssn: String,
+    val nationalIdentification: String,
+    val nationality: Nationality,
     var isContractsCreated: Boolean = false
 )

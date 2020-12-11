@@ -4,6 +4,13 @@ import java.util.UUID
 
 data class MemberSimpleSignedEvent(
     val memberId: Long,
-    val ssn: String,
+    val nationalIdentification: String,
+    val nationality: Nationality,
     val referenceId: UUID
-)
+) {
+    enum class Nationality {
+        SWEDEN,
+        NORWAY,
+        DENMARK
+    }
+}

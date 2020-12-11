@@ -192,7 +192,7 @@ public class MemberEventListener {
 
   @EventHandler
   void on(MemberSimpleSignedEvent e, @Timestamp Instant timestamp) {
-      memberSigned(e.getMemberId(), e.getSsn(), timestamp);
+      memberSigned(e.getMemberId(), e.getNationalIdentification(), timestamp);
   }
 
   private void memberSigned(Long memberId, String ssn, Instant timestamp) {

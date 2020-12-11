@@ -3,7 +3,6 @@ package com.hedvig.memberservice;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hedvig.common.UUIDGenerator;
 import com.hedvig.external.bisnodeBCI.BisnodeClient;
-import com.hedvig.memberservice.aggregates.BisnodeAddress;
 import com.hedvig.memberservice.aggregates.MemberAggregate;
 import com.hedvig.memberservice.aggregates.MemberStatus;
 import com.hedvig.memberservice.aggregates.PickedLocale;
@@ -11,16 +10,13 @@ import com.hedvig.memberservice.commands.*;
 import com.hedvig.memberservice.commands.models.ZignSecAuthenticationMarket;
 import com.hedvig.memberservice.events.*;
 import com.hedvig.memberservice.services.cashback.CashbackService;
-import com.hedvig.memberservice.web.dto.Address;
-import com.hedvig.memberservice.web.dto.StartOnboardingWithSSNRequest;
-import com.hedvig.memberservice.web.dto.UpdateContactInformationRequest;
+import com.hedvig.memberservice.web.dto.*;
 import lombok.val;
 import org.axonframework.eventsourcing.AbstractAggregateFactory;
 import org.axonframework.eventsourcing.DomainEventMessage;
 import org.axonframework.test.aggregate.AggregateTestFixture;
 import org.axonframework.test.aggregate.FixtureConfiguration;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -85,14 +81,14 @@ public class MemberAggregateTests {
             makeBankIdAuthenticationStatus(
                 TOLVANSSON_SSN, referenceTokenValue, TOLVANSSON_FIRST_NAME, TOLVANSSON_LAST_NAME);
 
-        AuthenticationAttemptCommand cmd = new AuthenticationAttemptCommand(memberId, authStatus);
+        SwedishBankIdAuthenticationAttemptCommand cmd = new SwedishBankIdAuthenticationAttemptCommand(memberId, authStatus);
 
         fixture
             .given(new MemberCreatedEvent(memberId, MemberStatus.INITIATED))
             .when(cmd)
             .expectSuccessfulHandlerExecution()
             .expectEvents(
-                new SSNUpdatedEvent(memberId, TOLVANSSON_SSN),
+                new SSNUpdatedEvent(memberId, TOLVANSSON_SSN, SSNUpdatedEvent.Nationality.SWEDEN),
                 new TrackingIdCreatedEvent(memberId, uuid),
                 new BirthDateUpdatedEvent(memberId, LocalDate.of(1912, 12, 12)),
                 new NameUpdatedEvent(memberId, "Tolvan", "Tolvansson"),
@@ -119,7 +115,7 @@ public class MemberAggregateTests {
                 new NewCashbackSelectedEvent(memberId, DEFAULT_CASHBACK.toString()),
                 new MemberSignedEvent(memberId, referenceId, "", "", TOLVANSSON_SSN),
                 new TrackingIdCreatedEvent(memberId, TRACKING_UUID))
-            .when(new AuthenticationAttemptCommand(memberId, bankIdAuthStatus))
+            .when(new SwedishBankIdAuthenticationAttemptCommand(memberId, bankIdAuthStatus))
             .expectSuccessfulHandlerExecution()
             .expectEvents(new MemberAuthenticatedEvent(memberId, referenceId));
     }
@@ -173,7 +169,7 @@ public class MemberAggregateTests {
             .when(new StartOnboardingWithSSNCommand(memberId, request))
             .expectSuccessfulHandlerExecution()
             .expectEvents(
-                new OnboardingStartedWithSSNEvent(memberId, ssn),
+                new OnboardingStartedWithSSNEvent(memberId, ssn, SSNUpdatedEvent.Nationality.SWEDEN),
                 new BirthDateUpdatedEvent(memberId, LocalDate.of(1920, 5, 5)),
                 new MemberStartedOnBoardingEvent(memberId, MemberStatus.ONBOARDING));
     }
@@ -202,10 +198,10 @@ public class MemberAggregateTests {
 
         fixture
             .given(new MemberCreatedEvent(memberId, MemberStatus.INITIATED))
-            .when(new BankIdSignCommand(memberId, referenceId, "", "", personalNumber))
+            .when(new SwedishBankIdSignCommand(memberId, referenceId, "", "", personalNumber))
             .expectSuccessfulHandlerExecution()
             .expectEvents(
-                new SSNUpdatedEvent(memberId, personalNumber),
+                new SSNUpdatedEvent(memberId, personalNumber, SSNUpdatedEvent.Nationality.SWEDEN),
                 new BirthDateUpdatedEvent(memberId, LocalDate.of(1989, 2, 17)),
                 new NewCashbackSelectedEvent(memberId, DEFAULT_CASHBACK.toString()),
                 new MemberSignedEvent(memberId, referenceId, "", "", personalNumber),
@@ -229,10 +225,10 @@ public class MemberAggregateTests {
                 new MemberAuthenticatedEvent(memberId, referenceId),
                 new MemberStartedOnBoardingEvent(memberId, MemberStatus.ONBOARDING),
                 new TrackingIdCreatedEvent(memberId, TRACKING_UUID))
-            .when(new BankIdSignCommand(memberId, referenceId, "", "", personalNumber))
+            .when(new SwedishBankIdSignCommand(memberId, referenceId, "", "", personalNumber))
             .expectSuccessfulHandlerExecution()
             .expectEvents(
-                new SSNUpdatedEvent(memberId, personalNumber),
+                new SSNUpdatedEvent(memberId, personalNumber, SSNUpdatedEvent.Nationality.SWEDEN),
                 new BirthDateUpdatedEvent(memberId, LocalDate.of(1989, 2, 17)),
                 new NewCashbackSelectedEvent(memberId, DEFAULT_CASHBACK.toString()),
                 new MemberSignedEvent(memberId, referenceId, "", "", personalNumber)
@@ -356,7 +352,7 @@ public class MemberAggregateTests {
         fixture
             .given(
                 new MemberCreatedEvent(memberId, MemberStatus.INITIATED),
-                new SSNUpdatedEvent(memberId, personalNumber),
+                new SSNUpdatedEvent(memberId, personalNumber, SSNUpdatedEvent.Nationality.SWEDEN),
                 new NewCashbackSelectedEvent(memberId, DEFAULT_CASHBACK.toString()),
                 new MemberSignedEvent(memberId, referenceId, "", "", personalNumber),
                 new PickedLocaleUpdatedEvent(memberId, PickedLocale.sv_SE),
@@ -378,10 +374,10 @@ public class MemberAggregateTests {
             .given(
                 new MemberCreatedEvent(memberId, MemberStatus.INITIATED)
             )
-            .when(new UpdateSSNCommand(memberId, personalNumber))
+            .when(new UpdateSSNCommand(memberId, personalNumber, Nationality.SWEDEN))
             .expectSuccessfulHandlerExecution()
             .expectEvents(
-                new SSNUpdatedEvent(memberId, personalNumber),
+                new SSNUpdatedEvent(memberId, personalNumber, SSNUpdatedEvent.Nationality.SWEDEN),
                 new BirthDateUpdatedEvent(memberId, LocalDate.of(1989, 2, 17))
             );
     }
@@ -396,10 +392,10 @@ public class MemberAggregateTests {
             .given(
                 new MemberCreatedEvent(memberId, MemberStatus.INITIATED)
             )
-            .when(new UpdateWebOnBoardingInfoCommand(memberId, personalNumber, email))
+            .when(new UpdateSwedishWebOnBoardingInfoCommand(memberId, personalNumber, email))
             .expectSuccessfulHandlerExecution()
             .expectEvents(
-                new SSNUpdatedEvent(memberId, personalNumber),
+                new SSNUpdatedEvent(memberId, personalNumber, SSNUpdatedEvent.Nationality.SWEDEN),
                 new BirthDateUpdatedEvent(memberId, LocalDate.of(1989, 2, 17)),
                 new EmailUpdatedEvent(memberId, email)
             );
@@ -409,17 +405,18 @@ public class MemberAggregateTests {
     public void memberSimpleSignedCommand_whenMemberIsCreated_shouldSignMemberAndUpdateSsn() {
         Long memberId = 1234L;
         String personalNumber = "198902171234";
+        NationalIdentification nationalIdentification = new NationalIdentification(personalNumber, Nationality.SWEDEN);
         UUID refId = UUID.randomUUID();
 
         fixture
             .given(
                 new MemberCreatedEvent(memberId, MemberStatus.INITIATED)
             )
-            .when(new MemberSimpleSignedCommand(memberId, personalNumber, refId))
+            .when(new MemberSimpleSignedCommand(memberId, nationalIdentification, refId))
             .expectSuccessfulHandlerExecution()
             .expectEvents(
-                new MemberSimpleSignedEvent(memberId, personalNumber, refId),
-                new SSNUpdatedEvent(memberId, personalNumber)
+                new MemberSimpleSignedEvent(memberId, personalNumber, MemberSimpleSignedEvent.Nationality.SWEDEN, refId),
+                new SSNUpdatedEvent(memberId, personalNumber, SSNUpdatedEvent.Nationality.SWEDEN)
             );
     }
 

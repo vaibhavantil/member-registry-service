@@ -6,7 +6,7 @@ import com.hedvig.integration.underwriter.UnderwriterApi
 import com.hedvig.integration.underwriter.dtos.QuoteToSignStatusDto
 import com.hedvig.integration.underwriter.dtos.SignMethod
 import com.hedvig.memberservice.commands.SignMemberFromUnderwriterCommand
-import com.hedvig.memberservice.commands.UpdateWebOnBoardingInfoCommand
+import com.hedvig.memberservice.commands.UpdateSwedishWebOnBoardingInfoCommand
 import com.hedvig.memberservice.jobs.ContractsCreatedCollector
 import com.hedvig.memberservice.query.MemberRepository
 import com.hedvig.memberservice.query.SignedMemberRepository
@@ -50,6 +50,7 @@ class SigningService(
     private val scheduler: Scheduler
 ) {
 
+    @Deprecated("Sign through underwriter instead")
     @Transactional
     fun startWebSign(memberId: Long, request: WebsignRequest): MemberSignResponse {
 
@@ -61,7 +62,7 @@ class SigningService(
 
         when (val quote = underwriterApi.hasQuoteToSign(memberId.toString())) {
             is QuoteToSignStatusDto.EligibleToSign -> {
-                val cmd = UpdateWebOnBoardingInfoCommand(memberId, request.ssn, request.email)
+                val cmd = UpdateSwedishWebOnBoardingInfoCommand(memberId, request.ssn, request.email)
                 commandGateway.sendAndWait<Any>(cmd)
 
                 return when (quote.signMethod) {
