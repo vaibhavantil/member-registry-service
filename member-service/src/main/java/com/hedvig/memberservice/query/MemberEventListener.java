@@ -3,7 +3,7 @@ package com.hedvig.memberservice.query;
 import com.hedvig.memberservice.aggregates.MemberStatus;
 import com.hedvig.memberservice.events.*;
 import com.hedvig.integration.botService.BotService;
-import com.hedvig.integration.productsPricing.ProductApi;
+import com.hedvig.integration.productsPricing.CampaignService;
 import com.hedvig.integration.productsPricing.dto.EditMemberNameRequestDTO;
 import lombok.extern.slf4j.Slf4j;
 import org.axonframework.eventhandling.EventHandler;
@@ -27,20 +27,20 @@ public class MemberEventListener {
   private final MemberRepository userRepo;
   private final SignedMemberRepository signedMemberRepository;
   private final TrackingIdRepository trackingRepo;
-  private final ProductApi productApi;
+  private final CampaignService campaignService;
   private final BotService botService;
 
   @Autowired
   public MemberEventListener(
-    MemberRepository userRepo,
-    SignedMemberRepository signedMemberRepository,
-    TrackingIdRepository trackingRepo,
-    ProductApi productApi,
-    BotService botService) {
+      MemberRepository userRepo,
+      SignedMemberRepository signedMemberRepository,
+      TrackingIdRepository trackingRepo,
+      CampaignService campaignService,
+      BotService botService) {
     this.userRepo = userRepo;
     this.signedMemberRepository = signedMemberRepository;
     this.trackingRepo = trackingRepo;
-    this.productApi = productApi;
+    this.campaignService = campaignService;
     this.botService = botService;
   }
 

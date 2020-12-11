@@ -1,7 +1,7 @@
 package com.hedvig.memberservice.web;
 
 import com.google.common.collect.Lists;
-import com.hedvig.integration.productsPricing.ProductApi;
+import com.hedvig.integration.productsPricing.CampaignService;
 import com.hedvig.memberservice.commands.UpdateEmailCommand;
 import com.hedvig.memberservice.commands.UpdatePhoneNumberCommand;
 import com.hedvig.memberservice.commands.UpdatePickedLocaleCommand;
@@ -32,7 +32,7 @@ public class MembersController {
   private final MemberRepository repo;
   private final TrackingIdRepository trackingRepo;
   private final CommandGateway commandGateway;
-  private final ProductApi productApi;
+  private final CampaignService campaignService;
   private final CashbackService cashbackService;
   private final Logger log = LoggerFactory.getLogger(this.getClass());
 
@@ -41,15 +41,15 @@ public class MembersController {
 
   @Autowired
   public MembersController(
-    MemberRepository repo,
-    CommandGateway commandGateway,
-    ProductApi productApi,
-    CashbackService cashbackService,
-    TrackingIdRepository trackingRepo
+      MemberRepository repo,
+      CommandGateway commandGateway,
+      CampaignService campaignService,
+      CashbackService cashbackService,
+      TrackingIdRepository trackingRepo
   ) {
     this.repo = repo;
     this.commandGateway = commandGateway;
-    this.productApi = productApi;
+    this.campaignService = campaignService;
     this.cashbackService = cashbackService;
     this.trackingRepo = trackingRepo;
   }

@@ -1,6 +1,6 @@
 package com.hedvig.memberservice.web
 
-import com.hedvig.integration.productsPricing.ProductApi
+import com.hedvig.integration.productsPricing.CampaignService
 import com.hedvig.memberservice.commands.UpdateAcceptLanguageCommand
 import com.hedvig.memberservice.query.MemberRepository
 import com.hedvig.memberservice.query.TrackingIdRepository
@@ -34,7 +34,7 @@ class MembersControllerUpdateLanguageTest {
     lateinit var memberRepository: MemberRepository
 
     @MockkBean
-    lateinit var productApi: ProductApi
+    lateinit var campaignService: CampaignService
 
     @MockkBean
     lateinit var trackingIdRepository: TrackingIdRepository
