@@ -24,7 +24,7 @@ class CorrectSwedishSsnEventComponent(
         var counter = 0
 
         allMembers.forEach { member ->
-            if (member.ssn != null && member.ssn.length != 12) {
+            if (member.ssn != null && member.ssn.length == 12) {
                 val birthDateUpdatedEvents = eventStore.readEvents(member.id.toString()).filter {
                     it.payloadType.simpleName == BirthDateUpdatedEvent::class.simpleName
                 }.asStream().toList()
