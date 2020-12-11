@@ -18,8 +18,7 @@ public class NameUpdateSagaTest {
 
   @Test
   public void onNameUpdateEvent() {
-    val saga = new NameUpdateSaga();
-    saga.campaignService = campaignService;
+    val saga = new NameUpdateSaga(campaignService);
 
     final NameUpdatedEvent e = new NameUpdatedEvent(1337L, "First", "Last");
     saga.onMemberNameUpdate(e);
