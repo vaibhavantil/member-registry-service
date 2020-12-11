@@ -12,7 +12,7 @@ class CampaignService(
     fun createCampaignOwnerMember(memberId: Long) =
         client.createCampaignOwnerMember(MemberCreatedRequest(memberId.toString()))
 
-    fun memberNameUpdate(memberId: Long, name: String?) =
+    fun memberNameUpdate(memberId: Long, name: String) =
         client.updateCampaignMemberName(MemberNameUpdateRequest(memberId.toString(), name))
 
 }
