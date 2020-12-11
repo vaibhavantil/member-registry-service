@@ -15,7 +15,6 @@ import com.hedvig.memberservice.services.signing.simple.SimpleSigningService
 import com.hedvig.memberservice.services.signing.sweden.dto.toUnderwriterStartSignSessionResponse
 import com.hedvig.memberservice.services.signing.zignsec.dto.toUnderwriterStartSignSessionResponse
 import com.hedvig.memberservice.web.dto.NationalIdentification
-import com.hedvig.memberservice.web.dto.Nationality
 import com.hedvig.memberservice.web.dto.UnderwriterStartSignSessionRequest
 import com.hedvig.memberservice.web.dto.UnderwriterStartSignSessionResponse
 import com.hedvig.memberservice.web.dto.toZignSecAuthenticationMarket
