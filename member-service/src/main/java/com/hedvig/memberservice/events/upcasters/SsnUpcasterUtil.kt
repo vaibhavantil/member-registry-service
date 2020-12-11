@@ -7,6 +7,6 @@ fun String?.nationalityFromSsn() = when (this?.length) {
     10 -> SSNUpdatedEvent.Nationality.DENMARK
     11 -> SSNUpdatedEvent.Nationality.NORWAY
     12 -> SSNUpdatedEvent.Nationality.SWEDEN
-    null -> SSNUpdatedEvent.Nationality.SWEDEN
+    null -> null
     else -> throw RuntimeException("SsnUpcasterUtil failed ssn: $this")
 }

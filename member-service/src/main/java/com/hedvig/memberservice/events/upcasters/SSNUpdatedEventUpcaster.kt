@@ -1,5 +1,6 @@
 package com.hedvig.memberservice.events.upcasters
 
+import com.hedvig.memberservice.events.SSNUpdatedEvent
 import org.axonframework.serialization.SimpleSerializedType
 import org.axonframework.serialization.upcasting.event.IntermediateEventRepresentation
 import org.axonframework.serialization.upcasting.event.SingleEventUpcaster
@@ -15,14 +16,18 @@ class SSNUpdatedEventUpcaster: SingleEventUpcaster() {
             org.dom4j.Document::class.java
         ) { document ->
             val ssn = document.rootElement.element("ssn").text
-            document.addElement("nationality").text = ssn.nationalityFromSsn().name
+            ssn.nationalityFromSsn()?.let {
+                document.addElement("nationality").text = it.name
+            } ?: run {
+                document.addElement("nationality").text = null
+            }
             document
         }
     }
 
     companion object {
         private val targetType = SimpleSerializedType(
-            SSNUpdatedEventUpcaster::class.java.typeName, null
+            SSNUpdatedEvent::class.java.typeName, null
         )
     }
 }
