@@ -91,7 +91,7 @@ public class MemberAggregate {
       applyChain = apply(new SSNUpdatedEvent(this.id, ssn));
       // -- Tracking id generation for the new member id
       generateTrackingId();
-      applyChain = getBirthdateFromSwedishSsnAndApplyEvent(this.id, ssn, applyChain);
+      applyChain = getBirthdateFromSwedishSsnAndApplyEvent(ssn, applyChain);
 
       try {
         applyChain = getPersonInformationFromBisnode(applyChain, ssn);
@@ -123,7 +123,7 @@ public class MemberAggregate {
     }
   }
 
-  private ApplyMore getBirthdateFromSwedishSsnAndApplyEvent(Long memberId, String ssn, @Nullable ApplyMore applyChain) {
+  private ApplyMore getBirthdateFromSwedishSsnAndApplyEvent(String ssn, @Nullable ApplyMore applyChain) {
     LocalDate birthDate = SsnUtilImpl.Companion.getBirthdateFromSwedishSsn(ssn);
     if (birthDate != null) {
         if (applyChain != null) {
@@ -132,7 +132,7 @@ public class MemberAggregate {
             );
             return applyChain;
         }
-      apply(new BirthDateUpdatedEvent(memberId, birthDate));
+      apply(new BirthDateUpdatedEvent(this.id, birthDate));
     }
     return applyChain;
   }
