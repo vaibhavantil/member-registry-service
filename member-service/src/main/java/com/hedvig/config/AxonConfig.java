@@ -1,6 +1,8 @@
 package com.hedvig.config;
 
 import com.hedvig.memberservice.aggregates.MemberAggregate;
+import com.hedvig.memberservice.events.upcasters.OnboardingStartedWithSSNEventUpcaster;
+import com.hedvig.memberservice.events.upcasters.SSNUpdatedEventUpcaster;
 import com.hedvig.memberservice.sagas.MemberSignedSaga;
 import com.hedvig.memberservice.sagas.NameUpdateSaga;
 import lombok.val;
@@ -9,6 +11,7 @@ import org.axonframework.config.SagaConfiguration;
 import org.axonframework.eventhandling.TrackingEventProcessorConfiguration;
 import org.axonframework.eventsourcing.AggregateFactory;
 import org.axonframework.messaging.StreamableMessageSource;
+import org.axonframework.serialization.upcasting.event.EventUpcasterChain;
 import org.axonframework.spring.eventsourcing.SpringPrototypeAggregateFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -70,4 +73,13 @@ public class AxonConfig {
             TrackingEventProcessorConfiguration.forSingleThreadedProcessing()
                 .andInitialTrackingToken(StreamableMessageSource::createHeadToken));
   }
+
+
+    @Bean
+    public EventUpcasterChain eventUpcasters() {
+        return new EventUpcasterChain(
+            new OnboardingStartedWithSSNEventUpcaster(),
+            new SSNUpdatedEventUpcaster()
+        );
+    }
 }
