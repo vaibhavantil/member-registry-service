@@ -1,6 +1,6 @@
 package com.hedvig.memberservice.listeners
 
-import com.hedvig.integration.productsPricing.ProductApi
+import com.hedvig.integration.productsPricing.CampaignService
 import com.hedvig.memberservice.events.MemberCreatedEvent
 import org.axonframework.config.ProcessingGroup
 import org.axonframework.eventhandling.EventHandler
@@ -10,14 +10,14 @@ import org.springframework.stereotype.Component
 @Component
 @ProcessingGroup("CreateCampaignOwner")
 class CreateCampaignOwnerEventListener(
-    val productApi: ProductApi
+    val campaignService: CampaignService
 ) {
 
     @EventHandler
     fun on(event: MemberCreatedEvent) {
         logger.info("Handling event MemberCreatedEvent (memberId=${event.id})")
         try {
-            productApi.createCampaignOwnerMember(event.id)
+            campaignService.createCampaignOwnerMember(event.id)
         } catch (ex: RuntimeException) {
             logger.error(
                 "Could not notify product-pricing about created campaign owner member for memberId: {}",

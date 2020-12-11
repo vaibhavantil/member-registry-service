@@ -1,7 +1,7 @@
 package com.hedvig.memberservice.sagas;
 
 import com.hedvig.memberservice.events.NameUpdatedEvent;
-import com.hedvig.integration.productsPricing.ProductApi;
+import com.hedvig.integration.productsPricing.CampaignService;
 import lombok.extern.slf4j.Slf4j;
 import org.axonframework.eventhandling.saga.EndSaga;
 import org.axonframework.eventhandling.saga.SagaEventHandler;
@@ -15,7 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 public class NameUpdateSaga {
 
   @Autowired
-  transient ProductApi productApi;
+  transient CampaignService campaignService;
 
   @SagaEventHandler(associationProperty = "memberId")
   @StartSaga
@@ -25,7 +25,7 @@ public class NameUpdateSaga {
     log.debug("ON MEMBER NAME UPDATE EVENT FOR {}", e.getMemberId());
 
     try {
-      productApi.memberNameUpdate(e.getMemberId(), e.getFirstName());
+      campaignService.memberNameUpdate(e.getMemberId(), e.getFirstName());
     } catch (RuntimeException ex) {
       log.error("Could not notify product-pricing about member name update for memberId: {}", e.getMemberId(), ex);
     }

@@ -1,6 +1,6 @@
 package com.hedvig.memberservice.sagas
 
-import com.hedvig.integration.productsPricing.ProductApi
+import com.hedvig.integration.productsPricing.CampaignService
 import com.hedvig.memberservice.aggregates.MemberStatus
 import com.hedvig.memberservice.events.MemberCreatedEvent
 import com.hedvig.memberservice.listeners.CreateCampaignOwnerEventListener
@@ -12,7 +12,7 @@ import org.junit.Test
 
 class CreateCampaignOwnerEventListenerTest {
     @MockK(relaxed = true)
-    lateinit var productApi: ProductApi
+    lateinit var campaignService: CampaignService
 
     @Before
     fun setup() {
@@ -21,9 +21,9 @@ class CreateCampaignOwnerEventListenerTest {
 
     @Test
     fun onMemberCreatedEvent_shouldCreateCampaignOwnerMember() {
-        val eventHandler = CreateCampaignOwnerEventListener(productApi)
+        val eventHandler = CreateCampaignOwnerEventListener(campaignService)
         val event = MemberCreatedEvent(1337L, MemberStatus.INITIATED)
         eventHandler.on(event)
-        verify(exactly = 1) { productApi.createCampaignOwnerMember(1337L) }
+        verify(exactly = 1) { campaignService.createCampaignOwnerMember(1337L) }
     }
 }
