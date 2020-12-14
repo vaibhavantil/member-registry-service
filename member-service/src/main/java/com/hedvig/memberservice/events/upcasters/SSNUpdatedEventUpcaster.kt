@@ -16,7 +16,7 @@ class SSNUpdatedEventUpcaster: SingleEventUpcaster() {
             org.dom4j.Document::class.java
         ) { document ->
             val ssn = document.rootElement.element("ssn").text
-            document.addElement("nationality").text = ssn.nationalityFromSsn()?.name
+            document.rootElement.addElement("nationality").text = ssn.nationalityFromSsn()?.name
             document
         }
     }
