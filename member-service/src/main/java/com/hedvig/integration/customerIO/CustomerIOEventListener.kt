@@ -1,9 +1,12 @@
 package com.hedvig.integration.customerIO
 
+import com.hedvig.external.event.ZignSecSignEvent
 import com.hedvig.integration.notificationService.NotificationService
+import com.hedvig.memberservice.events.DanishMemberSignedEvent
 import com.hedvig.memberservice.events.MemberSignedEvent
 import com.hedvig.memberservice.events.MemberSignedWithoutBankId
 import com.hedvig.memberservice.events.MemberSimpleSignedEvent
+import com.hedvig.memberservice.events.NorwegianMemberSignedEvent
 import com.hedvig.memberservice.query.MemberRepository
 import mu.KotlinLogging
 import org.axonframework.config.ProcessingGroup
@@ -34,6 +37,16 @@ class CustomerIOEventListener(
 
     @EventHandler
     fun on(event: MemberSimpleSignedEvent) {
+        deleteUnsignedMembersWithSameInfoFromCustomerIo(event.memberId)
+    }
+
+    @EventHandler
+    fun on(event: NorwegianMemberSignedEvent) {
+        deleteUnsignedMembersWithSameInfoFromCustomerIo(event.memberId)
+    }
+
+    @EventHandler
+    fun on(event: DanishMemberSignedEvent) {
         deleteUnsignedMembersWithSameInfoFromCustomerIo(event.memberId)
     }
 
