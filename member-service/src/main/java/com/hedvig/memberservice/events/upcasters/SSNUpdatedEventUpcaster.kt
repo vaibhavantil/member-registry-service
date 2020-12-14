@@ -15,9 +15,8 @@ class SSNUpdatedEventUpcaster: SingleEventUpcaster() {
             SimpleSerializedType(targetType.name, "1.0"),
             org.dom4j.Document::class.java
         ) { document ->
-            val root = document.rootElement
-            val ssn = root.element("ssn").text
-            root.addElement("nationality").text = ssn.nationalityFromSsn()?.name
+            val ssn = document.rootElement.element("ssn").text
+            document.rootElement.addElement("nationality").text = ssn.nationalityFromSsn()?.name
             document
         }
     }
