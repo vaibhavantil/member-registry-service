@@ -27,7 +27,7 @@ public class SignController {
     this.signingService = signingService;
   }
 
-
+  @Deprecated
   @PostMapping("websign")
   public ResponseEntity<WebSignResponse> websign(@RequestHeader("hedvig.token") final long hedvigToken, @RequestBody WebsignRequest websignRequest) {
 

@@ -2,7 +2,7 @@ package com.hedvig.memberservice.services.member;
 
 import com.hedvig.external.authentication.dto.ZignSecAuthenticationMethod;
 import com.hedvig.external.bankID.bankIdTypes.CollectResponse;
-import com.hedvig.memberservice.commands.BankIdSignCommand;
+import com.hedvig.memberservice.commands.SwedishBankIdSignCommand;
 import com.hedvig.memberservice.commands.ZignSecSignCommand;
 import com.hedvig.memberservice.commands.models.ZignSecAuthenticationMarket;
 import org.axonframework.commandhandling.gateway.CommandGateway;
@@ -23,7 +23,7 @@ public class MemberService {
   public void bankIdSignComplete(final long memberId, @NonNull final CollectResponse collectResponse) {
     this.commandGateway.sendAndWait(
         new
-            BankIdSignCommand(
+                SwedishBankIdSignCommand(
             memberId, collectResponse.getOrderRef(), collectResponse.getCompletionData().getSignature(), collectResponse.getCompletionData().getOcspResponse(),
             collectResponse.getCompletionData().getUser().getPersonalNumber()));
   }

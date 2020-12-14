@@ -15,6 +15,8 @@ import com.hedvig.memberservice.services.signing.simple.SimpleSigningService
 import com.hedvig.memberservice.services.signing.sweden.SwedishBankIdSigningService
 import com.hedvig.memberservice.services.signing.underwriter.UnderwriterSigningServiceImpl
 import com.hedvig.memberservice.services.signing.zignsec.ZignSecSigningService
+import com.hedvig.memberservice.web.dto.NationalIdentification
+import com.hedvig.memberservice.web.dto.Nationality
 import com.hedvig.memberservice.web.dto.UnderwriterStartSignSessionRequest
 import com.hedvig.memberservice.web.dto.UnderwriterStartSignSessionResponse
 import io.mockk.Called
@@ -171,7 +173,13 @@ class UnderwriterSigningServiceImplTest {
             signedMemberRepository.findBySsn(any())
         } returns Optional.of(SignedMemberEntity())
 
-        val response = sut.startSign(123L, UnderwriterStartSignSessionRequest.SimpleSign(UUID.randomUUID(), ""))
+        val response = sut.startSign(
+            123L,
+            UnderwriterStartSignSessionRequest.SimpleSign(
+                UUID.randomUUID(),
+                NationalIdentification("", Nationality.DENMARK)
+            )
+        )
 
         require(response is UnderwriterStartSignSessionResponse.SimpleSign)
         assertThat(response.successfullyStarted).isFalse()

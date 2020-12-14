@@ -1,5 +1,8 @@
 package com.hedvig.memberservice.util
 
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
+
 class SsnUtilImpl : SsnUtil {
 
     override fun getGenderFromSsn(ssn: String?): Gender? {
@@ -41,5 +44,13 @@ class SsnUtilImpl : SsnUtil {
     companion object {
         @JvmStatic
         val instance: SsnUtil = SsnUtilImpl()
+
+        fun getBirthdateFromSwedishSsn(ssn: String?): LocalDate? {
+            if (ssn != null) {
+                val dtf = DateTimeFormatter.ofPattern("yyyyMMdd")
+                return LocalDate.parse(ssn.substring(0, 8), dtf)
+            }
+            return null
+        }
     }
 }

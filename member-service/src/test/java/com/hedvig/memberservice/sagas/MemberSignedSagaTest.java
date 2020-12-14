@@ -134,7 +134,7 @@ public class MemberSignedSagaTest {
   public void onNorwegianMemberSignedEvent_whenUnderwriterServiceThrowsRuntimeException_willCallSigningService() {
     val uuid = UUID.fromString("123e4567-e89b-12d3-a456-426655440000");
     when(underwriterSigningService.isUnderwriterHandlingSignSession(uuid)).thenReturn(true);
-    willThrow(RuntimeException.class).given(underwriterSigningService).norwegianBankIdSignSessionWasCompleted(uuid);
+    willThrow(RuntimeException.class).given(underwriterSigningService).underwriterSignSessionWasCompleted(uuid);
 
     val saga = new MemberSignedSaga();
     saga.setUnderwriterApi(underwriterApi);
@@ -162,7 +162,7 @@ public class MemberSignedSagaTest {
     final NorwegianMemberSignedEvent e = new NorwegianMemberSignedEvent(1337L, "12121212120", "{ \"json\":true }", UUID.fromString("123e4567-e89b-12d3-a456-426655440000"));
     saga.onNorwegianMemberSignedEvent(e);
 
-    then(underwriterSigningService).should().norwegianBankIdSignSessionWasCompleted(e.getReferenceId());
+    then(underwriterSigningService).should().underwriterSignSessionWasCompleted(e.getReferenceId());
     verifyZeroInteractions(underwriterApi);
   }
 
@@ -206,7 +206,7 @@ public class MemberSignedSagaTest {
   public void onDanishMemberSignedEvent_whenUnderwriterServiceThrowsRuntimeException_willCallSigningService() {
     val uuid = UUID.fromString("123e4567-e89b-12d3-a456-426655440001");
     when(underwriterSigningService.isUnderwriterHandlingSignSession(uuid)).thenReturn(true);
-    willThrow(RuntimeException.class).given(underwriterSigningService).danishBankIdSignSessionWasCompleted(uuid);
+    willThrow(RuntimeException.class).given(underwriterSigningService).underwriterSignSessionWasCompleted(uuid);
 
     val saga = new MemberSignedSaga();
     saga.setUnderwriterApi(underwriterApi);
@@ -234,7 +234,7 @@ public class MemberSignedSagaTest {
     final DanishMemberSignedEvent e = new DanishMemberSignedEvent(1337L, "1212121212", "{ \"json\":true }", UUID.fromString("123e4567-e89b-12d3-a456-426655440001"));
     saga.onDanishMemberSignedEvent(e);
 
-    then(underwriterSigningService).should().danishBankIdSignSessionWasCompleted(e.getReferenceId());
+    then(underwriterSigningService).should().underwriterSignSessionWasCompleted(e.getReferenceId());
     verifyZeroInteractions(underwriterApi);
   }
 

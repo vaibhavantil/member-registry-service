@@ -5,6 +5,7 @@ import com.hedvig.integration.underwriter.dtos.SignMethod
 import com.hedvig.memberservice.events.DanishMemberSignedEvent
 import com.hedvig.memberservice.events.MemberSignedEvent
 import com.hedvig.memberservice.events.MemberSignedWithoutBankId
+import com.hedvig.memberservice.events.MemberSimpleSignedEvent
 import com.hedvig.memberservice.events.NorwegianMemberSignedEvent
 import com.hedvig.memberservice.services.SNSNotificationService
 import com.hedvig.memberservice.services.signing.SigningService
@@ -75,8 +76,8 @@ class MemberSignedSaga {
     @StartSaga
     @EndSaga
     fun onNorwegianMemberSignedEvent(e: NorwegianMemberSignedEvent) {
-        generifiedZignSecSign(e.memberId, e.referenceId, SignMethod.NORWEGIAN_BANK_ID) { referenceId ->
-            underwriterSigningService.norwegianBankIdSignSessionWasCompleted(referenceId)
+        generifiedUnderwriterSignSession(e.memberId, e.referenceId, SignMethod.NORWEGIAN_BANK_ID) { referenceId ->
+            underwriterSigningService.underwriterSignSessionWasCompleted(referenceId)
         }
     }
 
@@ -84,12 +85,23 @@ class MemberSignedSaga {
     @StartSaga
     @EndSaga
     fun onDanishMemberSignedEvent(e: DanishMemberSignedEvent) {
-        generifiedZignSecSign(e.memberId, e.referenceId, SignMethod.DANISH_BANK_ID) { referenceId ->
-            underwriterSigningService.danishBankIdSignSessionWasCompleted(referenceId)
+        generifiedUnderwriterSignSession(e.memberId, e.referenceId, SignMethod.DANISH_BANK_ID) { referenceId ->
+            underwriterSigningService.underwriterSignSessionWasCompleted(referenceId)
         }
     }
 
-    private fun generifiedZignSecSign(
+    @SagaEventHandler(associationProperty = "memberId")
+    @StartSaga
+    @EndSaga
+    fun onMemberSimpleSignedEvent(
+        e: MemberSimpleSignedEvent
+    ) {
+        generifiedUnderwriterSignSession(e.memberId, e.referenceId, SignMethod.SIMPLE_SIGN) { referenceId ->
+            underwriterSigningService.underwriterSignSessionWasCompleted(referenceId)
+        }
+    }
+
+    private fun generifiedUnderwriterSignSession(
         memberId: Long,
         referenceId: UUID?,
         signMethod: SignMethod,
@@ -103,7 +115,7 @@ class MemberSignedSaga {
             try {
                 underwritingSign(referenceId!!)
             } catch (ex: RuntimeException) {
-                log.error("Could not complete generified ZignSec bank id signing session in about signed member [MemberId: ${memberId}] Exception $ex")
+                log.error("Could not complete generified underwriter signing session in about signed member [MemberId: ${memberId}] Exception $ex")
             }
         } else {
             try {

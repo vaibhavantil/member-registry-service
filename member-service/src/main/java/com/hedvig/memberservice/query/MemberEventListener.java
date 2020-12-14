@@ -77,12 +77,6 @@ public class MemberEventListener {
 
     m.setSsn(e.getSsn());
 
-    if (e.getSsn() != null) {
-      final DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyyMMdd");
-      LocalDate d = LocalDate.parse(e.getSsn().substring(0, 8), dtf);
-      m.setBirthDate(d);
-    }
-
     userRepo.save(m);
   }
 
@@ -178,58 +172,40 @@ public class MemberEventListener {
 
   @EventHandler
   void on(MemberSignedEvent e, @Timestamp Instant timestamp) {
-    MemberEntity m = userRepo.findById(e.getId()).get();
-    m.setStatus(MemberStatus.SIGNED);
-    m.setSignedOn(timestamp);
-
-    SignedMemberEntity sme = new SignedMemberEntity();
-    sme.setId(e.getId());
-    sme.setSsn(e.getSsn());
-
-    userRepo.save(m);
-    signedMemberRepository.save(sme);
+      memberSigned(e.getId(), e.getSsn(), timestamp);
   }
 
   @EventHandler
   void on(MemberSignedWithoutBankId e, @Timestamp Instant timestamp) {
-    MemberEntity m = userRepo.findById(e.getMemberId()).get();
-    m.setStatus(MemberStatus.SIGNED);
-    m.setSignedOn(timestamp);
-
-    SignedMemberEntity sme = new SignedMemberEntity();
-    sme.setId(e.getMemberId());
-    sme.setSsn(e.getSsn());
-
-    userRepo.save(m);
-    signedMemberRepository.save(sme);
+      memberSigned(e.getMemberId(), e.getSsn(), timestamp);
   }
 
   @EventHandler
   void on(NorwegianMemberSignedEvent e, @Timestamp Instant timestamp) {
-    MemberEntity m = userRepo.findById(e.getMemberId()).get();
-    m.setStatus(MemberStatus.SIGNED);
-    m.setSignedOn(timestamp);
-
-    SignedMemberEntity sme = new SignedMemberEntity();
-    sme.setId(e.getMemberId());
-    sme.setSsn(e.getSsn());
-
-    userRepo.save(m);
-    signedMemberRepository.save(sme);
+      memberSigned(e.getMemberId(), e.getSsn(), timestamp);
   }
 
   @EventHandler
   void on(DanishMemberSignedEvent e, @Timestamp Instant timestamp) {
-    MemberEntity m = userRepo.findById(e.getMemberId()).get();
-    m.setStatus(MemberStatus.SIGNED);
-    m.setSignedOn(timestamp);
+      memberSigned(e.getMemberId(), e.getSsn(), timestamp);
+  }
 
-    SignedMemberEntity sme = new SignedMemberEntity();
-    sme.setId(e.getMemberId());
-    sme.setSsn(e.getSsn());
+  @EventHandler
+  void on(MemberSimpleSignedEvent e, @Timestamp Instant timestamp) {
+      memberSigned(e.getMemberId(), e.getNationalIdentification(), timestamp);
+  }
 
-    userRepo.save(m);
-    signedMemberRepository.save(sme);
+  private void memberSigned(Long memberId, String ssn, Instant timestamp) {
+      MemberEntity m = userRepo.findById(memberId).get();
+      m.setStatus(MemberStatus.SIGNED);
+      m.setSignedOn(timestamp);
+
+      SignedMemberEntity sme = new SignedMemberEntity();
+      sme.setId(memberId);
+      sme.setSsn(ssn);
+
+      userRepo.save(m);
+      signedMemberRepository.save(sme);
   }
 
   @EventHandler

@@ -11,7 +11,7 @@ import com.hedvig.integration.botService.BotService
 import com.hedvig.integration.underwriter.UnderwriterApi
 import com.hedvig.integration.underwriter.dtos.QuoteToSignStatusDto
 import com.hedvig.integration.underwriter.dtos.SignMethod
-import com.hedvig.memberservice.commands.UpdateWebOnBoardingInfoCommand
+import com.hedvig.memberservice.commands.UpdateSwedishWebOnBoardingInfoCommand
 import com.hedvig.memberservice.entities.SignSession
 import com.hedvig.memberservice.entities.SignStatus
 import com.hedvig.memberservice.query.MemberEntity
@@ -83,7 +83,7 @@ class SigningServiceTest {
     var thrown = ExpectedException.none()
 
     @Captor
-    lateinit var updateWebOnBoardingInfoCommandArgumentCaptor: ArgumentCaptor<UpdateWebOnBoardingInfoCommand>
+    lateinit var updateSwedishWebOnBoardingInfoCommandArgumentCaptor: ArgumentCaptor<UpdateSwedishWebOnBoardingInfoCommand>
 
     private lateinit var sut: SigningService
 
@@ -168,9 +168,9 @@ class SigningServiceTest {
 
         val (_, _, _) = sut.startWebSign(MEMBER_ID, WebsignRequest(EMAIL, SSN, IP_ADDRESS))
 
-        verify(commandGateway).sendAndWait<Any>(updateWebOnBoardingInfoCommandArgumentCaptor.capture())
+        verify(commandGateway).sendAndWait<Any>(updateSwedishWebOnBoardingInfoCommandArgumentCaptor.capture())
 
-        assertThat(updateWebOnBoardingInfoCommandArgumentCaptor.value.email).isNotEmpty()
+        assertThat(updateSwedishWebOnBoardingInfoCommandArgumentCaptor.value.email).isNotEmpty()
     }
 
     private fun makeQuoteToSignStatusEligibleSwitching(): QuoteToSignStatusDto {
