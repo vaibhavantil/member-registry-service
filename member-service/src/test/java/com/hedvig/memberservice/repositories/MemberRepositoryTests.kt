@@ -171,4 +171,38 @@ class MemberRepositoryTests {
         val randomEmailAndSsn = memberRepository.findSignedMembersBySsnOrEmail("random", "random")
         assertThat(randomEmailAndSsn).isEmpty()
     }
+
+    @Test
+    fun findAllSignedMembersTest() {
+        val signedMember1 = MemberEntity()
+        signedMember1.id = 826201426L
+        signedMember1.email = "chia6272@gmail.com"
+        signedMember1.status = MemberStatus.SIGNED
+        signedMember1.ssn = "194311209326"
+
+        val nonSignedMember1 = MemberEntity()
+        nonSignedMember1.id = 269511228L
+        nonSignedMember1.email = "chia6272@gmail.com"
+        nonSignedMember1.status = MemberStatus.INITIATED
+
+        val nonSignedMember2 = MemberEntity()
+        nonSignedMember2.id = 36522450L
+        nonSignedMember2.email = "chia6272@gmail.com"
+        nonSignedMember2.status = MemberStatus.INITIATED
+
+        memberRepository.saveAll(
+            listOf(
+                signedMember1,
+                nonSignedMember1,
+                nonSignedMember2
+            )
+        )
+
+        val result = memberRepository.findNonSignedBySsnOrEmailAndNotId(signedMember1.ssn, signedMember1.email, signedMember1.id)
+        assertThat(result).hasSize(2)
+        assertThat(result[1].id).isEqualTo(nonSignedMember1.id)
+        assertThat(result[1].status).isEqualTo(MemberStatus.INITIATED)
+        assertThat(result[0].id).isEqualTo(nonSignedMember2.id)
+        assertThat(result[0].status).isEqualTo(MemberStatus.INITIATED)
+    }
 }
