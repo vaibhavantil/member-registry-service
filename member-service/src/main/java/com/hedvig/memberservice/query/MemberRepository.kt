@@ -23,7 +23,7 @@ interface MemberRepository : JpaRepository<MemberEntity, Long> {
     )
     fun findNonSignedBySsnOrEmailAndNotId(
         ssn: String,
-        email: String,
+        email: String?,
         memberId: Long
     ): List<MemberEntity>
 
