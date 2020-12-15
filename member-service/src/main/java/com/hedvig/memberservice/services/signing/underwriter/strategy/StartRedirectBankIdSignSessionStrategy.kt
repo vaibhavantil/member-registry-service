@@ -14,8 +14,9 @@ import java.util.UUID
 class StartRedirectBankIdSignSessionStrategy(
     private val zignSecSigningService: ZignSecSigningService,
     @Value("\${zignsec.validSigningTargetHosts}")
-    private val validTargetHosts: Array<String>
-) : StartSignSessionStrategy<UnderwriterStartSignSessionRequest.BankIdRedirect, UnderwriterStartSignSessionResponse.BankIdRedirect> {
+    private val validTargetHosts: Array<String>,
+    private val commonSessionCompletion: CommonSessionCompletion
+) : StartSignSessionStrategy<UnderwriterStartSignSessionRequest.BankIdRedirect, UnderwriterStartSignSessionResponse.BankIdRedirect, UnderwriterSessionCompletedData.BankIdRedirect> {
     override fun startSignSession(memberId: Long, request: UnderwriterStartSignSessionRequest.BankIdRedirect): Pair<UUID?, UnderwriterStartSignSessionResponse.BankIdRedirect> {
         if (!hasValidHost(request.successUrl) || !hasValidHost(request.failUrl)) {
             return Pair(
@@ -52,4 +53,8 @@ class StartRedirectBankIdSignSessionStrategy(
 
     private fun hasValidHost(url: String): Boolean =
         validTargetHosts.contains(URL(url).host)
+
+    override fun signSessionWasCompleted(signSessionReference: UUID, data: UnderwriterSessionCompletedData.BankIdRedirect) {
+        commonSessionCompletion.signSessionWasCompleted(signSessionReference)
+    }
 }

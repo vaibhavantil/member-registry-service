@@ -8,11 +8,17 @@ import java.util.UUID
 
 @Service
 class StartSimpleSignSessionStrategy(
-    private val simpleSigningService: SimpleSigningService
-) : StartSignSessionStrategy<UnderwriterStartSignSessionRequest.SimpleSign, UnderwriterStartSignSessionResponse.SimpleSign> {
+    private val simpleSigningService: SimpleSigningService,
+    private val commonSessionCompletion: CommonSessionCompletion
+) : StartSignSessionStrategy<UnderwriterStartSignSessionRequest.SimpleSign, UnderwriterStartSignSessionResponse.SimpleSign, UnderwriterSessionCompletedData.SimpleSign> {
+
     override fun startSignSession(memberId: Long, request: UnderwriterStartSignSessionRequest.SimpleSign): Pair<UUID?, UnderwriterStartSignSessionResponse.SimpleSign> {
         val signSession = simpleSigningService.startSign(memberId, request.nationalIdentification)
 
         return Pair(signSession, UnderwriterStartSignSessionResponse.SimpleSign(true))
+    }
+
+    override fun signSessionWasCompleted(signSessionReference: UUID, data: UnderwriterSessionCompletedData.SimpleSign) {
+        commonSessionCompletion.signSessionWasCompleted(signSessionReference)
     }
 }

@@ -14,6 +14,7 @@ import com.hedvig.memberservice.services.member.dto.StartSwedishSignResponse
 import com.hedvig.memberservice.services.signing.simple.SimpleSigningService
 import com.hedvig.memberservice.services.signing.sweden.SwedishBankIdSigningService
 import com.hedvig.memberservice.services.signing.underwriter.UnderwriterSigningServiceImpl
+import com.hedvig.memberservice.services.signing.underwriter.strategy.CommonSessionCompletion
 import com.hedvig.memberservice.services.signing.underwriter.strategy.StartRedirectBankIdSignSessionStrategy
 import com.hedvig.memberservice.services.signing.underwriter.strategy.StartSignSessionStrategyService
 import com.hedvig.memberservice.services.signing.underwriter.strategy.StartSimpleSignSessionStrategy
@@ -38,21 +39,25 @@ class UnderwriterSigningServiceImplTest {
 
     private val underwriterSignSessionRepository: UnderwriterSignSessionRepository = mockk(relaxed = true)
     private val underwriterClient: UnderwriterClient = mockk()
+    private val commonSessionCompletion: CommonSessionCompletion = mockk()
     private val swedishBankIdSigningService: SwedishBankIdSigningService = mockk()
     private val zignSecSigningService: ZignSecSigningService = mockk()
     private val simpleSigningService: SimpleSigningService = mockk()
     private val signedMemberRepository: SignedMemberRepository = mockk()
 
     private val startSwedishBankIdSignSessionStrategy = StartSwedishBankIdSignSessionStrategy(
-        swedishBankIdSigningService
+        swedishBankIdSigningService,
+        underwriterClient
     )
 
     private val startRedirectBankIdSignSessionStrategy = StartRedirectBankIdSignSessionStrategy(
         zignSecSigningService,
-        arrayOf("hedvig.com")
+        arrayOf("hedvig.com"),
+        commonSessionCompletion
     )
     private val startSimpleSignSessionStrategy = StartSimpleSignSessionStrategy(
-        simpleSigningService
+        simpleSigningService,
+        commonSessionCompletion
     )
 
     private val startSignSessionStrategyService = StartSignSessionStrategyService(

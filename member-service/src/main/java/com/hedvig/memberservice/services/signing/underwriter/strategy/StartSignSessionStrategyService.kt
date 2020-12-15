@@ -2,6 +2,7 @@ package com.hedvig.memberservice.services.signing.underwriter.strategy
 
 import com.hedvig.memberservice.web.dto.UnderwriterStartSignSessionRequest
 import org.springframework.stereotype.Service
+import java.util.UUID
 
 @Service
 class StartSignSessionStrategyService(
@@ -13,5 +14,11 @@ class StartSignSessionStrategyService(
         is UnderwriterStartSignSessionRequest.SwedishBankId -> startSwedishBankIdSignSessionStrategy.startSignSession(memberId, request)
         is UnderwriterStartSignSessionRequest.BankIdRedirect -> startRedirectBankIdSignSessionStrategy.startSignSession(memberId, request)
         is UnderwriterStartSignSessionRequest.SimpleSign -> startSimpleSignSessionStrategy.startSignSession(memberId, request)
+    }
+
+    fun signSessionWasCompleted(signSessionReference: UUID, data: UnderwriterSessionCompletedData) = when (data) {
+        is UnderwriterSessionCompletedData.SwedishBankId -> startSwedishBankIdSignSessionStrategy.signSessionWasCompleted(signSessionReference, data)
+        is UnderwriterSessionCompletedData.BankIdRedirect -> startRedirectBankIdSignSessionStrategy.signSessionWasCompleted(signSessionReference, data)
+        is UnderwriterSessionCompletedData.SimpleSign -> startSimpleSignSessionStrategy.signSessionWasCompleted(signSessionReference, data)
     }
 }
