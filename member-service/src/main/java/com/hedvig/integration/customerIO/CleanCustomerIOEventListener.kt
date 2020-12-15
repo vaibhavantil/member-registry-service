@@ -61,6 +61,10 @@ class CleanCustomerIOEventListener(
             logger.error { "Cannot delete unsigned members with same info from customer.io since email is empty (memberId=${memberId})" }
             return
         }
+        if (member.ssn.isNullOrBlank()) {
+            logger.error { "Cannot delete unsigned members with same info from customer.io since ssn is empty (memberId=${memberId})" }
+            return
+        }
         val membersToDeleteFromCustomerIO = memberRepository.findNonSignedBySsnOrEmailAndNotId(
             ssn = member.ssn,
             email = member.email,
