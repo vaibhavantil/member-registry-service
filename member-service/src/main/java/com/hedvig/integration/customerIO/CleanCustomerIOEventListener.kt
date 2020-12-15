@@ -17,9 +17,9 @@ import org.springframework.stereotype.Component
 
 @Profile("customer.io")
 @ConditionalOnProperty(value = ["customerio.siteId", "customerio.apiKey"], matchIfMissing = false)
-@ProcessingGroup("CustomerIO")
+@ProcessingGroup("CleanCustomerIO")
 @Component
-class CustomerIOEventListener(
+class CleanCustomerIOEventListener(
     private val memberRepository: MemberRepository,
     private val notificationService: NotificationService
 ) {
