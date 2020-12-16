@@ -14,9 +14,15 @@ import com.hedvig.memberservice.services.member.dto.StartSwedishSignResponse
 import com.hedvig.memberservice.services.signing.simple.SimpleSigningService
 import com.hedvig.memberservice.services.signing.sweden.SwedishBankIdSigningService
 import com.hedvig.memberservice.services.signing.underwriter.UnderwriterSigningServiceImpl
+import com.hedvig.memberservice.services.signing.underwriter.strategy.CommonSessionCompletion
+import com.hedvig.memberservice.services.signing.underwriter.strategy.StartRedirectBankIdSignSessionStrategy
+import com.hedvig.memberservice.services.signing.underwriter.strategy.StartSignSessionStrategyService
+import com.hedvig.memberservice.services.signing.underwriter.strategy.StartSimpleSignSessionStrategy
+import com.hedvig.memberservice.services.signing.underwriter.strategy.StartSwedishBankIdSignSessionStrategy
 import com.hedvig.memberservice.services.signing.zignsec.ZignSecSigningService
 import com.hedvig.memberservice.web.dto.NationalIdentification
 import com.hedvig.memberservice.web.dto.Nationality
+import com.hedvig.memberservice.web.dto.RedirectCountry
 import com.hedvig.memberservice.web.dto.UnderwriterStartSignSessionRequest
 import com.hedvig.memberservice.web.dto.UnderwriterStartSignSessionResponse
 import io.mockk.Called
@@ -33,19 +39,37 @@ class UnderwriterSigningServiceImplTest {
 
     private val underwriterSignSessionRepository: UnderwriterSignSessionRepository = mockk(relaxed = true)
     private val underwriterClient: UnderwriterClient = mockk()
+    private val commonSessionCompletion: CommonSessionCompletion = mockk()
     private val swedishBankIdSigningService: SwedishBankIdSigningService = mockk()
     private val zignSecSigningService: ZignSecSigningService = mockk()
     private val simpleSigningService: SimpleSigningService = mockk()
     private val signedMemberRepository: SignedMemberRepository = mockk()
 
+    private val startSwedishBankIdSignSessionStrategy = StartSwedishBankIdSignSessionStrategy(
+        swedishBankIdSigningService,
+        underwriterClient
+    )
+
+    private val startRedirectBankIdSignSessionStrategy = StartRedirectBankIdSignSessionStrategy(
+        zignSecSigningService,
+        arrayOf("hedvig.com"),
+        commonSessionCompletion
+    )
+    private val startSimpleSignSessionStrategy = StartSimpleSignSessionStrategy(
+        simpleSigningService,
+        commonSessionCompletion
+    )
+
+    private val startSignSessionStrategyService = StartSignSessionStrategyService(
+        startSwedishBankIdSignSessionStrategy,
+        startRedirectBankIdSignSessionStrategy,
+        startSimpleSignSessionStrategy
+    )
+
     private val sut = UnderwriterSigningServiceImpl(
         underwriterSignSessionRepository,
-        underwriterClient,
-        swedishBankIdSigningService,
-        zignSecSigningService,
-        simpleSigningService,
         signedMemberRepository,
-        arrayOf("hedvig.com")
+        startSignSessionStrategyService
     )
 
     @Test
@@ -69,8 +93,17 @@ class UnderwriterSigningServiceImplTest {
             underwriterSignSessionRepository.saveOrUpdateReusableSession(capture(underwriterSessionRefSlot), capture(signReferenceSlot))
         } returns Unit
 
-        val response = sut.startSwedishBankIdSignSession(underwriterSessionRef, memberId, swedishSSN, ip, false)
+        val response = sut.startSign(
+            memberId,
+            UnderwriterStartSignSessionRequest.SwedishBankId(
+                underwriterSessionRef,
+                NationalIdentification(swedishSSN, Nationality.SWEDEN),
+                ip,
+                false
+            )
+        )
 
+        require(response is UnderwriterStartSignSessionResponse.SwedishBankId)
         assertThat(response.autoStartToken).isEqualTo(autoStartToken)
         assertThat(signReferenceSlot.captured).isEqualTo(orderRefUUID)
         assertThat(underwriterSessionRefSlot.captured).isEqualTo(underwriterSessionRef)
@@ -80,7 +113,14 @@ class UnderwriterSigningServiceImplTest {
     fun dontStartSwedishBankIdSignIfAlreadySigned() {
         every { signedMemberRepository.findBySsn(swedishSSN) } returns Optional.of(SignedMemberEntity())
 
-        sut.startSwedishBankIdSignSession(underwriterSessionRef, memberId, swedishSSN, ip, false)
+        sut.startSign(memberId,
+            UnderwriterStartSignSessionRequest.SwedishBankId(
+                underwriterSessionRef,
+                NationalIdentification(swedishSSN, Nationality.SWEDEN),
+                ip,
+                false
+            )
+        )
 
         verify { swedishBankIdSigningService wasNot Called }
         verify { underwriterSignSessionRepository wasNot Called }
@@ -99,8 +139,18 @@ class UnderwriterSigningServiceImplTest {
             underwriterSignSessionRepository.saveOrUpdateReusableSession(capture(underwriterSessionRefSlot), capture(signReferenceSlot))
         } returns Unit
 
-        val response = sut.startNorwegianBankIdSignSession(underwriterSessionRef, memberId, norwegianSSN, successTargetUrl, failUrl)
+        val response = sut.startSign(
+            memberId,
+            UnderwriterStartSignSessionRequest.BankIdRedirect(
+                underwriterSessionRef,
+                NationalIdentification(norwegianSSN, Nationality.NORWAY),
+                successTargetUrl,
+                failUrl,
+                RedirectCountry.NORWAY
+            )
+        )
 
+        require(response is UnderwriterStartSignSessionResponse.BankIdRedirect)
         assertThat(response.redirectUrl).isEqualTo(redirectUrl)
         assertThat(signReferenceSlot.captured).isEqualTo(orderRefUUID)
         assertThat(underwriterSessionRefSlot.captured).isEqualTo(underwriterSessionRef)
@@ -113,8 +163,18 @@ class UnderwriterSigningServiceImplTest {
             zignSecSigningService.startSign(memberId, norwegianSSN, successTargetUrl, failUrl, ZignSecAuthenticationMarket.NORWAY)
         } returns StartZignSecAuthenticationResult.Failed(listOf(ZignSecAuthenticationResponseError(1, "Some error message")))
 
-        val response = sut.startNorwegianBankIdSignSession(underwriterSessionRef, memberId, norwegianSSN, successTargetUrl, failUrl)
+        val response = sut.startSign(
+            memberId,
+            UnderwriterStartSignSessionRequest.BankIdRedirect(
+                underwriterSessionRef,
+                NationalIdentification(norwegianSSN, Nationality.NORWAY),
+                successTargetUrl,
+                failUrl,
+                RedirectCountry.NORWAY
+            )
+        )
 
+        require(response is UnderwriterStartSignSessionResponse.BankIdRedirect)
         verify { underwriterSignSessionRepository wasNot Called }
         assertThat(response.errorMessages).isNotEmpty
     }
@@ -123,7 +183,16 @@ class UnderwriterSigningServiceImplTest {
     fun dontStartNorwegianBankIdSignIfAlreadySigned() {
         every { signedMemberRepository.findBySsn(norwegianSSN) } returns Optional.of(SignedMemberEntity())
 
-        sut.startNorwegianBankIdSignSession(underwriterSessionRef, memberId, norwegianSSN, successTargetUrl, failUrl)
+        sut.startSign(
+            memberId,
+            UnderwriterStartSignSessionRequest.BankIdRedirect(
+                underwriterSessionRef,
+                NationalIdentification(norwegianSSN, Nationality.NORWAY),
+                successTargetUrl,
+                failUrl,
+                RedirectCountry.NORWAY
+            )
+        )
 
         verify { swedishBankIdSigningService wasNot Called }
         verify { underwriterSignSessionRepository wasNot Called }
@@ -149,8 +218,22 @@ class UnderwriterSigningServiceImplTest {
 
     @Test
     fun failStartNorwegianBankIdSignSessionOnInvalidHost() {
-        val response = sut.startNorwegianBankIdSignSession(orderRefUUID, memberId, norwegianSSN, "http://someOther.host", "http://someOther.host")
+        every {
+            signedMemberRepository.findBySsn(any())
+        } returns Optional.empty()
 
+        val response = sut.startSign(
+            memberId,
+            UnderwriterStartSignSessionRequest.BankIdRedirect(
+                underwriterSessionRef,
+                NationalIdentification(norwegianSSN, Nationality.NORWAY),
+                "http://someOther.host",
+                "http://someOther.host",
+                RedirectCountry.NORWAY
+            )
+        )
+
+        require(response is UnderwriterStartSignSessionResponse.BankIdRedirect)
         assertThat(response.redirectUrl).isNull()
         assertThat(response.internalErrorMessage).isNotNull()
     }
@@ -160,9 +243,18 @@ class UnderwriterSigningServiceImplTest {
         every {
             signedMemberRepository.findBySsn(any())
         } returns Optional.of(SignedMemberEntity())
+        val response = sut.startSign(
+            memberId,
+            UnderwriterStartSignSessionRequest.BankIdRedirect(
+                underwriterSessionRef,
+                NationalIdentification("", Nationality.DENMARK),
+                "https://hedvig.com/success",
+                "https://hedvig.com/fail",
+                RedirectCountry.NORWAY
+            )
+        )
 
-        val response = sut.startDanishBankIdSignSession(UUID.randomUUID(), 123L, "", "https://hedvig.com/success", "https://hedvig.com/fail")
-
+        require(response is UnderwriterStartSignSessionResponse.BankIdRedirect)
         assertThat(response.redirectUrl).isNull()
         assertThat(response.internalErrorMessage).isNotNull()
     }

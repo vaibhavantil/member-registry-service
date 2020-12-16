@@ -10,6 +10,7 @@ import com.hedvig.memberservice.events.NorwegianMemberSignedEvent
 import com.hedvig.memberservice.services.SNSNotificationService
 import com.hedvig.memberservice.services.signing.SigningService
 import com.hedvig.memberservice.services.signing.underwriter.UnderwriterSigningService
+import com.hedvig.memberservice.services.signing.underwriter.strategy.UnderwriterSessionCompletedData
 import org.axonframework.eventhandling.EventMessage
 import org.axonframework.eventhandling.saga.EndSaga
 import org.axonframework.eventhandling.saga.SagaEventHandler
@@ -44,7 +45,12 @@ class MemberSignedSaga {
         val isUnderwriterHandlingSession = underwriterSigningService.isUnderwriterHandlingSignSession(UUID.fromString(e.getReferenceId()))
         if (isUnderwriterHandlingSession) {
             try {
-                underwriterSigningService.swedishBankIdSignSessionWasCompleted(e.getReferenceId(), e.getSignature(), e.getOscpResponse())
+                underwriterSigningService.signSessionWasCompleted(
+                    UUID.fromString(e.getReferenceId()),
+                    UnderwriterSessionCompletedData.SwedishBankId(
+                        e.getReferenceId(), e.getSignature(), e.getOscpResponse()
+                    )
+                )
             } catch (ex: RuntimeException) {
                 log.error("Could not complete swedish bank id signing session in about signed member [MemberId: ${e.id}] Exception $ex")
             }
@@ -77,7 +83,7 @@ class MemberSignedSaga {
     @EndSaga
     fun onNorwegianMemberSignedEvent(e: NorwegianMemberSignedEvent) {
         generifiedUnderwriterSignSession(e.memberId, e.referenceId, SignMethod.NORWEGIAN_BANK_ID) { referenceId ->
-            underwriterSigningService.underwriterSignSessionWasCompleted(referenceId)
+            underwriterSigningService.signSessionWasCompleted(referenceId, UnderwriterSessionCompletedData.BankIdRedirect)
         }
     }
 
@@ -86,7 +92,7 @@ class MemberSignedSaga {
     @EndSaga
     fun onDanishMemberSignedEvent(e: DanishMemberSignedEvent) {
         generifiedUnderwriterSignSession(e.memberId, e.referenceId, SignMethod.DANISH_BANK_ID) { referenceId ->
-            underwriterSigningService.underwriterSignSessionWasCompleted(referenceId)
+            underwriterSigningService.signSessionWasCompleted(referenceId, UnderwriterSessionCompletedData.BankIdRedirect)
         }
     }
 
@@ -97,7 +103,7 @@ class MemberSignedSaga {
         e: MemberSimpleSignedEvent
     ) {
         generifiedUnderwriterSignSession(e.memberId, e.referenceId, SignMethod.SIMPLE_SIGN) { referenceId ->
-            underwriterSigningService.underwriterSignSessionWasCompleted(referenceId)
+            underwriterSigningService.signSessionWasCompleted(referenceId, UnderwriterSessionCompletedData.SimpleSign)
         }
     }
 

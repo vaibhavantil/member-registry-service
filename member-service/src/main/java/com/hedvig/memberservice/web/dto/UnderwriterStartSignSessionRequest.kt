@@ -13,26 +13,46 @@ import java.util.UUID
 sealed class UnderwriterStartSignSessionRequest {
 
     abstract val underwriterSessionReference: UUID
+    abstract val nationalIdentification: NationalIdentification
+    abstract fun createErrorResponse(message: String): UnderwriterStartSignSessionResponse
 
     data class SwedishBankId(
         override val underwriterSessionReference: UUID,
-        val nationalIdentification: NationalIdentification,
+        override val nationalIdentification: NationalIdentification,
         val ipAddress: String,
         val isSwitching: Boolean
-    ) : UnderwriterStartSignSessionRequest()
+    ) : UnderwriterStartSignSessionRequest() {
+        override fun createErrorResponse(message: String) =
+            UnderwriterStartSignSessionResponse.SwedishBankId(
+                null,
+                message
+            )
+    }
 
     data class BankIdRedirect(
         override val underwriterSessionReference: UUID,
-        val nationalIdentification: NationalIdentification,
+        override val nationalIdentification: NationalIdentification,
         val successUrl: String,
         val failUrl: String,
         val country: RedirectCountry
-    ) : UnderwriterStartSignSessionRequest()
+    ) : UnderwriterStartSignSessionRequest() {
+        override fun createErrorResponse(message: String) =
+            UnderwriterStartSignSessionResponse.BankIdRedirect(
+                null,
+                message
+            )
+    }
 
     data class SimpleSign(
         override val underwriterSessionReference: UUID,
-        val nationalIdentification: NationalIdentification
-    ) : UnderwriterStartSignSessionRequest()
+        override val nationalIdentification: NationalIdentification
+    ) : UnderwriterStartSignSessionRequest() {
+        override fun createErrorResponse(message: String) =
+            UnderwriterStartSignSessionResponse.SimpleSign(
+                false,
+                message
+            )
+    }
 }
 
 

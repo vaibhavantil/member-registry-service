@@ -21,7 +21,7 @@ sealed class UnderwriterStartSignSessionResponse {
 
     data class BankIdRedirect(
         val redirectUrl: String?,
-        override val internalErrorMessage: String?,
+        override val internalErrorMessage: String? = null,
         val errorMessages: List<ZignSecAuthenticationResponseError>? = null
     ) : UnderwriterStartSignSessionResponse()
 

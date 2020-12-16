@@ -12,6 +12,7 @@ import com.hedvig.memberservice.events.NorwegianMemberSignedEvent;
 import com.hedvig.memberservice.services.SNSNotificationService;
 import com.hedvig.memberservice.services.signing.SigningService;
 import com.hedvig.memberservice.services.signing.underwriter.UnderwriterSigningService;
+import com.hedvig.memberservice.services.signing.underwriter.strategy.UnderwriterSessionCompletedData;
 import lombok.val;
 import org.axonframework.eventhandling.GenericEventMessage;
 import org.junit.Test;
@@ -24,235 +25,248 @@ import java.util.UUID;
 @RunWith(MockitoJUnitRunner.class)
 public class MemberSignedSagaTest {
 
-  @Mock
-  UnderwriterApi underwriterApi;
-  @Mock
-  UnderwriterSigningService underwriterSigningService;
-  @Mock
-  SigningService signingService;
-  @Mock
-  SNSNotificationService snsNotificationService;
+    @Mock
+    UnderwriterApi underwriterApi;
+    @Mock
+    UnderwriterSigningService underwriterSigningService;
+    @Mock
+    SigningService signingService;
+    @Mock
+    SNSNotificationService snsNotificationService;
 
-  @Test
-  public void onMemberSignedEvent_whenUnderwriterApiThrowsRuntimeException_willCallSigningService() {
-    when(underwriterSigningService.isUnderwriterHandlingSignSession(UUID.fromString("123e4567-e89b-12d3-a456-426655440000"))).thenReturn(false);
-    willThrow(RuntimeException.class).given(underwriterApi).memberSigned(anyString(), anyString(), anyString(), anyString());
+    @Test
+    public void onMemberSignedEvent_whenUnderwriterApiThrowsRuntimeException_willCallSigningService() {
+        when(underwriterSigningService.isUnderwriterHandlingSignSession(UUID.fromString("123e4567-e89b-12d3-a456-426655440000"))).thenReturn(false);
+        willThrow(RuntimeException.class).given(underwriterApi).memberSigned(anyString(), anyString(), anyString(), anyString());
 
-    val saga = new MemberSignedSaga();
-    saga.setUnderwriterApi(underwriterApi);
-    saga.setSigningService(signingService);
-    saga.setSnsNotificationService(snsNotificationService);
-    saga.setUnderwriterSigningService(underwriterSigningService);
-
-
-    final MemberSignedEvent e = new MemberSignedEvent(1337L, "123e4567-e89b-12d3-a456-426655440000", "signature",
-      "oscpResponse", "19121212121212");
-    saga.onMemberSignedEvent(e);
-
-    then(signingService).should().completeSwedishSession(e.getReferenceId());
-    then(signingService).should().productSignConfirmed(e.getId());
-    then(snsNotificationService).should().sendMemberSignedNotification(e.getId());
-  }
-
-  @Test
-  public void onMemberSignedEvent_whenUnderwriterServiceThrowsRuntimeException_willCallSigningService() {
-    when(underwriterSigningService.isUnderwriterHandlingSignSession(UUID.fromString("123e4567-e89b-12d3-a456-426655440000"))).thenReturn(true);
-    willThrow(RuntimeException.class).given(underwriterSigningService).swedishBankIdSignSessionWasCompleted(anyString(), anyString(), anyString());
-
-    val saga = new MemberSignedSaga();
-    saga.setUnderwriterApi(underwriterApi);
-    saga.setSigningService(signingService);
-    saga.setSnsNotificationService(snsNotificationService);
-    saga.setUnderwriterSigningService(underwriterSigningService);
+        val saga = new MemberSignedSaga();
+        saga.setUnderwriterApi(underwriterApi);
+        saga.setSigningService(signingService);
+        saga.setSnsNotificationService(snsNotificationService);
+        saga.setUnderwriterSigningService(underwriterSigningService);
 
 
-    final MemberSignedEvent e = new MemberSignedEvent(1337L, "123e4567-e89b-12d3-a456-426655440000", "signature",
-      "oscpResponse", "19121212121212");
-    saga.onMemberSignedEvent(e);
+        final MemberSignedEvent e = new MemberSignedEvent(1337L, "123e4567-e89b-12d3-a456-426655440000", "signature",
+            "oscpResponse", "19121212121212");
+        saga.onMemberSignedEvent(e);
 
-    then(signingService).should().completeSwedishSession(e.getReferenceId());
-    then(signingService).should().productSignConfirmed(e.getId());
-    then(snsNotificationService).should().sendMemberSignedNotification(e.getId());
-  }
+        then(signingService).should().completeSwedishSession(e.getReferenceId());
+        then(signingService).should().productSignConfirmed(e.getId());
+        then(snsNotificationService).should().sendMemberSignedNotification(e.getId());
+    }
 
-  @Test
-  public void onMemberSignedEvent_whenUnderwriterHandleSigningSession_dontCallMemberSignedEndpoint() {
-    when(underwriterSigningService.isUnderwriterHandlingSignSession(UUID.fromString("123e4567-e89b-12d3-a456-426655440000"))).thenReturn(true);
+    @Test
+    public void onMemberSignedEvent_whenUnderwriterServiceThrowsRuntimeException_willCallSigningService() {
+        when(underwriterSigningService.isUnderwriterHandlingSignSession(UUID.fromString("123e4567-e89b-12d3-a456-426655440000"))).thenReturn(true);
+        willThrow(RuntimeException.class).given(underwriterSigningService).signSessionWasCompleted(anyObject(), anyObject());
 
-    val saga = new MemberSignedSaga();
-    saga.setUnderwriterApi(underwriterApi);
-    saga.setSigningService(signingService);
-    saga.setSnsNotificationService(snsNotificationService);
-    saga.setUnderwriterSigningService(underwriterSigningService);
+        val saga = new MemberSignedSaga();
+        saga.setUnderwriterApi(underwriterApi);
+        saga.setSigningService(signingService);
+        saga.setSnsNotificationService(snsNotificationService);
+        saga.setUnderwriterSigningService(underwriterSigningService);
 
-    final MemberSignedEvent e = new MemberSignedEvent(1337L, "123e4567-e89b-12d3-a456-426655440000", "signature",
-      "oscpResponse", "19121212121212");
-    saga.onMemberSignedEvent(e);
 
-    then(underwriterSigningService).should().swedishBankIdSignSessionWasCompleted(e.getReferenceId(), e.getSignature(), e.getOscpResponse());
-    verifyZeroInteractions(underwriterApi);
-  }
+        final MemberSignedEvent e = new MemberSignedEvent(1337L, "123e4567-e89b-12d3-a456-426655440000", "signature",
+            "oscpResponse", "19121212121212");
+        saga.onMemberSignedEvent(e);
 
-  @Test
-  public void onMemberSignedEvent_whenIsNotUnderwriterHandleSigningSession_callMemberSignedEndpoint() {
-    when(underwriterSigningService.isUnderwriterHandlingSignSession(UUID.fromString("123e4567-e89b-12d3-a456-426655440000"))).thenReturn(false);
+        then(signingService).should().completeSwedishSession(e.getReferenceId());
+        then(signingService).should().productSignConfirmed(e.getId());
+        then(snsNotificationService).should().sendMemberSignedNotification(e.getId());
+    }
 
-    val saga = new MemberSignedSaga();
-    saga.setUnderwriterApi(underwriterApi);
-    saga.setSigningService(signingService);
-    saga.setSnsNotificationService(snsNotificationService);
-    saga.setUnderwriterSigningService(underwriterSigningService);
+    @Test
+    public void onMemberSignedEvent_whenUnderwriterHandleSigningSession_dontCallMemberSignedEndpoint() {
+        when(underwriterSigningService.isUnderwriterHandlingSignSession(UUID.fromString("123e4567-e89b-12d3-a456-426655440000"))).thenReturn(true);
 
-    verifyNoMoreInteractions(underwriterSigningService);
+        val saga = new MemberSignedSaga();
+        saga.setUnderwriterApi(underwriterApi);
+        saga.setSigningService(signingService);
+        saga.setSnsNotificationService(snsNotificationService);
+        saga.setUnderwriterSigningService(underwriterSigningService);
 
-    final MemberSignedEvent e = new MemberSignedEvent(1337L, "123e4567-e89b-12d3-a456-426655440000", "signature",
-      "oscpResponse", "19121212121212");
-    saga.onMemberSignedEvent(e);
+        final MemberSignedEvent e = new MemberSignedEvent(1337L, "123e4567-e89b-12d3-a456-426655440000", "signature",
+            "oscpResponse", "19121212121212");
+        saga.onMemberSignedEvent(e);
 
-    then(underwriterApi).should().memberSigned(e.id.toString(), e.referenceId, e.signature, e.oscpResponse);
-  }
+        then(underwriterSigningService).should().signSessionWasCompleted(
+            UUID.fromString(e.getReferenceId()),
+            new UnderwriterSessionCompletedData.SwedishBankId(
+                e.getReferenceId(),
+                e.getSignature(),
+                e.getOscpResponse()
+            )
+        );
+        verifyZeroInteractions(underwriterApi);
+    }
 
-  @Test
-  public void onNorwegianMemberSignedEvent_whenUnderwriterApiThrowsRuntimeException_willCallSigningService() {
-    when(underwriterSigningService.isUnderwriterHandlingSignSession(UUID.fromString("123e4567-e89b-12d3-a456-426655440000"))).thenReturn(false);
-    willThrow(RuntimeException.class).given(underwriterApi).memberSigned(anyString(), anyString(), anyString(), anyString());
+    @Test
+    public void onMemberSignedEvent_whenIsNotUnderwriterHandleSigningSession_callMemberSignedEndpoint() {
+        when(underwriterSigningService.isUnderwriterHandlingSignSession(UUID.fromString("123e4567-e89b-12d3-a456-426655440000"))).thenReturn(false);
 
-    val saga = new MemberSignedSaga();
-    saga.setUnderwriterApi(underwriterApi);
-    saga.setSigningService(signingService);
-    saga.setSnsNotificationService(snsNotificationService);
-    saga.setUnderwriterSigningService(underwriterSigningService);
+        val saga = new MemberSignedSaga();
+        saga.setUnderwriterApi(underwriterApi);
+        saga.setSigningService(signingService);
+        saga.setSnsNotificationService(snsNotificationService);
+        saga.setUnderwriterSigningService(underwriterSigningService);
 
-    final NorwegianMemberSignedEvent e = new NorwegianMemberSignedEvent(1337L, "12121212120", "{ \"json\":true }", UUID.fromString("123e4567-e89b-12d3-a456-426655440000"));
-    saga.onNorwegianMemberSignedEvent(e);
+        verifyNoMoreInteractions(underwriterSigningService);
 
-    then(signingService).should().productSignConfirmed(e.getMemberId());
-    then(snsNotificationService).should().sendMemberSignedNotification(e.getMemberId());
-  }
+        final MemberSignedEvent e = new MemberSignedEvent(1337L, "123e4567-e89b-12d3-a456-426655440000", "signature",
+            "oscpResponse", "19121212121212");
+        saga.onMemberSignedEvent(e);
 
-  @Test
-  public void onNorwegianMemberSignedEvent_whenUnderwriterServiceThrowsRuntimeException_willCallSigningService() {
-    val uuid = UUID.fromString("123e4567-e89b-12d3-a456-426655440000");
-    when(underwriterSigningService.isUnderwriterHandlingSignSession(uuid)).thenReturn(true);
-    willThrow(RuntimeException.class).given(underwriterSigningService).underwriterSignSessionWasCompleted(uuid);
+        then(underwriterApi).should().memberSigned(e.id.toString(), e.referenceId, e.signature, e.oscpResponse);
+    }
 
-    val saga = new MemberSignedSaga();
-    saga.setUnderwriterApi(underwriterApi);
-    saga.setSigningService(signingService);
-    saga.setSnsNotificationService(snsNotificationService);
-    saga.setUnderwriterSigningService(underwriterSigningService);
+    @Test
+    public void onNorwegianMemberSignedEvent_whenUnderwriterApiThrowsRuntimeException_willCallSigningService() {
+        when(underwriterSigningService.isUnderwriterHandlingSignSession(UUID.fromString("123e4567-e89b-12d3-a456-426655440000"))).thenReturn(false);
+        willThrow(RuntimeException.class).given(underwriterApi).memberSigned(anyString(), anyString(), anyString(), anyString());
 
-    final NorwegianMemberSignedEvent e = new NorwegianMemberSignedEvent(1337L, "12121212120", "{ \"json\":true }", UUID.fromString("123e4567-e89b-12d3-a456-426655440000"));
-    saga.onNorwegianMemberSignedEvent(e);
+        val saga = new MemberSignedSaga();
+        saga.setUnderwriterApi(underwriterApi);
+        saga.setSigningService(signingService);
+        saga.setSnsNotificationService(snsNotificationService);
+        saga.setUnderwriterSigningService(underwriterSigningService);
 
-    then(signingService).should().productSignConfirmed(e.getMemberId());
-    then(snsNotificationService).should().sendMemberSignedNotification(e.getMemberId());
-  }
+        final NorwegianMemberSignedEvent e = new NorwegianMemberSignedEvent(1337L, "12121212120", "{ \"json\":true }", UUID.fromString("123e4567-e89b-12d3-a456-426655440000"));
+        saga.onNorwegianMemberSignedEvent(e);
 
-  @Test
-  public void onNorwegianMemberSignedEvent_whenUnderwriterHandleSigningSession_dontCallMemberSignedEndpoint() {
-    when(underwriterSigningService.isUnderwriterHandlingSignSession(UUID.fromString("123e4567-e89b-12d3-a456-426655440000"))).thenReturn(true);
+        then(signingService).should().productSignConfirmed(e.getMemberId());
+        then(snsNotificationService).should().sendMemberSignedNotification(e.getMemberId());
+    }
 
-    val saga = new MemberSignedSaga();
-    saga.setUnderwriterApi(underwriterApi);
-    saga.setSigningService(signingService);
-    saga.setSnsNotificationService(snsNotificationService);
-    saga.setUnderwriterSigningService(underwriterSigningService);
+    @Test
+    public void onNorwegianMemberSignedEvent_whenUnderwriterServiceThrowsRuntimeException_willCallSigningService() {
+        val uuid = UUID.fromString("123e4567-e89b-12d3-a456-426655440000");
+        when(underwriterSigningService.isUnderwriterHandlingSignSession(uuid)).thenReturn(true);
+        willThrow(RuntimeException.class).given(underwriterSigningService).signSessionWasCompleted(any(), any());
 
-    final NorwegianMemberSignedEvent e = new NorwegianMemberSignedEvent(1337L, "12121212120", "{ \"json\":true }", UUID.fromString("123e4567-e89b-12d3-a456-426655440000"));
-    saga.onNorwegianMemberSignedEvent(e);
+        val saga = new MemberSignedSaga();
+        saga.setUnderwriterApi(underwriterApi);
+        saga.setSigningService(signingService);
+        saga.setSnsNotificationService(snsNotificationService);
+        saga.setUnderwriterSigningService(underwriterSigningService);
 
-    then(underwriterSigningService).should().underwriterSignSessionWasCompleted(e.getReferenceId());
-    verifyZeroInteractions(underwriterApi);
-  }
+        final NorwegianMemberSignedEvent e = new NorwegianMemberSignedEvent(1337L, "12121212120", "{ \"json\":true }", UUID.fromString("123e4567-e89b-12d3-a456-426655440000"));
+        saga.onNorwegianMemberSignedEvent(e);
 
-  @Test
-  public void onNorwegianMemberSignedEvent_whenIsNotUnderwriterHandleSigningSession_callMemberSignedEndpoint() {
-    when(underwriterSigningService.isUnderwriterHandlingSignSession(UUID.fromString("123e4567-e89b-12d3-a456-426655440000"))).thenReturn(false);
+        then(signingService).should().productSignConfirmed(e.getMemberId());
+        then(snsNotificationService).should().sendMemberSignedNotification(e.getMemberId());
+    }
 
-    val saga = new MemberSignedSaga();
-    saga.setUnderwriterApi(underwriterApi);
-    saga.setSigningService(signingService);
-    saga.setSnsNotificationService(snsNotificationService);
-    saga.setUnderwriterSigningService(underwriterSigningService);
+    @Test
+    public void onNorwegianMemberSignedEvent_whenUnderwriterHandleSigningSession_dontCallMemberSignedEndpoint() {
+        when(underwriterSigningService.isUnderwriterHandlingSignSession(UUID.fromString("123e4567-e89b-12d3-a456-426655440000"))).thenReturn(true);
 
-    verifyNoMoreInteractions(underwriterSigningService);
+        val saga = new MemberSignedSaga();
+        saga.setUnderwriterApi(underwriterApi);
+        saga.setSigningService(signingService);
+        saga.setSnsNotificationService(snsNotificationService);
+        saga.setUnderwriterSigningService(underwriterSigningService);
 
-    final NorwegianMemberSignedEvent e = new NorwegianMemberSignedEvent(1337L, "12121212120", "{ \"json\":true }", UUID.fromString("123e4567-e89b-12d3-a456-426655440000"));
-    saga.onNorwegianMemberSignedEvent(e);
+        final NorwegianMemberSignedEvent e = new NorwegianMemberSignedEvent(1337L, "12121212120", "{ \"json\":true }", UUID.fromString("123e4567-e89b-12d3-a456-426655440000"));
+        saga.onNorwegianMemberSignedEvent(e);
 
-    then(underwriterApi).should().memberSigned("1337", "", "", "");
-  }
+        then(underwriterSigningService).should().signSessionWasCompleted(
+            eq(e.getReferenceId()),
+            any(UnderwriterSessionCompletedData.BankIdRedirect.class)
+        );
+        verifyZeroInteractions(underwriterApi);
+    }
 
-  @Test
-  public void onDanishMemberSignedEvent_whenUnderwriterApiThrowsRuntimeException_willCallSigningService() {
-    when(underwriterSigningService.isUnderwriterHandlingSignSession(UUID.fromString("123e4567-e89b-12d3-a456-426655440001"))).thenReturn(false);
-    willThrow(RuntimeException.class).given(underwriterApi).memberSigned(anyString(), anyString(), anyString(), anyString());
+    @Test
+    public void onNorwegianMemberSignedEvent_whenIsNotUnderwriterHandleSigningSession_callMemberSignedEndpoint() {
+        when(underwriterSigningService.isUnderwriterHandlingSignSession(UUID.fromString("123e4567-e89b-12d3-a456-426655440000"))).thenReturn(false);
 
-    val saga = new MemberSignedSaga();
-    saga.setUnderwriterApi(underwriterApi);
-    saga.setSigningService(signingService);
-    saga.setSnsNotificationService(snsNotificationService);
-    saga.setUnderwriterSigningService(underwriterSigningService);
+        val saga = new MemberSignedSaga();
+        saga.setUnderwriterApi(underwriterApi);
+        saga.setSigningService(signingService);
+        saga.setSnsNotificationService(snsNotificationService);
+        saga.setUnderwriterSigningService(underwriterSigningService);
 
-    final DanishMemberSignedEvent e = new DanishMemberSignedEvent(1337L, "1212121212", "{ \"json\":true }", UUID.fromString("123e4567-e89b-12d3-a456-426655440001"));
-    saga.onDanishMemberSignedEvent(e);
+        verifyNoMoreInteractions(underwriterSigningService);
 
-    then(signingService).should().productSignConfirmed(e.getMemberId());
-    then(snsNotificationService).should().sendMemberSignedNotification(e.getMemberId());
-  }
+        final NorwegianMemberSignedEvent e = new NorwegianMemberSignedEvent(1337L, "12121212120", "{ \"json\":true }", UUID.fromString("123e4567-e89b-12d3-a456-426655440000"));
+        saga.onNorwegianMemberSignedEvent(e);
 
-  @Test
-  public void onDanishMemberSignedEvent_whenUnderwriterServiceThrowsRuntimeException_willCallSigningService() {
-    val uuid = UUID.fromString("123e4567-e89b-12d3-a456-426655440001");
-    when(underwriterSigningService.isUnderwriterHandlingSignSession(uuid)).thenReturn(true);
-    willThrow(RuntimeException.class).given(underwriterSigningService).underwriterSignSessionWasCompleted(uuid);
+        then(underwriterApi).should().memberSigned("1337", "", "", "");
+    }
 
-    val saga = new MemberSignedSaga();
-    saga.setUnderwriterApi(underwriterApi);
-    saga.setSigningService(signingService);
-    saga.setSnsNotificationService(snsNotificationService);
-    saga.setUnderwriterSigningService(underwriterSigningService);
+    @Test
+    public void onDanishMemberSignedEvent_whenUnderwriterApiThrowsRuntimeException_willCallSigningService() {
+        when(underwriterSigningService.isUnderwriterHandlingSignSession(UUID.fromString("123e4567-e89b-12d3-a456-426655440001"))).thenReturn(false);
+        willThrow(RuntimeException.class).given(underwriterApi).memberSigned(anyString(), anyString(), anyString(), anyString());
 
-    final DanishMemberSignedEvent e = new DanishMemberSignedEvent(1337L, "1212121212", "{ \"json\":true }", UUID.fromString("123e4567-e89b-12d3-a456-426655440001"));
-    saga.onDanishMemberSignedEvent(e);
+        val saga = new MemberSignedSaga();
+        saga.setUnderwriterApi(underwriterApi);
+        saga.setSigningService(signingService);
+        saga.setSnsNotificationService(snsNotificationService);
+        saga.setUnderwriterSigningService(underwriterSigningService);
 
-    then(signingService).should().productSignConfirmed(e.getMemberId());
-    then(snsNotificationService).should().sendMemberSignedNotification(e.getMemberId());
-  }
+        final DanishMemberSignedEvent e = new DanishMemberSignedEvent(1337L, "1212121212", "{ \"json\":true }", UUID.fromString("123e4567-e89b-12d3-a456-426655440001"));
+        saga.onDanishMemberSignedEvent(e);
 
-  @Test
-  public void onDanishMemberSignedEvent_whenUnderwriterHandleSigningSession_dontCallMemberSignedEndpoint() {
-    when(underwriterSigningService.isUnderwriterHandlingSignSession(UUID.fromString("123e4567-e89b-12d3-a456-426655440001"))).thenReturn(true);
+        then(signingService).should().productSignConfirmed(e.getMemberId());
+        then(snsNotificationService).should().sendMemberSignedNotification(e.getMemberId());
+    }
 
-    val saga = new MemberSignedSaga();
-    saga.setUnderwriterApi(underwriterApi);
-    saga.setSigningService(signingService);
-    saga.setSnsNotificationService(snsNotificationService);
-    saga.setUnderwriterSigningService(underwriterSigningService);
+    @Test
+    public void onDanishMemberSignedEvent_whenUnderwriterServiceThrowsRuntimeException_willCallSigningService() {
+        val uuid = UUID.fromString("123e4567-e89b-12d3-a456-426655440001");
+        when(underwriterSigningService.isUnderwriterHandlingSignSession(uuid)).thenReturn(true);
+        willThrow(RuntimeException.class).given(underwriterSigningService).signSessionWasCompleted(any(), any());
 
-    final DanishMemberSignedEvent e = new DanishMemberSignedEvent(1337L, "1212121212", "{ \"json\":true }", UUID.fromString("123e4567-e89b-12d3-a456-426655440001"));
-    saga.onDanishMemberSignedEvent(e);
+        val saga = new MemberSignedSaga();
+        saga.setUnderwriterApi(underwriterApi);
+        saga.setSigningService(signingService);
+        saga.setSnsNotificationService(snsNotificationService);
+        saga.setUnderwriterSigningService(underwriterSigningService);
 
-    then(underwriterSigningService).should().underwriterSignSessionWasCompleted(e.getReferenceId());
-    verifyZeroInteractions(underwriterApi);
-  }
+        final DanishMemberSignedEvent e = new DanishMemberSignedEvent(1337L, "1212121212", "{ \"json\":true }", UUID.fromString("123e4567-e89b-12d3-a456-426655440001"));
+        saga.onDanishMemberSignedEvent(e);
 
-  @Test
-  public void onDanishMemberSignedEvent_whenIsNotUnderwriterHandleSigningSession_callMemberSignedEndpoint() {
-    when(underwriterSigningService.isUnderwriterHandlingSignSession(UUID.fromString("123e4567-e89b-12d3-a456-426655440001"))).thenReturn(false);
+        then(signingService).should().productSignConfirmed(e.getMemberId());
+        then(snsNotificationService).should().sendMemberSignedNotification(e.getMemberId());
+    }
 
-    val saga = new MemberSignedSaga();
-    saga.setUnderwriterApi(underwriterApi);
-    saga.setSigningService(signingService);
-    saga.setSnsNotificationService(snsNotificationService);
-    saga.setUnderwriterSigningService(underwriterSigningService);
+    @Test
+    public void onDanishMemberSignedEvent_whenUnderwriterHandleSigningSession_dontCallMemberSignedEndpoint() {
+        when(underwriterSigningService.isUnderwriterHandlingSignSession(UUID.fromString("123e4567-e89b-12d3-a456-426655440001"))).thenReturn(true);
 
-    verifyNoMoreInteractions(underwriterSigningService);
+        val saga = new MemberSignedSaga();
+        saga.setUnderwriterApi(underwriterApi);
+        saga.setSigningService(signingService);
+        saga.setSnsNotificationService(snsNotificationService);
+        saga.setUnderwriterSigningService(underwriterSigningService);
 
-    final DanishMemberSignedEvent e = new DanishMemberSignedEvent(1337L, "1212121212", "{ \"json\":true }", UUID.fromString("123e4567-e89b-12d3-a456-426655440001"));
-    saga.onDanishMemberSignedEvent(e);
+        final DanishMemberSignedEvent e = new DanishMemberSignedEvent(1337L, "1212121212", "{ \"json\":true }", UUID.fromString("123e4567-e89b-12d3-a456-426655440001"));
+        saga.onDanishMemberSignedEvent(e);
 
-    then(underwriterApi).should().memberSigned("1337", "", "", "");
-  }
+        then(underwriterSigningService).should().signSessionWasCompleted(
+            eq(e.getReferenceId()),
+            any(UnderwriterSessionCompletedData.BankIdRedirect.class)
+        );
+        verifyZeroInteractions(underwriterApi);
+    }
+
+    @Test
+    public void onDanishMemberSignedEvent_whenIsNotUnderwriterHandleSigningSession_callMemberSignedEndpoint() {
+        when(underwriterSigningService.isUnderwriterHandlingSignSession(UUID.fromString("123e4567-e89b-12d3-a456-426655440001"))).thenReturn(false);
+
+        val saga = new MemberSignedSaga();
+        saga.setUnderwriterApi(underwriterApi);
+        saga.setSigningService(signingService);
+        saga.setSnsNotificationService(snsNotificationService);
+        saga.setUnderwriterSigningService(underwriterSigningService);
+
+        verifyNoMoreInteractions(underwriterSigningService);
+
+        final DanishMemberSignedEvent e = new DanishMemberSignedEvent(1337L, "1212121212", "{ \"json\":true }", UUID.fromString("123e4567-e89b-12d3-a456-426655440001"));
+        saga.onDanishMemberSignedEvent(e);
+
+        then(underwriterApi).should().memberSigned("1337", "", "", "");
+    }
 }
