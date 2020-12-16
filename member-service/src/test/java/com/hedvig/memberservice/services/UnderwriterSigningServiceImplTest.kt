@@ -68,7 +68,6 @@ class UnderwriterSigningServiceImplTest {
 
     private val sut = UnderwriterSigningServiceImpl(
         underwriterSignSessionRepository,
-        underwriterClient,
         signedMemberRepository,
         startSignSessionStrategyService
     )
