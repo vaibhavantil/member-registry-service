@@ -16,9 +16,9 @@ class StartSignSessionStrategyService(
         is UnderwriterStartSignSessionRequest.SimpleSign -> startSimpleSignSessionStrategy.startSignSession(memberId, request)
     }
 
-    fun signSessionWasCompleted(signSessionReference: UUID, data: UnderwriterSessionCompletedData) = when (data) {
-        is UnderwriterSessionCompletedData.SwedishBankId -> startSwedishBankIdSignSessionStrategy.signSessionWasCompleted(signSessionReference, data)
-        is UnderwriterSessionCompletedData.BankIdRedirect -> startRedirectBankIdSignSessionStrategy.signSessionWasCompleted(signSessionReference, data)
-        is UnderwriterSessionCompletedData.SimpleSign -> startSimpleSignSessionStrategy.signSessionWasCompleted(signSessionReference, data)
+    fun signSessionWasCompleted(underwriterSignSessionReference: UUID, data: UnderwriterSessionCompletedData) = when (data) {
+        is UnderwriterSessionCompletedData.SwedishBankId -> startSwedishBankIdSignSessionStrategy.signSessionWasCompleted(underwriterSignSessionReference, data)
+        is UnderwriterSessionCompletedData.BankIdRedirect -> startRedirectBankIdSignSessionStrategy.signSessionWasCompleted(underwriterSignSessionReference, data)
+        is UnderwriterSessionCompletedData.SimpleSign -> startSimpleSignSessionStrategy.signSessionWasCompleted(underwriterSignSessionReference, data)
     }
 }

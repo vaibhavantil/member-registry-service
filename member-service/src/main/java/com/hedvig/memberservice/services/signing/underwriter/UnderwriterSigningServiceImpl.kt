@@ -1,7 +1,5 @@
 package com.hedvig.memberservice.services.signing.underwriter
 
-import com.hedvig.integration.underwriter.UnderwriterClient
-import com.hedvig.integration.underwriter.dtos.SignRequest
 import com.hedvig.memberservice.query.SignedMemberRepository
 import com.hedvig.memberservice.query.UnderwriterSignSessionRepository
 import com.hedvig.memberservice.query.saveOrUpdateReusableSession
@@ -15,7 +13,6 @@ import java.util.*
 @Service
 class UnderwriterSigningServiceImpl(
     private val underwriterSignSessionRepository: UnderwriterSignSessionRepository,
-    private val underwriterClient: UnderwriterClient,
     private val signedMemberRepository: SignedMemberRepository,
     private val startSignSessionStrategyService: StartSignSessionStrategyService
 ) : UnderwriterSigningService {
@@ -41,26 +38,6 @@ class UnderwriterSigningServiceImpl(
         val session = underwriterSignSessionRepository.findBySignReference(signSessionReference)
             ?: throw IllegalCallerException("Called underwriterSignSessionWasCompleted but could not find underwriter sign session use isUnderwriterIsHandlingSignSession before calling this method")
 
-        startSignSessionStrategyService.signSessionWasCompleted(signSessionReference, data)
-    }
-
-    fun swedishBankIdSignSessionWasCompleted(orderReference: String, signature: String, oscpResponse: String) {
-        val session = underwriterSignSessionRepository.findBySignReference(UUID.fromString(orderReference))
-            ?: throw IllegalCallerException("Called swedishBankIdSignSessionWasCompleted but could not find underwriter sign session use isUnderwriterIsHandlingSignSession before calling this method")
-
-        underwriterClient.swedishBankIdSingComplete(
-            session.underwriterSignSessionReference,
-            SignRequest(
-                orderReference,
-                signature,
-                oscpResponse
-            )
-        )
-    }
-
-    fun underwriterSignSessionWasCompleted(orderReference: UUID) {
-        val session = underwriterSignSessionRepository.findBySignReference(orderReference)
-            ?: throw IllegalCallerException("Called underwriterSignSessionWasCompleted but could not find underwriter sign session use isUnderwriterIsHandlingSignSession before calling this method")
-
+        startSignSessionStrategyService.signSessionWasCompleted(session.underwriterSignSessionReference, data)
     }
 }

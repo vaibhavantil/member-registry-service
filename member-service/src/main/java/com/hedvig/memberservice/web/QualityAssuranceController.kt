@@ -15,7 +15,7 @@ class QualityAssuranceController(
     @PostMapping("unsignMember")
     fun unsignMember(
         @RequestBody request: UnsignMemberRequest
-    ) = ResponseEntity.ok(
+    ): ResponseEntity<Boolean> = ResponseEntity.ok(
         qualityAssuranceService.unsignMember(
             ssn = request.ssn
         )
