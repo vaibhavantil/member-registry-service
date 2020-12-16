@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.query.Param
 import org.springframework.stereotype.Repository
+import java.util.stream.Stream
 
 @Repository
 interface MemberRepository : JpaRepository<MemberEntity, Long> {
@@ -93,4 +94,12 @@ interface MemberRepository : JpaRepository<MemberEntity, Long> {
     """
     )
     fun findIdsWithNoPickedLocale(pageable: Pageable): Page<Long>
+
+    @Query(
+        """
+      FROM MemberEntity
+      WHERE ssn is not null and LENGTH(ssn) = 12
+    """
+    )
+    fun findAllSwedishMembers(): Stream<MemberEntity>
 }
