@@ -11,17 +11,22 @@ class CorrectSwedishSsnEventComponent(
     private val correctMember: CorrectMember
 ) {
 
-    fun addCorrectionEventsOnAllSwedishMembers(): Int {
+    fun addCorrectionEventsOnAllSwedishMembers(): String {
         val allMembers = memberRepository.findAll()
         var counter = 0
+        var oomeMembersMemberIds = mutableListOf<Long>()
 
         allMembers.forEach { member ->
-            if (correctMember.correctMember(member)) {
-                counter++
+            try {
+                if (correctMember.correctMember(member)) {
+                    counter++
+                }
+            } catch (e: OutOfMemoryError) {
+                oomeMembersMemberIds.add(member.id)
             }
         }
 
-        return counter
+        return "counter: $counter oomeCounter: ${oomeMembersMemberIds.size} [$oomeMembersMemberIds]"
     }
 
 }
