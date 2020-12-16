@@ -54,7 +54,7 @@ class MembersControllerV2 @Autowired constructor(
 
     //this will be removed once used
     @GetMapping("/correctSwedishSsnEvent")
-    fun correction(): ResponseEntity<Int> {
+    fun correction(): ResponseEntity<String> {
         return ResponseEntity.ok().body(correctSwedishSsnEventComponent.addCorrectionEventsOnAllSwedishMembers())
     }
 
