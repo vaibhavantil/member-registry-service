@@ -1,6 +1,8 @@
 package com.hedvig.memberservice.correction
 
 import com.hedvig.memberservice.query.MemberRepository
+import org.axonframework.commandhandling.gateway.CommandGateway
+import org.axonframework.eventsourcing.eventstore.EventStore
 import org.springframework.stereotype.Component
 
 //This will be removed once used so I'm not going for the best code out there :D
@@ -8,25 +10,24 @@ import org.springframework.stereotype.Component
 @Component
 class CorrectSwedishSsnEventComponent(
     private val memberRepository: MemberRepository,
-    private val correctMember: CorrectMember
+    private val eventStore: EventStore,
+    private val commandGateway: CommandGateway
 ) {
 
     fun addCorrectionEventsOnAllSwedishMembers(): String {
         val allMembers = memberRepository.findAll()
         var counter = 0
-        var oomeMembersMemberIds = mutableListOf<Long>()
 
         allMembers.forEach { member ->
-            try {
-                if (correctMember.correctMember(member)) {
-                    counter++
-                }
-            } catch (e: OutOfMemoryError) {
-                oomeMembersMemberIds.add(member.id)
+            var correctMemberJob: CorrectMember? = CorrectMember(eventStore, commandGateway)
+            if (correctMemberJob?.correctMember(member) == true) {
+                counter++
             }
+            correctMemberJob = null
+            System.gc()
         }
 
-        return "counter: $counter oomeCounter: ${oomeMembersMemberIds.size} [$oomeMembersMemberIds]"
+        return "counter: $counter"
     }
 
 }

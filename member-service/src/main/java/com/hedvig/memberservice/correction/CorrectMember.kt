@@ -10,8 +10,6 @@ import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import javax.transaction.Transactional
 
-@Component
-@Transactional
 class CorrectMember(
     private val eventStore: EventStore,
     private val commandGateway: CommandGateway
