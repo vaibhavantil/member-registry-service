@@ -7,6 +7,7 @@ import com.hedvig.memberservice.query.MemberRepository
 import org.axonframework.commandhandling.gateway.CommandGateway
 import org.axonframework.eventsourcing.eventstore.EventStore
 import org.springframework.stereotype.Component
+import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
