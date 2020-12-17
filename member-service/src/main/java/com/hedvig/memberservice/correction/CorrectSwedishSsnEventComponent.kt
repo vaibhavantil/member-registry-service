@@ -13,6 +13,7 @@ import java.time.format.DateTimeFormatter
 //This will be removed once used so I'm not going for the best code out there :D
 //But it is really important that the logic is correct so please let me know if somthing it strange :)
 @Component
+@Transactional
 class CorrectSwedishSsnEventComponent(
     private val memberRepository: MemberRepository,
     private val eventStore: EventStore,
