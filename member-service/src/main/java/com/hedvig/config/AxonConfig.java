@@ -72,6 +72,12 @@ public class AxonConfig {
         x ->
             TrackingEventProcessorConfiguration.forSingleThreadedProcessing()
                 .andInitialTrackingToken(StreamableMessageSource::createHeadToken));
+
+      config.registerTrackingEventProcessor(
+          "NotificationServiceUpdatePhoneNumber",
+          x ->
+              TrackingEventProcessorConfiguration.forSingleThreadedProcessing()
+                  .andInitialTrackingToken(StreamableMessageSource::createTailToken));
   }
 
 
