@@ -15,6 +15,10 @@ public class PhoneNumberUpdatedEvent implements Traceable {
     return id;
   }
 
+  public String getPhoneNumber() {
+    return phoneNumber;
+  }
+
   @Override
   public Map<String, Object> getValues() {
     Map result = new HashMap();
