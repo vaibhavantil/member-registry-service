@@ -3,6 +3,7 @@ package com.hedvig.integration.customerIO
 import com.hedvig.integration.notificationService.NotificationService
 import com.hedvig.memberservice.events.PhoneNumberUpdatedEvent
 import org.axonframework.config.ProcessingGroup
+import org.axonframework.eventhandling.EventHandler
 import org.axonframework.eventsourcing.DomainEventMessage
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
@@ -12,6 +13,8 @@ import org.springframework.stereotype.Component
 class NotificationServiceUpdatePhoneNumberEventListener(
     private val notificationService: NotificationService
 ) {
+
+    @EventHandler
     fun on(event: PhoneNumberUpdatedEvent, eventMessage: DomainEventMessage<Any>) {
         logger.info("Updating notification service phone number with [event: $event]")
         notificationService.updatePhoneNumber(eventMessage.identifier, event.memberId.toString(), event.phoneNumber)
