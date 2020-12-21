@@ -4,7 +4,6 @@ import com.hedvig.memberservice.aggregates.MemberAggregate;
 import com.hedvig.memberservice.events.upcasters.OnboardingStartedWithSSNEventUpcaster;
 import com.hedvig.memberservice.events.upcasters.SSNUpdatedEventUpcaster;
 import com.hedvig.memberservice.sagas.MemberSignedSaga;
-import com.hedvig.memberservice.sagas.NameUpdateSaga;
 import lombok.val;
 import org.axonframework.config.EventProcessingConfiguration;
 import org.axonframework.config.SagaConfiguration;
