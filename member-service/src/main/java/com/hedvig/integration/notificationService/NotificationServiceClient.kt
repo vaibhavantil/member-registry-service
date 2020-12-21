@@ -39,7 +39,7 @@ interface NotificationServiceClient {
 
     @PostMapping("/_/event")
     fun sendEvent(
-        @RequestHeader(value = "Request-Id") requestId: String?,
-        @RequestBody event: EventRequest?
+        @RequestHeader(value = "Request-Id") requestId: String,
+        @RequestBody event: EventRequest
     ): ResponseEntity<*>?
 }
