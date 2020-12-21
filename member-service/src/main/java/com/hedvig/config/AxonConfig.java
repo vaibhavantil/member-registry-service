@@ -41,17 +41,6 @@ public class AxonConfig {
     return config;
   }
 
-  @Bean("memberNameUpdateSagaConfiguration")
-  public SagaConfiguration<NameUpdateSaga> memberNameUpdateSagaConfiguration() {
-    val config = SagaConfiguration.trackingSagaManager(NameUpdateSaga.class);
-    config.configureTrackingProcessor(
-      x ->
-        TrackingEventProcessorConfiguration.forSingleThreadedProcessing()
-          .andInitialTrackingToken(StreamableMessageSource::createTailToken));
-
-    return config;
-  }
-
   @Autowired
   public void configure(EventProcessingConfiguration config) {
 

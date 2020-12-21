@@ -2,6 +2,7 @@ package com.hedvig.memberservice.listeners
 
 import com.hedvig.integration.productsPricing.CampaignService
 import com.hedvig.memberservice.events.MemberCreatedEvent
+import com.hedvig.memberservice.events.NameUpdatedEvent
 import org.axonframework.config.ProcessingGroup
 import org.axonframework.eventhandling.EventHandler
 import org.slf4j.LoggerFactory
@@ -9,7 +10,7 @@ import org.springframework.stereotype.Component
 
 @Component
 @ProcessingGroup("CreateCampaignOwner")
-class CreateCampaignOwnerEventListener(
+class CampaignOwnerUpdaterEventListener(
     val campaignService: CampaignService
 ) {
 
@@ -27,7 +28,19 @@ class CreateCampaignOwnerEventListener(
         }
     }
 
+    @EventHandler
+    fun on(e: NameUpdatedEvent) {
+        logger.debug("ON MEMBER NAME UPDATE EVENT FOR {}", e.memberId)
+        try {
+            e.firstName?.let {
+                campaignService.memberNameUpdate(e.memberId, it)
+            }
+        } catch (ex: RuntimeException) {
+            logger.error("Could not notify product-pricing about member name update for memberId: {}", e.memberId, ex)
+        }
+    }
+
     companion object {
-        private val logger = LoggerFactory.getLogger(CreateCampaignOwnerEventListener::class.java)
+        private val logger = LoggerFactory.getLogger(CampaignOwnerUpdaterEventListener::class.java)
     }
 }
