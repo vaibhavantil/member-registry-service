@@ -8,7 +8,7 @@ import org.axonframework.eventhandling.saga.StartSaga
 import org.axonframework.spring.stereotype.Saga
 import org.slf4j.LoggerFactory
 
-@Saga(configurationBean = "memberMemberNameUpdateConfiguration")
+@Saga(configurationBean = "memberNameUpdateSagaConfiguration")
 class NameUpdateSaga(
     val campaignService: CampaignService
 ) {
