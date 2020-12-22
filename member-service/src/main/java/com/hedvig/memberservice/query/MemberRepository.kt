@@ -90,13 +90,6 @@ interface MemberRepository : JpaRepository<MemberEntity, Long> {
 
     @Query(
         """
-        SELECT m.id from MemberEntity m WHERE m.pickedLocale is null and (first_name is null or first_name != 'GDPR')
-    """
-    )
-    fun findIdsWithNoPickedLocale(pageable: Pageable): Page<Long>
-
-    @Query(
-        """
       FROM MemberEntity
       WHERE ssn is not null and LENGTH(ssn) = 12
     """
