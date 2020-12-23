@@ -171,7 +171,7 @@ public class MemberSignedSagaTest {
         saga.onNorwegianMemberSignedEvent(e);
 
         then(underwriterSigningService).should().signSessionWasCompleted(
-            eq(e.getReferenceId()),
+            e.getReferenceId(),
             any(UnderwriterSessionCompletedData.BankIdRedirect.class)
         );
         verifyZeroInteractions(underwriterApi);
