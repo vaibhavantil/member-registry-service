@@ -9,13 +9,13 @@ import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.junit4.SpringRunner
 import org.springframework.test.web.servlet.MockMvc
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
-import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers
 
+@WebMvcTest(QualityAssuranceController::class)
 @RunWith(SpringRunner::class)
-@WebMvcTest(controllers = [QualityAssuranceController::class])
-@ActiveProfiles("production")
-class QualityAssuranceServiceImplProductionTest {
+@ActiveProfiles("staging,development")
+class QualityAssuranceServiceImplStagingTest {
 
     @Autowired
     lateinit var mockMvc: MockMvc
@@ -24,11 +24,10 @@ class QualityAssuranceServiceImplProductionTest {
     lateinit var qualityAssuranceServiceImpl: QualityAssuranceServiceImpl
 
     @Test
-    fun `When profile is production, the service is NOT available`() {
+    fun `When profile is staging or development, the endpoint IS available`() {
         mockMvc.perform(
-            post("/_/staging/SWEDEN/unsignMember")
+            MockMvcRequestBuilders.post("/_/staging/unsignMember")
                 .header("hedvig.token", "1337")
-        ).andExpect(status().isNotFound)
+        ).andExpect(MockMvcResultMatchers.status().isBadRequest)
     }
 }
-

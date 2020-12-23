@@ -29,7 +29,7 @@ public class MemberQueryService {
     Page<MemberEntity> searchRes = searchInternal(searchReq);
 
     List<InternalMember> memberDTOs = searchRes.getContent().stream()
-      .map(InternalMember::fromEntity)
+      .map(InternalMember.Companion::fromEntity)
       .collect(Collectors.toList());
 
     if (searchRes.getPageable().isPaged()) {

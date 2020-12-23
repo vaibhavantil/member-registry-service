@@ -12,4 +12,8 @@ public class TrackingIdCreatedEvent {
     this.memberId = memberId;
     this.trackingId = trackingId;
   }
+
+    public UUID getTrackingId() {
+        return trackingId;
+    }
 }

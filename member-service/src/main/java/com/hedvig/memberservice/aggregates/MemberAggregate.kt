@@ -1,9 +1,10 @@
 package com.hedvig.memberservice.aggregates
 
+import org.axonframework.commandhandling.model.AggregateLifecycle.apply
+
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.hedvig.common.UUIDGenerator
 import com.hedvig.external.bisnodeBCI.BisnodeClient
-import com.hedvig.memberservice.aggregates.MemberAggregate
 import com.hedvig.memberservice.commands.CreateMemberCommand
 import com.hedvig.memberservice.commands.EditMemberInfoCommand
 import com.hedvig.memberservice.commands.EditMemberInformationCommand
@@ -76,33 +77,31 @@ import java.util.UUID
 import java.util.function.Supplier
 
 @Aggregate
-class MemberAggregate {
+class MemberAggregate() {
+
     @AggregateIdentifier
-    var id: Long? = null
-    private var bisnodeClient: BisnodeClient? = null
-    private var status: MemberStatus? = null
-    private var member: Member? = null
-    private var latestBisnodeInformation: BisnodeInformation? = null
-    private var cashbackService: CashbackService? = null
-    private var objectMapper: ObjectMapper? = null
-    private var uuidGenerator: UUIDGenerator? = null
-    private var trackingId: UUID? = null
+    private var id: Long = 0L
 
     @Autowired
-    constructor(
-        bisnodeClient: BisnodeClient?,
-        cashbackService: CashbackService?,
-        uuidGenerator: UUIDGenerator?,
-        objectMapper: ObjectMapper?) {
-        this.bisnodeClient = bisnodeClient
-        this.cashbackService = cashbackService
-        this.uuidGenerator = uuidGenerator
-        this.objectMapper = objectMapper
-    }
+    lateinit var bisnodeClient: BisnodeClient
+
+    @Autowired
+    lateinit var cashbackService: CashbackService
+
+    @Autowired
+    lateinit var objectMapper: ObjectMapper
+
+    @Autowired
+    lateinit var uuidGenerator: UUIDGenerator
+
+    lateinit var status: MemberStatus
+    lateinit var member: Member
+    var trackingId: UUID? = null
+    lateinit var latestBisnodeInformation: BisnodeInformation
 
     @CommandHandler
-    constructor(command: CreateMemberCommand) {
-        AggregateLifecycle.apply(MemberCreatedEvent(command.memberId, MemberStatus.INITIATED))
+    constructor(command: CreateMemberCommand) : this() {
+        apply(MemberCreatedEvent(command.memberId, MemberStatus.INITIATED))
             .andThenApply {
                 if (command.acceptLanguage != null && !command.acceptLanguage.isEmpty()) {
                     return@andThenApply AcceptLanguageUpdatedEvent(command.memberId, command.acceptLanguage)
@@ -118,7 +117,7 @@ class MemberAggregate {
         if (status == MemberStatus.INITIATED || status == MemberStatus.ONBOARDING) {
             // Trigger fetching of bisnode data.
             val ssn = bankIdAuthResponse.sSN
-            applyChain = AggregateLifecycle.apply(SSNUpdatedEvent(id, ssn, SSNUpdatedEvent.Nationality.SWEDEN))
+            applyChain = apply(SSNUpdatedEvent(id, ssn, SSNUpdatedEvent.Nationality.SWEDEN))
             // -- Tracking id generation for the new member id
             generateTrackingId()
             applyChain = getBirthdateFromSwedishSsnAndApplyEvent(ssn, applyChain)
@@ -141,7 +140,7 @@ class MemberAggregate {
         if (applyChain != null) {
             applyChain.andThenApply(Supplier<Any> { authenticatedEvent })
         } else {
-            AggregateLifecycle.apply(authenticatedEvent)
+            apply(authenticatedEvent)
         }
     }
 
@@ -155,13 +154,13 @@ class MemberAggregate {
                 )
                 return applyChain
             }
-            AggregateLifecycle.apply(BirthDateUpdatedEvent(id!!, birthDate))
+            apply(BirthDateUpdatedEvent(id!!, birthDate))
         }
         return applyChain
     }
 
     private fun generateTrackingId() {
-        AggregateLifecycle.apply(TrackingIdCreatedEvent(id, uuidGenerator!!.generateRandom()))
+        apply(TrackingIdCreatedEvent(id, uuidGenerator!!.generateRandom()))
     }
 
     private fun formatName(name: String): String {
@@ -191,7 +190,7 @@ class MemberAggregate {
     @CommandHandler
     fun inactivateMember(command: InactivateMemberCommand?) {
         if (status == MemberStatus.INITIATED || status == MemberStatus.ONBOARDING) {
-            AggregateLifecycle.apply(MemberInactivatedEvent(id))
+            apply(MemberInactivatedEvent(id))
         } else {
             val str = String.format("Cannot INACTIAVTE member %s in status: %s", id, status!!.name)
             throw RuntimeException(str)
@@ -201,12 +200,16 @@ class MemberAggregate {
     @CommandHandler
     fun startOnboardingWithSSNCommand(command: StartOnboardingWithSSNCommand) {
         if (status == MemberStatus.INITIATED || status == MemberStatus.ONBOARDING) {
-            AggregateLifecycle.apply(OnboardingStartedWithSSNEvent(id, command.ssn, SSNUpdatedEvent.Nationality.SWEDEN))
+            apply(OnboardingStartedWithSSNEvent(id, command.ssn, SSNUpdatedEvent.Nationality.SWEDEN))
             getBirthdateFromSwedishSsnAndApplyEvent(command.ssn, null)
-            AggregateLifecycle.apply(MemberStartedOnBoardingEvent(id, MemberStatus.ONBOARDING))
+            apply(MemberStartedOnBoardingEvent(id, MemberStatus.ONBOARDING))
         } else {
             throw RuntimeException(String.format("Cannot start onboarding in state: %s", status))
         }
+    }
+
+    private fun maybeApplyNameUpdatedEvent() {
+
     }
 
     @CommandHandler
@@ -215,15 +218,12 @@ class MemberAggregate {
             logger.error("Will not update member info since member is SIGNED (memberId={})", id)
             return
         }
-        if ((cmd.firstName != null
-                && member!!.firstName != cmd.firstName)
-            || (cmd.lastName != null
-                && member!!.lastName != cmd.lastName)) {
-            AggregateLifecycle.apply(NameUpdatedEvent(id, cmd.firstName, cmd.lastName))
+        if ((cmd.firstName != null && member.firstName != cmd.firstName) &&
+            (cmd.lastName != null && member.lastName != cmd.lastName)) {
+            apply(NameUpdatedEvent(id, cmd.firstName, cmd.lastName))
         }
-        if (cmd.email != null
-            && member!!.email != cmd.email) {
-            AggregateLifecycle.apply(EmailUpdatedEvent(id, cmd.email))
+        if (cmd.email != null && member.email != cmd.email) {
+            apply(EmailUpdatedEvent(id, cmd.email))
         }
         val address = member!!.livingAddress
         if (address == null
@@ -234,7 +234,7 @@ class MemberAggregate {
                 cmd.apartmentNo,
                 cmd.floor)) {
             val floor = if (cmd.floor != null) cmd.floor else 0
-            AggregateLifecycle.apply(
+            apply(
                 LivingAddressUpdatedEvent(
                     id,
                     cmd.street,
@@ -245,11 +245,11 @@ class MemberAggregate {
         }
         if (cmd.phoneNumber != null
             && member!!.phoneNumber != cmd.phoneNumber) {
-            AggregateLifecycle.apply(PhoneNumberUpdatedEvent(id, cmd.phoneNumber))
+            apply(PhoneNumberUpdatedEvent(id, cmd.phoneNumber))
         }
         if (cmd.birthDate != null
             && member!!.birthDate != cmd.birthDate) {
-            AggregateLifecycle.apply(BirthDateUpdatedEvent(id!!, cmd.birthDate))
+            apply(BirthDateUpdatedEvent(id!!, cmd.birthDate))
         }
     }
 
@@ -257,11 +257,11 @@ class MemberAggregate {
     fun bankIdSignHandler(cmd: SwedishBankIdSignCommand) {
         if (cmd.personalNumber != null
             && member!!.ssn != cmd.personalNumber) {
-            AggregateLifecycle.apply(SSNUpdatedEvent(id, cmd.personalNumber, SSNUpdatedEvent.Nationality.SWEDEN))
+            apply(SSNUpdatedEvent(id, cmd.personalNumber, SSNUpdatedEvent.Nationality.SWEDEN))
         }
         getBirthdateFromSwedishSsnAndApplyEvent(cmd.personalNumber, null)
-        AggregateLifecycle.apply(NewCashbackSelectedEvent(id, cashbackService!!.getDefaultId(id!!).toString()))
-        AggregateLifecycle.apply(
+        apply(NewCashbackSelectedEvent(id, cashbackService!!.getDefaultId(id!!).toString()))
+        apply(
             MemberSignedEvent(
                 id, cmd.referenceId, cmd.signature, cmd.oscpResponse,
                 cmd.personalNumber))
@@ -273,23 +273,23 @@ class MemberAggregate {
     @CommandHandler
     fun ZignSecSignHandler(cmd: ZignSecSignCommand) {
         if (!isValidJSON(cmd.provideJsonResponse)) throw RuntimeException("Invalid json from provider")
-        AggregateLifecycle.apply(NewCashbackSelectedEvent(id, cashbackService!!.getDefaultId(id!!).toString()))
+        apply(NewCashbackSelectedEvent(id, cashbackService.getDefaultId(id).toString()))
         val zignSecAuthMarket = cmd.zignSecAuthMarket
         if (zignSecAuthMarket === ZignSecAuthenticationMarket.NORWAY) {
             if (cmd.personalNumber != null
                 && member!!.ssn != cmd.personalNumber) {
-                AggregateLifecycle.apply(NorwegianSSNUpdatedEvent(id!!, cmd.personalNumber))
+                apply(NorwegianSSNUpdatedEvent(id!!, cmd.personalNumber))
             }
-            AggregateLifecycle.apply(
+            apply(
                 NorwegianMemberSignedEvent(
                     id!!, cmd.personalNumber, cmd.provideJsonResponse, cmd.referenceId))
             return
         } else if (zignSecAuthMarket === ZignSecAuthenticationMarket.DENMARK) {
             if (cmd.personalNumber != null
                 && member!!.ssn != cmd.personalNumber) {
-                AggregateLifecycle.apply(DanishSSNUpdatedEvent(id!!, cmd.personalNumber))
+                apply(DanishSSNUpdatedEvent(id!!, cmd.personalNumber))
             }
-            AggregateLifecycle.apply(
+            apply(
                 DanishMemberSignedEvent(
                     id!!, cmd.personalNumber, cmd.provideJsonResponse, cmd.referenceId))
             return
@@ -309,40 +309,39 @@ class MemberAggregate {
 
     @CommandHandler
     fun on(signMemberFromUnderwriterCommand: SignMemberFromUnderwriterCommand) {
-        AggregateLifecycle.apply(MemberSignedWithoutBankId(signMemberFromUnderwriterCommand.id, signMemberFromUnderwriterCommand.ssn))
+        apply(MemberSignedWithoutBankId(signMemberFromUnderwriterCommand.id, signMemberFromUnderwriterCommand.ssn))
     }
 
     @CommandHandler
     fun on(cmd: MemberSimpleSignedCommand) {
         val identification = cmd.nationalIdentification.identification
         val nationality = cmd.nationalIdentification.nationality
-        AggregateLifecycle.apply(MemberSimpleSignedEvent(cmd.id, identification, toMemberSimpleSignedEventNationality(nationality), cmd.referenceId))
-        AggregateLifecycle.apply(SSNUpdatedEvent(id, identification, toSSNUpdatedEventNationality(nationality)))
+        apply(MemberSimpleSignedEvent(cmd.id, identification, toMemberSimpleSignedEventNationality(nationality), cmd.referenceId))
+        apply(SSNUpdatedEvent(id, identification, toSSNUpdatedEventNationality(nationality)))
     }
 
     @CommandHandler
     fun selectNewCashback(cmd: SelectNewCashbackCommand) {
-        AggregateLifecycle.apply(NewCashbackSelectedEvent(id, cmd.optionId.toString()))
+        apply(NewCashbackSelectedEvent(id, cmd.optionId.toString()))
     }
 
     @CommandHandler
     fun updateEmail(cmd: UpdateEmailCommand) {
-        AggregateLifecycle.apply(EmailUpdatedEvent(id, cmd.email))
+        apply(EmailUpdatedEvent(id, cmd.email))
     }
 
     @CommandHandler
     fun editMemberInformation(cmd: EditMemberInformationCommand) {
         if ((cmd.member.firstName != null
-                && member!!.firstName != cmd.member.firstName)
-            || (cmd.member.lastName != null
-                && member!!.lastName != cmd.member.lastName)) {
-            AggregateLifecycle.apply(
-                NameUpdatedEvent(
-                    id, cmd.member.firstName, cmd.member.lastName), MetaData.with("token", cmd.token))
+                && member.firstName != cmd.member.firstName)
+            && (cmd.member.lastName != null
+                && member.lastName != cmd.member.lastName)) {
+            apply(
+                NameUpdatedEvent(id, cmd.member.firstName, cmd.member.lastName), MetaData.with("token", cmd.token))
         }
         if (cmd.member.email != null
             && member!!.email != cmd.member.email) {
-            AggregateLifecycle.apply(EmailUpdatedEvent(id, cmd.member.email), MetaData.with("token", cmd.token))
+            apply(EmailUpdatedEvent(id, cmd.member.email), MetaData.with("token", cmd.token))
         }
         val address = member!!.livingAddress
         if (address == null
@@ -352,33 +351,36 @@ class MemberAggregate {
                 cmd.member.zipCode,
                 cmd.member.apartment,
                 cmd.member.floor)) {
-            AggregateLifecycle.apply(
+            apply(
                 LivingAddressUpdatedEvent(
                     id,
                     cmd.member.street,
                     cmd.member.city,
                     cmd.member.zipCode,
                     cmd.member.apartment,
-                    cmd.member.floor), MetaData.with("token", cmd.token))
+                    cmd.member.floor),
+                MetaData.with("token", cmd.token)
+            )
         }
         if (cmd.member.phoneNumber != null
             && member!!.phoneNumber != cmd.member.phoneNumber) {
-            AggregateLifecycle.apply(PhoneNumberUpdatedEvent(id, cmd.member.phoneNumber), MetaData.with("token", cmd.token))
+            apply(PhoneNumberUpdatedEvent(id, cmd.member.phoneNumber), MetaData.with("token", cmd.token))
         }
     }
 
     @CommandHandler
     fun on(cmd: EditMemberInfoCommand) {
-        val firstName = cmd.firstName ?: member!!.firstName
-        val lastName = cmd.lastName ?: member!!.lastName
-        if (firstName != member!!.firstName || lastName != member!!.lastName) {
-            AggregateLifecycle.apply(NameUpdatedEvent(id, firstName, lastName), MetaData.with("token", cmd.token))
+        val firstName = cmd.firstName ?: member.firstName
+        val lastName = cmd.lastName ?: member.lastName
+        if ((firstName != null && member.firstName != firstName)
+            && (lastName != null && member.lastName != lastName)) {
+            apply(NameUpdatedEvent(id, firstName, lastName), MetaData.with("token", cmd.token))
         }
         if (cmd.email != null && cmd.email != member!!.email) {
-            AggregateLifecycle.apply(EmailUpdatedEvent(id, cmd.email), MetaData.with("token", cmd.token))
+            apply(EmailUpdatedEvent(id, cmd.email), MetaData.with("token", cmd.token))
         }
         if (cmd.phoneNumber != null && cmd.phoneNumber != member!!.phoneNumber) {
-            AggregateLifecycle.apply(PhoneNumberUpdatedEvent(id, cmd.phoneNumber), MetaData.with("token", cmd.token))
+            apply(PhoneNumberUpdatedEvent(id, cmd.phoneNumber), MetaData.with("token", cmd.token))
         }
     }
 
@@ -388,13 +390,13 @@ class MemberAggregate {
             cmd.phoneNumber)
         if (cmd.phoneNumber != null
             && member!!.phoneNumber != cmd.phoneNumber) {
-            AggregateLifecycle.apply(PhoneNumberUpdatedEvent(cmd.memberId, cmd.phoneNumber))
+            apply(PhoneNumberUpdatedEvent(cmd.memberId, cmd.phoneNumber))
         }
     }
 
     @CommandHandler
     fun on(cmd: SetFraudulentStatusCommand) {
-        AggregateLifecycle.apply(FraudulentStatusUpdatedEvent(cmd.memberId, cmd.fraudulentStatus, cmd.fraudulentDescription), MetaData.with("token", cmd.token))
+        apply(FraudulentStatusUpdatedEvent(cmd.memberId, cmd.fraudulentStatus, cmd.fraudulentDescription), MetaData.with("token", cmd.token))
     }
 
     @CommandHandler
@@ -403,30 +405,30 @@ class MemberAggregate {
             cmd.memberId, cmd.SSN, cmd.email)
         if (cmd.SSN != null
             && member!!.ssn != cmd.SSN) {
-            AggregateLifecycle.apply(SSNUpdatedEvent(id, cmd.SSN, SSNUpdatedEvent.Nationality.SWEDEN))
+            apply(SSNUpdatedEvent(id, cmd.SSN, SSNUpdatedEvent.Nationality.SWEDEN))
             getBirthdateFromSwedishSsnAndApplyEvent(cmd.SSN, null)
         }
         if (cmd.email != null
             && member!!.email != cmd.email) {
-            AggregateLifecycle.apply(EmailUpdatedEvent(id, cmd.email))
+            apply(EmailUpdatedEvent(id, cmd.email))
         }
     }
 
     @CommandHandler
     fun on(cmd: UpdateSSNCommand) {
         logger.debug("Updating ssn for member {}, ssn: {}", cmd.memberId, cmd.ssn)
-        AggregateLifecycle.apply(SSNUpdatedEvent(cmd.memberId, cmd.ssn, toSSNUpdatedEventNationality(cmd.nationality)))
+        apply(SSNUpdatedEvent(cmd.memberId, cmd.ssn, toSSNUpdatedEventNationality(cmd.nationality)))
         getBirthdateFromSwedishSsnAndApplyEvent(cmd.ssn, null)
     }
 
     @CommandHandler
     fun on(cmd: InitializeAppleUserCommand) {
-        AggregateLifecycle.apply(
+        apply(
             MemberCreatedEvent(
                 cmd.memberId,
                 MemberStatus.SIGNED)
         )
-        AggregateLifecycle.apply(
+        apply(
             SSNUpdatedEvent(
                 cmd.memberId,
                 cmd.personalNumber,
@@ -434,30 +436,30 @@ class MemberAggregate {
             )
         )
         getBirthdateFromSwedishSsnAndApplyEvent(cmd.personalNumber, null)
-        AggregateLifecycle.apply(
+        apply(
             NewCashbackSelectedEvent(
                 cmd.memberId,
                 cashbackService!!.getDefaultId(id!!).toString())
         )
-        AggregateLifecycle.apply(
+        apply(
             NameUpdatedEvent(
                 cmd.memberId,
                 cmd.firstName,
                 cmd.lastName),
             null
         )
-        AggregateLifecycle.apply(
+        apply(
             PhoneNumberUpdatedEvent(
                 cmd.memberId,
                 cmd.phoneNumber
             )
         )
-        AggregateLifecycle.apply(
+        apply(
             EmailUpdatedEvent(
                 cmd.memberId,
                 cmd.email)
         )
-        AggregateLifecycle.apply(LivingAddressUpdatedEvent(
+        apply(LivingAddressUpdatedEvent(
             cmd.memberId,
             cmd.street,
             cmd.city,
@@ -473,7 +475,7 @@ class MemberAggregate {
         logger.info("Updating accept language for member {}, new number: {}", cmd.memberId, cmd.acceptLanguage)
         if (!cmd.acceptLanguage.isEmpty() &&
             member!!.acceptLanguage != cmd.acceptLanguage) {
-            AggregateLifecycle.apply(AcceptLanguageUpdatedEvent(cmd.memberId, cmd.acceptLanguage))
+            apply(AcceptLanguageUpdatedEvent(cmd.memberId, cmd.acceptLanguage))
         }
     }
 
@@ -481,19 +483,19 @@ class MemberAggregate {
     fun on(cmd: UpdatePickedLocaleCommand) {
         if (member!!.pickedLocale != cmd.pickedLocale) {
             logger.info("Updating picked locale for member {}, new locale: {}", cmd.memberId, cmd.pickedLocale)
-            AggregateLifecycle.apply(PickedLocaleUpdatedEvent(cmd.memberId, cmd.pickedLocale))
+            apply(PickedLocaleUpdatedEvent(cmd.memberId, cmd.pickedLocale))
         }
     }
 
     @CommandHandler
     fun on(cmd: UpdateBirthDateCommand) {
-        AggregateLifecycle.apply(BirthDateUpdatedEvent(cmd.memberId, cmd.birthDate))
+        apply(BirthDateUpdatedEvent(cmd.memberId, cmd.birthDate))
     }
 
     @EventSourcingHandler
     fun on(e: MemberCreatedEvent) {
-        id = e.getId()
-        status = e.getStatus()
+        id = e.id
+        status = e.status
         member = Member()
     }
 
@@ -504,8 +506,7 @@ class MemberAggregate {
 
     @EventSourcingHandler
     fun on(e: NameUpdatedEvent) {
-        member!!.firstName = e.getFirstName()
-        member!!.lastName = e.getLastName()
+        member = member.copy(firstName = e.firstName, lastName = e.lastName)
     }
 
     @EventSourcingHandler
@@ -530,19 +531,19 @@ class MemberAggregate {
 
     @EventSourcingHandler
     fun on(e: EmailUpdatedEvent) {
-        member!!.email = e.getEmail()
+        member = member.copy(email = e.email)
     }
 
     @EventSourcingHandler
     fun on(e: LivingAddressUpdatedEvent) {
         val address = LivingAddress(
             e.street, e.city, e.zipCode, e.apartmentNo, e.floor)
-        member!!.livingAddress = address
+        member = member.copy(livingAddress = address)
     }
 
     @EventSourcingHandler
     fun on(e: OnboardingStartedWithSSNEvent) {
-        member!!.ssn = e.ssn
+        member = member.copy(ssn = e.ssn)
     }
 
     @EventSourcingHandler
@@ -562,36 +563,36 @@ class MemberAggregate {
 
     @EventSourcingHandler
     fun on(e: PhoneNumberUpdatedEvent) {
-        member!!.phoneNumber = e.phoneNumber
+        member = member.copy(phoneNumber = e.phoneNumber)
     }
 
     @EventSourcingHandler
     fun on(e: BirthDateUpdatedEvent) {
-        member!!.birthDate = e.birthDate
+        member = member.copy(birthDate = e.birthDate)
     }
 
     @EventSourcingHandler
     fun on(e: SSNUpdatedEvent) {
-        member!!.ssn = e.ssn
+        member = member.copy(ssn = e.ssn)
     }
 
     @EventSourcingHandler
     fun on(e: NorwegianSSNUpdatedEvent) {
-        member!!.ssn = e.ssn
+        member = member.copy(ssn = e.ssn)
     }
 
     @EventSourcingHandler
     fun on(e: DanishSSNUpdatedEvent) {
-        member!!.ssn = e.ssn
+        member = member.copy(ssn = e.ssn)
     }
 
     @EventSourcingHandler
     fun on(e: AcceptLanguageUpdatedEvent) {
-        member!!.acceptLanguage = e.acceptLanguage
+        member = member.copy(acceptLanguage = e.acceptLanguage)
     }
 
     @EventSourcingHandler
     fun on(e: PickedLocaleUpdatedEvent) {
-        member!!.pickedLocale = e.pickedLocale
+        member = member.copy(pickedLocale = e.pickedLocale)
     }
 }

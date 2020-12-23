@@ -13,4 +13,8 @@ public class OnboardingStartedWithSSNEvent extends SSNUpdatedEvent {
     super(memberId, ssn, nationality);
   }
 
+    @Override
+    public String getSsn() {
+        return super.getSsn();
+    }
 }

@@ -4,6 +4,7 @@ import com.hedvig.integration.contentservice.ContentServiceClient
 import com.hedvig.integration.contentservice.dto.CashbackOptionDTO
 import com.hedvig.memberservice.aggregates.PickedLocale
 import com.hedvig.memberservice.commands.SelectNewCashbackCommand
+import com.hedvig.memberservice.commands.UpdateAcceptLanguageCommand
 import com.hedvig.memberservice.query.MemberEntity
 import com.hedvig.memberservice.query.MemberRepository
 import com.hedvig.memberservice.services.cashback.CashbackServiceImpl.Companion.DEFAULT_DANISH_CASHBACK_OPTION
@@ -13,6 +14,7 @@ import com.hedvig.memberservice.services.exceptions.MemberNotFoundException
 import io.mockk.every
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
+import io.mockk.slot
 import io.mockk.verify
 import org.assertj.core.api.Assertions.assertThat
 import org.axonframework.commandhandling.gateway.CommandGateway
@@ -60,7 +62,10 @@ class CashbackServiceImplTest {
 
         classToTest.selectCashbackOption(memberId, existingCashbackOption, null)
 
-        verify { commandGateway.sendAndWait(SelectNewCashbackCommand(memberId, existingCashbackOption)) }
+        val slot = slot<SelectNewCashbackCommand>()
+        verify { commandGateway.sendAndWait(capture(slot)) }
+        assertThat(slot.captured.memberId).isEqualTo(memberId)
+        assertThat(slot.captured.optionId).isEqualTo(existingCashbackOption)
     }
 
     @Test
@@ -209,7 +214,10 @@ class CashbackServiceImplTest {
 
         classToTest.selectCashbackOption(memberId, existingCashbackOption, overrideLocale)
 
-        verify { commandGateway.sendAndWait(SelectNewCashbackCommand(memberId, existingCashbackOption)) }
+        val slot = slot<SelectNewCashbackCommand>()
+        verify { commandGateway.sendAndWait(capture(slot)) }
+        assertThat(slot.captured.memberId).isEqualTo(memberId)
+        assertThat(slot.captured.optionId).isEqualTo(existingCashbackOption)
     }
 
 
