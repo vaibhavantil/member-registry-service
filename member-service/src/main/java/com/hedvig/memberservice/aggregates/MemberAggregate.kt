@@ -58,18 +58,13 @@ import com.hedvig.memberservice.util.SsnUtilImpl.Companion.getBirthdateFromSwedi
 import com.hedvig.memberservice.util.logger
 import com.hedvig.memberservice.web.dto.Nationality.Companion.toMemberSimpleSignedEventNationality
 import com.hedvig.memberservice.web.dto.Nationality.Companion.toSSNUpdatedEventNationality
-import com.hedvig.util.logger
-import lombok.extern.slf4j.Slf4j
 import org.axonframework.commandhandling.CommandHandler
 import org.axonframework.commandhandling.model.AggregateIdentifier
-import org.axonframework.commandhandling.model.AggregateLifecycle
 import org.axonframework.commandhandling.model.ApplyMore
 import org.axonframework.eventhandling.EventHandler
 import org.axonframework.eventsourcing.EventSourcingHandler
 import org.axonframework.messaging.MetaData
 import org.axonframework.spring.stereotype.Aggregate
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.lang.Nullable
 import java.io.IOException
@@ -150,17 +145,17 @@ class MemberAggregate() {
         if (birthDate != null) {
             if (applyChain != null) {
                 applyChain = applyChain.andThenApply(
-                    Supplier<Any> { BirthDateUpdatedEvent(id!!, birthDate) }
+                    Supplier<Any> { BirthDateUpdatedEvent(id, birthDate) }
                 )
                 return applyChain
             }
-            apply(BirthDateUpdatedEvent(id!!, birthDate))
+            apply(BirthDateUpdatedEvent(id, birthDate))
         }
         return applyChain
     }
 
     private fun generateTrackingId() {
-        apply(TrackingIdCreatedEvent(id, uuidGenerator!!.generateRandom()))
+        apply(TrackingIdCreatedEvent(id, uuidGenerator.generateRandom()))
     }
 
     private fun formatName(name: String): String {
@@ -170,21 +165,21 @@ class MemberAggregate() {
 
     @Throws(RuntimeException::class)
     private fun getPersonInformationFromBisnode(applyChain: ApplyMore?, ssn: String): ApplyMore? {
-        var applyChain = applyChain
+        var chain = applyChain
         logger.info("Calling bisnode for person information for {}", ssn)
-        val personList = bisnodeClient!!.match(ssn).persons
+        val personList = bisnodeClient.match(ssn).persons
         val person = personList[0].person
         if (personList.size != 1) {
             throw RuntimeException("Could not find person at bisnode.")
         }
-        applyChain = applyChain!!.andThenApply { NameUpdatedEvent(id, person.preferredOrFirstName, person.familyName) }
+        chain = chain!!.andThenApply { NameUpdatedEvent(id, person.preferredOrFirstName, person.familyName) }
         val pi = BisnodeInformation(ssn, person)
         if (pi.address.isPresent) {
-            applyChain = applyChain.andThenApply(
+            chain = chain.andThenApply(
                 Supplier<Any> { LivingAddressUpdatedEvent(id, pi.address.get()) })
         }
-        applyChain.andThenApply(Supplier<Any> { PersonInformationFromBisnodeEvent(id, pi) })
-        return applyChain
+        chain.andThenApply(Supplier<Any> { PersonInformationFromBisnodeEvent(id, pi) })
+        return chain
     }
 
     @CommandHandler
@@ -192,7 +187,7 @@ class MemberAggregate() {
         if (status == MemberStatus.INITIATED || status == MemberStatus.ONBOARDING) {
             apply(MemberInactivatedEvent(id))
         } else {
-            val str = String.format("Cannot INACTIAVTE member %s in status: %s", id, status!!.name)
+            val str = String.format("Cannot INACTIAVTE member %s in status: %s", id, status.name)
             throw RuntimeException(str)
         }
     }
@@ -208,8 +203,17 @@ class MemberAggregate() {
         }
     }
 
-    private fun maybeApplyNameUpdatedEvent() {
+    private fun maybeApplyNameUpdatedEvent(firstName: String?, lastName: String?) {
+        val shouldUpdateFirstName = firstName != null && member.firstName != firstName
+        val shouldUpdateLastName = lastName != null && member.lastName != lastName
 
+        if (shouldUpdateFirstName || shouldUpdateLastName) {
+            apply(NameUpdatedEvent(
+                id,
+                if (shouldUpdateFirstName) firstName else member.firstName,
+                if (shouldUpdateLastName) lastName else member.lastName
+            ))
+        }
     }
 
     @CommandHandler
@@ -218,14 +222,11 @@ class MemberAggregate() {
             logger.error("Will not update member info since member is SIGNED (memberId={})", id)
             return
         }
-        if ((cmd.firstName != null && member.firstName != cmd.firstName) &&
-            (cmd.lastName != null && member.lastName != cmd.lastName)) {
-            apply(NameUpdatedEvent(id, cmd.firstName, cmd.lastName))
-        }
+        maybeApplyNameUpdatedEvent(cmd.firstName, cmd.lastName)
         if (cmd.email != null && member.email != cmd.email) {
             apply(EmailUpdatedEvent(id, cmd.email))
         }
-        val address = member!!.livingAddress
+        val address = member.livingAddress
         if (address == null
             || address.needsUpdate(
                 cmd.street,
@@ -244,23 +245,23 @@ class MemberAggregate() {
                     floor))
         }
         if (cmd.phoneNumber != null
-            && member!!.phoneNumber != cmd.phoneNumber) {
+            && member.phoneNumber != cmd.phoneNumber) {
             apply(PhoneNumberUpdatedEvent(id, cmd.phoneNumber))
         }
         if (cmd.birthDate != null
-            && member!!.birthDate != cmd.birthDate) {
-            apply(BirthDateUpdatedEvent(id!!, cmd.birthDate))
+            && member.birthDate != cmd.birthDate) {
+            apply(BirthDateUpdatedEvent(id, cmd.birthDate))
         }
     }
 
     @CommandHandler
     fun bankIdSignHandler(cmd: SwedishBankIdSignCommand) {
         if (cmd.personalNumber != null
-            && member!!.ssn != cmd.personalNumber) {
+            && member.ssn != cmd.personalNumber) {
             apply(SSNUpdatedEvent(id, cmd.personalNumber, SSNUpdatedEvent.Nationality.SWEDEN))
         }
         getBirthdateFromSwedishSsnAndApplyEvent(cmd.personalNumber, null)
-        apply(NewCashbackSelectedEvent(id, cashbackService!!.getDefaultId(id!!).toString()))
+        apply(NewCashbackSelectedEvent(id, cashbackService.getDefaultId(id).toString()))
         apply(
             MemberSignedEvent(
                 id, cmd.referenceId, cmd.signature, cmd.oscpResponse,
@@ -277,21 +278,21 @@ class MemberAggregate() {
         val zignSecAuthMarket = cmd.zignSecAuthMarket
         if (zignSecAuthMarket === ZignSecAuthenticationMarket.NORWAY) {
             if (cmd.personalNumber != null
-                && member!!.ssn != cmd.personalNumber) {
-                apply(NorwegianSSNUpdatedEvent(id!!, cmd.personalNumber))
+                && member.ssn != cmd.personalNumber) {
+                apply(NorwegianSSNUpdatedEvent(id, cmd.personalNumber))
             }
             apply(
                 NorwegianMemberSignedEvent(
-                    id!!, cmd.personalNumber, cmd.provideJsonResponse, cmd.referenceId))
+                    id, cmd.personalNumber, cmd.provideJsonResponse, cmd.referenceId))
             return
         } else if (zignSecAuthMarket === ZignSecAuthenticationMarket.DENMARK) {
             if (cmd.personalNumber != null
-                && member!!.ssn != cmd.personalNumber) {
-                apply(DanishSSNUpdatedEvent(id!!, cmd.personalNumber))
+                && member.ssn != cmd.personalNumber) {
+                apply(DanishSSNUpdatedEvent(id, cmd.personalNumber))
             }
             apply(
                 DanishMemberSignedEvent(
-                    id!!, cmd.personalNumber, cmd.provideJsonResponse, cmd.referenceId))
+                    id, cmd.personalNumber, cmd.provideJsonResponse, cmd.referenceId))
             return
         }
         throw RuntimeException("ZignSec authentication market: " + zignSecAuthMarket.name + " is not implemented!")
@@ -299,7 +300,7 @@ class MemberAggregate() {
 
     fun isValidJSON(json: String?): Boolean {
         return try {
-            objectMapper!!.readTree(json)
+            objectMapper.readTree(json)
             true
         } catch (e: IOException) {
             logger.error("Failed to validate json", e)
@@ -332,18 +333,12 @@ class MemberAggregate() {
 
     @CommandHandler
     fun editMemberInformation(cmd: EditMemberInformationCommand) {
-        if ((cmd.member.firstName != null
-                && member.firstName != cmd.member.firstName)
-            && (cmd.member.lastName != null
-                && member.lastName != cmd.member.lastName)) {
-            apply(
-                NameUpdatedEvent(id, cmd.member.firstName, cmd.member.lastName), MetaData.with("token", cmd.token))
-        }
+        maybeApplyNameUpdatedEvent(cmd.member.firstName, cmd.member.lastName)
         if (cmd.member.email != null
-            && member!!.email != cmd.member.email) {
+            && member.email != cmd.member.email) {
             apply(EmailUpdatedEvent(id, cmd.member.email), MetaData.with("token", cmd.token))
         }
-        val address = member!!.livingAddress
+        val address = member.livingAddress
         if (address == null
             || address.needsUpdate(
                 cmd.member.street,
@@ -363,23 +358,18 @@ class MemberAggregate() {
             )
         }
         if (cmd.member.phoneNumber != null
-            && member!!.phoneNumber != cmd.member.phoneNumber) {
+            && member.phoneNumber != cmd.member.phoneNumber) {
             apply(PhoneNumberUpdatedEvent(id, cmd.member.phoneNumber), MetaData.with("token", cmd.token))
         }
     }
 
     @CommandHandler
     fun on(cmd: EditMemberInfoCommand) {
-        val firstName = cmd.firstName ?: member.firstName
-        val lastName = cmd.lastName ?: member.lastName
-        if ((firstName != null && member.firstName != firstName)
-            && (lastName != null && member.lastName != lastName)) {
-            apply(NameUpdatedEvent(id, firstName, lastName), MetaData.with("token", cmd.token))
-        }
-        if (cmd.email != null && cmd.email != member!!.email) {
+        maybeApplyNameUpdatedEvent(cmd.firstName, cmd.lastName)
+        if (cmd.email != null && cmd.email != member.email) {
             apply(EmailUpdatedEvent(id, cmd.email), MetaData.with("token", cmd.token))
         }
-        if (cmd.phoneNumber != null && cmd.phoneNumber != member!!.phoneNumber) {
+        if (cmd.phoneNumber != null && cmd.phoneNumber != member.phoneNumber) {
             apply(PhoneNumberUpdatedEvent(id, cmd.phoneNumber), MetaData.with("token", cmd.token))
         }
     }
@@ -389,7 +379,7 @@ class MemberAggregate() {
         logger.info("Updating phoneNumber for member {}, new number: {}", cmd.memberId,
             cmd.phoneNumber)
         if (cmd.phoneNumber != null
-            && member!!.phoneNumber != cmd.phoneNumber) {
+            && member.phoneNumber != cmd.phoneNumber) {
             apply(PhoneNumberUpdatedEvent(cmd.memberId, cmd.phoneNumber))
         }
     }
@@ -404,12 +394,12 @@ class MemberAggregate() {
         logger.debug("Updating ssn and email for webOnBoarding member {}, ssn: {}, email: {}",
             cmd.memberId, cmd.SSN, cmd.email)
         if (cmd.SSN != null
-            && member!!.ssn != cmd.SSN) {
+            && member.ssn != cmd.SSN) {
             apply(SSNUpdatedEvent(id, cmd.SSN, SSNUpdatedEvent.Nationality.SWEDEN))
             getBirthdateFromSwedishSsnAndApplyEvent(cmd.SSN, null)
         }
         if (cmd.email != null
-            && member!!.email != cmd.email) {
+            && member.email != cmd.email) {
             apply(EmailUpdatedEvent(id, cmd.email))
         }
     }
@@ -439,7 +429,7 @@ class MemberAggregate() {
         apply(
             NewCashbackSelectedEvent(
                 cmd.memberId,
-                cashbackService!!.getDefaultId(id!!).toString())
+                cashbackService.getDefaultId(id).toString())
         )
         apply(
             NameUpdatedEvent(
@@ -474,14 +464,14 @@ class MemberAggregate() {
     fun on(cmd: UpdateAcceptLanguageCommand) {
         logger.info("Updating accept language for member {}, new number: {}", cmd.memberId, cmd.acceptLanguage)
         if (!cmd.acceptLanguage.isEmpty() &&
-            member!!.acceptLanguage != cmd.acceptLanguage) {
+            member.acceptLanguage != cmd.acceptLanguage) {
             apply(AcceptLanguageUpdatedEvent(cmd.memberId, cmd.acceptLanguage))
         }
     }
 
     @CommandHandler
     fun on(cmd: UpdatePickedLocaleCommand) {
-        if (member!!.pickedLocale != cmd.pickedLocale) {
+        if (member.pickedLocale != cmd.pickedLocale) {
             logger.info("Updating picked locale for member {}, new locale: {}", cmd.memberId, cmd.pickedLocale)
             apply(PickedLocaleUpdatedEvent(cmd.memberId, cmd.pickedLocale))
         }
