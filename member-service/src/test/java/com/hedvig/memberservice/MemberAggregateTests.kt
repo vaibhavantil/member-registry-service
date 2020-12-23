@@ -122,7 +122,7 @@ class MemberAggregateTests {
         val memberId = 1234L
         val referenceId = "someReferenceId"
         every { uuidGenerator.generateRandom() } returns TRACKING_UUID
-        every { cashbackService.getDefaultId(anyLong()) } returns DEFAULT_CASHBACK
+        every { cashbackService.getDefaultId(any()) } returns DEFAULT_CASHBACK
         val bankIdAuthStatus = makeBankIdAuthenticationStatus(
             TOLVANSSON_SSN, referenceId, TOLVANSSON_FIRST_NAME, TOLVANSSON_LAST_NAME)
         fixture
@@ -343,7 +343,7 @@ class MemberAggregateTests {
         val referenceId = "someReferenceId"
         val personalNumber = "198902171234"
         every { uuidGenerator!!.generateRandom() } returns TRACKING_UUID
-        every { cashbackService.getDefaultId(anyLong()) } returns DEFAULT_CASHBACK
+        every { cashbackService.getDefaultId(any()) } returns DEFAULT_CASHBACK
         fixture
             .given(
                 MemberCreatedEvent(memberId, MemberStatus.INITIATED, Instant.now()),
