@@ -4,7 +4,7 @@ import java.time.Instant
 import java.util.UUID
 
 class InsuranceCancellationEvent(
-    var memberId: Long?,
-    var insuranceId: UUID?,
-    var inactivationDate: Instant?
+    val memberId: Long,
+    val insuranceId: UUID?,
+    val inactivationDate: Instant?
 )
