@@ -73,7 +73,6 @@ import java.util.function.Supplier
 
 @Aggregate
 class MemberAggregate() {
-
     @AggregateIdentifier
     private var id: Long = 0L
 
