@@ -20,6 +20,7 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
+import java.util.Objects;
 import java.util.UUID;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -171,7 +172,7 @@ public class MemberSignedSagaTest {
         saga.onNorwegianMemberSignedEvent(e);
 
         then(underwriterSigningService).should().signSessionWasCompleted(
-            e.getReferenceId(),
+            Objects.requireNonNull(e.getReferenceId()),
             any(UnderwriterSessionCompletedData.BankIdRedirect.class)
         );
         verifyZeroInteractions(underwriterApi);
@@ -246,7 +247,7 @@ public class MemberSignedSagaTest {
         saga.onDanishMemberSignedEvent(e);
 
         then(underwriterSigningService).should().signSessionWasCompleted(
-            eq(e.getReferenceId()),
+            Objects.requireNonNull(e.getReferenceId()),
             any(UnderwriterSessionCompletedData.BankIdRedirect.class)
         );
         verifyZeroInteractions(underwriterApi);
