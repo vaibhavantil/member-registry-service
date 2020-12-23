@@ -46,7 +46,6 @@ import com.hedvig.memberservice.web.dto.NationalIdentification
 import com.hedvig.memberservice.web.dto.Nationality
 import com.hedvig.memberservice.web.dto.StartOnboardingWithSSNRequest
 import com.hedvig.memberservice.web.dto.UpdateContactInformationRequest
-import com.ninjasquad.springmockk.MockkBean
 import io.mockk.every
 import io.mockk.mockk
 import org.axonframework.eventsourcing.AbstractAggregateFactory
@@ -56,14 +55,6 @@ import org.axonframework.test.aggregate.FixtureConfiguration
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.ArgumentMatchers
-import org.mockito.ArgumentMatchers.anyLong
-import org.mockito.BDDMockito
-import org.mockito.Mockito
-import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
-import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.test.context.junit4.SpringRunner
 import org.springframework.web.client.RestClientException
 import java.time.Instant
