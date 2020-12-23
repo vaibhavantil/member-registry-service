@@ -14,6 +14,7 @@ import com.hedvig.integration.apigateway.ApiGatewayService
 import com.hedvig.memberservice.jobs.SwedishBankIdMetrics
 import com.hedvig.memberservice.services.redispublisher.AuthSessionUpdatedEventStatus
 import com.hedvig.memberservice.services.redispublisher.RedisEventPublisher
+import com.hedvig.memberservice.util.logger
 import org.axonframework.commandhandling.gateway.CommandGateway
 import org.quartz.JobBuilder
 import org.quartz.Scheduler
@@ -140,7 +141,5 @@ class BankIdServiceV2(
 
     companion object {
         const val JOB_GROUP = "bankid.auth.collect"
-
-        private val logger = LoggerFactory.getLogger(BankIdServiceV2::class.java)
     }
 }

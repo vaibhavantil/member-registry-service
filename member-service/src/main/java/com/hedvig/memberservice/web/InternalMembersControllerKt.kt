@@ -1,6 +1,7 @@
 package com.hedvig.memberservice.web
 
 import com.hedvig.memberservice.query.MemberRepository
+import com.hedvig.memberservice.util.logger
 import com.hedvig.memberservice.web.dto.ChargeMembersDTO
 import com.hedvig.memberservice.web.dto.InternalMember
 import org.slf4j.LoggerFactory
@@ -23,7 +24,7 @@ class InternalMembersControllerKt(
         val members = memberIds.map { memberId -> InternalMember.fromEntity(membersReducedList.first { it.id == memberId }) }
 
         if (dto.memberIds.size != members.size) {
-            log.error(
+            logger.error(
                 "Length mismatch of supplied members and found members: wanted {}, found {}",
                 dto.memberIds.size,
                 members.size)
@@ -31,6 +32,4 @@ class InternalMembersControllerKt(
         }
         return ResponseEntity.ok(members)
     }
-
-    private val log = LoggerFactory.getLogger(this::class.java)
 }

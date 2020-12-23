@@ -8,6 +8,7 @@ import com.hedvig.memberservice.events.MemberSignedWithoutBankId
 import com.hedvig.memberservice.events.MemberSimpleSignedEvent
 import com.hedvig.memberservice.events.NorwegianMemberSignedEvent
 import com.hedvig.memberservice.query.MemberRepository
+import com.hedvig.memberservice.util.logger
 import mu.KotlinLogging
 import org.axonframework.config.ProcessingGroup
 import org.axonframework.eventhandling.EventHandler
@@ -23,8 +24,6 @@ class CleanCustomerIOEventListener(
     private val memberRepository: MemberRepository,
     private val notificationService: NotificationService
 ) {
-    private val logger = KotlinLogging.logger {}
-
     @EventHandler
     fun on(event: MemberSignedEvent) {
         deleteUnsignedMembersWithSameInfoFromCustomerIo(event.id)
@@ -53,16 +52,16 @@ class CleanCustomerIOEventListener(
     private fun deleteUnsignedMembersWithSameInfoFromCustomerIo(memberId: Long) {
         val memberMaybe = memberRepository.findById(memberId)
         if (!memberMaybe.isPresent) {
-            logger.error { "Cannot delete unsigned members with same info from customer.io since no member exist (memberId=${memberId})" }
+            logger.error("Cannot delete unsigned members with same info from customer.io since no member exist (memberId=${memberId})")
             return
         }
         val member = memberMaybe.get()
         if (member.email.isNullOrBlank()) {
-            logger.error { "Cannot delete unsigned members with same info from customer.io since email is empty (memberId=${memberId})" }
+            logger.error("Cannot delete unsigned members with same info from customer.io since email is empty (memberId=${memberId})")
             return
         }
         if (member.ssn.isNullOrBlank()) {
-            logger.error { "Cannot delete unsigned members with same info from customer.io since ssn is empty (memberId=${memberId})" }
+            logger.error("Cannot delete unsigned members with same info from customer.io since ssn is empty (memberId=${memberId})")
             return
         }
         val membersToDeleteFromCustomerIO = memberRepository.findNonSignedBySsnOrEmailAndNotId(
@@ -73,14 +72,14 @@ class CleanCustomerIOEventListener(
         membersToDeleteFromCustomerIO.forEach { memberToDelete ->
             try {
                 notificationService.deleteCustomer(memberToDelete.id.toString())
-                logger.info { "Deleted member=${memberToDelete.id} from customer.io since member=${member.id} signed" }
+                logger.info("Deleted member=${memberToDelete.id} from customer.io since member=${member.id} signed")
             } catch (exception: Exception) {
-                logger.error { "Failed to delete member=${memberToDelete.id} from customer.io (exception=$exception)" }
+                logger.error("Failed to delete member=${memberToDelete.id} from customer.io (exception=$exception)")
             }
             try {
                 Thread.sleep(10)
             } catch (exception: Exception) {
-                logger.error { "Interrupted when throttling customer.io deletions" }
+                logger.error("Interrupted when throttling customer.io deletions")
             }
         }
     }

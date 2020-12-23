@@ -5,6 +5,7 @@ import com.hedvig.integration.notificationService.NotificationService
 import com.hedvig.memberservice.events.EmailUpdatedEvent
 import com.hedvig.memberservice.events.NameUpdatedEvent
 import com.hedvig.memberservice.query.MemberRepository
+import com.hedvig.memberservice.util.logger
 import com.hedvig.resolver.LocaleResolver
 import com.neovisionaries.i18n.CountryCode
 import org.axonframework.config.ProcessingGroup
@@ -23,7 +24,6 @@ class EventListener @Autowired constructor(
     private val notificationService: NotificationService,
     private val memberRepository: MemberRepository
 ) {
-    private val logger: Logger = LoggerFactory.getLogger(EventListener::class.java)
 
     @EventHandler
     fun on(evt: NameUpdatedEvent) {

@@ -11,6 +11,7 @@ import com.hedvig.memberservice.services.SNSNotificationService
 import com.hedvig.memberservice.services.signing.SigningService
 import com.hedvig.memberservice.services.signing.underwriter.UnderwriterSigningService
 import com.hedvig.memberservice.services.signing.underwriter.strategy.UnderwriterSessionCompletedData
+import com.hedvig.memberservice.util.logger
 import org.axonframework.eventhandling.EventMessage
 import org.axonframework.eventhandling.saga.EndSaga
 import org.axonframework.eventhandling.saga.SagaEventHandler
@@ -52,13 +53,13 @@ class MemberSignedSaga {
                     )
                 )
             } catch (ex: RuntimeException) {
-                log.error("Could not complete swedish bank id signing session in about signed member [MemberId: ${e.id}] Exception $ex")
+                logger.error("Could not complete swedish bank id signing session in about signed member [MemberId: ${e.id}] Exception $ex")
             }
         } else {
             try {
                 underwriterApi.memberSigned(e.getId().toString(), e.getReferenceId(), e.getSignature(), e.getOscpResponse())
             } catch (ex: RuntimeException) {
-                log.error("Could not notify underwriter about signed member [MemberId: ${e.id}] Exception $ex")
+                logger.error("Could not notify underwriter about signed member [MemberId: ${e.id}] Exception $ex")
             }
         }
 
@@ -72,7 +73,7 @@ class MemberSignedSaga {
     @StartSaga
     @EndSaga
     fun onMemberSignedFromUnderwriterEvent(e: MemberSignedWithoutBankId) {
-        log.debug("Product has already been signed [MemberId: ${e.memberId}]")
+        logger.debug("Product has already been signed [MemberId: ${e.memberId}]")
 
         signingService.productSignConfirmed(e.memberId)
         snsNotificationService.sendMemberSignedNotification(e.memberId)
@@ -121,22 +122,18 @@ class MemberSignedSaga {
             try {
                 underwritingSign(referenceId!!)
             } catch (ex: RuntimeException) {
-                log.error("Could not complete generified underwriter signing session in about signed member [MemberId: ${memberId}] Exception $ex")
+                logger.error("Could not complete generified underwriter signing session in about signed member [MemberId: ${memberId}] Exception $ex")
             }
         } else {
             try {
                 underwriterApi.memberSigned(memberId.toString(), "", "", "")
             } catch (ex: RuntimeException) {
-                log.error("Could not notify underwriter about signed member [MemberId: ${memberId}] Exception $ex")
+                logger.error("Could not notify underwriter about signed member [MemberId: ${memberId}] Exception $ex")
             }
         }
 
         signingService.productSignConfirmed(memberId)
         signingService.scheduleContractsCreatedJob(memberId, signMethod)
         snsNotificationService.sendMemberSignedNotification(memberId)
-    }
-
-    companion object {
-        private val log = LoggerFactory.getLogger(MemberSignedSaga::class.java)
     }
 }
