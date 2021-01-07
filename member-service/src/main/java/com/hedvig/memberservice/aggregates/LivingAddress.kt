@@ -1,7 +1,6 @@
 package com.hedvig.memberservice.aggregates
 
 class LivingAddress(
-    /** Represents Street, number, entrance  */
     val street: String?,
     val city: String?,
     val zip: String?,

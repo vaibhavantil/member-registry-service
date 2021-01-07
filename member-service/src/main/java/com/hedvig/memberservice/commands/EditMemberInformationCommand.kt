@@ -3,7 +3,7 @@ package com.hedvig.memberservice.commands
 import com.hedvig.memberservice.web.dto.InternalMember
 import org.axonframework.commandhandling.TargetAggregateIdentifier
 
-class EditMemberInformationCommand(
+data class EditMemberInformationCommand(
     @TargetAggregateIdentifier
     val id: String,
     val member: InternalMember,

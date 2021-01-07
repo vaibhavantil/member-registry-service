@@ -3,7 +3,6 @@ package com.hedvig.memberservice
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.hedvig.common.UUIDGenerator
 import com.hedvig.external.bisnodeBCI.BisnodeClient
-import com.hedvig.memberservice.aggregates.LivingAddress
 import com.hedvig.memberservice.aggregates.MemberAggregate
 import com.hedvig.memberservice.aggregates.MemberStatus
 import com.hedvig.memberservice.aggregates.PickedLocale
@@ -12,7 +11,7 @@ import com.hedvig.memberservice.commands.InactivateMemberCommand
 import com.hedvig.memberservice.commands.MemberSimpleSignedCommand
 import com.hedvig.memberservice.commands.MemberUpdateContactInformationCommand
 import com.hedvig.memberservice.commands.SelectNewCashbackCommand
-import com.hedvig.memberservice.commands.StartOnboardingWithSSNCommand
+import com.hedvig.memberservice.commands.StartSwedishOnboardingWithSSNCommand
 import com.hedvig.memberservice.commands.SwedishBankIdAuthenticationAttemptCommand
 import com.hedvig.memberservice.commands.SwedishBankIdSignCommand
 import com.hedvig.memberservice.commands.UpdateBirthDateCommand
@@ -46,7 +45,6 @@ import com.hedvig.memberservice.web.dto.NationalIdentification
 import com.hedvig.memberservice.web.dto.Nationality
 import com.hedvig.memberservice.web.dto.StartOnboardingWithSSNRequest
 import com.hedvig.memberservice.web.dto.UpdateContactInformationRequest
-import com.ninjasquad.springmockk.MockkBean
 import io.mockk.every
 import io.mockk.mockk
 import org.axonframework.eventsourcing.AbstractAggregateFactory
@@ -56,14 +54,6 @@ import org.axonframework.test.aggregate.FixtureConfiguration
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.ArgumentMatchers
-import org.mockito.ArgumentMatchers.anyLong
-import org.mockito.BDDMockito
-import org.mockito.Mockito
-import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
-import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.test.context.junit4.SpringRunner
 import org.springframework.web.client.RestClientException
 import java.time.Instant
@@ -122,7 +112,7 @@ class MemberAggregateTests {
         val memberId = 1234L
         val referenceId = "someReferenceId"
         every { uuidGenerator.generateRandom() } returns TRACKING_UUID
-        every { cashbackService.getDefaultId(anyLong()) } returns DEFAULT_CASHBACK
+        every { cashbackService.getDefaultId(any()) } returns DEFAULT_CASHBACK
         val bankIdAuthStatus = makeBankIdAuthenticationStatus(
             TOLVANSSON_SSN, referenceId, TOLVANSSON_FIRST_NAME, TOLVANSSON_LAST_NAME)
         fixture
@@ -183,7 +173,7 @@ class MemberAggregateTests {
         val request = StartOnboardingWithSSNRequest(ssn)
         fixture
             .given(MemberCreatedEvent(memberId, MemberStatus.INITIATED, Instant.now()))
-            .`when`(StartOnboardingWithSSNCommand(memberId, request))
+            .`when`(StartSwedishOnboardingWithSSNCommand(memberId, request))
             .expectSuccessfulHandlerExecution()
             .expectEvents(
                 OnboardingStartedWithSSNEvent(memberId, ssn, SSNUpdatedEvent.Nationality.SWEDEN),
@@ -343,7 +333,7 @@ class MemberAggregateTests {
         val referenceId = "someReferenceId"
         val personalNumber = "198902171234"
         every { uuidGenerator!!.generateRandom() } returns TRACKING_UUID
-        every { cashbackService.getDefaultId(anyLong()) } returns DEFAULT_CASHBACK
+        every { cashbackService.getDefaultId(any()) } returns DEFAULT_CASHBACK
         fixture
             .given(
                 MemberCreatedEvent(memberId, MemberStatus.INITIATED, Instant.now()),
