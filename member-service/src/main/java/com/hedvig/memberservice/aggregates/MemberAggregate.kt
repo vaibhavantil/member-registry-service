@@ -74,7 +74,9 @@ import java.util.function.Supplier
 class MemberAggregate() {
 
     @AggregateIdentifier
-    var id: Long? = null
+    var _id: Long? = null
+    val id: Long
+        get() = _id!!
 
     @Autowired
     lateinit var bisnodeClient: BisnodeClient
@@ -120,16 +122,16 @@ class MemberAggregate() {
                 logger.error("Caught exception calling bisnode for personalInformation", ex)
                 applyChain!!.andThenApply {
                     NameUpdatedEvent(
-                        id!!,
+                        id,
                         formatName(bankIdAuthResponse.givenName),
                         formatName(bankIdAuthResponse.surname))
                 }
             }
             if (status == MemberStatus.INITIATED) {
-                applyChain = applyChain!!.andThenApply { MemberStartedOnBoardingEvent(id!!, MemberStatus.ONBOARDING) }
+                applyChain = applyChain!!.andThenApply { MemberStartedOnBoardingEvent(id, MemberStatus.ONBOARDING) }
             }
         }
-        val authenticatedEvent = MemberAuthenticatedEvent(id!!, bankIdAuthResponse.referenceToken)
+        val authenticatedEvent = MemberAuthenticatedEvent(id, bankIdAuthResponse.referenceToken)
         if (applyChain != null) {
             applyChain.andThenApply(Supplier<Any> { authenticatedEvent })
         } else {
@@ -143,11 +145,11 @@ class MemberAggregate() {
         if (birthDate != null) {
             if (applyChain != null) {
                 applyChain = applyChain.andThenApply(
-                    Supplier<Any> { BirthDateUpdatedEvent(id!!, birthDate) }
+                    Supplier<Any> { BirthDateUpdatedEvent(id, birthDate) }
                 )
                 return applyChain
             }
-            apply(BirthDateUpdatedEvent(id!!, birthDate))
+            apply(BirthDateUpdatedEvent(id, birthDate))
         }
         return applyChain
     }
@@ -170,13 +172,13 @@ class MemberAggregate() {
         if (personList.size != 1) {
             throw RuntimeException("Could not find person at bisnode.")
         }
-        chain = chain.andThenApply { NameUpdatedEvent(id!!, person.preferredOrFirstName, person.familyName) }
+        chain = chain.andThenApply { NameUpdatedEvent(id, person.preferredOrFirstName, person.familyName) }
         val bisnodeInformation = BisnodeInformation(ssn, person)
         if (bisnodeInformation.address.isPresent) {
             chain = chain.andThenApply(
-                Supplier<Any> { LivingAddressUpdatedEvent(id!!, bisnodeInformation.address.get()) })
+                Supplier<Any> { LivingAddressUpdatedEvent(id, bisnodeInformation.address.get()) })
         }
-        chain.andThenApply({ PersonInformationFromBisnodeEvent(id!!, bisnodeInformation) })
+        chain.andThenApply({ PersonInformationFromBisnodeEvent(id, bisnodeInformation) })
         return chain
     }
 
@@ -195,7 +197,7 @@ class MemberAggregate() {
         if (status == MemberStatus.INITIATED || status == MemberStatus.ONBOARDING) {
             apply(OnboardingStartedWithSSNEvent(id, command.ssn, SSNUpdatedEvent.Nationality.SWEDEN))
             getBirthdateFromSwedishSsnAndApplyEvent(command.ssn, null)
-            apply(MemberStartedOnBoardingEvent(id!!, MemberStatus.ONBOARDING))
+            apply(MemberStartedOnBoardingEvent(id, MemberStatus.ONBOARDING))
         } else {
             throw RuntimeException(String.format("Cannot start onboarding in state: %s", status))
         }
@@ -207,7 +209,7 @@ class MemberAggregate() {
 
         if (shouldUpdateFirstName || shouldUpdateLastName) {
             apply(NameUpdatedEvent(
-                id!!,
+                id,
                 if (shouldUpdateFirstName) firstName else member.firstName,
                 if (shouldUpdateLastName) lastName else member.lastName
             ))
@@ -222,7 +224,7 @@ class MemberAggregate() {
         }
         maybeApplyNameUpdatedEvent(cmd.firstName, cmd.lastName)
         if (cmd.email != null && member.email != cmd.email) {
-            apply(EmailUpdatedEvent(id!!, cmd.email))
+            apply(EmailUpdatedEvent(id, cmd.email))
         }
         val address = member.livingAddress
         if (address == null
@@ -235,7 +237,7 @@ class MemberAggregate() {
             val floor = if (cmd.floor != null) cmd.floor else 0
             apply(
                 LivingAddressUpdatedEvent(
-                    id!!,
+                    id,
                     cmd.street,
                     cmd.city,
                     cmd.zipCode,
@@ -244,11 +246,11 @@ class MemberAggregate() {
         }
         if (cmd.phoneNumber != null
             && member.phoneNumber != cmd.phoneNumber) {
-            apply(PhoneNumberUpdatedEvent(id!!, cmd.phoneNumber))
+            apply(PhoneNumberUpdatedEvent(id, cmd.phoneNumber))
         }
         if (cmd.birthDate != null
             && member.birthDate != cmd.birthDate) {
-            apply(BirthDateUpdatedEvent(id!!, cmd.birthDate))
+            apply(BirthDateUpdatedEvent(id, cmd.birthDate))
         }
     }
 
@@ -259,7 +261,7 @@ class MemberAggregate() {
             apply(SSNUpdatedEvent(id, cmd.personalNumber, SSNUpdatedEvent.Nationality.SWEDEN))
         }
         getBirthdateFromSwedishSsnAndApplyEvent(cmd.personalNumber, null)
-        apply(NewCashbackSelectedEvent(id!!, cashbackService.getDefaultId(id!!).toString()))
+        apply(NewCashbackSelectedEvent(id, cashbackService.getDefaultId(id).toString()))
         apply(
             MemberSignedEvent(
                 id, cmd.referenceId, cmd.signature, cmd.oscpResponse,
@@ -272,26 +274,26 @@ class MemberAggregate() {
     @CommandHandler
     fun handle(cmd: ZignSecSignCommand) {
         if (!isValidJSON(cmd.provideJsonResponse)) throw RuntimeException("Invalid json from provider")
-        apply(NewCashbackSelectedEvent(id!!, cashbackService.getDefaultId(id!!).toString()))
+        apply(NewCashbackSelectedEvent(id, cashbackService.getDefaultId(id).toString()))
         val zignSecAuthMarket = cmd.zignSecAuthMarket
         when (zignSecAuthMarket) {
             ZignSecAuthenticationMarket.NORWAY -> {
                 if (cmd.personalNumber != null
                     && member.ssn != cmd.personalNumber) {
-                    apply(NorwegianSSNUpdatedEvent(id!!, cmd.personalNumber))
+                    apply(NorwegianSSNUpdatedEvent(id, cmd.personalNumber))
                 }
                 apply(
                     NorwegianMemberSignedEvent(
-                        id!!, cmd.personalNumber, cmd.provideJsonResponse, cmd.referenceId))
+                        id, cmd.personalNumber, cmd.provideJsonResponse, cmd.referenceId))
             }
             ZignSecAuthenticationMarket.DENMARK -> {
                 if (cmd.personalNumber != null
                     && member.ssn != cmd.personalNumber) {
-                    apply(DanishSSNUpdatedEvent(id!!, cmd.personalNumber))
+                    apply(DanishSSNUpdatedEvent(id, cmd.personalNumber))
                 }
                 apply(
                     DanishMemberSignedEvent(
-                        id!!, cmd.personalNumber, cmd.provideJsonResponse, cmd.referenceId))
+                        id, cmd.personalNumber, cmd.provideJsonResponse, cmd.referenceId))
             }
             else -> throw RuntimeException("ZignSec authentication market: " + zignSecAuthMarket.name + " is not implemented!")
         }
@@ -322,12 +324,12 @@ class MemberAggregate() {
 
     @CommandHandler
     fun handle(cmd: SelectNewCashbackCommand) {
-        apply(NewCashbackSelectedEvent(id!!, cmd.optionId.toString()))
+        apply(NewCashbackSelectedEvent(id, cmd.optionId.toString()))
     }
 
     @CommandHandler
     fun handle(cmd: UpdateEmailCommand) {
-        apply(EmailUpdatedEvent(id!!, cmd.email))
+        apply(EmailUpdatedEvent(id, cmd.email))
     }
 
     @CommandHandler
@@ -335,7 +337,7 @@ class MemberAggregate() {
         maybeApplyNameUpdatedEvent(cmd.member.firstName, cmd.member.lastName)
         if (cmd.member.email != null
             && member.email != cmd.member.email) {
-            apply(EmailUpdatedEvent(id!!, cmd.member.email), MetaData.with("token", cmd.token))
+            apply(EmailUpdatedEvent(id, cmd.member.email), MetaData.with("token", cmd.token))
         }
         val address = member.livingAddress
         if (address == null
@@ -347,7 +349,7 @@ class MemberAggregate() {
                 cmd.member.floor)) {
             apply(
                 LivingAddressUpdatedEvent(
-                    id!!,
+                    id,
                     cmd.member.street,
                     cmd.member.city,
                     cmd.member.zipCode,
@@ -358,7 +360,7 @@ class MemberAggregate() {
         }
         if (cmd.member.phoneNumber != null
             && member.phoneNumber != cmd.member.phoneNumber) {
-            apply(PhoneNumberUpdatedEvent(id!!, cmd.member.phoneNumber), MetaData.with("token", cmd.token))
+            apply(PhoneNumberUpdatedEvent(id, cmd.member.phoneNumber), MetaData.with("token", cmd.token))
         }
     }
 
@@ -366,10 +368,10 @@ class MemberAggregate() {
     fun handle(cmd: EditMemberInfoCommand) {
         maybeApplyNameUpdatedEvent(cmd.firstName, cmd.lastName)
         if (cmd.email != null && cmd.email != member.email) {
-            apply(EmailUpdatedEvent(id!!, cmd.email), MetaData.with("token", cmd.token))
+            apply(EmailUpdatedEvent(id, cmd.email), MetaData.with("token", cmd.token))
         }
         if (cmd.phoneNumber != null && cmd.phoneNumber != member.phoneNumber) {
-            apply(PhoneNumberUpdatedEvent(id!!, cmd.phoneNumber), MetaData.with("token", cmd.token))
+            apply(PhoneNumberUpdatedEvent(id, cmd.phoneNumber), MetaData.with("token", cmd.token))
         }
     }
 
@@ -399,7 +401,7 @@ class MemberAggregate() {
         }
         if (cmd.email != null
             && member.email != cmd.email) {
-            apply(EmailUpdatedEvent(id!!, cmd.email))
+            apply(EmailUpdatedEvent(id, cmd.email))
         }
     }
 
@@ -428,7 +430,7 @@ class MemberAggregate() {
         apply(
             NewCashbackSelectedEvent(
                 cmd.memberId,
-                cashbackService.getDefaultId(id!!).toString())
+                cashbackService.getDefaultId(id).toString())
         )
         apply(
             NameUpdatedEvent(
@@ -483,7 +485,7 @@ class MemberAggregate() {
 
     @EventSourcingHandler
     fun on(e: MemberCreatedEvent) {
-        id = e.id
+        _id = e.id
         status = e.status
         member = Member()
     }
