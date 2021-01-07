@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hedvig.memberservice.aggregates.FraudulentStatus;
 import com.hedvig.memberservice.commands.MemberUpdateContactInformationCommand;
 import com.hedvig.memberservice.commands.SetFraudulentStatusCommand;
-import com.hedvig.memberservice.commands.StartOnboardingWithSSNCommand;
+import com.hedvig.memberservice.commands.StartSwedishOnboardingWithSSNCommand;
 import com.hedvig.memberservice.query.MemberEntity;
 import com.hedvig.memberservice.query.MemberRepository;
 import com.hedvig.memberservice.services.member.MemberQueryService;
@@ -105,7 +105,7 @@ public class InternalMembersControllerTests {
                 .content(jsonMapper.writeValueAsBytes(request)))
         .andExpect(status().is2xxSuccessful());
 
-    ArgumentCaptor<StartOnboardingWithSSNCommand> argumentCaptor = ArgumentCaptor.forClass(StartOnboardingWithSSNCommand.class);
+    ArgumentCaptor<StartSwedishOnboardingWithSSNCommand> argumentCaptor = ArgumentCaptor.forClass(StartSwedishOnboardingWithSSNCommand.class);
 
     verify(commandGateway, times(1))
         .sendAndWait(argumentCaptor.capture());
@@ -135,7 +135,7 @@ public class InternalMembersControllerTests {
         .andExpect(status().isNoContent());
 
 
-    ArgumentCaptor<StartOnboardingWithSSNCommand> argumentCaptor = ArgumentCaptor.forClass(StartOnboardingWithSSNCommand.class);
+    ArgumentCaptor<StartSwedishOnboardingWithSSNCommand> argumentCaptor = ArgumentCaptor.forClass(StartSwedishOnboardingWithSSNCommand.class);
 
     verify(commandGateway, times(1))
         .sendAndWait(argumentCaptor.capture());

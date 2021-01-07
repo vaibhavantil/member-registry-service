@@ -76,7 +76,7 @@ public class InternalMembersController {
         @PathVariable Long memberId, @RequestBody StartOnboardingWithSSNRequest request) {
 
         try {
-            commandBus.sendAndWait(new StartOnboardingWithSSNCommand(memberId, request));
+            commandBus.sendAndWait(new StartSwedishOnboardingWithSSNCommand(memberId, request));
         } catch (RuntimeException ex) {
             return ResponseEntity.badRequest().body("{\"message\":\"" + ex.getMessage() + "\"");
         }

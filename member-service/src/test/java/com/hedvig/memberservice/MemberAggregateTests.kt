@@ -3,7 +3,6 @@ package com.hedvig.memberservice
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.hedvig.common.UUIDGenerator
 import com.hedvig.external.bisnodeBCI.BisnodeClient
-import com.hedvig.memberservice.aggregates.LivingAddress
 import com.hedvig.memberservice.aggregates.MemberAggregate
 import com.hedvig.memberservice.aggregates.MemberStatus
 import com.hedvig.memberservice.aggregates.PickedLocale
@@ -12,7 +11,7 @@ import com.hedvig.memberservice.commands.InactivateMemberCommand
 import com.hedvig.memberservice.commands.MemberSimpleSignedCommand
 import com.hedvig.memberservice.commands.MemberUpdateContactInformationCommand
 import com.hedvig.memberservice.commands.SelectNewCashbackCommand
-import com.hedvig.memberservice.commands.StartOnboardingWithSSNCommand
+import com.hedvig.memberservice.commands.StartSwedishOnboardingWithSSNCommand
 import com.hedvig.memberservice.commands.SwedishBankIdAuthenticationAttemptCommand
 import com.hedvig.memberservice.commands.SwedishBankIdSignCommand
 import com.hedvig.memberservice.commands.UpdateBirthDateCommand
@@ -174,7 +173,7 @@ class MemberAggregateTests {
         val request = StartOnboardingWithSSNRequest(ssn)
         fixture
             .given(MemberCreatedEvent(memberId, MemberStatus.INITIATED, Instant.now()))
-            .`when`(StartOnboardingWithSSNCommand(memberId, request))
+            .`when`(StartSwedishOnboardingWithSSNCommand(memberId, request))
             .expectSuccessfulHandlerExecution()
             .expectEvents(
                 OnboardingStartedWithSSNEvent(memberId, ssn, SSNUpdatedEvent.Nationality.SWEDEN),
