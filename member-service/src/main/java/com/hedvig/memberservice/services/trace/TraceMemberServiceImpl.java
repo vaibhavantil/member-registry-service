@@ -30,7 +30,7 @@ public class TraceMemberServiceImpl implements TraceMemberService {
     final List<TraceMemberDTO> result = new ArrayList();
     final Map<String, TraceMemberDTO> uniqResults = new HashMap<>();
     eventStorageEngine.readEvents(memberId.toString())
-      .asStream().filter((EventMessage m) -> m.getPayload() instanceof Traceable && ((Traceable)m.getPayload()).getMemberId().equals(memberId))
+      .asStream().filter((EventMessage m) -> m.getPayload() instanceof Traceable && ((Traceable)m.getPayload()).getMemberId() == memberId)
       .iterator().forEachRemaining((EventMessage m) ->
       uniqResults.putAll(
             TraceMemberHelper.getTraceInfo((Traceable)m.getPayload(),

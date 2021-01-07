@@ -49,7 +49,7 @@ public class InternalMembersController {
         Optional<MemberEntity> member = memberRepository.findById(memberId);
         if (member.isPresent()) {
 
-            InternalMember internalMember = InternalMember.fromEntity(member.get());
+            InternalMember internalMember = InternalMember.Companion.fromEntity(member.get());
             internalMember.getTraceMemberInfo().addAll(traceMemberService.getTracesByMemberId(memberId));
             return ResponseEntity.ok(internalMember);
         }
@@ -76,7 +76,7 @@ public class InternalMembersController {
         @PathVariable Long memberId, @RequestBody StartOnboardingWithSSNRequest request) {
 
         try {
-            commandBus.sendAndWait(new StartOnboardingWithSSNCommand(memberId, request));
+            commandBus.sendAndWait(new StartSwedishOnboardingWithSSNCommand(memberId, request));
         } catch (RuntimeException ex) {
             return ResponseEntity.badRequest().body("{\"message\":\"" + ex.getMessage() + "\"");
         }
@@ -139,7 +139,7 @@ public class InternalMembersController {
 
         Optional<MemberEntity> member = memberRepository.findById(Long.parseLong(memberId));
 
-        if (member.isPresent() && !InternalMember.fromEntity(member.get()).equals(dto)) {
+        if (member.isPresent() && !InternalMember.Companion.fromEntity(member.get()).equals(dto)) {
             commandBus.sendAndWait(new EditMemberInformationCommand(memberId, dto, token));
         }
     }

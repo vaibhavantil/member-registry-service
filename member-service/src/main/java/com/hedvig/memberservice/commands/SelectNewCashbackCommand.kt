@@ -1,11 +1,10 @@
 package com.hedvig.memberservice.commands
 
 import org.axonframework.commandhandling.TargetAggregateIdentifier
+import java.util.UUID
 
-@Deprecated("Only used in sweden")
-data class UpdateSwedishWebOnBoardingInfoCommand(
+data class SelectNewCashbackCommand(
     @TargetAggregateIdentifier
     val memberId: Long,
-    val ssn: String?,
-    val email: String?
+    val optionId: UUID
 )

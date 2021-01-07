@@ -6,6 +6,7 @@ import com.hedvig.memberservice.services.signing.simple.SimpleSigningService
 import com.hedvig.memberservice.services.signing.zignsec.ZignSecSigningService
 import com.hedvig.memberservice.services.signing.sweden.SwedishBankIdSigningService
 import com.hedvig.memberservice.services.redispublisher.RedisEventPublisher
+import com.hedvig.memberservice.util.logger
 import org.quartz.JobExecutionContext
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
@@ -20,8 +21,6 @@ class ContractsCreatedCollectorBean(
     private val simpleSigningService: SimpleSigningService,
     private val redisEventPublisher: RedisEventPublisher
 ) {
-
-    private val logger = LoggerFactory.getLogger(this::class.java)
 
     fun execute(context: JobExecutionContext) {
 

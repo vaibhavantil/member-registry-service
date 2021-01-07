@@ -3,6 +3,7 @@ package com.hedvig.memberservice.listeners
 import com.hedvig.integration.productsPricing.CampaignService
 import com.hedvig.memberservice.events.MemberCreatedEvent
 import com.hedvig.memberservice.events.NameUpdatedEvent
+import com.hedvig.memberservice.util.logger
 import org.axonframework.config.ProcessingGroup
 import org.axonframework.eventhandling.EventHandler
 import org.slf4j.LoggerFactory
@@ -38,9 +39,5 @@ class CampaignOwnerUpdaterEventListener(
         } catch (ex: RuntimeException) {
             logger.error("Could not notify product-pricing about member name update for memberId: {}", e.memberId, ex)
         }
-    }
-
-    companion object {
-        private val logger = LoggerFactory.getLogger(CampaignOwnerUpdaterEventListener::class.java)
     }
 }

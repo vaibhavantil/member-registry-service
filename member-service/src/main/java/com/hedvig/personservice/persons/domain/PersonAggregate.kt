@@ -1,5 +1,6 @@
 package com.hedvig.personservice.persons.domain
 
+import com.hedvig.memberservice.util.logger
 import com.hedvig.personservice.debts.model.DebtSnapshot
 import com.hedvig.personservice.persons.domain.events.*
 import com.hedvig.personservice.persons.model.Whitelisted
@@ -31,11 +32,9 @@ class PersonAggregate() {
     private var lastDebtCheckedAt: Instant = Instant.MIN
     private var whitelisted: Whitelisted? = null
 
-    private val logger = KotlinLogging.logger { }
-
     @CommandHandler
     constructor(command: CreatePersonCommand): this() {
-        logger.info { "Person CREATED with ssn=${maskLastDigitsOfSsn(command.ssn)}" }
+        logger.info("Person CREATED with ssn=${maskLastDigitsOfSsn(command.ssn)}")
         AggregateLifecycle.apply(PersonCreatedEvent(UUID.randomUUID(), command.ssn))
     }
 
@@ -48,29 +47,29 @@ class PersonAggregate() {
     @CommandHandler
     fun handle(command: CheckPersonDebtCommand) {
         if (isBeforeFirstFridayOfMonth(lastDebtCheckedAt)) {
-            logger.info { "CHECKING debt for ssn=${maskLastDigitsOfSsn(command.ssn)}" }
+            logger.info("CHECKING debt for ssn=${maskLastDigitsOfSsn(command.ssn)}")
             AggregateLifecycle.apply(CheckPersonDebtEvent(command.ssn))
             return
         }
         if (latestDateSnapShotFrom.isAfter(LocalDateTime.now().minusWeeks(4))) {
-            logger.error { "Person debt ALREADY checked within 4 week period" }
+            logger.error("Person debt ALREADY checked within 4 week period")
             AggregateLifecycle.apply(PersonDebtAlreadyCheckedEvent(command.ssn))
             return
         }
-        logger.info { "CHECKING debt for ssn=${maskLastDigitsOfSsn(command.ssn)}" }
+        logger.info("CHECKING debt for ssn=${maskLastDigitsOfSsn(command.ssn)}")
         AggregateLifecycle.apply(CheckPersonDebtEvent(command.ssn))
     }
 
     @CommandHandler
     fun handle(command: SynaDebtCheckedCommand) {
         if (!command.debtSnapshot.fromDateTime.isEqual(latestDateSnapShotFrom)) {
-            logger.info { "Debt CHECKED on SYNA-ARKIV for ssn=${maskLastDigitsOfSsn(command.ssn)}" }
+            logger.info("Debt CHECKED on SYNA-ARKIV for ssn=${maskLastDigitsOfSsn(command.ssn)}")
             AggregateLifecycle.apply(SynaDebtCheckedEvent(
                 ssn = command.ssn,
                 debtSnapshot = command.debtSnapshot
             ))
         } else {
-            logger.info { "Debt ALREADY checked with SYNA-ARKIV for ssn=${maskLastDigitsOfSsn(command.ssn)} from=${command.debtSnapshot.fromDateTime}" }
+            logger.info("Debt ALREADY checked with SYNA-ARKIV for ssn=${maskLastDigitsOfSsn(command.ssn)} from=${command.debtSnapshot.fromDateTime}")
             AggregateLifecycle.apply(SameSynaDebtCheckedEvent(command.ssn))
         }
     }

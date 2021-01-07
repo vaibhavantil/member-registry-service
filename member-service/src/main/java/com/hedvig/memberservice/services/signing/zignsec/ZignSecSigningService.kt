@@ -48,8 +48,4 @@ class ZignSecSigningService(
     }
 
     fun notifyContractsCreated(memberId: Long) = zignSecBankIdService.notifyContractsCreated(memberId)
-
-    companion object {
-        private val logger = LoggerFactory.getLogger(ZignSecSigningService::class.java)
-    }
 }

@@ -1,11 +1,11 @@
 package com.hedvig.memberservice.commands
 
+import com.hedvig.memberservice.web.dto.Nationality
 import org.axonframework.commandhandling.TargetAggregateIdentifier
 
-@Deprecated("Only used in sweden")
-data class UpdateSwedishWebOnBoardingInfoCommand(
+class UpdateSSNCommand(
     @TargetAggregateIdentifier
     val memberId: Long,
-    val ssn: String?,
-    val email: String?
+    val ssn: String,
+    val nationality: Nationality
 )

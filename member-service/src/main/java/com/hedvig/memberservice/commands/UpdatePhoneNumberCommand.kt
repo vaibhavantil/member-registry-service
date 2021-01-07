@@ -2,10 +2,8 @@ package com.hedvig.memberservice.commands
 
 import org.axonframework.commandhandling.TargetAggregateIdentifier
 
-@Deprecated("Only used in sweden")
-data class UpdateSwedishWebOnBoardingInfoCommand(
+class UpdatePhoneNumberCommand(
     @TargetAggregateIdentifier
     val memberId: Long,
-    val ssn: String?,
-    val email: String?
+    val phoneNumber: String
 )

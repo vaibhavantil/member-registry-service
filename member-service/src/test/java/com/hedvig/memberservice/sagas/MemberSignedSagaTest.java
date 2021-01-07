@@ -20,6 +20,7 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
+import java.util.Objects;
 import java.util.UUID;
 
 @RunWith(MockitoJUnitRunner.class)

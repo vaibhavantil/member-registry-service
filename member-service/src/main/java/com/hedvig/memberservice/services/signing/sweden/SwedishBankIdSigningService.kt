@@ -13,6 +13,7 @@ import com.hedvig.memberservice.services.BankIdRestService
 import com.hedvig.memberservice.services.member.MemberService
 import com.hedvig.memberservice.services.member.dto.MemberSignResponse
 import com.hedvig.memberservice.services.member.dto.StartSwedishSignResponse
+import com.hedvig.memberservice.util.logger
 import com.hedvig.memberservice.web.v2.dto.WebsignRequest
 import org.quartz.JobBuilder
 import org.quartz.Scheduler
@@ -123,7 +124,7 @@ class SwedishBankIdSigningService(
                 false
             }
             .orElseGet {
-                log.error("Could not find SignSession with orderReference: ", orderReference)
+                logger.error("Could not find SignSession with orderReference: ", orderReference)
                 false
             }
     }
@@ -160,9 +161,4 @@ class SwedishBankIdSigningService(
         }
         return signText
     }
-
-    companion object {
-        private val log = LoggerFactory.getLogger(SwedishBankIdSigningService::class.java)
-    }
-
 }

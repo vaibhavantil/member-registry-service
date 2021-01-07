@@ -9,6 +9,7 @@ import com.hedvig.external.bankID.bankIdTypes.CollectResponse
 import com.hedvig.external.bankID.bankIdTypes.OrderResponse
 import com.hedvig.memberservice.query.CollectRepository
 import com.hedvig.memberservice.query.CollectType
+import com.hedvig.memberservice.util.logger
 import java.io.UnsupportedEncodingException
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
@@ -18,11 +19,10 @@ class BankIdService(
     private val bankIdApi: BankIdApi,
     private val collectRepository: CollectRepository
 ) {
-    private val log = LoggerFactory.getLogger(BankIdService::class.java)
 
     fun auth(memberId: Long?, endUserIp: String?): OrderResponse {
         val status = bankIdApi.auth(OrderAuthRequest(endUserIp))
-        log.info(
+        logger.info(
             "Started bankId AUTH autostart:{}, reference:{}",
             status.autoStartToken,
             status.orderRef)

@@ -4,6 +4,7 @@ import com.hedvig.integration.botService.BotService
 import com.hedvig.memberservice.commands.CreateMemberCommand
 import com.hedvig.memberservice.query.MemberEntity
 import com.hedvig.memberservice.query.MemberRepository
+import com.hedvig.memberservice.util.logger
 import com.hedvig.memberservice.web.v2.dto.HelloHedvigResponse
 import org.axonframework.commandhandling.gateway.CommandGateway
 import org.slf4j.Logger
@@ -45,11 +46,7 @@ class MembersControllerV2 @Autowired constructor(
 
         botService.initBotService(id, json)
 
-        log.info("New member created with id: " + id!!)
+        logger.info("New member created with id: " + id!!)
         return ResponseEntity.ok().body(HelloHedvigResponse(id))
-    }
-
-    companion object {
-        val log: Logger = LoggerFactory.getLogger(MembersControllerV2::class.java)
     }
 }

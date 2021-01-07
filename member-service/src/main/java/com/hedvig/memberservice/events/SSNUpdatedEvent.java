@@ -23,4 +23,8 @@ public class SSNUpdatedEvent {
       NORWAY,
       DENMARK
   }
+
+  public String getSsn() {
+    return ssn;
+  }
 }

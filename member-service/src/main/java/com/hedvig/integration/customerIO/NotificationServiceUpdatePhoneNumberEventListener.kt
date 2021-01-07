@@ -2,6 +2,7 @@ package com.hedvig.integration.customerIO
 
 import com.hedvig.integration.notificationService.NotificationService
 import com.hedvig.memberservice.events.PhoneNumberUpdatedEvent
+import com.hedvig.memberservice.util.logger
 import feign.FeignException
 import org.axonframework.config.ProcessingGroup
 import org.axonframework.eventhandling.EventHandler
@@ -23,9 +24,5 @@ class NotificationServiceUpdatePhoneNumberEventListener(
         } catch (e: RuntimeException) {
             logger.error("Notification service phone number update failed to handle event: $event")
         }
-    }
-
-    companion object {
-        private val logger = LoggerFactory.getLogger(NotificationServiceUpdatePhoneNumberEventListener::class.java)
     }
 }
