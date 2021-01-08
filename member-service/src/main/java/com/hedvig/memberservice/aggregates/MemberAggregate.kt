@@ -74,7 +74,9 @@ import java.util.function.Supplier
 class MemberAggregate() {
 
     @AggregateIdentifier
-    private var id: Long = 0L
+    var _id: Long? = null
+    val id: Long
+        get() = _id!!
 
     @Autowired
     lateinit var bisnodeClient: BisnodeClient
@@ -483,7 +485,7 @@ class MemberAggregate() {
 
     @EventSourcingHandler
     fun on(e: MemberCreatedEvent) {
-        id = e.id
+        _id = e.id
         status = e.status
         member = Member()
     }
