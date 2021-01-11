@@ -15,6 +15,7 @@ import com.hedvig.memberservice.services.signing.simple.SimpleSigningService
 import com.hedvig.memberservice.services.signing.sweden.SwedishBankIdSigningService
 import com.hedvig.memberservice.services.signing.underwriter.UnderwriterSigningServiceImpl
 import com.hedvig.memberservice.services.signing.underwriter.strategy.CommonSessionCompletion
+import com.hedvig.memberservice.services.signing.underwriter.strategy.SignStrategy
 import com.hedvig.memberservice.services.signing.underwriter.strategy.StartRedirectBankIdSignSessionStrategy
 import com.hedvig.memberservice.services.signing.underwriter.strategy.StartSignSessionStrategyService
 import com.hedvig.memberservice.services.signing.underwriter.strategy.StartSimpleSignSessionStrategy
@@ -90,7 +91,7 @@ class UnderwriterSigningServiceImplTest {
         val underwriterSessionRefSlot = slot<UUID>()
         val signReferenceSlot = slot<UUID>()
         every {
-            underwriterSignSessionRepository.saveOrUpdateReusableSession(capture(underwriterSessionRefSlot), capture(signReferenceSlot))
+            underwriterSignSessionRepository.saveOrUpdateReusableSession(capture(underwriterSessionRefSlot), capture(signReferenceSlot), memberId, SignStrategy.SWEDISH_BANK_ID)
         } returns Unit
 
         val response = sut.startSign(
@@ -136,7 +137,7 @@ class UnderwriterSigningServiceImplTest {
         val underwriterSessionRefSlot = slot<UUID>()
         val signReferenceSlot = slot<UUID>()
         every {
-            underwriterSignSessionRepository.saveOrUpdateReusableSession(capture(underwriterSessionRefSlot), capture(signReferenceSlot))
+            underwriterSignSessionRepository.saveOrUpdateReusableSession(capture(underwriterSessionRefSlot), capture(signReferenceSlot), memberId, SignStrategy.REDIRECT_BANK_ID)
         } returns Unit
 
         val response = sut.startSign(
@@ -200,7 +201,7 @@ class UnderwriterSigningServiceImplTest {
 
     @Test
     fun underwriterSignSessionExists_thenShouldBeHandled() {
-        every { underwriterSignSessionRepository.findBySignReference(orderRefUUID) } returns UnderwriterSignSessionEntity(underwriterSessionRef, orderRefUUID)
+        every { underwriterSignSessionRepository.findBySignReference(orderRefUUID) } returns UnderwriterSignSessionEntity(underwriterSessionRef, orderRefUUID, null, null)
 
         val handled = sut.isUnderwriterHandlingSignSession(orderRefUUID)
 

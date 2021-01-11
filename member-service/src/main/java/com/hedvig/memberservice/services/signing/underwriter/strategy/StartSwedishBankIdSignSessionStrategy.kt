@@ -14,7 +14,9 @@ class StartSwedishBankIdSignSessionStrategy(
     private val underwriterClient: UnderwriterClient
 ) : StartSignSessionStrategy<UnderwriterStartSignSessionRequest.SwedishBankId, UnderwriterStartSignSessionResponse.SwedishBankId, UnderwriterSessionCompletedData.SwedishBankId> {
 
-    override fun startSignSession(memberId: Long, request: UnderwriterStartSignSessionRequest.SwedishBankId): Pair<UUID?, UnderwriterStartSignSessionResponse.SwedishBankId> {
+    override val signStrategy = SignStrategy.SWEDISH_BANK_ID
+
+    override fun startSignSession(memberId: Long, request: UnderwriterStartSignSessionRequest.SwedishBankId): Triple<UUID?, UnderwriterStartSignSessionResponse.SwedishBankId, SignStrategy> {
         val response = swedishBankIdSigningService.startSign(
             memberId,
             request.nationalIdentification.identification,
@@ -22,11 +24,12 @@ class StartSwedishBankIdSignSessionStrategy(
             request.isSwitching
         )
 
-        return Pair(
+        return Triple(
             UUID.fromString(response.bankIdOrderResponse.orderRef),
             UnderwriterStartSignSessionResponse.SwedishBankId(
                 response.bankIdOrderResponse.autoStartToken
-            )
+            ),
+            signStrategy
         )
     }
 
