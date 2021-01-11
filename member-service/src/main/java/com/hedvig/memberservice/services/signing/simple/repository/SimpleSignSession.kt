@@ -15,6 +15,7 @@ class SimpleSignSession(
     @Column(unique = true)
     val memberId: Long,
     val nationalIdentification: String,
+    @Enumerated(EnumType.STRING)
     val nationality: Nationality,
     var isContractsCreated: Boolean = false
 )
