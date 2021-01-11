@@ -10,6 +10,7 @@ import com.hedvig.memberservice.commands.UpdateSwedishWebOnBoardingInfoCommand
 import com.hedvig.memberservice.jobs.ContractsCreatedCollector
 import com.hedvig.memberservice.query.MemberRepository
 import com.hedvig.memberservice.query.SignedMemberRepository
+import com.hedvig.memberservice.query.UnderwriterSignSessionRepository
 import com.hedvig.memberservice.services.MemberHasExistingInsuranceException
 import com.hedvig.memberservice.services.signing.sweden.SwedishBankIdSigningService
 import com.hedvig.memberservice.services.signing.zignsec.ZignSecSigningService
@@ -18,6 +19,7 @@ import com.hedvig.memberservice.services.member.dto.MemberSignResponse
 import com.hedvig.memberservice.services.member.dto.MemberSignUnderwriterQuoteResponse
 import com.hedvig.memberservice.services.redispublisher.RedisEventPublisher
 import com.hedvig.memberservice.services.signing.simple.SimpleSigningService
+import com.hedvig.memberservice.services.signing.underwriter.strategy.SignStrategy
 import com.hedvig.memberservice.util.logger
 import com.hedvig.memberservice.web.dto.IsMemberAlreadySignedResponse
 import com.hedvig.memberservice.web.dto.IsSsnAlreadySignedMemberResponse
@@ -48,6 +50,7 @@ class SigningService(
     private val zignSecSigningService: ZignSecSigningService,
     private val simpleSigningService: SimpleSigningService,
     private val redisEventPublisher: RedisEventPublisher,
+    private val underwriterSignSessionRepository: UnderwriterSignSessionRepository,
     private val scheduler: Scheduler
 ) {
 
@@ -108,20 +111,29 @@ class SigningService(
         val optionalMember = memberRepository.findById(memberId)
 
         return if (optionalMember.isPresent) {
-            when (underwriterApi.getSignMethodFromQuote(memberId.toString())) {
-                SignMethod.SWEDISH_BANK_ID -> {
+            val signStrategy =
+                underwriterSignSessionRepository.findTopByMemberIdOrderByInternalIdDesc(memberId)?.signStrategy
+                    // Fixme: remove this should be out dated in a week when the sessions expires
+                    ?: when (underwriterApi.getSignMethodFromQuote(memberId.toString())) {
+                        SignMethod.SWEDISH_BANK_ID -> SignStrategy.SWEDISH_BANK_ID
+                        SignMethod.NORWEGIAN_BANK_ID,
+                        SignMethod.DANISH_BANK_ID -> SignStrategy.REDIRECT_BANK_ID
+                        SignMethod.SIMPLE_SIGN -> SignStrategy.SIMPLE_SIGN
+                    }
+
+            when (signStrategy) {
+                SignStrategy.SWEDISH_BANK_ID -> {
                     val session = swedishBankIdSigningService.getSignSession(memberId)
                     session
                         .map { SignStatusResponse.CreateFromEntity(it) }
                         .orElseGet { null }
                 }
-                SignMethod.NORWEGIAN_BANK_ID,
-                SignMethod.DANISH_BANK_ID -> {
+                SignStrategy.REDIRECT_BANK_ID -> {
                     zignSecSigningService.getSignStatus(memberId)?.let {
                         SignStatusResponse.CreateFromZignSecStatus(it)
                     }
                 }
-                SignMethod.SIMPLE_SIGN -> {
+                SignStrategy.SIMPLE_SIGN -> {
                     simpleSigningService.getSignStatus(memberId)?.let {
                         SignStatusResponse.CreateFromSimpleSignStatus(it)
                     }

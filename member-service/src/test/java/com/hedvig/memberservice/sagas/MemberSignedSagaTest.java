@@ -172,7 +172,7 @@ public class MemberSignedSagaTest {
         saga.onNorwegianMemberSignedEvent(e);
 
         then(underwriterSigningService).should().signSessionWasCompleted(
-            any(UUID.class),
+            eq(e.getReferenceId()),
             any(UnderwriterSessionCompletedData.BankIdRedirect.class)
         );
         verifyZeroInteractions(underwriterApi);
@@ -247,7 +247,7 @@ public class MemberSignedSagaTest {
         saga.onDanishMemberSignedEvent(e);
 
         then(underwriterSigningService).should().signSessionWasCompleted(
-            any(UUID.class),
+            eq(e.getReferenceId()),
             any(UnderwriterSessionCompletedData.BankIdRedirect.class)
         );
         verifyZeroInteractions(underwriterApi);

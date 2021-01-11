@@ -6,6 +6,6 @@ import org.axonframework.commandhandling.TargetAggregateIdentifier
 data class UpdateSwedishWebOnBoardingInfoCommand(
     @TargetAggregateIdentifier
     val memberId: Long,
-    val SSN: String?,
+    val ssn: String?,
     val email: String?
 )

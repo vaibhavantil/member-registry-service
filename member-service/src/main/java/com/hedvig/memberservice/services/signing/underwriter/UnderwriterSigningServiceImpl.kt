@@ -22,10 +22,11 @@ class UnderwriterSigningServiceImpl(
             return request.createErrorResponse("Could not start sign")
         }
 
-        val (signSessionReference, response) = startSignSessionStrategyService.startSignSession(memberId, request)
+        val (signSessionReference, response, signStrategy)
+            = startSignSessionStrategyService.startSignSession(memberId, request)
 
         signSessionReference?.let {
-            underwriterSignSessionRepository.saveOrUpdateReusableSession(request.underwriterSessionReference, it)
+            underwriterSignSessionRepository.saveOrUpdateReusableSession(request.underwriterSessionReference, it, memberId, signStrategy)
         }
 
         return response
