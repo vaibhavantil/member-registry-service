@@ -22,7 +22,7 @@ class UnderwriterSignSessionRepositoryTest {
         val sessionReference = UUID.randomUUID()
         val signReference = UUID.randomUUID()
 
-        underwriterSignSessionRepository.save(UnderwriterSignSessionEntity(sessionReference, signReference))
+        underwriterSignSessionRepository.save(UnderwriterSignSessionEntity(sessionReference, signReference, null, null))
 
         val session = underwriterSignSessionRepository.findBySignReference(signReference)
 

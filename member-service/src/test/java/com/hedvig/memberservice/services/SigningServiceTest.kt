@@ -18,6 +18,7 @@ import com.hedvig.memberservice.query.MemberEntity
 import com.hedvig.memberservice.query.MemberRepository
 import com.hedvig.memberservice.query.SignedMemberEntity
 import com.hedvig.memberservice.query.SignedMemberRepository
+import com.hedvig.memberservice.query.UnderwriterSignSessionRepository
 import com.hedvig.memberservice.services.member.CannotSignInsuranceException
 import com.hedvig.memberservice.services.member.dto.MemberSignResponse
 import com.hedvig.memberservice.services.redispublisher.RedisEventPublisher
@@ -77,6 +78,9 @@ class SigningServiceTest {
     lateinit var simpleSigningService: SimpleSigningService
 
     @Mock
+    lateinit var underwriterSignSessionRepository: UnderwriterSignSessionRepository
+
+    @Mock
     lateinit var scheduler: Scheduler
 
     @Rule @JvmField
@@ -91,8 +95,19 @@ class SigningServiceTest {
     fun setup() {
         whenever(signedMemberRepository.findBySsn(ArgumentMatchers.any())).thenReturn(Optional.empty())
 
-        sut = SigningService(underwriterApi, signedMemberRepository, botService, memberRepository, commandGateway,
-            swedishBankIdSigningService, zignSecSigningService, simpleSigningService, redisEventPublisher, scheduler)
+        sut = SigningService(
+            underwriterApi,
+            signedMemberRepository,
+            botService,
+            memberRepository,
+            commandGateway,
+            swedishBankIdSigningService,
+            zignSecSigningService,
+            simpleSigningService,
+            redisEventPublisher,
+            underwriterSignSessionRepository,
+            scheduler
+        )
     }
 
     @Test

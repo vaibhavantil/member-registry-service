@@ -17,14 +17,18 @@ class StartRedirectBankIdSignSessionStrategy(
     private val validTargetHosts: Array<String>,
     private val commonSessionCompletion: CommonSessionCompletion
 ) : StartSignSessionStrategy<UnderwriterStartSignSessionRequest.BankIdRedirect, UnderwriterStartSignSessionResponse.BankIdRedirect, UnderwriterSessionCompletedData.BankIdRedirect> {
-    override fun startSignSession(memberId: Long, request: UnderwriterStartSignSessionRequest.BankIdRedirect): Pair<UUID?, UnderwriterStartSignSessionResponse.BankIdRedirect> {
+
+    override val signStrategy = SignStrategy.REDIRECT_BANK_ID
+
+    override fun startSignSession(memberId: Long, request: UnderwriterStartSignSessionRequest.BankIdRedirect): Triple<UUID?, UnderwriterStartSignSessionResponse.BankIdRedirect, SignStrategy> {
         if (!hasValidHost(request.successUrl) || !hasValidHost(request.failUrl)) {
-            return Pair(
+            return Triple(
                 null,
                 UnderwriterStartSignSessionResponse.BankIdRedirect(
                     redirectUrl = null,
                     internalErrorMessage = "Not a valid target url"
-                )
+                ),
+                signStrategy
             )
         }
 
@@ -38,15 +42,20 @@ class StartRedirectBankIdSignSessionStrategy(
 
         return when (response) {
             is StartZignSecAuthenticationResult.Success -> {
-                Pair(response.orderReference, UnderwriterStartSignSessionResponse.BankIdRedirect(response.redirectUrl.trim()))
+                Triple(
+                    response.orderReference,
+                    UnderwriterStartSignSessionResponse.BankIdRedirect(response.redirectUrl.trim()),
+                    signStrategy
+                )
             }
             is StartZignSecAuthenticationResult.Failed ->
-                Pair(
+                Triple(
                     null,
                     UnderwriterStartSignSessionResponse.BankIdRedirect(
                         redirectUrl = null,
                         errorMessages = response.errors
-                    )
+                    ),
+                    signStrategy
                 )
         }
     }

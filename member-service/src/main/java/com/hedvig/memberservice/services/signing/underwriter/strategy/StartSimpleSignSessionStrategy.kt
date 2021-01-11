@@ -12,10 +12,12 @@ class StartSimpleSignSessionStrategy(
     private val commonSessionCompletion: CommonSessionCompletion
 ) : StartSignSessionStrategy<UnderwriterStartSignSessionRequest.SimpleSign, UnderwriterStartSignSessionResponse.SimpleSign, UnderwriterSessionCompletedData.SimpleSign> {
 
-    override fun startSignSession(memberId: Long, request: UnderwriterStartSignSessionRequest.SimpleSign): Pair<UUID?, UnderwriterStartSignSessionResponse.SimpleSign> {
+    override val signStrategy = SignStrategy.SIMPLE_SIGN
+
+    override fun startSignSession(memberId: Long, request: UnderwriterStartSignSessionRequest.SimpleSign): Triple<UUID?, UnderwriterStartSignSessionResponse.SimpleSign, SignStrategy> {
         val signSession = simpleSigningService.startSign(memberId, request.nationalIdentification)
 
-        return Pair(signSession, UnderwriterStartSignSessionResponse.SimpleSign(true))
+        return Triple(signSession, UnderwriterStartSignSessionResponse.SimpleSign(true), signStrategy)
     }
 
     override fun signSessionWasCompleted(signSessionReference: UUID, data: UnderwriterSessionCompletedData.SimpleSign) {
