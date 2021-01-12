@@ -8,5 +8,5 @@ import org.springframework.stereotype.Service
 class IdentityServiceImpl(
     private val repository: IdentityRepository
 ): IdentityService {
-    override fun identityOnMemberId(memberId: Long) = repository.findById(memberId).get()
+    override fun identityOnMemberId(memberId: Long) = repository.findById(memberId).orElse(null)
 }
