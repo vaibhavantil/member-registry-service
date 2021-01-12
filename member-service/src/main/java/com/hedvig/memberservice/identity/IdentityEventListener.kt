@@ -13,6 +13,7 @@ import com.hedvig.memberservice.identity.repository.NationalIdentification
 import com.hedvig.memberservice.identity.repository.Nationality
 import org.axonframework.config.ProcessingGroup
 import org.axonframework.eventhandling.EventHandler
+import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Component
 
 @Component
@@ -60,18 +61,11 @@ class IdentityEventListener(
     }
 
     private fun saveOrUpdate(identityEntity: IdentityEntity) {
-        repository.findById(identityEntity.memberId).ifPresentOrElse(
-            {
-                if (identityEntity.hasNewOrMoreNewInfo(it)) {
-                    repository.save(
-                        it.update(identityEntity)
-                    )
-                }
-            },
-            {
-                repository.save(identityEntity)
+        repository.findByIdOrNull(identityEntity.memberId)?.let {
+            if (it.hasNewOrMoreNewInfo(identityEntity)) {
+                repository.save(it.update(identityEntity))
             }
-        )
+        } ?: repository.save(identityEntity)
     }
 
     private fun parseFirstNameFromZignSecJson(json: String): String? =
