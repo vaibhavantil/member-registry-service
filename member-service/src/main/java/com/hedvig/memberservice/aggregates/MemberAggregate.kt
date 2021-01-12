@@ -302,12 +302,12 @@ class MemberAggregate() {
 
     @CommandHandler
     fun handle(command: ZignSecSuccessfulAuthenticationCommand) {
-        if (!isValidJSON(command.provideJsonResponse)) throw RuntimeException("Invalid json from provider")
+        if (!isValidJSON(command.providerJsonResponse)) throw RuntimeException("Invalid json from provider")
         apply(
             ZignSecSuccessfulAuthenticationEvent(
                 command.id,
                 command.personalNumber,
-                command.provideJsonResponse,
+                command.providerJsonResponse,
                 command.zignSecAuthMarket.toAuthenticationEventAuthenticationMethod()
             )
         )
