@@ -20,7 +20,8 @@ class IdentityEntity(
     @Embedded
     val nationalIdentification: NationalIdentification,
     val identificationMethod: IdentificationMethod,
-    val fullName: String?,
+    val firstName: String?,
+    val lastName: String?,
     @CreationTimestamp
     val createdAt: Instant = Instant.now(),
     @UpdateTimestamp
@@ -32,7 +33,8 @@ class IdentityEntity(
         this.memberId,
         identityEntity.nationalIdentification,
         identityEntity.identificationMethod,
-        identityEntity.fullName,
+        identityEntity.firstName,
+        identityEntity.lastName,
         this.createdAt,
         Instant.now()
     )

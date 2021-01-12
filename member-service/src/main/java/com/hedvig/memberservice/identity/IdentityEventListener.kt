@@ -31,7 +31,8 @@ class IdentityEventListener(
                 Nationality.NORWAY
             ),
             IdentificationMethod.NORWEGIAN_BANK_ID,
-            paresFullNameFromZignSecJson(event.providerJsonResponse)
+            paresFirstNameFromZignSecJson(event.providerJsonResponse),
+            paresLastNameFromZignSecJson(event.providerJsonResponse)
         )
 
         saveOrUpdate(identityEntity)
@@ -51,7 +52,8 @@ class IdentityEventListener(
                 nationality
             ),
             identificationMethod,
-            paresFullNameFromZignSecJson(event.providerJsonResponse)
+            paresFirstNameFromZignSecJson(event.providerJsonResponse),
+            paresLastNameFromZignSecJson(event.providerJsonResponse)
         )
 
         saveOrUpdate(identityEntity)
@@ -72,8 +74,11 @@ class IdentityEventListener(
         )
     }
 
-    private fun paresFullNameFromZignSecJson(json: String): String? =
-        objectMapper.readValue(json, ZignSecJson::class.java).identity.fullName
+    private fun paresFirstNameFromZignSecJson(json: String): String? =
+        objectMapper.readValue(json, ZignSecJson::class.java).identity.firstName
+
+    private fun paresLastNameFromZignSecJson(json: String): String? =
+        objectMapper.readValue(json, ZignSecJson::class.java).identity.lastName
 
     companion object {
         fun IdentityEntity.hasNewOrMoreNewInfo(oldIdentityEntity: IdentityEntity): Boolean {
@@ -84,12 +89,16 @@ class IdentityEventListener(
             if (
                 this.nationalIdentification == oldIdentityEntity.nationalIdentification ||
                 this.identificationMethod == oldIdentityEntity.identificationMethod ||
-                this.fullName == oldIdentityEntity.fullName
+                this.firstName == oldIdentityEntity.firstName ||
+                this.lastName == oldIdentityEntity.lastName
             ) {
                 return false
             }
 
-            if (this.fullName == null) {
+            if (
+                (oldIdentityEntity.firstName != null && this.firstName == null) ||
+                (oldIdentityEntity.lastName != null && this.lastName == null)
+            ) {
                 return false
             }
 
