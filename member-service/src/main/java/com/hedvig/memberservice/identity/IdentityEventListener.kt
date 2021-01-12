@@ -105,15 +105,17 @@ class IdentityEventListener(
             return true
         }
     }
+
+    data class ZignSecJson(
+        val identity: ZignSecJsonIdentity
+    )
+
+    @JsonNaming(PropertyNamingStrategy.UpperCamelCaseStrategy::class)
+    data class ZignSecJsonIdentity(
+        val firstName: String?,
+        val lastName: String?
+    )
+
 }
 
-data class ZignSecJson(
-    val identity: ZignSecJsonIdentity
-)
-
-@JsonNaming(PropertyNamingStrategy.UpperCamelCaseStrategy::class)
-data class ZignSecJsonIdentity(
-    val firstName: String?,
-    val lastName: String?
-)
 
