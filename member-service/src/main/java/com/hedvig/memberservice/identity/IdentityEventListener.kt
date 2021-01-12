@@ -31,8 +31,8 @@ class IdentityEventListener(
                 Nationality.NORWAY
             ),
             IdentificationMethod.NORWEGIAN_BANK_ID,
-            paresFirstNameFromZignSecJson(event.providerJsonResponse),
-            paresLastNameFromZignSecJson(event.providerJsonResponse)
+            parseFirstNameFromZignSecJson(event.providerJsonResponse),
+            parseLastNameFromZignSecJson(event.providerJsonResponse)
         )
 
         saveOrUpdate(identityEntity)
@@ -52,8 +52,8 @@ class IdentityEventListener(
                 nationality
             ),
             identificationMethod,
-            paresFirstNameFromZignSecJson(event.providerJsonResponse),
-            paresLastNameFromZignSecJson(event.providerJsonResponse)
+            parseFirstNameFromZignSecJson(event.providerJsonResponse),
+            parseLastNameFromZignSecJson(event.providerJsonResponse)
         )
 
         saveOrUpdate(identityEntity)
@@ -74,10 +74,10 @@ class IdentityEventListener(
         )
     }
 
-    private fun paresFirstNameFromZignSecJson(json: String): String? =
+    private fun parseFirstNameFromZignSecJson(json: String): String? =
         objectMapper.readValue(json, ZignSecJson::class.java).identity.firstName
 
-    private fun paresLastNameFromZignSecJson(json: String): String? =
+    private fun parseLastNameFromZignSecJson(json: String): String? =
         objectMapper.readValue(json, ZignSecJson::class.java).identity.lastName
 
     companion object {
