@@ -8,6 +8,7 @@ import com.hedvig.memberservice.events.NorwegianMemberSignedEvent
 import com.hedvig.memberservice.events.ZignSecSuccessfulAuthenticationEvent
 import com.hedvig.memberservice.identity.repository.IdentificationMethod
 import com.hedvig.memberservice.identity.repository.IdentityEntity
+import com.hedvig.memberservice.identity.repository.IdentityEntity.Companion.hasNewOrMoreNewInfo
 import com.hedvig.memberservice.identity.repository.IdentityRepository
 import com.hedvig.memberservice.identity.repository.NationalIdentification
 import com.hedvig.memberservice.identity.repository.Nationality
@@ -62,7 +63,7 @@ class IdentityEventListener(
 
     private fun saveOrUpdate(identityEntity: IdentityEntity) {
         repository.findByIdOrNull(identityEntity.memberId)?.let {
-            if (it.hasNewOrMoreNewInfo(identityEntity)) {
+            if (hasNewOrMoreNewInfo(identityEntity, it)) {
                 repository.save(it.update(identityEntity))
             }
         } ?: repository.save(identityEntity)
@@ -73,32 +74,6 @@ class IdentityEventListener(
 
     private fun parseLastNameFromZignSecJson(json: String): String? =
         objectMapper.readValue(json, ZignSecJson::class.java).identity.lastName
-
-    companion object {
-        fun IdentityEntity.hasNewOrMoreNewInfo(oldIdentityEntity: IdentityEntity): Boolean {
-            if (this.memberId != oldIdentityEntity.memberId) {
-                throw IllegalCallerException("hasNewOrMoreNewInfo should not be called with entities that has different member id")
-            }
-
-            if (
-                this.nationalIdentification == oldIdentityEntity.nationalIdentification ||
-                this.identificationMethod == oldIdentityEntity.identificationMethod ||
-                this.firstName == oldIdentityEntity.firstName ||
-                this.lastName == oldIdentityEntity.lastName
-            ) {
-                return false
-            }
-
-            if (
-                (oldIdentityEntity.firstName != null && this.firstName == null) ||
-                (oldIdentityEntity.lastName != null && this.lastName == null)
-            ) {
-                return false
-            }
-
-            return true
-        }
-    }
 
     data class ZignSecJson(
         val identity: ZignSecJsonIdentity

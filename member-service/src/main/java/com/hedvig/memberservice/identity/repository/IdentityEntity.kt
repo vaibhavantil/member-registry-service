@@ -37,4 +37,30 @@ class IdentityEntity(
         identityEntity.firstName ?: this.firstName,
         identityEntity.lastName ?: this.lastName
     )
+
+    companion object {
+        fun hasNewOrMoreNewInfo(newIdentityEntity: IdentityEntity, oldIdentityEntity: IdentityEntity): Boolean {
+            if (newIdentityEntity.memberId != oldIdentityEntity.memberId) {
+                throw IllegalCallerException("hasNewOrMoreNewInfo should not be called with entities that has different member id")
+            }
+
+            if (
+                newIdentityEntity.nationalIdentification == oldIdentityEntity.nationalIdentification ||
+                newIdentityEntity.identificationMethod == oldIdentityEntity.identificationMethod ||
+                newIdentityEntity.firstName == oldIdentityEntity.firstName ||
+                newIdentityEntity.lastName == oldIdentityEntity.lastName
+            ) {
+                return false
+            }
+
+            if (
+                (oldIdentityEntity.firstName != null && newIdentityEntity.firstName == null) ||
+                (oldIdentityEntity.lastName != null && newIdentityEntity.lastName == null)
+            ) {
+                return false
+            }
+
+            return true
+        }
+    }
 }
