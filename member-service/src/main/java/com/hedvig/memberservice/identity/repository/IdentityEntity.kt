@@ -19,6 +19,7 @@ class IdentityEntity(
     val memberId: Long,
     @Embedded
     val nationalIdentification: NationalIdentification,
+    @Enumerated(EnumType.STRING)
     val identificationMethod: IdentificationMethod,
     val firstName: String?,
     val lastName: String?,
@@ -33,8 +34,8 @@ class IdentityEntity(
         this.memberId,
         identityEntity.nationalIdentification,
         identityEntity.identificationMethod,
-        identityEntity.firstName,
-        identityEntity.lastName,
+        identityEntity.firstName ?: this.firstName,
+        identityEntity.lastName ?: this.lastName,
         this.createdAt,
         Instant.now()
     )
