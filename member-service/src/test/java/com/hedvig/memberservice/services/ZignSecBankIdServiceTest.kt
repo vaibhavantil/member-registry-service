@@ -5,6 +5,8 @@ import com.hedvig.external.authentication.dto.ZignSecAuthenticationMethod
 import com.hedvig.external.authentication.dto.ZignSecAuthenticationResult
 import com.hedvig.integration.apigateway.ApiGatewayService
 import com.hedvig.memberservice.commands.InactivateMemberCommand
+import com.hedvig.memberservice.commands.ZignSecSuccessfulAuthenticationCommand
+import com.hedvig.memberservice.commands.models.ZignSecAuthenticationMarket
 import com.hedvig.memberservice.query.MemberRepository
 import com.hedvig.memberservice.query.SignedMemberEntity
 import com.hedvig.memberservice.query.SignedMemberRepository
@@ -30,14 +32,19 @@ class ZignSecBankIdServiceTest {
 
     @Mock
     lateinit var zignSecAuthentication: ZignSecAuthentication
+
     @Mock
     lateinit var commandGateway: CommandGateway
+
     @Mock
     lateinit var redisEventPublisher: RedisEventPublisher
+
     @Mock
     lateinit var signedMemberRepository: SignedMemberRepository
+
     @Mock
     lateinit var apiGatewayService: ApiGatewayService
+
     @Mock
     lateinit var memberRepository: MemberRepository
 
@@ -75,11 +82,12 @@ class ZignSecBankIdServiceTest {
 
     @Test
     fun completeCompletedAuthentication_sameMemberId_doesNotInactivateMemberAndDoesNotReassignsMember() {
+        val json = "{\"json\":true}"
         val result = ZignSecAuthenticationResult.Completed(
             RESULT_ID,
             MEMBER_ID,
             SSN,
-            "{\"json\":true}",
+            json,
             ZignSecAuthenticationMethod.NORWAY_WEB_OR_MOBILE
         )
 
@@ -93,7 +101,15 @@ class ZignSecBankIdServiceTest {
 
         classUnderTest.completeAuthentication(result)
 
-        verify(commandGateway, never()).sendAndWait<Any>(any())
+        verify(commandGateway).sendAndWait<Any>(
+            ZignSecSuccessfulAuthenticationCommand(
+                MEMBER_ID,
+                RESULT_ID,
+                SSN,
+                json,
+                ZignSecAuthenticationMarket.NORWAY
+            )
+        )
         verify(apiGatewayService, never()).reassignMember(anyLong(), anyLong())
         verify(redisEventPublisher).onAuthSessionUpdated(MEMBER_ID, AuthSessionUpdatedEventStatus.SUCCESS)
     }
