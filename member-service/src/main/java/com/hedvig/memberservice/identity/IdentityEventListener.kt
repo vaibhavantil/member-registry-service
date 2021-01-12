@@ -114,7 +114,6 @@ data class ZignSecJson(
 @JsonNaming(PropertyNamingStrategy.UpperCamelCaseStrategy::class)
 data class ZignSecJsonIdentity(
     val firstName: String?,
-    val lastName: String?,
-    val fullName: String?
+    val lastName: String?
 )
 
