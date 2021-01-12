@@ -18,12 +18,13 @@ class IdentityEntity(
     @Enumerated(EnumType.STRING)
     val identificationMethod: IdentificationMethod,
     val firstName: String?,
-    val lastName: String?,
-    @CreationTimestamp
-    val createdAt: Instant = Instant.now(),
-    @UpdateTimestamp
-    var updatedAt: Instant = Instant.now()
-) {
+    val lastName: String?
+  ) {
+  @field:CreationTimestamp
+  @Column(updatable = false)
+  lateinit var createdAt: Instant
+  @field:UpdateTimestamp
+  lateinit var updatedAt: Instant
     fun update(
         identityEntity: IdentityEntity
     ) = IdentityEntity(
