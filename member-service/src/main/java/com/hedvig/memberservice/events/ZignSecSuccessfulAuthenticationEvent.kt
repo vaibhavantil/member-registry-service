@@ -6,8 +6,9 @@ data class ZignSecSuccessfulAuthenticationEvent(
     val ssn: String,
     val providerJsonResponse: String,
     val authenticationMethod: AuthenticationMethod
-)
-
-enum class AuthenticationMethod {
-    NORWEGIAN_BANK_ID
+) {
+    enum class AuthenticationMethod {
+        NORWEGIAN_BANK_ID,
+        DANISH_BANK_ID
+    }
 }

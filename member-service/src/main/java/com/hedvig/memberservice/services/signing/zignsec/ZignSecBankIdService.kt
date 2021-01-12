@@ -70,7 +70,14 @@ class ZignSecBankIdService(
                         commandGateway.sendAndWait<Any>(InactivateMemberCommand(result.memberId))
                         apiGatewayService.reassignMember(result.memberId, signedMember.get().id)
                     }
-                    commandGateway.sendAndWait<Any>(ZignSecSuccessfulAuthenticationCommand)
+                    commandGateway.sendAndWait<Any>(
+                        ZignSecSuccessfulAuthenticationCommand(
+                            result.memberId,
+                            result.id,
+                            result.ssn,
+                            result.providerJsonResponse,
+                            ZignSecAuthenticationMarket.fromAuthenticationMethod(result.authenticationMethod)
+                        ))
                     redisEventPublisher.onAuthSessionUpdated(result.memberId, AuthSessionUpdatedEventStatus.SUCCESS)
                 } else {
                     redisEventPublisher.onAuthSessionUpdated(result.memberId, AuthSessionUpdatedEventStatus.FAILED)

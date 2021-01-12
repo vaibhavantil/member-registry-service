@@ -26,6 +26,7 @@ import com.hedvig.memberservice.commands.UpdatePickedLocaleCommand
 import com.hedvig.memberservice.commands.UpdateSSNCommand
 import com.hedvig.memberservice.commands.UpdateSwedishWebOnBoardingInfoCommand
 import com.hedvig.memberservice.commands.ZignSecSignCommand
+import com.hedvig.memberservice.commands.ZignSecSuccessfulAuthenticationCommand
 import com.hedvig.memberservice.commands.models.ZignSecAuthenticationMarket
 import com.hedvig.memberservice.events.AcceptLanguageUpdatedEvent
 import com.hedvig.memberservice.events.BirthDateUpdatedEvent
@@ -53,6 +54,7 @@ import com.hedvig.memberservice.events.PhoneNumberUpdatedEvent
 import com.hedvig.memberservice.events.PickedLocaleUpdatedEvent
 import com.hedvig.memberservice.events.SSNUpdatedEvent
 import com.hedvig.memberservice.events.TrackingIdCreatedEvent
+import com.hedvig.memberservice.events.ZignSecSuccessfulAuthenticationEvent
 import com.hedvig.memberservice.services.cashback.CashbackService
 import com.hedvig.memberservice.util.SsnUtilImpl.Companion.getBirthdateFromSwedishSsn
 import com.hedvig.memberservice.util.logger
@@ -296,6 +298,19 @@ class MemberAggregate() {
             }
             else -> throw RuntimeException("ZignSec authentication market: " + zignSecAuthMarket.name + " is not implemented!")
         }
+    }
+
+    @CommandHandler
+    fun handle(command: ZignSecSuccessfulAuthenticationCommand) {
+        if (!isValidJSON(command.provideJsonResponse)) throw RuntimeException("Invalid json from provider")
+        apply(
+            ZignSecSuccessfulAuthenticationEvent(
+                command.id,
+                command.personalNumber,
+                command.provideJsonResponse,
+                command.zignSecAuthMarket.toAuthenticationEventAuthenticationMethod()
+            )
+        )
     }
 
     fun isValidJSON(json: String): Boolean {

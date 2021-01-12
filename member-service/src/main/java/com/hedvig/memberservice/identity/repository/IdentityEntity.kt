@@ -52,5 +52,6 @@ enum class Nationality {
 }
 
 enum class IdentificationMethod {
-    NORWEGIAN_BANK_ID
+    NORWEGIAN_BANK_ID,
+    DANISH_BANK_ID
 }

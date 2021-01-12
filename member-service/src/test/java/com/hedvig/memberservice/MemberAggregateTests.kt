@@ -19,6 +19,7 @@ import com.hedvig.memberservice.commands.UpdatePickedLocaleCommand
 import com.hedvig.memberservice.commands.UpdateSSNCommand
 import com.hedvig.memberservice.commands.UpdateSwedishWebOnBoardingInfoCommand
 import com.hedvig.memberservice.commands.ZignSecSignCommand
+import com.hedvig.memberservice.commands.ZignSecSuccessfulAuthenticationCommand
 import com.hedvig.memberservice.commands.models.ZignSecAuthenticationMarket
 import com.hedvig.memberservice.events.BirthDateUpdatedEvent
 import com.hedvig.memberservice.events.DanishMemberSignedEvent
@@ -39,6 +40,7 @@ import com.hedvig.memberservice.events.OnboardingStartedWithSSNEvent
 import com.hedvig.memberservice.events.PickedLocaleUpdatedEvent
 import com.hedvig.memberservice.events.SSNUpdatedEvent
 import com.hedvig.memberservice.events.TrackingIdCreatedEvent
+import com.hedvig.memberservice.events.ZignSecSuccessfulAuthenticationEvent
 import com.hedvig.memberservice.services.cashback.CashbackService
 import com.hedvig.memberservice.web.dto.Address
 import com.hedvig.memberservice.web.dto.NationalIdentification
@@ -68,7 +70,7 @@ class MemberAggregateTests {
 
     val cashbackService = mockk<CashbackService>()
 
-    val uuidGenerator= mockk<UUIDGenerator>()
+    val uuidGenerator = mockk<UUIDGenerator>()
 
     val objectMapper: ObjectMapper = ObjectMapper()
 
@@ -415,6 +417,82 @@ class MemberAggregateTests {
             .expectEvents(
                 BirthDateUpdatedEvent(memberId, birthDate)
             )
+    }
+
+    @Test
+    fun `handle valid norwegian ZignSecSuccessfulAuthenticationCommand should apply ZignSecSuccessfulAuthenticationEvent`() {
+        val memberId = 1234L
+        val referenceId = UUID.randomUUID()
+        val personalNumber = "12121212120"
+        val provideJsonResponse = "{ \"json\": true }"
+        fixture
+            .given(
+                MemberCreatedEvent(memberId, MemberStatus.INITIATED, Instant.now())
+            )
+            .`when`(ZignSecSuccessfulAuthenticationCommand(
+                memberId,
+                referenceId,
+                personalNumber,
+                provideJsonResponse,
+                ZignSecAuthenticationMarket.NORWAY
+            ))
+            .expectSuccessfulHandlerExecution()
+            .expectEvents(
+                ZignSecSuccessfulAuthenticationEvent(
+                    memberId,
+                    personalNumber,
+                    provideJsonResponse,
+                    ZignSecSuccessfulAuthenticationEvent.AuthenticationMethod.NORWEGIAN_BANK_ID
+                )
+            )
+    }
+
+    @Test
+    fun `handle valid danish ZignSecSuccessfulAuthenticationCommand should apply ZignSecSuccessfulAuthenticationEvent`() {
+        val memberId = 1234L
+        val referenceId = UUID.randomUUID()
+        val personalNumber = "12121212120"
+        val provideJsonResponse = "{ \"json\": true }"
+        fixture
+            .given(
+                MemberCreatedEvent(memberId, MemberStatus.INITIATED, Instant.now())
+            )
+            .`when`(ZignSecSuccessfulAuthenticationCommand(
+                memberId,
+                referenceId,
+                personalNumber,
+                provideJsonResponse,
+                ZignSecAuthenticationMarket.DENMARK
+            ))
+            .expectSuccessfulHandlerExecution()
+            .expectEvents(
+                ZignSecSuccessfulAuthenticationEvent(
+                    memberId,
+                    personalNumber,
+                    provideJsonResponse,
+                    ZignSecSuccessfulAuthenticationEvent.AuthenticationMethod.DANISH_BANK_ID
+                )
+            )
+    }
+
+    @Test
+    fun `handle invalid ZignSecSuccessfulAuthenticationCommand should throw`() {
+        val memberId = 1234L
+        val referenceId = UUID.randomUUID()
+        val personalNumber = "12121212120"
+        val provideJsonResponse = "not a valid json"
+        fixture
+            .given(
+                MemberCreatedEvent(memberId, MemberStatus.INITIATED, Instant.now())
+            )
+            .`when`(ZignSecSuccessfulAuthenticationCommand(
+                memberId,
+                referenceId,
+                personalNumber,
+                provideJsonResponse,
+                ZignSecAuthenticationMarket.DENMARK
+            ))
+            .expectException(RuntimeException::class.java)
     }
 
     private inner class AggregateFactoryM<T> internal constructor(aggregateType: Class<T>?) : AbstractAggregateFactory<T>(aggregateType) {

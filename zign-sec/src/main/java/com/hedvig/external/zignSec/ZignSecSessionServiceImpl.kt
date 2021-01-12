@@ -234,7 +234,9 @@ class ZignSecSessionServiceImpl(
                                 ZignSecAuthenticationResult.Completed(
                                     session.referenceId,
                                     session.memberId,
-                                    signEntity.personalNumber
+                                    signEntity.personalNumber,
+                                    jsonRequest,
+                                    session.authenticationMethod
                                 )
                             )
                         } else {

@@ -1,6 +1,7 @@
 package com.hedvig.memberservice.services
 
 import com.hedvig.external.authentication.ZignSecAuthentication
+import com.hedvig.external.authentication.dto.ZignSecAuthenticationMethod
 import com.hedvig.external.authentication.dto.ZignSecAuthenticationResult
 import com.hedvig.integration.apigateway.ApiGatewayService
 import com.hedvig.memberservice.commands.InactivateMemberCommand
@@ -52,7 +53,9 @@ class ZignSecBankIdServiceTest {
         val result = ZignSecAuthenticationResult.Completed(
             RESULT_ID,
             MEMBER_ID,
-            SSN
+            SSN,
+            "{\"json\":true}",
+            ZignSecAuthenticationMethod.NORWAY_WEB_OR_MOBILE
         )
 
         val signedMemberEntity = SignedMemberEntity()
@@ -75,7 +78,9 @@ class ZignSecBankIdServiceTest {
         val result = ZignSecAuthenticationResult.Completed(
             RESULT_ID,
             MEMBER_ID,
-            SSN
+            SSN,
+            "{\"json\":true}",
+            ZignSecAuthenticationMethod.NORWAY_WEB_OR_MOBILE
         )
 
         val signedMemberEntity = SignedMemberEntity()
@@ -98,7 +103,9 @@ class ZignSecBankIdServiceTest {
         val result = ZignSecAuthenticationResult.Completed(
             RESULT_ID,
             MEMBER_ID,
-            SSN
+            SSN,
+            "{\"json\":true}",
+            ZignSecAuthenticationMethod.NORWAY_WEB_OR_MOBILE
         )
 
         whenever(signedMemberRepository.findBySsn(SSN)).thenReturn(Optional.empty())

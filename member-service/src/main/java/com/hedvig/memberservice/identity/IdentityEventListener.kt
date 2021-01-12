@@ -3,7 +3,7 @@ package com.hedvig.memberservice.identity
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.PropertyNamingStrategy
 import com.fasterxml.jackson.databind.annotation.JsonNaming
-import com.hedvig.memberservice.events.AuthenticationMethod
+import com.hedvig.memberservice.events.ZignSecSuccessfulAuthenticationEvent.AuthenticationMethod
 import com.hedvig.memberservice.events.NorwegianMemberSignedEvent
 import com.hedvig.memberservice.events.ZignSecSuccessfulAuthenticationEvent
 import com.hedvig.memberservice.identity.repository.IdentificationMethod
@@ -41,6 +41,7 @@ class IdentityEventListener(
     fun on(event: ZignSecSuccessfulAuthenticationEvent) {
         val (nationality, identificationMethod) = when (event.authenticationMethod) {
             AuthenticationMethod.NORWEGIAN_BANK_ID -> Pair(Nationality.NORWAY, IdentificationMethod.NORWEGIAN_BANK_ID)
+            AuthenticationMethod.DANISH_BANK_ID -> Pair(Nationality.DENMARK, IdentificationMethod.DANISH_BANK_ID)
         }
 
         val identityEntity = IdentityEntity(
