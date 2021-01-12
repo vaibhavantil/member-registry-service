@@ -16,7 +16,7 @@ import org.axonframework.eventhandling.EventHandler
 import org.springframework.stereotype.Component
 
 @Component
-@ProcessingGroup("IdentityEventListener")
+@ProcessingGroup("IdentifiedMembers")
 class IdentityEventListener(
     private val repository: IdentityRepository,
     private val objectMapper: ObjectMapper
