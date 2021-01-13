@@ -38,29 +38,20 @@ class IdentityEntity(
         identityEntity.lastName ?: this.lastName
     )
 
-    companion object {
-        fun hasNewOrMoreNewInfo(newIdentityEntity: IdentityEntity, oldIdentityEntity: IdentityEntity): Boolean {
-            if (newIdentityEntity.memberId != oldIdentityEntity.memberId) {
-                throw IllegalCallerException("hasNewOrMoreNewInfo should not be called with entities that has different member id")
-            }
-
-            if (
-                newIdentityEntity.nationalIdentification == oldIdentityEntity.nationalIdentification ||
-                newIdentityEntity.identificationMethod == oldIdentityEntity.identificationMethod ||
-                newIdentityEntity.firstName == oldIdentityEntity.firstName ||
-                newIdentityEntity.lastName == oldIdentityEntity.lastName
-            ) {
-                return false
-            }
-
-            if (
-                (oldIdentityEntity.firstName != null && newIdentityEntity.firstName == null) ||
-                (oldIdentityEntity.lastName != null && newIdentityEntity.lastName == null)
-            ) {
-                return false
-            }
-
-            return true
+    fun hasNewOrMoreNewInfo(newIdentityEntity: IdentityEntity): Boolean {
+        if (this.memberId != newIdentityEntity.memberId) {
+            throw IllegalCallerException("hasNewOrMoreNewInfo should not be called with entities that has different member id")
         }
+
+        if (
+            this.nationalIdentification == newIdentityEntity.nationalIdentification ||
+            this.identificationMethod == newIdentityEntity.identificationMethod ||
+            this.firstName == newIdentityEntity.firstName ||
+            this.lastName == newIdentityEntity.lastName
+        ) {
+            return false
+        }
+
+        return true
     }
 }

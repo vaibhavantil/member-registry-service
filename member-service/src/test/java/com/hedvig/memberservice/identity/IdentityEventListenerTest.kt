@@ -114,7 +114,7 @@ class IdentityEventListenerTest {
     }
 
     @Test
-    fun `on event without name is not saved`() {
+    fun `on event without name is not overridden`() {
         val oldIdentityEntity = IdentityEntity(
             memberId,
             NationalIdentification(
@@ -126,17 +126,23 @@ class IdentityEventListenerTest {
             "Testsson"
         )
         every { repository.findById(any()) } returns Optional.of(oldIdentityEntity)
+        val slot = CapturingSlot<IdentityEntity>()
+        every {
+            repository.save(capture(slot))
+        } returns stub
 
         lut.on(
             ZignSecSuccessfulAuthenticationEvent(
                 memberId,
                 ssn,
-                zignSecJson,
+                "{\"identity\": {}}",
                 ZignSecSuccessfulAuthenticationEvent.AuthenticationMethod.DANISH_BANK_ID
             )
         )
 
-        verify(exactly = 0) { repository.save(any<IdentityEntity>()) }
+        verify(exactly = 1) { repository.save(any<IdentityEntity>()) }
+        assertThat(slot.captured.firstName).isEqualTo("Test")
+        assertThat(slot.captured.lastName).isEqualTo("Testsson")
     }
 
     @Test

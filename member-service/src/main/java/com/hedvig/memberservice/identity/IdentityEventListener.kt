@@ -1,14 +1,11 @@
 package com.hedvig.memberservice.identity
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.databind.PropertyNamingStrategy
-import com.fasterxml.jackson.databind.annotation.JsonNaming
 import com.hedvig.memberservice.events.ZignSecSuccessfulAuthenticationEvent.AuthenticationMethod
 import com.hedvig.memberservice.events.NorwegianMemberSignedEvent
 import com.hedvig.memberservice.events.ZignSecSuccessfulAuthenticationEvent
 import com.hedvig.memberservice.identity.repository.IdentificationMethod
 import com.hedvig.memberservice.identity.repository.IdentityEntity
-import com.hedvig.memberservice.identity.repository.IdentityEntity.Companion.hasNewOrMoreNewInfo
 import com.hedvig.memberservice.identity.repository.IdentityRepository
 import com.hedvig.memberservice.identity.repository.NationalIdentification
 import com.hedvig.memberservice.identity.repository.Nationality
@@ -63,7 +60,7 @@ class IdentityEventListener(
 
     private fun saveOrUpdate(identityEntity: IdentityEntity) {
         repository.findByIdOrNull(identityEntity.memberId)?.let {
-            if (hasNewOrMoreNewInfo(identityEntity, it)) {
+            if (it.hasNewOrMoreNewInfo(identityEntity)) {
                 repository.save(it.update(identityEntity))
             }
         } ?: repository.save(identityEntity)
