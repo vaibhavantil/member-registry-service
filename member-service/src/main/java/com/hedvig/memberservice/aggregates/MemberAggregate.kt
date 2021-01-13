@@ -296,7 +296,6 @@ class MemberAggregate() {
                     DanishMemberSignedEvent(
                         id, cmd.personalNumber, cmd.provideJsonResponse, cmd.referenceId))
             }
-            else -> throw RuntimeException("ZignSec authentication market: " + zignSecAuthMarket.name + " is not implemented!")
         }
     }
 

@@ -33,8 +33,8 @@ class IdentityEventListener(
                 Nationality.NORWAY
             ),
             IdentificationMethod.NORWEGIAN_BANK_ID,
-            parseFirstNameFromZignSecJson(event.providerJsonResponse),
-            parseLastNameFromZignSecJson(event.providerJsonResponse)
+            event.parseFirstNameFromZignSecJson(objectMapper),
+            event.parseLastNameFromZignSecJson(objectMapper)
         )
 
         saveOrUpdate(identityEntity)
@@ -54,8 +54,8 @@ class IdentityEventListener(
                 nationality
             ),
             identificationMethod,
-            parseFirstNameFromZignSecJson(event.providerJsonResponse),
-            parseLastNameFromZignSecJson(event.providerJsonResponse)
+            event.parseFirstNameFromZignSecJson(objectMapper),
+            event.parseLastNameFromZignSecJson(objectMapper)
         )
 
         saveOrUpdate(identityEntity)
@@ -68,23 +68,6 @@ class IdentityEventListener(
             }
         } ?: repository.save(identityEntity)
     }
-
-    private fun parseFirstNameFromZignSecJson(json: String): String? =
-        objectMapper.readValue(json, ZignSecJson::class.java).identity.firstName
-
-    private fun parseLastNameFromZignSecJson(json: String): String? =
-        objectMapper.readValue(json, ZignSecJson::class.java).identity.lastName
-
-    data class ZignSecJson(
-        val identity: ZignSecJsonIdentity
-    )
-
-    @JsonNaming(PropertyNamingStrategy.UpperCamelCaseStrategy::class)
-    data class ZignSecJsonIdentity(
-        val firstName: String?,
-        val lastName: String?
-    )
-
 }
 
 

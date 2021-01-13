@@ -1,10 +1,11 @@
 package com.hedvig.memberservice.events
 
-import java.util.*
+import java.util.UUID
 
 data class NorwegianMemberSignedEvent(
     val memberId: Long,
     val ssn: String,
-    val providerJsonResponse: String,
+    override val providerJsonResponse: String,
     val referenceId: UUID?
-)
+): ZignSecIdentityJson()
+
