@@ -61,8 +61,9 @@ class ZignSecBankIdServiceTest {
             RESULT_ID,
             MEMBER_ID,
             SSN,
-            "{\"json\":true}",
-            ZignSecAuthenticationMethod.NORWAY_WEB_OR_MOBILE
+            ZignSecAuthenticationMethod.NORWAY_WEB_OR_MOBILE,
+            null,
+            null
         )
 
         val signedMemberEntity = SignedMemberEntity()
@@ -82,13 +83,13 @@ class ZignSecBankIdServiceTest {
 
     @Test
     fun completeCompletedAuthentication_sameMemberId_doesNotInactivateMemberAndDoesNotReassignsMember() {
-        val json = "{\"json\":true}"
         val result = ZignSecAuthenticationResult.Completed(
             RESULT_ID,
             MEMBER_ID,
             SSN,
-            json,
-            ZignSecAuthenticationMethod.NORWAY_WEB_OR_MOBILE
+            ZignSecAuthenticationMethod.NORWAY_WEB_OR_MOBILE,
+            "Test",
+            "Testsson"
         )
 
         val signedMemberEntity = SignedMemberEntity()
@@ -106,8 +107,9 @@ class ZignSecBankIdServiceTest {
                 MEMBER_ID,
                 RESULT_ID,
                 SSN,
-                json,
-                ZignSecAuthenticationMarket.NORWAY
+                ZignSecAuthenticationMarket.NORWAY,
+                "Test",
+                "Testsson"
             )
         )
         verify(apiGatewayService, never()).reassignMember(anyLong(), anyLong())
@@ -120,8 +122,9 @@ class ZignSecBankIdServiceTest {
             RESULT_ID,
             MEMBER_ID,
             SSN,
-            "{\"json\":true}",
-            ZignSecAuthenticationMethod.NORWAY_WEB_OR_MOBILE
+            ZignSecAuthenticationMethod.NORWAY_WEB_OR_MOBILE,
+            null,
+            null
         )
 
         whenever(signedMemberRepository.findBySsn(SSN)).thenReturn(Optional.empty())

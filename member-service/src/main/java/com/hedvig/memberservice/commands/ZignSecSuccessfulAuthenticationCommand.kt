@@ -8,6 +8,7 @@ data class ZignSecSuccessfulAuthenticationCommand(
     @TargetAggregateIdentifier val id: Long,
     val referenceId: UUID,
     val personalNumber: String,
-    val providerJsonResponse: String,
-    val zignSecAuthMarket: ZignSecAuthenticationMarket
+    val zignSecAuthMarket: ZignSecAuthenticationMarket,
+    val firstName: String?,
+    val lastName: String?
 )

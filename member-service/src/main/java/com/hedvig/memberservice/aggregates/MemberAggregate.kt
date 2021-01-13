@@ -54,7 +54,7 @@ import com.hedvig.memberservice.events.PhoneNumberUpdatedEvent
 import com.hedvig.memberservice.events.PickedLocaleUpdatedEvent
 import com.hedvig.memberservice.events.SSNUpdatedEvent
 import com.hedvig.memberservice.events.TrackingIdCreatedEvent
-import com.hedvig.memberservice.events.ZignSecSuccessfulAuthenticationEvent
+import com.hedvig.memberservice.events.MemberIdentifiedEvent
 import com.hedvig.memberservice.services.cashback.CashbackService
 import com.hedvig.memberservice.util.SsnUtilImpl.Companion.getBirthdateFromSwedishSsn
 import com.hedvig.memberservice.util.logger
@@ -276,13 +276,26 @@ class MemberAggregate() {
     fun handle(cmd: ZignSecSignCommand) {
         if (!isValidJSON(cmd.provideJsonResponse)) throw RuntimeException("Invalid json from provider")
         apply(NewCashbackSelectedEvent(id, cashbackService.getDefaultId(id).toString()))
-        val zignSecAuthMarket = cmd.zignSecAuthMarket
-        when (zignSecAuthMarket) {
+        when (cmd.zignSecAuthMarket) {
             ZignSecAuthenticationMarket.NORWAY -> {
-                if (cmd.personalNumber != null
-                    && member.ssn != cmd.personalNumber) {
+                if (member.ssn != cmd.personalNumber) {
                     apply(NorwegianSSNUpdatedEvent(id, cmd.personalNumber))
                 }
+                apply(
+                    MemberIdentifiedEvent(
+                        cmd.id,
+                        MemberIdentifiedEvent.NationalIdentification(
+                            cmd.personalNumber,
+                            when (cmd.zignSecAuthMarket) {
+                                ZignSecAuthenticationMarket.NORWAY -> MemberIdentifiedEvent.Nationality.NORWAY
+                                ZignSecAuthenticationMarket.DENMARK ->  MemberIdentifiedEvent.Nationality.DENMARK
+                            }
+                        ),
+                        cmd.zignSecAuthMarket.toMemberIdentifiedEventIdentificationMethod(),
+                        cmd.firstName,
+                        cmd.lastName
+                    )
+                )
                 apply(
                     NorwegianMemberSignedEvent(
                         id, cmd.personalNumber, cmd.provideJsonResponse, cmd.referenceId))
@@ -301,13 +314,19 @@ class MemberAggregate() {
 
     @CommandHandler
     fun handle(command: ZignSecSuccessfulAuthenticationCommand) {
-        if (!isValidJSON(command.providerJsonResponse)) throw RuntimeException("Invalid json from provider")
         apply(
-            ZignSecSuccessfulAuthenticationEvent(
+            MemberIdentifiedEvent(
                 command.id,
-                command.personalNumber,
-                command.providerJsonResponse,
-                command.zignSecAuthMarket.toAuthenticationEventAuthenticationMethod()
+                MemberIdentifiedEvent.NationalIdentification(
+                    command.personalNumber,
+                    when (command.zignSecAuthMarket) {
+                        ZignSecAuthenticationMarket.NORWAY -> MemberIdentifiedEvent.Nationality.NORWAY
+                        ZignSecAuthenticationMarket.DENMARK ->  MemberIdentifiedEvent.Nationality.DENMARK
+                    }
+                ),
+                command.zignSecAuthMarket.toMemberIdentifiedEventIdentificationMethod(),
+                command.firstName,
+                command.lastName
             )
         )
     }

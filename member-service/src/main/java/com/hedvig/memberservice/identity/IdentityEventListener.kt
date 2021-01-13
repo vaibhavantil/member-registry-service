@@ -1,9 +1,7 @@
 package com.hedvig.memberservice.identity
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import com.hedvig.memberservice.events.ZignSecSuccessfulAuthenticationEvent.AuthenticationMethod
-import com.hedvig.memberservice.events.NorwegianMemberSignedEvent
-import com.hedvig.memberservice.events.ZignSecSuccessfulAuthenticationEvent
+import com.hedvig.memberservice.events.MemberIdentifiedEvent
 import com.hedvig.memberservice.identity.repository.IdentificationMethod
 import com.hedvig.memberservice.identity.repository.IdentityEntity
 import com.hedvig.memberservice.identity.repository.IdentityRepository
@@ -17,42 +15,28 @@ import org.springframework.stereotype.Component
 @Component
 @ProcessingGroup("IdentifiedMembers")
 class IdentityEventListener(
-    private val repository: IdentityRepository,
-    private val objectMapper: ObjectMapper
+    private val repository: IdentityRepository
 ) {
 
     @EventHandler
-    fun on(event: NorwegianMemberSignedEvent) {
-        val identityEntity = IdentityEntity(
-            event.memberId,
-            NationalIdentification(
-                event.ssn,
-                Nationality.NORWAY
-            ),
-            IdentificationMethod.NORWEGIAN_BANK_ID,
-            event.parseFirstNameFromZignSecJson(objectMapper),
-            event.parseLastNameFromZignSecJson(objectMapper)
-        )
-
-        saveOrUpdate(identityEntity)
-    }
-
-    @EventHandler
-    fun on(event: ZignSecSuccessfulAuthenticationEvent) {
-        val (nationality, identificationMethod) = when (event.authenticationMethod) {
-            AuthenticationMethod.NORWEGIAN_BANK_ID -> Pair(Nationality.NORWAY, IdentificationMethod.NORWEGIAN_BANK_ID)
-            AuthenticationMethod.DANISH_BANK_ID -> Pair(Nationality.DENMARK, IdentificationMethod.DANISH_BANK_ID)
-        }
+    fun on(event: MemberIdentifiedEvent) {
 
         val identityEntity = IdentityEntity(
             event.memberId,
             NationalIdentification(
-                event.ssn,
-                nationality
+                event.nationalIdentification.identification,
+                when(event.nationalIdentification.nationality) {
+                    MemberIdentifiedEvent.Nationality.SWEDEN -> Nationality.SWEDEN
+                    MemberIdentifiedEvent.Nationality.NORWAY -> Nationality.NORWAY
+                    MemberIdentifiedEvent.Nationality.DENMARK -> Nationality.DENMARK
+                }
             ),
-            identificationMethod,
-            event.parseFirstNameFromZignSecJson(objectMapper),
-            event.parseLastNameFromZignSecJson(objectMapper)
+            when(event.identificationMethod) {
+                MemberIdentifiedEvent.IdentificationMethod.NORWEGIAN_BANK_ID -> IdentificationMethod.NORWEGIAN_BANK_ID
+                MemberIdentifiedEvent.IdentificationMethod.DANISH_BANK_ID -> IdentificationMethod.DANISH_BANK_ID
+            },
+            event.firstName,
+            event.lastName
         )
 
         saveOrUpdate(identityEntity)

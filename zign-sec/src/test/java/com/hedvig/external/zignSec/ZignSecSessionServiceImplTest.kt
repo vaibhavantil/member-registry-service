@@ -320,7 +320,7 @@ class ZignSecSessionServiceImplTest {
 
         classUnderTest.handleNotification(zignSecSuccessAuthNotificationRequest)
 
-        verify(authenticationEventPublisher).publishAuthenticationEvent(ZignSecAuthenticationResult.Completed(REFERENCE_ID, 1337, "1212120000", zignSecSuccessAuthNotificationRequest, ZignSecAuthenticationMethod.NORWAY_WEB_OR_MOBILE))
+        verify(authenticationEventPublisher).publishAuthenticationEvent(ZignSecAuthenticationResult.Completed(REFERENCE_ID, 1337, "1212120000", ZignSecAuthenticationMethod.NORWAY_WEB_OR_MOBILE, null, null))
 
         val savedSession = sessionRepository.findByReferenceId(REFERENCE_ID).get()
         assertThat(savedSession.referenceId).isEqualTo(REFERENCE_ID)
@@ -359,7 +359,7 @@ class ZignSecSessionServiceImplTest {
 
         classUnderTest.handleNotification(zignSecSuccessAuthNotificationRequest)
 
-        verify(authenticationEventPublisher).publishSignEvent(ZignSecSignResult.Signed(REFERENCE_ID, 1337, "12121200000", zignSecSuccessAuthNotificationRequest, ZignSecAuthenticationMethod.NORWAY_WEB_OR_MOBILE))
+        verify(authenticationEventPublisher).publishSignEvent(ZignSecSignResult.Signed(REFERENCE_ID, 1337, "12121200000", zignSecSuccessAuthNotificationRequest, ZignSecAuthenticationMethod.NORWAY_WEB_OR_MOBILE, null, null))
 
         assertThat(secSignEntityCaptor.value.personalNumber).isEqualTo("12121200000")
         assertThat(secSignEntityCaptor.value.idProviderPersonId).isEqualTo("9578-6000-4-365161")

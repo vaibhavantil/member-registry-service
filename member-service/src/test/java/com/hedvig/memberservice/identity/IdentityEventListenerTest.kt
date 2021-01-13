@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import com.hedvig.memberservice.events.NorwegianMemberSignedEvent
-import com.hedvig.memberservice.events.ZignSecSuccessfulAuthenticationEvent
+import com.hedvig.memberservice.events.MemberIdentifiedEvent
 import com.hedvig.memberservice.identity.repository.IdentificationMethod
 import com.hedvig.memberservice.identity.repository.IdentityEntity
 import com.hedvig.memberservice.identity.repository.IdentityRepository
@@ -30,13 +30,12 @@ class IdentityEventListenerTest {
     fun before() {
         objectMapper = ObjectMapper().registerKotlinModule().registerModule(JavaTimeModule())
         lut = IdentityEventListener(
-            repository,
-            objectMapper
+            repository
         )
     }
 
     @Test
-    fun `on NorwegianMemberSignedEvent save IdentityEntity`() {
+    fun `on MemberIdentifiedEvent save IdentityEntity`() {
         every { repository.findById(any()) } returns Optional.empty()
         val slot = CapturingSlot<IdentityEntity>()
         every {
@@ -44,36 +43,15 @@ class IdentityEventListenerTest {
         } returns stub
 
         lut.on(
-            NorwegianMemberSignedEvent(
+            MemberIdentifiedEvent(
                 memberId,
-                ssn,
-                zignSecJson,
-                null
-            )
-        )
-
-        assertThat(slot.captured.firstName).isEqualTo("Test")
-        assertThat(slot.captured.lastName).isEqualTo("Testsson")
-        assertThat(slot.captured.nationalIdentification.identification).isEqualTo(ssn)
-        assertThat(slot.captured.nationalIdentification.nationality).isEqualTo(Nationality.NORWAY)
-        assertThat(slot.captured.memberId).isEqualTo(memberId)
-    }
-
-
-    @Test
-    fun `on ZignSecSuccessfulAuthenticationEvent save IdentityEntity`() {
-        every { repository.findById(any()) } returns Optional.empty()
-        val slot = CapturingSlot<IdentityEntity>()
-        every {
-            repository.save(capture(slot))
-        } returns stub
-
-        lut.on(
-            ZignSecSuccessfulAuthenticationEvent(
-                memberId,
-                ssn,
-                zignSecJson,
-                ZignSecSuccessfulAuthenticationEvent.AuthenticationMethod.DANISH_BANK_ID
+                MemberIdentifiedEvent.NationalIdentification(
+                    ssn,
+                    MemberIdentifiedEvent.Nationality.DENMARK
+                ),
+                MemberIdentifiedEvent.IdentificationMethod.DANISH_BANK_ID,
+                "Test",
+                "Testsson"
             )
         )
 
@@ -102,11 +80,15 @@ class IdentityEventListenerTest {
         } returns stub
 
         lut.on(
-            ZignSecSuccessfulAuthenticationEvent(
+            MemberIdentifiedEvent(
                 memberId,
-                ssn,
-                zignSecJson,
-                ZignSecSuccessfulAuthenticationEvent.AuthenticationMethod.DANISH_BANK_ID
+                MemberIdentifiedEvent.NationalIdentification(
+                    ssn,
+                    MemberIdentifiedEvent.Nationality.DENMARK
+                ),
+                MemberIdentifiedEvent.IdentificationMethod.DANISH_BANK_ID,
+                "Test",
+                "Testsson"
             )
         )
 
@@ -132,11 +114,15 @@ class IdentityEventListenerTest {
         } returns stub
 
         lut.on(
-            ZignSecSuccessfulAuthenticationEvent(
+            MemberIdentifiedEvent(
                 memberId,
-                ssn,
-                "{\"identity\": {}}",
-                ZignSecSuccessfulAuthenticationEvent.AuthenticationMethod.DANISH_BANK_ID
+                MemberIdentifiedEvent.NationalIdentification(
+                    ssn,
+                    MemberIdentifiedEvent.Nationality.DENMARK
+                ),
+                MemberIdentifiedEvent.IdentificationMethod.DANISH_BANK_ID,
+                null,
+                null
             )
         )
 
@@ -160,11 +146,15 @@ class IdentityEventListenerTest {
         every { repository.findById(any()) } returns Optional.of(oldIdentityEntity)
 
         lut.on(
-            ZignSecSuccessfulAuthenticationEvent(
+            MemberIdentifiedEvent(
                 memberId,
-                ssn,
-                zignSecJson,
-                ZignSecSuccessfulAuthenticationEvent.AuthenticationMethod.DANISH_BANK_ID
+                MemberIdentifiedEvent.NationalIdentification(
+                    ssn,
+                    MemberIdentifiedEvent.Nationality.DENMARK
+                ),
+                MemberIdentifiedEvent.IdentificationMethod.DANISH_BANK_ID,
+                "Test",
+                "Testsson"
             )
         )
 

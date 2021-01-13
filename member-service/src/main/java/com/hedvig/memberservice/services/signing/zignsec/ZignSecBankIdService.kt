@@ -75,8 +75,9 @@ class ZignSecBankIdService(
                             result.memberId,
                             result.id,
                             result.ssn,
-                            result.providerJsonResponse,
-                            ZignSecAuthenticationMarket.fromAuthenticationMethod(result.authenticationMethod)
+                            ZignSecAuthenticationMarket.fromAuthenticationMethod(result.authenticationMethod),
+                            result.firstName,
+                            result.lastName
                         ))
                     redisEventPublisher.onAuthSessionUpdated(result.memberId, AuthSessionUpdatedEventStatus.SUCCESS)
                 } else {

@@ -9,5 +9,7 @@ data class ZignSecSignCommand(
     val referenceId: UUID,
     val personalNumber: String,
     val provideJsonResponse: String,
-    val zignSecAuthMarket: ZignSecAuthenticationMarket
+    val zignSecAuthMarket: ZignSecAuthenticationMarket,
+    val firstName: String?,
+    val lastName: String?
 )

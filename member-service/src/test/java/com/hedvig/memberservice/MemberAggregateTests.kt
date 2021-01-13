@@ -40,7 +40,7 @@ import com.hedvig.memberservice.events.OnboardingStartedWithSSNEvent
 import com.hedvig.memberservice.events.PickedLocaleUpdatedEvent
 import com.hedvig.memberservice.events.SSNUpdatedEvent
 import com.hedvig.memberservice.events.TrackingIdCreatedEvent
-import com.hedvig.memberservice.events.ZignSecSuccessfulAuthenticationEvent
+import com.hedvig.memberservice.events.MemberIdentifiedEvent
 import com.hedvig.memberservice.services.cashback.CashbackService
 import com.hedvig.memberservice.web.dto.Address
 import com.hedvig.memberservice.web.dto.NationalIdentification
@@ -248,11 +248,18 @@ class MemberAggregateTests {
                 MemberCreatedEvent(memberId, MemberStatus.INITIATED, Instant.now()),
                 MemberStartedOnBoardingEvent(memberId, MemberStatus.ONBOARDING),
                 TrackingIdCreatedEvent(memberId, TRACKING_UUID))
-            .`when`(ZignSecSignCommand(memberId, referenceId, personalNumber, provideJsonResponse, ZignSecAuthenticationMarket.NORWAY))
+            .`when`(ZignSecSignCommand(memberId, referenceId, personalNumber, provideJsonResponse, ZignSecAuthenticationMarket.NORWAY, "Test", "Testsson"))
             .expectSuccessfulHandlerExecution()
             .expectEvents(
                 NewCashbackSelectedEvent(memberId, DEFAULT_CASHBACK.toString()),
                 NorwegianSSNUpdatedEvent(memberId, personalNumber),
+                MemberIdentifiedEvent(
+                    memberId,
+                    MemberIdentifiedEvent.NationalIdentification(personalNumber, MemberIdentifiedEvent.Nationality.NORWAY),
+                    MemberIdentifiedEvent.IdentificationMethod.NORWEGIAN_BANK_ID,
+                    "Test",
+                    "Testsson"
+                ),
                 NorwegianMemberSignedEvent(memberId, personalNumber, provideJsonResponse, referenceId)
             )
     }
@@ -269,7 +276,7 @@ class MemberAggregateTests {
                 MemberCreatedEvent(memberId, MemberStatus.INITIATED, Instant.now()),
                 MemberStartedOnBoardingEvent(memberId, MemberStatus.ONBOARDING),
                 TrackingIdCreatedEvent(memberId, TRACKING_UUID))
-            .`when`(ZignSecSignCommand(memberId, referenceId, personalNumber, provideJsonResponse, ZignSecAuthenticationMarket.DENMARK))
+            .`when`(ZignSecSignCommand(memberId, referenceId, personalNumber, provideJsonResponse, ZignSecAuthenticationMarket.DENMARK, null, null))
             .expectSuccessfulHandlerExecution()
             .expectEvents(
                 NewCashbackSelectedEvent(memberId, DEFAULT_CASHBACK.toString()),
@@ -290,7 +297,7 @@ class MemberAggregateTests {
                 MemberCreatedEvent(memberId, MemberStatus.INITIATED, Instant.now()),
                 MemberStartedOnBoardingEvent(memberId, MemberStatus.ONBOARDING),
                 TrackingIdCreatedEvent(memberId, TRACKING_UUID))
-            .`when`(ZignSecSignCommand(memberId, referenceId, personalNumber, provideJsonResponse, ZignSecAuthenticationMarket.NORWAY))
+            .`when`(ZignSecSignCommand(memberId, referenceId, personalNumber, provideJsonResponse, ZignSecAuthenticationMarket.NORWAY, null, null))
             .expectException(RuntimeException::class.java)
     }
 
@@ -424,7 +431,6 @@ class MemberAggregateTests {
         val memberId = 1234L
         val referenceId = UUID.randomUUID()
         val personalNumber = "12121212120"
-        val provideJsonResponse = "{ \"json\": true }"
         fixture
             .given(
                 MemberCreatedEvent(memberId, MemberStatus.INITIATED, Instant.now())
@@ -433,16 +439,21 @@ class MemberAggregateTests {
                 memberId,
                 referenceId,
                 personalNumber,
-                provideJsonResponse,
-                ZignSecAuthenticationMarket.NORWAY
+                ZignSecAuthenticationMarket.NORWAY,
+                "Test",
+                "Testsson"
             ))
             .expectSuccessfulHandlerExecution()
             .expectEvents(
-                ZignSecSuccessfulAuthenticationEvent(
+                MemberIdentifiedEvent(
                     memberId,
-                    personalNumber,
-                    provideJsonResponse,
-                    ZignSecSuccessfulAuthenticationEvent.AuthenticationMethod.NORWEGIAN_BANK_ID
+                    MemberIdentifiedEvent.NationalIdentification(
+                        personalNumber,
+                        MemberIdentifiedEvent.Nationality.NORWAY
+                    ),
+                    MemberIdentifiedEvent.IdentificationMethod.NORWEGIAN_BANK_ID,
+                    "Test",
+                    "Testsson"
                 )
             )
     }
@@ -452,7 +463,6 @@ class MemberAggregateTests {
         val memberId = 1234L
         val referenceId = UUID.randomUUID()
         val personalNumber = "12121212120"
-        val provideJsonResponse = "{ \"json\": true }"
         fixture
             .given(
                 MemberCreatedEvent(memberId, MemberStatus.INITIATED, Instant.now())
@@ -461,38 +471,23 @@ class MemberAggregateTests {
                 memberId,
                 referenceId,
                 personalNumber,
-                provideJsonResponse,
-                ZignSecAuthenticationMarket.DENMARK
+                ZignSecAuthenticationMarket.DENMARK,
+                "Test",
+                "Testsson"
             ))
             .expectSuccessfulHandlerExecution()
             .expectEvents(
-                ZignSecSuccessfulAuthenticationEvent(
+                MemberIdentifiedEvent(
                     memberId,
-                    personalNumber,
-                    provideJsonResponse,
-                    ZignSecSuccessfulAuthenticationEvent.AuthenticationMethod.DANISH_BANK_ID
+                    MemberIdentifiedEvent.NationalIdentification(
+                        personalNumber,
+                        MemberIdentifiedEvent.Nationality.DENMARK
+                    ),
+                    MemberIdentifiedEvent.IdentificationMethod.DANISH_BANK_ID,
+                    "Test",
+                    "Testsson"
                 )
             )
-    }
-
-    @Test
-    fun `handle invalid ZignSecSuccessfulAuthenticationCommand should throw`() {
-        val memberId = 1234L
-        val referenceId = UUID.randomUUID()
-        val personalNumber = "12121212120"
-        val provideJsonResponse = "not a valid json"
-        fixture
-            .given(
-                MemberCreatedEvent(memberId, MemberStatus.INITIATED, Instant.now())
-            )
-            .`when`(ZignSecSuccessfulAuthenticationCommand(
-                memberId,
-                referenceId,
-                personalNumber,
-                provideJsonResponse,
-                ZignSecAuthenticationMarket.DENMARK
-            ))
-            .expectException(RuntimeException::class.java)
     }
 
     private inner class AggregateFactoryM<T> internal constructor(aggregateType: Class<T>?) : AbstractAggregateFactory<T>(aggregateType) {

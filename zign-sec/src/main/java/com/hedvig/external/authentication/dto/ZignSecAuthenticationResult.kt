@@ -7,8 +7,9 @@ sealed class ZignSecAuthenticationResult {
         val id: UUID,
         val memberId: Long,
         val ssn: String,
-        val providerJsonResponse: String,
-        val authenticationMethod: ZignSecAuthenticationMethod
+        val authenticationMethod: ZignSecAuthenticationMethod,
+        val firstName: String?,
+        val lastName: String?
     ) : ZignSecAuthenticationResult()
 
     data class Failed(

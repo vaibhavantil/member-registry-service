@@ -37,7 +37,15 @@ class ZignSecSigningService(
     fun handleSignResult(result: ZignSecSignResult) {
         when (result) {
             is ZignSecSignResult.Signed -> {
-                memberService.signComplete(result.memberId, result.id, result.ssn, result.providerJsonResponse, result.authenticationMethod)
+                memberService.signComplete(
+                    result.memberId,
+                    result.id,
+                    result.ssn,
+                    result.providerJsonResponse,
+                    result.authenticationMethod,
+                    result.firstName,
+                    result.lastName
+                )
                 applicationEventPublisher.publishEvent(SignSessionCompleteEvent(result.memberId))
             }
             is ZignSecSignResult.Failed -> {
