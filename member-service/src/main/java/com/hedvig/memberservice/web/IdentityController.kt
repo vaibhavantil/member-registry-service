@@ -9,12 +9,12 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 
 @RestController
-@RequestMapping("/_/member/identity/")
+@RequestMapping("/_/member/")
 class IdentityController(
     private val identityService: IdentityService
 ) {
 
-    @GetMapping("{memberId}")
+    @GetMapping("{memberId}/identity")
     fun identity(
         @PathVariable("memberId") memberId: Long
     ): ResponseEntity<IdentityDto> =
