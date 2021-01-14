@@ -5,7 +5,7 @@ import java.util.UUID
 data class NorwegianMemberSignedEvent(
     val memberId: Long,
     val ssn: String,
-    override val providerJsonResponse: String,
+    val providerJsonResponse: String,
     val referenceId: UUID?
-): ZignSecIdentityJson()
+)
 

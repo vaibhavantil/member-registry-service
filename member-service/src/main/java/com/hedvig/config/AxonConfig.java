@@ -68,7 +68,7 @@ public class AxonConfig {
                   .andInitialTrackingToken(StreamableMessageSource::createTailToken));
 
       config.registerTrackingEventProcessor(
-          "IdentifiedMembers",
+          "BackfillMemberIdentifiedEventNorway",
           x ->
               TrackingEventProcessorConfiguration.forSingleThreadedProcessing()
                   .andInitialTrackingToken(StreamableMessageSource::createTailToken));
