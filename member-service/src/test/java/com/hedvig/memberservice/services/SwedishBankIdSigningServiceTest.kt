@@ -155,7 +155,7 @@ class SwedishBankIdSigningServiceTest {
         assertThat(session.collectResponse)
             .hasFieldOrPropertyWithValue("status", CollectStatus.pending)
 
-        Mockito.verify(signSessionRepository).save(ArgumentMatchers.eq(session))
+        verify(signSessionRepository).save(ArgumentMatchers.eq(session))
     }
 
     @Test
@@ -177,7 +177,7 @@ class SwedishBankIdSigningServiceTest {
         assertThat(session.collectResponse)
             .hasFieldOrPropertyWithValue("status", CollectStatus.complete)
 
-        Mockito.verify(signSessionRepository).save(ArgumentMatchers.eq(session))
+        verify(signSessionRepository).save(ArgumentMatchers.eq(session))
     }
 
     @Test
@@ -194,7 +194,7 @@ class SwedishBankIdSigningServiceTest {
 
         sut.collectBankId(ORDER_REFERENCE)
 
-        Mockito.verify(memberService).bankIdSignComplete(ArgumentMatchers.eq(MEMBER_ID), ArgumentMatchers.eq(response))
+        verify(memberService).bankIdSignComplete(MEMBER_ID, response)
     }
 
     @Test
