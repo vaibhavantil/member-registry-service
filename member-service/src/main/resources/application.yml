@@ -45,3 +45,7 @@ spring:
 
 lokalise:
   useFakes: true
+
+trustpilot:
+  oauth:
+    basepath: https://api.trustpilot.com/v1/oauth/oauth-business-users-for-applications
