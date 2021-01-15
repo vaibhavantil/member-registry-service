@@ -5,7 +5,7 @@ import org.springframework.web.bind.annotation.*
 
 @FeignClient(
     name = "trustpilotClient",
-    url = "https://invitations-api.trustpilot.com/v1/private",
+    url = "\${trustpilot.api.basepath}",
     configuration = [TrustpilotFeignConfig::class]
 )
 interface TrustpilotClient {
