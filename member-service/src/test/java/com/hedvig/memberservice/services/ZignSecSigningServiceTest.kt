@@ -95,11 +95,13 @@ class ZignSecSigningServiceTest {
                 MEMBER_ID,
                 SSN,
                 PROVIDER_JSON_RESPONSE,
-                ZignSecAuthenticationMethod.NORWAY_WEB_OR_MOBILE
+                ZignSecAuthenticationMethod.NORWAY_WEB_OR_MOBILE,
+                null,
+                null
             )
         )
 
-        verify(memberService).signComplete(MEMBER_ID, RESPONSE_ID, SSN, PROVIDER_JSON_RESPONSE, ZignSecAuthenticationMethod.NORWAY_WEB_OR_MOBILE)
+        verify(memberService).signComplete(MEMBER_ID, RESPONSE_ID, SSN, PROVIDER_JSON_RESPONSE, ZignSecAuthenticationMethod.NORWAY_WEB_OR_MOBILE, null, null)
         verify(applicationEventPublisher).publishEvent(SignSessionCompleteEvent(MEMBER_ID))
     }
 
@@ -111,11 +113,13 @@ class ZignSecSigningServiceTest {
                 MEMBER_ID,
                 DANISH_SSN,
                 PROVIDER_JSON_RESPONSE,
-                ZignSecAuthenticationMethod.DENMARK
+                ZignSecAuthenticationMethod.DENMARK,
+                null,
+                null
             )
         )
 
-        verify(memberService).signComplete(MEMBER_ID, RESPONSE_ID, DANISH_SSN, PROVIDER_JSON_RESPONSE, ZignSecAuthenticationMethod.DENMARK)
+        verify(memberService).signComplete(MEMBER_ID, RESPONSE_ID, DANISH_SSN, PROVIDER_JSON_RESPONSE, ZignSecAuthenticationMethod.DENMARK, null, null)
         verify(applicationEventPublisher).publishEvent(SignSessionCompleteEvent(MEMBER_ID))
     }
 

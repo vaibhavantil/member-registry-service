@@ -205,7 +205,7 @@ class ZignSecSessionServiceImpl(
                                 )
                             )
                         } else {
-                            memberSigned(session, jsonRequest)
+                            memberSigned(session, jsonRequest, notification.identity.firstName, notification.identity.lastName)
                         }
                     }
                 }
@@ -234,7 +234,10 @@ class ZignSecSessionServiceImpl(
                                 ZignSecAuthenticationResult.Completed(
                                     session.referenceId,
                                     session.memberId,
-                                    signEntity.personalNumber
+                                    signEntity.personalNumber,
+                                    session.authenticationMethod,
+                                    notification.identity?.firstName,
+                                    notification.identity?.lastName
                                 )
                             )
                         } else {
@@ -254,7 +257,7 @@ class ZignSecSessionServiceImpl(
         sessionRepository.save(session)
     }
 
-    private fun memberSigned(session: ZignSecSession, jsonRequest: String) {
+    private fun memberSigned(session: ZignSecSession, jsonRequest: String, firstName: String?, lastName: String?) {
         assert(!session.requestPersonalNumber.isNullOrEmpty() && !session.notification?.identity?.idProviderPersonId.isNullOrEmpty()) {
             authenticationEventPublisher.publishSignEvent(
                 ZignSecSignResult.Failed(
@@ -277,7 +280,9 @@ class ZignSecSessionServiceImpl(
                 session.memberId,
                 session.requestPersonalNumber!!,
                 jsonRequest,
-                session.authenticationMethod
+                session.authenticationMethod,
+                firstName,
+                lastName
             )
         )
     }

@@ -1,6 +1,7 @@
 package com.hedvig.memberservice.commands.models
 
 import com.hedvig.external.authentication.dto.ZignSecAuthenticationMethod
+import com.hedvig.memberservice.events.MemberIdentifiedEvent
 
 enum class ZignSecAuthenticationMarket {
     NORWAY,
@@ -9,6 +10,11 @@ enum class ZignSecAuthenticationMarket {
     fun getAuthenticationMethod() = when (this) {
         NORWAY -> ZignSecAuthenticationMethod.NORWAY_WEB_OR_MOBILE
         DENMARK -> ZignSecAuthenticationMethod.DENMARK
+    }
+
+    fun toMemberIdentifiedEventIdentificationMethod() = when (this) {
+        NORWAY -> MemberIdentifiedEvent.IdentificationMethod.NORWEGIAN_BANK_ID
+        DENMARK -> MemberIdentifiedEvent.IdentificationMethod.DANISH_BANK_ID
     }
 
     companion object {
