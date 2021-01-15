@@ -13,7 +13,9 @@ data class MemberIdentifiedEvent(
     )
 
     enum class Nationality {
-        SWEDEN, NORWAY, DENMARK
+        SWEDEN,
+        NORWAY,
+        DENMARK
     }
 
     enum class IdentificationMethod {
