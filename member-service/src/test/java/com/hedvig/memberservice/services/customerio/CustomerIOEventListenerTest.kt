@@ -37,7 +37,7 @@ class CustomerIOEventListenerTest {
     }
 
     @Test
-    fun swedish_picked_locale_sets_timezone_to_stockholm() {
+    fun `swedish picked locale sets timezone to stockholm`() {
 
         val member = MemberEntity()
         member.pickedLocale = PickedLocale.en_SE
@@ -58,7 +58,7 @@ class CustomerIOEventListenerTest {
     }
 
     @Test
-    fun norwegian_picked_locale_sets_timezone_to_oslo() {
+    fun `norwegian picked locale sets timezone to oslo`() {
 
         val member = MemberEntity()
         member.id = 123
@@ -79,7 +79,7 @@ class CustomerIOEventListenerTest {
     }
 
     @Test
-    fun no_picked_locale_sets_timezone_to_null() {
+    fun `no picked locale sets timezone to null`() {
 
         val member = MemberEntity()
         member.id = "123".toLong()
@@ -99,8 +99,49 @@ class CustomerIOEventListenerTest {
         assertThat(slot.captured["timezone"]).isNull()
     }
 
+    @Test
+    fun `trustpilot link is set if created successfully`() {
+        val member = MemberEntity()
+        member.pickedLocale = PickedLocale.en_SE
+        member.id = 123
+        member.firstName = "Example"
+        member.lastName = "Person"
+        every { memberRepository.findById(any()) } returns Optional.of(member)
+
+        every { trustpilotReviewService.generateTrustpilotReviewLinkForMember(any()) } returns
+            TrustpilotReviewLinkResponseDto("id", "expected-url")
+
+        val sut = CustomerIOEventListener(notificationService, memberRepository, trustpilotReviewService)
+
+        sut.on(EmailUpdatedEvent(1337L, "omse@lkj.com"))
+
+        val slot = slot<Map<String, Any?>>()
+        verify { notificationService.updateCustomer(any(), capture(slot)) }
+
+        assertThat(slot.captured["trustpilotLink"]).isEqualTo("expected-url")
+    }
+
+    @Test
+    fun `trustpilot should be able to safely return null`() {
+        val member = MemberEntity()
+        member.pickedLocale = PickedLocale.en_SE
+        member.id = 123
+        every { memberRepository.findById(any()) } returns Optional.of(member)
+
+        every { trustpilotReviewService.generateTrustpilotReviewLinkForMember(any()) } returns null
+
+        val sut = CustomerIOEventListener(notificationService, memberRepository, trustpilotReviewService)
+
+        sut.on(EmailUpdatedEvent(1337L, "omse@lkj.com"))
+
+        val slot = slot<Map<String, Any?>>()
+        verify { notificationService.updateCustomer(any(), capture(slot)) }
+
+        assertThat(slot.captured["trustpilotLink"]).isNull()
+    }
+
     @Test(expected = IllegalStateException::class)
-    fun no_memberentity_found_fails() {
+    fun `no memberentity found fails`() {
 
         every { memberRepository.findById(any()) } returns Optional.empty()
 

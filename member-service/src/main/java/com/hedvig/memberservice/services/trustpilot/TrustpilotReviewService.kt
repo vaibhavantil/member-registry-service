@@ -4,5 +4,5 @@ import com.hedvig.memberservice.external.trustpilot.TrustpilotReviewLinkRequestD
 import com.hedvig.memberservice.external.trustpilot.TrustpilotReviewLinkResponseDto
 
 interface TrustpilotReviewService {
-    fun generateTrustpilotReviewLinkForMember(request: TrustpilotReviewLinkRequestDto): TrustpilotReviewLinkResponseDto
+    fun generateTrustpilotReviewLinkForMember(request: TrustpilotReviewLinkRequestDto): TrustpilotReviewLinkResponseDto?
 }
