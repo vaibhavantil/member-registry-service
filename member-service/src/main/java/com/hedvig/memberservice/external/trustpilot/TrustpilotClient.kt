@@ -17,14 +17,3 @@ interface TrustpilotClient {
     ): TrustpilotReviewLinkResponseDto
 }
 
-data class TrustpilotReviewLinkRequestDto(
-    val referenceId: String,
-    val email: String,
-    val name: String,
-    val locale: String
-)
-
-data class TrustpilotReviewLinkResponseDto(
-    val id: String,
-    val url: String
-)

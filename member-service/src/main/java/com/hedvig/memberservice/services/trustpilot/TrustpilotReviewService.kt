@@ -10,8 +10,3 @@ interface TrustpilotReviewService {
         locale: Locale?
     ): TrustpilotReviewInvitation?
 }
-
-data class TrustpilotReviewInvitation(
-    val id: String,
-    val url: String
-)
