@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.PropertyNamingStrategy
 import com.fasterxml.jackson.databind.annotation.JsonNaming
 import com.hedvig.memberservice.events.MemberIdentifiedEvent
 import com.hedvig.memberservice.events.NorwegianMemberSignedEvent
+import org.axonframework.commandhandling.TargetAggregateIdentifier
 import org.axonframework.commandhandling.gateway.CommandGateway
 import org.axonframework.commandhandling.model.AggregateIdentifier
 import org.axonframework.config.ProcessingGroup
@@ -64,7 +65,7 @@ class BackfillMemberIdentifiedEventNorwayListener(
 }
 
 data class MemberIdentifiedCommand(
-    @AggregateIdentifier
+    @TargetAggregateIdentifier
     val id: Long,
     val nationalIdentification: MemberIdentifiedEvent.NationalIdentification,
     val identificationMethod: MemberIdentifiedEvent.IdentificationMethod,
