@@ -23,7 +23,7 @@ class BackfillMemberIdentifiedEventNorwayListener(
     val commandGateway: CommandGateway
 ) {
 
-    val backfillUpUntilThisPoint = Instant.now()
+    val backfillUpUntilThisPoint: Instant = Instant.now()
 
     @EventListener
     fun on(event: NorwegianMemberSignedEvent, @Timestamp timestamp: Instant) {
