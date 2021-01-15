@@ -28,6 +28,7 @@ class TrustpilotReviewServiceImpl(
                     memberId.toString(), email, name, "${locale.language}-${locale.country}"
                 )
             )
+            logger.info("Trustpilot review link created for member $memberId, link id = ${response.id}")
             TrustpilotReviewInvitation(response.id, response.url)
         } catch (exception: Exception) {
             logger.warn("Trustpilot API call failed", exception)
