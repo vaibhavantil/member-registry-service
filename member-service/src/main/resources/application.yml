@@ -47,5 +47,6 @@ lokalise:
   useFakes: true
 
 trustpilot:
+  businessUnitId: 5b62ebf41788620001d3c4ae # ID of www.hedvig.com fetched through Trustpilot public API
   oauth:
     basepath: https://api.trustpilot.com/v1/oauth/oauth-business-users-for-applications
