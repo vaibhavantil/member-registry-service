@@ -5,6 +5,7 @@ import org.axonframework.commandhandling.model.AggregateLifecycle.apply
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.hedvig.common.UUIDGenerator
 import com.hedvig.external.bisnodeBCI.BisnodeClient
+import com.hedvig.memberservice.backfill.BackfillMemberIdentifiedEventNorwayListener
 import com.hedvig.memberservice.backfill.MemberIdentifiedCommand
 import com.hedvig.memberservice.commands.CreateMemberCommand
 import com.hedvig.memberservice.commands.EditMemberInfoCommand
@@ -70,6 +71,7 @@ import org.axonframework.messaging.MetaData
 import org.axonframework.spring.stereotype.Aggregate
 import org.springframework.beans.factory.annotation.Autowired
 import java.io.IOException
+import java.time.Instant
 import java.util.UUID
 import java.util.function.Supplier
 
@@ -285,21 +287,23 @@ class MemberAggregate() {
                     member.ssn != cmd.personalNumber ->
                         logger.warn("Handling `ZignSecSignCommand` with different ssn [member ssn: ${member.ssn}, cmd personalNumber: ${cmd.personalNumber}]")
                 }
-                apply(
-                    MemberIdentifiedEvent(
-                        cmd.id,
-                        MemberIdentifiedEvent.NationalIdentification(
-                            cmd.personalNumber,
-                            when (cmd.zignSecAuthMarket) {
-                                ZignSecAuthenticationMarket.NORWAY -> MemberIdentifiedEvent.Nationality.NORWAY
-                                ZignSecAuthenticationMarket.DENMARK -> MemberIdentifiedEvent.Nationality.DENMARK
-                            }
-                        ),
-                        cmd.zignSecAuthMarket.toMemberIdentifiedEventIdentificationMethod(),
-                        cmd.firstName,
-                        cmd.lastName
+                if (Instant.now().isAfter(BackfillMemberIdentifiedEventNorwayListener.backfillUpUntilThisPoint)) {
+                    apply(
+                        MemberIdentifiedEvent(
+                            cmd.id,
+                            MemberIdentifiedEvent.NationalIdentification(
+                                cmd.personalNumber,
+                                when (cmd.zignSecAuthMarket) {
+                                    ZignSecAuthenticationMarket.NORWAY -> MemberIdentifiedEvent.Nationality.NORWAY
+                                    ZignSecAuthenticationMarket.DENMARK -> MemberIdentifiedEvent.Nationality.DENMARK
+                                }
+                            ),
+                            cmd.zignSecAuthMarket.toMemberIdentifiedEventIdentificationMethod(),
+                            cmd.firstName,
+                            cmd.lastName
+                        )
                     )
-                )
+                }
                 apply(
                     NorwegianMemberSignedEvent(
                         id, cmd.personalNumber, cmd.provideJsonResponse, cmd.referenceId))

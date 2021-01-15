@@ -8,10 +8,12 @@ import com.hedvig.memberservice.events.NorwegianMemberSignedEvent
 import org.axonframework.commandhandling.gateway.CommandGateway
 import org.axonframework.commandhandling.model.AggregateIdentifier
 import org.axonframework.config.ProcessingGroup
+import org.axonframework.eventhandling.EventHandler
 import org.axonframework.eventhandling.Timestamp
-import org.springframework.context.event.EventListener
 import org.springframework.stereotype.Component
 import java.time.Instant
+import java.time.LocalDateTime
+import java.time.ZoneOffset
 
 /**
  * This is a one of and will be removed once its is used once
@@ -23,9 +25,11 @@ class BackfillMemberIdentifiedEventNorwayListener(
     val commandGateway: CommandGateway
 ) {
 
-    val backfillUpUntilThisPoint: Instant = Instant.now()
+    companion object {
+        val backfillUpUntilThisPoint: Instant = LocalDateTime.of(2021, 1, 15, 23, 59).toInstant(ZoneOffset.UTC)
+    }
 
-    @EventListener
+    @EventHandler
     fun on(event: NorwegianMemberSignedEvent, @Timestamp timestamp: Instant) {
 
         if (timestamp.isAfter(backfillUpUntilThisPoint)) {
