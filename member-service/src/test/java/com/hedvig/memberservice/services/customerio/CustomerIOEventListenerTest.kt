@@ -3,26 +3,31 @@ package com.hedvig.memberservice.services.customerio
 import com.hedvig.integration.notificationService.NotificationService
 import com.hedvig.memberservice.aggregates.PickedLocale
 import com.hedvig.memberservice.events.EmailUpdatedEvent
+import com.hedvig.memberservice.external.trustpilot.TrustpilotReviewLinkResponseDto
 import com.hedvig.memberservice.query.MemberEntity
 import com.hedvig.memberservice.query.MemberRepository
+import com.hedvig.memberservice.services.trustpilot.TrustpilotReviewService
 import io.mockk.MockKAnnotations
 import io.mockk.every
 import io.mockk.impl.annotations.MockK
 import io.mockk.slot
 import io.mockk.verify
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test
 
-import org.junit.Assert.*
 import org.junit.Before
 import java.util.Optional
 
-class EventListenerTest {
+class CustomerIOEventListenerTest {
 
     @MockK(relaxed = true)
     lateinit var notificationService: NotificationService
 
     @MockK
     lateinit var memberRepository: MemberRepository
+
+    @MockK
+    lateinit var trustpilotReviewService: TrustpilotReviewService
 
 
     @Before
@@ -31,14 +36,17 @@ class EventListenerTest {
     }
 
     @Test
-    fun swedish_picked_locale_sets_timezone_to_sockholm() {
+    fun swedish_picked_locale_sets_timezone_to_stockholm() {
 
         val member = MemberEntity()
         member.pickedLocale = PickedLocale.en_SE
+        member.id = 123
         every { memberRepository.findById(any()) } returns Optional.of(member)
 
+        every { trustpilotReviewService.generateTrustpilotReviewLinkForMember(any()) } returns
+            TrustpilotReviewLinkResponseDto("id", "url")
 
-        val sut = EventListener(notificationService, memberRepository)
+        val sut = CustomerIOEventListener(notificationService, memberRepository, trustpilotReviewService)
 
         sut.on(EmailUpdatedEvent(1337L, "omse@lkj.com"))
 
@@ -52,10 +60,14 @@ class EventListenerTest {
     fun norwegian_picked_locale_sets_timezone_to_oslo() {
 
         val member = MemberEntity()
+        member.id = 123
         member.pickedLocale = PickedLocale.nb_NO
         every { memberRepository.findById(any()) } returns Optional.of(member)
 
-        val sut = EventListener(notificationService, memberRepository)
+        every { trustpilotReviewService.generateTrustpilotReviewLinkForMember(any()) } returns
+            TrustpilotReviewLinkResponseDto("id", "url")
+
+        val sut = CustomerIOEventListener(notificationService, memberRepository, trustpilotReviewService)
 
         sut.on(EmailUpdatedEvent(1337L, "omse@lkj.com"))
 
@@ -69,17 +81,22 @@ class EventListenerTest {
     fun no_picked_locale_sets_timezone_to_null() {
 
         val member = MemberEntity()
+        member.id = "123".toLong()
         member.pickedLocale = null
         every { memberRepository.findById(any()) } returns Optional.of(member)
 
-        val sut = EventListener(notificationService, memberRepository)
+        val sut = CustomerIOEventListener(notificationService, memberRepository, trustpilotReviewService)
+
+        every { trustpilotReviewService.generateTrustpilotReviewLinkForMember(any()) } returns
+            TrustpilotReviewLinkResponseDto("id", "url")
 
         sut.on(EmailUpdatedEvent(1337L, "omse@lkj.com"))
 
         val slot = slot<Map<String, Any?>>()
         verify { notificationService.updateCustomer(any(), capture(slot)) }
 
-        assert(slot.captured["timezone"] == null)
+        assertThat(slot.captured["timezone"]).isNull()
+//        assert(slot.captured["timezone"] == null)
     }
 
     @Test
@@ -87,7 +104,10 @@ class EventListenerTest {
 
         every { memberRepository.findById(any()) } returns Optional.empty()
 
-        val sut = EventListener(notificationService, memberRepository)
+        val sut = CustomerIOEventListener(notificationService, memberRepository, trustpilotReviewService)
+
+        every { trustpilotReviewService.generateTrustpilotReviewLinkForMember(any()) } returns
+            TrustpilotReviewLinkResponseDto("id", "url")
 
         sut.on(EmailUpdatedEvent(1337L, "omse@lkj.com"))
 

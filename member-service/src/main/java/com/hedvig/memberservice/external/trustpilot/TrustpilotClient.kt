@@ -1,7 +1,9 @@
 package com.hedvig.memberservice.external.trustpilot
 
+import com.hedvig.memberservice.query.MemberEntity
 import org.springframework.cloud.openfeign.FeignClient
 import org.springframework.web.bind.annotation.*
+import java.util.Locale
 
 @FeignClient(
     name = "trustpilotClient",
@@ -22,7 +24,18 @@ data class TrustpilotReviewLinkRequestDto(
     val email: String,
     val name: String,
     val locale: String
-)
+) {
+    companion object {
+        fun from(memberId: String, locale: Locale, email: String, name: String): TrustpilotReviewLinkRequestDto {
+            return TrustpilotReviewLinkRequestDto(
+                referenceId = memberId,
+                email = email,
+                name = name,
+                locale = locale.toString()
+            )
+        }
+    }
+}
 
 data class TrustpilotReviewLinkResponseDto(
     val id: String,
