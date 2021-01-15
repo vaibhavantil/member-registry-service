@@ -9,3 +9,4 @@
 ## Optional checklist
 - [ ] Unit tests written
 - [ ] Tested locally
+- [ ] Boyscouted
