@@ -277,11 +277,18 @@ class MemberAggregateTests {
                 MemberCreatedEvent(memberId, MemberStatus.INITIATED, Instant.now()),
                 MemberStartedOnBoardingEvent(memberId, MemberStatus.ONBOARDING),
                 TrackingIdCreatedEvent(memberId, TRACKING_UUID))
-            .`when`(ZignSecSignCommand(memberId, referenceId, personalNumber, provideJsonResponse, ZignSecAuthenticationMarket.DENMARK, null, null))
+            .`when`(ZignSecSignCommand(memberId, referenceId, personalNumber, provideJsonResponse, ZignSecAuthenticationMarket.DENMARK, "Test", "Testsson"))
             .expectSuccessfulHandlerExecution()
             .expectEvents(
                 NewCashbackSelectedEvent(memberId, DEFAULT_CASHBACK.toString()),
                 DanishSSNUpdatedEvent(memberId, personalNumber),
+                MemberIdentifiedEvent(
+                    memberId,
+                    MemberIdentifiedEvent.NationalIdentification(personalNumber, MemberIdentifiedEvent.Nationality.DENMARK),
+                    MemberIdentifiedEvent.IdentificationMethod.DANISH_BANK_ID,
+                    "Test",
+                    "Testsson"
+                ),
                 DanishMemberSignedEvent(memberId, personalNumber, provideJsonResponse, referenceId)
             )
     }
