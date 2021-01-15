@@ -30,7 +30,9 @@ class CustomerIOEventListener @Autowired constructor(
 
     @EventHandler
     fun on(evt: NameUpdatedEvent) {
-        val member = getMemberOrThrowError(evt.memberId)
+        val member = memberRepository.findById(evt.memberId).orElseThrow {
+            IllegalStateException("No member found for ${evt.memberId}")
+        }
 
         val locale = getLocaleForMember(member)
 
@@ -42,20 +44,22 @@ class CustomerIOEventListener @Autowired constructor(
             evt.lastName
         )
 
-        val traits = ImmutableMap.of<String, Any>(
-                "first_name", evt.firstName,
-                "last_name", evt.lastName
-            )
+        val traits = mutableMapOf(
+            "first_name" to evt.firstName,
+            "last_name" to evt.lastName
+        )
 
         if (trustPilotLinkResponse != null) {
-            traits.plus("trustpilotLink" to  "trustPilotLinkResponse")
+            traits["trustpilotLink"] = trustPilotLinkResponse.url
         }
         sendWithSleep(traits, Objects.toString(evt.memberId))
     }
 
     @EventHandler
     fun on(evt: EmailUpdatedEvent) {
-        val member = getMemberOrThrowError(evt.memberId)
+        val member = memberRepository.findById(evt.memberId).orElseThrow {
+            IllegalStateException("No member found for ${evt.memberId}")
+        }
 
         val locale = getLocaleForMember(member)
 
@@ -76,13 +80,13 @@ class CustomerIOEventListener @Autowired constructor(
             member.lastName
         )
 
-        val traits = mapOf(
+        val traits = mutableMapOf(
             "email" to evt.email,
             "timezone" to timeZone
         )
 
         if (trustPilotLinkResponse != null) {
-            traits.plus("trustpilotLink" to  "trustPilotLinkResponse")
+            traits["trustpilotLink"] = trustPilotLinkResponse.url
         }
         sendWithSleep(traits, Objects.toString(evt.memberId))
     }
@@ -101,26 +105,16 @@ class CustomerIOEventListener @Autowired constructor(
     private fun getLocaleForMember(member: MemberEntity): Locale? {
         return member.pickedLocale?.locale
             ?: LocaleResolver.resolveNullableLocale(member.acceptLanguage)
-//            ?: Locale("sv", "SE")
-    }
-
-    private fun getMemberOrThrowError(memberId: Long): MemberEntity {
-        val member = memberRepository.findById(memberId)
-
-        if (!member.isPresent) {
-            throw error("Could not update email for member $memberId member not found in MemberRepository")
-        }
-        return member.get()
     }
 
     private fun getTrustpilotLink(
-        memberId: String, locale: Locale, email: String?, firstName: String?, lastName: String?
+        memberId: String, locale: Locale?, email: String?, firstName: String?, lastName: String?
     ): TrustpilotReviewLinkResponseDto? {
 
         val trustpilotReviewLinkRequest =  when {
             email != null && firstName != null && lastName != null -> TrustpilotReviewLinkRequestDto.from(
                 memberId,
-                locale,
+                locale ?: Locale("sv", "SE"),
                 email,
                 "${firstName.capitalize()} ${lastName.capitalize()}"
             )

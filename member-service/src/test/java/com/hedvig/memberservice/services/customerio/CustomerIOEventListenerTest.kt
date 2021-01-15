@@ -16,6 +16,7 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test
 
 import org.junit.Before
+import java.lang.IllegalStateException
 import java.util.Optional
 
 class CustomerIOEventListenerTest {
@@ -53,7 +54,7 @@ class CustomerIOEventListenerTest {
         val slot = slot<Map<String, Any?>>()
         verify { notificationService.updateCustomer(any(), capture(slot)) }
 
-        assert(slot.captured["timezone"] == "Europe/Stockholm")
+        assertThat(slot.captured["timezone"]).isEqualTo("Europe/Stockholm")
     }
 
     @Test
@@ -74,7 +75,7 @@ class CustomerIOEventListenerTest {
         val slot = slot<Map<String, Any?>>()
         verify { notificationService.updateCustomer(any(), capture(slot)) }
 
-        assert(slot.captured["timezone"] == "Europe/Oslo")
+        assertThat(slot.captured["timezone"]).isEqualTo("Europe/Oslo")
     }
 
     @Test
@@ -96,11 +97,10 @@ class CustomerIOEventListenerTest {
         verify { notificationService.updateCustomer(any(), capture(slot)) }
 
         assertThat(slot.captured["timezone"]).isNull()
-//        assert(slot.captured["timezone"] == null)
     }
 
-    @Test
-    fun no_memberentity_found_does_nothing() {
+    @Test(expected = IllegalStateException::class)
+    fun no_memberentity_found_fails() {
 
         every { memberRepository.findById(any()) } returns Optional.empty()
 
@@ -110,8 +110,5 @@ class CustomerIOEventListenerTest {
             TrustpilotReviewLinkResponseDto("id", "url")
 
         sut.on(EmailUpdatedEvent(1337L, "omse@lkj.com"))
-
-        verify(inverse = true) { notificationService.updateCustomer(any(), any()) }
-
     }
 }
