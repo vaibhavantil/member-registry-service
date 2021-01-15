@@ -279,10 +279,12 @@ class MemberAggregate() {
         apply(NewCashbackSelectedEvent(id, cashbackService.getDefaultId(id).toString()))
         when (cmd.zignSecAuthMarket) {
             ZignSecAuthenticationMarket.NORWAY -> {
-                if (member.ssn != cmd.personalNumber) {
-                    apply(NorwegianSSNUpdatedEvent(id, cmd.personalNumber))
+                when {
+                    member.ssn == null ->
+                     apply(NorwegianSSNUpdatedEvent(id, cmd.personalNumber))
+                    member.ssn != cmd.personalNumber ->
+                        logger.warn("Handling `ZignSecSignCommand` with different ssn [member ssn: ${member.ssn}, cmd personalNumber: ${cmd.personalNumber}]")
                 }
-                /* TODO: Uncomment this when removing BackfillMemberIdentifiedEventNorwayListener
                 apply(
                     MemberIdentifiedEvent(
                         cmd.id,
@@ -297,7 +299,7 @@ class MemberAggregate() {
                         cmd.firstName,
                         cmd.lastName
                     )
-                )*/
+                )
                 apply(
                     NorwegianMemberSignedEvent(
                         id, cmd.personalNumber, cmd.provideJsonResponse, cmd.referenceId))
