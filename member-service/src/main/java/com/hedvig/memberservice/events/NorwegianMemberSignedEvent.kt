@@ -1,6 +1,6 @@
 package com.hedvig.memberservice.events
 
-import java.util.*
+import java.util.UUID
 
 data class NorwegianMemberSignedEvent(
     val memberId: Long,
@@ -8,3 +8,4 @@ data class NorwegianMemberSignedEvent(
     val providerJsonResponse: String,
     val referenceId: UUID?
 )
+

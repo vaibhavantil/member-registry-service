@@ -5,6 +5,7 @@ import com.hedvig.external.authentication.dto.ZignSecAuthenticationResult
 import com.hedvig.external.authentication.dto.ZignSecBankIdAuthenticationRequest
 import com.hedvig.integration.apigateway.ApiGatewayService
 import com.hedvig.memberservice.commands.InactivateMemberCommand
+import com.hedvig.memberservice.commands.ZignSecSuccessfulAuthenticationCommand
 import com.hedvig.memberservice.commands.models.ZignSecAuthenticationMarket
 import com.hedvig.memberservice.query.MemberRepository
 import com.hedvig.memberservice.query.SignedMemberRepository
@@ -69,6 +70,15 @@ class ZignSecBankIdService(
                         commandGateway.sendAndWait<Any>(InactivateMemberCommand(result.memberId))
                         apiGatewayService.reassignMember(result.memberId, signedMember.get().id)
                     }
+                    commandGateway.sendAndWait<Any>(
+                        ZignSecSuccessfulAuthenticationCommand(
+                            result.memberId,
+                            result.id,
+                            result.ssn,
+                            ZignSecAuthenticationMarket.fromAuthenticationMethod(result.authenticationMethod),
+                            result.firstName,
+                            result.lastName
+                        ))
                     redisEventPublisher.onAuthSessionUpdated(result.memberId, AuthSessionUpdatedEventStatus.SUCCESS)
                 } else {
                     redisEventPublisher.onAuthSessionUpdated(result.memberId, AuthSessionUpdatedEventStatus.FAILED)

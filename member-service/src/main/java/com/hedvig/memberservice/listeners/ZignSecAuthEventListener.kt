@@ -7,7 +7,7 @@ import org.springframework.scheduling.annotation.Async
 import org.springframework.stereotype.Component
 
 @Component
-class NorwegianAuthEventListener(
+class ZignSecAuthEventListener(
     private val zignSecBankIdService: ZignSecBankIdService
 ) {
 

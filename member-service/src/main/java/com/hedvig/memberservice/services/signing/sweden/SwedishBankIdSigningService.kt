@@ -97,7 +97,7 @@ class SwedishBankIdSigningService(
      * @return true if BankID needs to be collected again, otherwise false
      */
     @Transactional
-    fun collectBankId(@NonNull orderReference: String?): Boolean {
+    fun collectBankId(orderReference: String): Boolean {
         val session = signSessionRepository.findByOrderReference(orderReference)
         return session
             .map { s: SignSession ->

@@ -19,6 +19,7 @@ import com.hedvig.memberservice.commands.UpdatePickedLocaleCommand
 import com.hedvig.memberservice.commands.UpdateSSNCommand
 import com.hedvig.memberservice.commands.UpdateSwedishWebOnBoardingInfoCommand
 import com.hedvig.memberservice.commands.ZignSecSignCommand
+import com.hedvig.memberservice.commands.ZignSecSuccessfulAuthenticationCommand
 import com.hedvig.memberservice.commands.models.ZignSecAuthenticationMarket
 import com.hedvig.memberservice.events.BirthDateUpdatedEvent
 import com.hedvig.memberservice.events.DanishMemberSignedEvent
@@ -39,6 +40,7 @@ import com.hedvig.memberservice.events.OnboardingStartedWithSSNEvent
 import com.hedvig.memberservice.events.PickedLocaleUpdatedEvent
 import com.hedvig.memberservice.events.SSNUpdatedEvent
 import com.hedvig.memberservice.events.TrackingIdCreatedEvent
+import com.hedvig.memberservice.events.MemberIdentifiedEvent
 import com.hedvig.memberservice.services.cashback.CashbackService
 import com.hedvig.memberservice.web.dto.Address
 import com.hedvig.memberservice.web.dto.NationalIdentification
@@ -68,7 +70,7 @@ class MemberAggregateTests {
 
     val cashbackService = mockk<CashbackService>()
 
-    val uuidGenerator= mockk<UUIDGenerator>()
+    val uuidGenerator = mockk<UUIDGenerator>()
 
     val objectMapper: ObjectMapper = ObjectMapper()
 
@@ -246,11 +248,19 @@ class MemberAggregateTests {
                 MemberCreatedEvent(memberId, MemberStatus.INITIATED, Instant.now()),
                 MemberStartedOnBoardingEvent(memberId, MemberStatus.ONBOARDING),
                 TrackingIdCreatedEvent(memberId, TRACKING_UUID))
-            .`when`(ZignSecSignCommand(memberId, referenceId, personalNumber, provideJsonResponse, ZignSecAuthenticationMarket.NORWAY))
+            .`when`(ZignSecSignCommand(memberId, referenceId, personalNumber, provideJsonResponse, ZignSecAuthenticationMarket.NORWAY, "Test", "Testsson"))
             .expectSuccessfulHandlerExecution()
             .expectEvents(
                 NewCashbackSelectedEvent(memberId, DEFAULT_CASHBACK.toString()),
                 NorwegianSSNUpdatedEvent(memberId, personalNumber),
+                /** TODO: BackfillMemberIdentifiedEventNorwayListener
+                 MemberIdentifiedEvent(
+                    memberId,
+                    MemberIdentifiedEvent.NationalIdentification(personalNumber, MemberIdentifiedEvent.Nationality.NORWAY),
+                    MemberIdentifiedEvent.IdentificationMethod.NORWEGIAN_BANK_ID,
+                    "Test",
+                    "Testsson"
+                ),*/
                 NorwegianMemberSignedEvent(memberId, personalNumber, provideJsonResponse, referenceId)
             )
     }
@@ -267,11 +277,18 @@ class MemberAggregateTests {
                 MemberCreatedEvent(memberId, MemberStatus.INITIATED, Instant.now()),
                 MemberStartedOnBoardingEvent(memberId, MemberStatus.ONBOARDING),
                 TrackingIdCreatedEvent(memberId, TRACKING_UUID))
-            .`when`(ZignSecSignCommand(memberId, referenceId, personalNumber, provideJsonResponse, ZignSecAuthenticationMarket.DENMARK))
+            .`when`(ZignSecSignCommand(memberId, referenceId, personalNumber, provideJsonResponse, ZignSecAuthenticationMarket.DENMARK, "Test", "Testsson"))
             .expectSuccessfulHandlerExecution()
             .expectEvents(
                 NewCashbackSelectedEvent(memberId, DEFAULT_CASHBACK.toString()),
                 DanishSSNUpdatedEvent(memberId, personalNumber),
+                MemberIdentifiedEvent(
+                    memberId,
+                    MemberIdentifiedEvent.NationalIdentification(personalNumber, MemberIdentifiedEvent.Nationality.DENMARK),
+                    MemberIdentifiedEvent.IdentificationMethod.DANISH_BANK_ID,
+                    "Test",
+                    "Testsson"
+                ),
                 DanishMemberSignedEvent(memberId, personalNumber, provideJsonResponse, referenceId)
             )
     }
@@ -288,7 +305,7 @@ class MemberAggregateTests {
                 MemberCreatedEvent(memberId, MemberStatus.INITIATED, Instant.now()),
                 MemberStartedOnBoardingEvent(memberId, MemberStatus.ONBOARDING),
                 TrackingIdCreatedEvent(memberId, TRACKING_UUID))
-            .`when`(ZignSecSignCommand(memberId, referenceId, personalNumber, provideJsonResponse, ZignSecAuthenticationMarket.NORWAY))
+            .`when`(ZignSecSignCommand(memberId, referenceId, personalNumber, provideJsonResponse, ZignSecAuthenticationMarket.NORWAY, null, null))
             .expectException(RuntimeException::class.java)
     }
 
@@ -414,6 +431,70 @@ class MemberAggregateTests {
             .expectSuccessfulHandlerExecution()
             .expectEvents(
                 BirthDateUpdatedEvent(memberId, birthDate)
+            )
+    }
+
+    @Test
+    fun `handle valid norwegian ZignSecSuccessfulAuthenticationCommand should apply ZignSecSuccessfulAuthenticationEvent`() {
+        val memberId = 1234L
+        val referenceId = UUID.randomUUID()
+        val personalNumber = "12121212120"
+        fixture
+            .given(
+                MemberCreatedEvent(memberId, MemberStatus.INITIATED, Instant.now())
+            )
+            .`when`(ZignSecSuccessfulAuthenticationCommand(
+                memberId,
+                referenceId,
+                personalNumber,
+                ZignSecAuthenticationMarket.NORWAY,
+                "Test",
+                "Testsson"
+            ))
+            .expectSuccessfulHandlerExecution()
+            .expectEvents(
+                MemberIdentifiedEvent(
+                    memberId,
+                    MemberIdentifiedEvent.NationalIdentification(
+                        personalNumber,
+                        MemberIdentifiedEvent.Nationality.NORWAY
+                    ),
+                    MemberIdentifiedEvent.IdentificationMethod.NORWEGIAN_BANK_ID,
+                    "Test",
+                    "Testsson"
+                )
+            )
+    }
+
+    @Test
+    fun `handle valid danish ZignSecSuccessfulAuthenticationCommand should apply ZignSecSuccessfulAuthenticationEvent`() {
+        val memberId = 1234L
+        val referenceId = UUID.randomUUID()
+        val personalNumber = "12121212120"
+        fixture
+            .given(
+                MemberCreatedEvent(memberId, MemberStatus.INITIATED, Instant.now())
+            )
+            .`when`(ZignSecSuccessfulAuthenticationCommand(
+                memberId,
+                referenceId,
+                personalNumber,
+                ZignSecAuthenticationMarket.DENMARK,
+                "Test",
+                "Testsson"
+            ))
+            .expectSuccessfulHandlerExecution()
+            .expectEvents(
+                MemberIdentifiedEvent(
+                    memberId,
+                    MemberIdentifiedEvent.NationalIdentification(
+                        personalNumber,
+                        MemberIdentifiedEvent.Nationality.DENMARK
+                    ),
+                    MemberIdentifiedEvent.IdentificationMethod.DANISH_BANK_ID,
+                    "Test",
+                    "Testsson"
+                )
             )
     }
 

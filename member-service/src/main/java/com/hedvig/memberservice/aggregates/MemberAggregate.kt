@@ -5,6 +5,8 @@ import org.axonframework.commandhandling.model.AggregateLifecycle.apply
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.hedvig.common.UUIDGenerator
 import com.hedvig.external.bisnodeBCI.BisnodeClient
+import com.hedvig.memberservice.backfill.BackfillMemberIdentifiedEventNorwayListener
+import com.hedvig.memberservice.backfill.MemberIdentifiedCommand
 import com.hedvig.memberservice.commands.CreateMemberCommand
 import com.hedvig.memberservice.commands.EditMemberInfoCommand
 import com.hedvig.memberservice.commands.EditMemberInformationCommand
@@ -26,6 +28,7 @@ import com.hedvig.memberservice.commands.UpdatePickedLocaleCommand
 import com.hedvig.memberservice.commands.UpdateSSNCommand
 import com.hedvig.memberservice.commands.UpdateSwedishWebOnBoardingInfoCommand
 import com.hedvig.memberservice.commands.ZignSecSignCommand
+import com.hedvig.memberservice.commands.ZignSecSuccessfulAuthenticationCommand
 import com.hedvig.memberservice.commands.models.ZignSecAuthenticationMarket
 import com.hedvig.memberservice.events.AcceptLanguageUpdatedEvent
 import com.hedvig.memberservice.events.BirthDateUpdatedEvent
@@ -53,6 +56,7 @@ import com.hedvig.memberservice.events.PhoneNumberUpdatedEvent
 import com.hedvig.memberservice.events.PickedLocaleUpdatedEvent
 import com.hedvig.memberservice.events.SSNUpdatedEvent
 import com.hedvig.memberservice.events.TrackingIdCreatedEvent
+import com.hedvig.memberservice.events.MemberIdentifiedEvent
 import com.hedvig.memberservice.services.cashback.CashbackService
 import com.hedvig.memberservice.util.SsnUtilImpl.Companion.getBirthdateFromSwedishSsn
 import com.hedvig.memberservice.util.logger
@@ -67,12 +71,12 @@ import org.axonframework.messaging.MetaData
 import org.axonframework.spring.stereotype.Aggregate
 import org.springframework.beans.factory.annotation.Autowired
 import java.io.IOException
+import java.time.Instant
 import java.util.UUID
 import java.util.function.Supplier
 
 @Aggregate
 class MemberAggregate() {
-
     @AggregateIdentifier
     var _id: Long? = null
     val id: Long
@@ -275,12 +279,16 @@ class MemberAggregate() {
     fun handle(cmd: ZignSecSignCommand) {
         if (!isValidJSON(cmd.provideJsonResponse)) throw RuntimeException("Invalid json from provider")
         apply(NewCashbackSelectedEvent(id, cashbackService.getDefaultId(id).toString()))
-        val zignSecAuthMarket = cmd.zignSecAuthMarket
-        when (zignSecAuthMarket) {
+        when (cmd.zignSecAuthMarket) {
             ZignSecAuthenticationMarket.NORWAY -> {
-                if (cmd.personalNumber != null
-                    && member.ssn != cmd.personalNumber) {
-                    apply(NorwegianSSNUpdatedEvent(id, cmd.personalNumber))
+                when {
+                    member.ssn == null ->
+                     apply(NorwegianSSNUpdatedEvent(id, cmd.personalNumber))
+                    member.ssn != cmd.personalNumber ->
+                        logger.warn("Handling `ZignSecSignCommand` with different ssn [member ssn: ${member.ssn}, cmd personalNumber: ${cmd.personalNumber}]")
+                }
+                if (Instant.now().isAfter(BackfillMemberIdentifiedEventNorwayListener.backfillUpUntilThisPoint)) {
+                    applyMemberIdentifiedEventFromZignSecSignCommand(cmd)
                 }
                 apply(
                     NorwegianMemberSignedEvent(
@@ -291,12 +299,49 @@ class MemberAggregate() {
                     && member.ssn != cmd.personalNumber) {
                     apply(DanishSSNUpdatedEvent(id, cmd.personalNumber))
                 }
+                applyMemberIdentifiedEventFromZignSecSignCommand(cmd)
                 apply(
                     DanishMemberSignedEvent(
                         id, cmd.personalNumber, cmd.provideJsonResponse, cmd.referenceId))
             }
-            else -> throw RuntimeException("ZignSec authentication market: " + zignSecAuthMarket.name + " is not implemented!")
         }
+    }
+
+    private fun applyMemberIdentifiedEventFromZignSecSignCommand(cmd: ZignSecSignCommand) {
+        apply(
+            MemberIdentifiedEvent(
+                cmd.id,
+                MemberIdentifiedEvent.NationalIdentification(
+                    cmd.personalNumber,
+                    when (cmd.zignSecAuthMarket) {
+                        ZignSecAuthenticationMarket.NORWAY -> MemberIdentifiedEvent.Nationality.NORWAY
+                        ZignSecAuthenticationMarket.DENMARK -> MemberIdentifiedEvent.Nationality.DENMARK
+                    }
+                ),
+                cmd.zignSecAuthMarket.toMemberIdentifiedEventIdentificationMethod(),
+                cmd.firstName,
+                cmd.lastName
+            )
+        )
+    }
+
+    @CommandHandler
+    fun handle(command: ZignSecSuccessfulAuthenticationCommand) {
+        apply(
+            MemberIdentifiedEvent(
+                command.id,
+                MemberIdentifiedEvent.NationalIdentification(
+                    command.personalNumber,
+                    when (command.zignSecAuthMarket) {
+                        ZignSecAuthenticationMarket.NORWAY -> MemberIdentifiedEvent.Nationality.NORWAY
+                        ZignSecAuthenticationMarket.DENMARK -> MemberIdentifiedEvent.Nationality.DENMARK
+                    }
+                ),
+                command.zignSecAuthMarket.toMemberIdentifiedEventIdentificationMethod(),
+                command.firstName,
+                command.lastName
+            )
+        )
     }
 
     fun isValidJSON(json: String): Boolean {
@@ -481,6 +526,19 @@ class MemberAggregate() {
     @CommandHandler
     fun handle(cmd: UpdateBirthDateCommand) {
         apply(BirthDateUpdatedEvent(cmd.memberId, cmd.birthDate))
+    }
+
+    @CommandHandler
+    fun handle(cmd: MemberIdentifiedCommand) {
+        apply(
+            MemberIdentifiedEvent(
+                cmd.id,
+                cmd.nationalIdentification,
+                cmd.identificationMethod,
+                cmd.firstName,
+                cmd.lastName
+            )
+        )
     }
 
     @EventSourcingHandler

@@ -12,7 +12,9 @@ sealed class ZignSecSignResult {
         val memberId: Long,
         val ssn: String,
         val providerJsonResponse: String,
-        override val authenticationMethod: ZignSecAuthenticationMethod
+        override val authenticationMethod: ZignSecAuthenticationMethod,
+        val firstName: String?,
+        val lastName: String?
     ) : ZignSecSignResult()
 
     data class Failed(
