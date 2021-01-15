@@ -15,7 +15,11 @@ import java.time.Instant
 
 class TrustpilotOauth2Interceptor(
     val template: RestTemplate,
-    val config: TrustpilotOauth2Configuration
+    val basePath: String,
+    val apikey: String,
+    val secret: String,
+    val username: String,
+    val password: String
 ) : RequestInterceptor {
 
     private var accessTokenExpiryTime: Instant = Instant.now()
@@ -51,8 +55,8 @@ class TrustpilotOauth2Interceptor(
     private fun createTokens() {
         val response = call("/accesstoken", LinkedMultiValueMap<String, String>().apply {
             add("grant_type", "password")
-            add("username", config.username)
-            add("password", config.password)
+            add("username", username)
+            add("password", password)
         })
         setTokens(response)
     }
@@ -65,11 +69,11 @@ class TrustpilotOauth2Interceptor(
     }
 
     private fun call(path: String, body: MultiValueMap<String, String>): TokenResponse {
-        val url = "${config.basePath}$path"
+        val url = "$basePath$path"
         val headers = HttpHeaders()
         headers.contentType = MediaType.APPLICATION_FORM_URLENCODED
 
-        val encodedAuth = Base64Utils.encodeToString("${config.apikey}:${config.secret}".toByteArray())
+        val encodedAuth = Base64Utils.encodeToString("$apikey:$secret".toByteArray())
         headers.add("Authorization", "Basic $encodedAuth")
 
         val request = HttpEntity(body, headers)
