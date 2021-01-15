@@ -13,8 +13,8 @@ enum class ZignSecAuthenticationMarket {
     }
 
     fun toMemberIdentifiedEventIdentificationMethod() = when (this) {
-        ZignSecAuthenticationMarket.NORWAY -> MemberIdentifiedEvent.IdentificationMethod.NORWEGIAN_BANK_ID
-        ZignSecAuthenticationMarket.DENMARK -> MemberIdentifiedEvent.IdentificationMethod.DANISH_BANK_ID
+        NORWAY -> MemberIdentifiedEvent.IdentificationMethod.NORWEGIAN_BANK_ID
+        DENMARK -> MemberIdentifiedEvent.IdentificationMethod.DANISH_BANK_ID
     }
 
     companion object {

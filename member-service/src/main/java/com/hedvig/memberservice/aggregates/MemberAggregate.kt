@@ -288,21 +288,7 @@ class MemberAggregate() {
                         logger.warn("Handling `ZignSecSignCommand` with different ssn [member ssn: ${member.ssn}, cmd personalNumber: ${cmd.personalNumber}]")
                 }
                 if (Instant.now().isAfter(BackfillMemberIdentifiedEventNorwayListener.backfillUpUntilThisPoint)) {
-                    apply(
-                        MemberIdentifiedEvent(
-                            cmd.id,
-                            MemberIdentifiedEvent.NationalIdentification(
-                                cmd.personalNumber,
-                                when (cmd.zignSecAuthMarket) {
-                                    ZignSecAuthenticationMarket.NORWAY -> MemberIdentifiedEvent.Nationality.NORWAY
-                                    ZignSecAuthenticationMarket.DENMARK -> MemberIdentifiedEvent.Nationality.DENMARK
-                                }
-                            ),
-                            cmd.zignSecAuthMarket.toMemberIdentifiedEventIdentificationMethod(),
-                            cmd.firstName,
-                            cmd.lastName
-                        )
-                    )
+                    applyMemberIdentifiedEventFromZignSecSignCommand(cmd)
                 }
                 apply(
                     NorwegianMemberSignedEvent(
@@ -313,11 +299,30 @@ class MemberAggregate() {
                     && member.ssn != cmd.personalNumber) {
                     apply(DanishSSNUpdatedEvent(id, cmd.personalNumber))
                 }
+                applyMemberIdentifiedEventFromZignSecSignCommand(cmd)
                 apply(
                     DanishMemberSignedEvent(
                         id, cmd.personalNumber, cmd.provideJsonResponse, cmd.referenceId))
             }
         }
+    }
+
+    private fun applyMemberIdentifiedEventFromZignSecSignCommand(cmd: ZignSecSignCommand) {
+        apply(
+            MemberIdentifiedEvent(
+                cmd.id,
+                MemberIdentifiedEvent.NationalIdentification(
+                    cmd.personalNumber,
+                    when (cmd.zignSecAuthMarket) {
+                        ZignSecAuthenticationMarket.NORWAY -> MemberIdentifiedEvent.Nationality.NORWAY
+                        ZignSecAuthenticationMarket.DENMARK -> MemberIdentifiedEvent.Nationality.DENMARK
+                    }
+                ),
+                cmd.zignSecAuthMarket.toMemberIdentifiedEventIdentificationMethod(),
+                cmd.firstName,
+                cmd.lastName
+            )
+        )
     }
 
     @CommandHandler
