@@ -1,11 +1,8 @@
 package com.hedvig.memberservice.services.customerio
 
-import com.google.common.collect.ImmutableMap
 import com.hedvig.integration.notificationService.NotificationService
 import com.hedvig.memberservice.events.EmailUpdatedEvent
 import com.hedvig.memberservice.events.NameUpdatedEvent
-import com.hedvig.memberservice.external.trustpilot.TrustpilotReviewLinkRequestDto
-import com.hedvig.memberservice.external.trustpilot.TrustpilotReviewLinkResponseDto
 import com.hedvig.memberservice.query.MemberEntity
 import com.hedvig.memberservice.query.MemberRepository
 import com.hedvig.memberservice.services.trustpilot.TrustpilotReviewInvitation
@@ -37,7 +34,7 @@ class CustomerIOEventListener @Autowired constructor(
 
         val locale = getLocaleForMember(member)
 
-        val trustPilotLinkResponse = getTrustpilotLink(
+        val trustPilotLinkResponse = getTrustpilotReviewInvitation(
             member.id,
             locale,
             member.email,
@@ -72,8 +69,7 @@ class CustomerIOEventListener @Autowired constructor(
             else -> throw RuntimeException("Unsupported country code detected $countryCode")
         }
 
-//            put this in a try?
-        val trustPilotLinkResponse = getTrustpilotLink(
+        val trustpilotReviewInvitation = getTrustpilotReviewInvitation(
             member.id,
             locale,
             evt.email,
@@ -86,8 +82,8 @@ class CustomerIOEventListener @Autowired constructor(
             "timezone" to timeZone
         )
 
-        if (trustPilotLinkResponse != null) {
-            traits["trustpilotLink"] = trustPilotLinkResponse.url
+        if (trustpilotReviewInvitation != null) {
+            traits["trustpilotLink"] = trustpilotReviewInvitation.url
         }
         sendWithSleep(traits, Objects.toString(evt.memberId))
     }
@@ -108,7 +104,7 @@ class CustomerIOEventListener @Autowired constructor(
             ?: LocaleResolver.resolveNullableLocale(member.acceptLanguage)
     }
 
-    private fun getTrustpilotLink(
+    private fun getTrustpilotReviewInvitation(
         memberId: Long, locale: Locale?, email: String?, firstName: String?, lastName: String?
     ): TrustpilotReviewInvitation? {
         firstName ?: return null

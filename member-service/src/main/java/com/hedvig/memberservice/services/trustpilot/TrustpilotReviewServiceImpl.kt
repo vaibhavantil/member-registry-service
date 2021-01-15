@@ -2,12 +2,11 @@ package com.hedvig.memberservice.services.trustpilot
 
 import com.hedvig.memberservice.external.trustpilot.TrustpilotClient
 import com.hedvig.memberservice.external.trustpilot.TrustpilotReviewLinkRequestDto
-import com.hedvig.memberservice.external.trustpilot.TrustpilotReviewLinkResponseDto
 import com.hedvig.memberservice.util.logger
 import com.hedvig.resolver.LocaleResolver
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
-import java.util.*
+import java.util.Locale
 
 @Service
 class TrustpilotReviewServiceImpl(
