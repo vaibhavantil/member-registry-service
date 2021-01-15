@@ -8,6 +8,7 @@ import com.hedvig.memberservice.external.trustpilot.TrustpilotReviewLinkRequestD
 import com.hedvig.memberservice.external.trustpilot.TrustpilotReviewLinkResponseDto
 import com.hedvig.memberservice.query.MemberEntity
 import com.hedvig.memberservice.query.MemberRepository
+import com.hedvig.memberservice.services.trustpilot.TrustpilotReviewInvitation
 import com.hedvig.memberservice.services.trustpilot.TrustpilotReviewService
 import com.hedvig.resolver.LocaleResolver
 import com.neovisionaries.i18n.CountryCode
@@ -37,7 +38,7 @@ class CustomerIOEventListener @Autowired constructor(
         val locale = getLocaleForMember(member)
 
         val trustPilotLinkResponse = getTrustpilotLink(
-            member.id.toString(),
+            member.id,
             locale,
             member.email,
             evt.firstName,
@@ -73,7 +74,7 @@ class CustomerIOEventListener @Autowired constructor(
 
 //            put this in a try?
         val trustPilotLinkResponse = getTrustpilotLink(
-            member.id.toString(),
+            member.id,
             locale,
             evt.email,
             member.firstName,
@@ -108,24 +109,14 @@ class CustomerIOEventListener @Autowired constructor(
     }
 
     private fun getTrustpilotLink(
-        memberId: String, locale: Locale?, email: String?, firstName: String?, lastName: String?
-    ): TrustpilotReviewLinkResponseDto? {
+        memberId: Long, locale: Locale?, email: String?, firstName: String?, lastName: String?
+    ): TrustpilotReviewInvitation? {
+        firstName ?: return null
+        lastName ?: return null
+        email ?: return null
 
-        val trustpilotReviewLinkRequest =  when {
-            email != null && firstName != null && lastName != null -> TrustpilotReviewLinkRequestDto.from(
-                memberId,
-                locale ?: Locale("sv", "SE"),
-                email,
-                "${firstName.capitalize()} ${lastName.capitalize()}"
-            )
-            else -> null
-        }
-
-        return if (trustpilotReviewLinkRequest != null) {
-            trustpilotReviewService.generateTrustpilotReviewLinkForMember(trustpilotReviewLinkRequest)
-        }
-        else {
-            null
-        }
+        return trustpilotReviewService.generateTrustpilotReviewInvitation(
+            memberId, email, "${firstName.capitalize()} ${lastName.capitalize()}", locale
+        )
     }
 }

@@ -1,8 +1,17 @@
 package com.hedvig.memberservice.services.trustpilot
 
-import com.hedvig.memberservice.external.trustpilot.TrustpilotReviewLinkRequestDto
-import com.hedvig.memberservice.external.trustpilot.TrustpilotReviewLinkResponseDto
+import java.util.Locale;
 
 interface TrustpilotReviewService {
-    fun generateTrustpilotReviewLinkForMember(request: TrustpilotReviewLinkRequestDto): TrustpilotReviewLinkResponseDto?
+    fun generateTrustpilotReviewInvitation(
+        memberId: Long,
+        email: String,
+        name: String,
+        locale: Locale?
+    ): TrustpilotReviewInvitation?
 }
+
+data class TrustpilotReviewInvitation(
+    val id: String,
+    val url: String
+)

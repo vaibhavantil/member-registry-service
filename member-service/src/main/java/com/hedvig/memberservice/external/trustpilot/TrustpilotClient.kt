@@ -24,18 +24,7 @@ data class TrustpilotReviewLinkRequestDto(
     val email: String,
     val name: String,
     val locale: String
-) {
-    companion object {
-        fun from(memberId: String, locale: Locale, email: String, name: String): TrustpilotReviewLinkRequestDto {
-            return TrustpilotReviewLinkRequestDto(
-                referenceId = memberId,
-                email = email,
-                name = name,
-                locale = locale.toString()
-            )
-        }
-    }
-}
+)
 
 data class TrustpilotReviewLinkResponseDto(
     val id: String,

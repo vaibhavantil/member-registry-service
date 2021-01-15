@@ -6,6 +6,7 @@ import com.hedvig.memberservice.events.EmailUpdatedEvent
 import com.hedvig.memberservice.external.trustpilot.TrustpilotReviewLinkResponseDto
 import com.hedvig.memberservice.query.MemberEntity
 import com.hedvig.memberservice.query.MemberRepository
+import com.hedvig.memberservice.services.trustpilot.TrustpilotReviewInvitation
 import com.hedvig.memberservice.services.trustpilot.TrustpilotReviewService
 import io.mockk.MockKAnnotations
 import io.mockk.every
@@ -44,8 +45,9 @@ class CustomerIOEventListenerTest {
         member.id = 123
         every { memberRepository.findById(any()) } returns Optional.of(member)
 
-        every { trustpilotReviewService.generateTrustpilotReviewLinkForMember(any()) } returns
-            TrustpilotReviewLinkResponseDto("id", "url")
+        every {
+            trustpilotReviewService.generateTrustpilotReviewInvitation(any(), any(), any(), any())
+        } returns TrustpilotReviewInvitation("id", "url")
 
         val sut = CustomerIOEventListener(notificationService, memberRepository, trustpilotReviewService)
 
@@ -65,8 +67,9 @@ class CustomerIOEventListenerTest {
         member.pickedLocale = PickedLocale.nb_NO
         every { memberRepository.findById(any()) } returns Optional.of(member)
 
-        every { trustpilotReviewService.generateTrustpilotReviewLinkForMember(any()) } returns
-            TrustpilotReviewLinkResponseDto("id", "url")
+        every {
+            trustpilotReviewService.generateTrustpilotReviewInvitation(any(), any(), any(), any())
+        } returns TrustpilotReviewInvitation("id", "url")
 
         val sut = CustomerIOEventListener(notificationService, memberRepository, trustpilotReviewService)
 
@@ -88,8 +91,9 @@ class CustomerIOEventListenerTest {
 
         val sut = CustomerIOEventListener(notificationService, memberRepository, trustpilotReviewService)
 
-        every { trustpilotReviewService.generateTrustpilotReviewLinkForMember(any()) } returns
-            TrustpilotReviewLinkResponseDto("id", "url")
+        every {
+            trustpilotReviewService.generateTrustpilotReviewInvitation(any(), any(), any(), any())
+        } returns TrustpilotReviewInvitation("id", "url")
 
         sut.on(EmailUpdatedEvent(1337L, "omse@lkj.com"))
 
@@ -108,8 +112,9 @@ class CustomerIOEventListenerTest {
         member.lastName = "Person"
         every { memberRepository.findById(any()) } returns Optional.of(member)
 
-        every { trustpilotReviewService.generateTrustpilotReviewLinkForMember(any()) } returns
-            TrustpilotReviewLinkResponseDto("id", "expected-url")
+        every {
+            trustpilotReviewService.generateTrustpilotReviewInvitation(any(), any(), any(), any())
+        } returns TrustpilotReviewInvitation("id", "expected-url")
 
         val sut = CustomerIOEventListener(notificationService, memberRepository, trustpilotReviewService)
 
@@ -128,7 +133,9 @@ class CustomerIOEventListenerTest {
         member.id = 123
         every { memberRepository.findById(any()) } returns Optional.of(member)
 
-        every { trustpilotReviewService.generateTrustpilotReviewLinkForMember(any()) } returns null
+        every {
+            trustpilotReviewService.generateTrustpilotReviewInvitation(any(), any(), any(), any())
+        } returns null
 
         val sut = CustomerIOEventListener(notificationService, memberRepository, trustpilotReviewService)
 
@@ -147,8 +154,9 @@ class CustomerIOEventListenerTest {
 
         val sut = CustomerIOEventListener(notificationService, memberRepository, trustpilotReviewService)
 
-        every { trustpilotReviewService.generateTrustpilotReviewLinkForMember(any()) } returns
-            TrustpilotReviewLinkResponseDto("id", "url")
+        every {
+            trustpilotReviewService.generateTrustpilotReviewInvitation(any(), any(), any(), any())
+        } returns TrustpilotReviewInvitation("id", "url")
 
         sut.on(EmailUpdatedEvent(1337L, "omse@lkj.com"))
     }
