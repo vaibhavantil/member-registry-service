@@ -11,4 +11,3 @@ class TrustpilotFeignConfig {
         return TrustpilotOauth2Interceptor(template, config)
     }
 }
-

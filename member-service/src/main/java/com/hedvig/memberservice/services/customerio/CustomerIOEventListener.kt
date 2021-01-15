@@ -5,7 +5,6 @@ import com.hedvig.memberservice.events.EmailUpdatedEvent
 import com.hedvig.memberservice.events.NameUpdatedEvent
 import com.hedvig.memberservice.query.MemberEntity
 import com.hedvig.memberservice.query.MemberRepository
-import com.hedvig.memberservice.services.trustpilot.TrustpilotReviewInvitation
 import com.hedvig.memberservice.services.trustpilot.TrustpilotReviewService
 import com.hedvig.resolver.LocaleResolver
 import com.neovisionaries.i18n.CountryCode
@@ -34,22 +33,20 @@ class CustomerIOEventListener @Autowired constructor(
 
         val locale = getLocaleForMember(member)
 
-        val trustPilotLinkResponse = getTrustpilotReviewInvitation(
-            member.id,
-            locale,
-            member.email,
-            evt.firstName,
-            evt.lastName
-        )
-
         val traits = mutableMapOf(
             "first_name" to evt.firstName,
             "last_name" to evt.lastName
         )
 
-        if (trustPilotLinkResponse != null) {
-            traits["trustpilotLink"] = trustPilotLinkResponse.url
-        }
+        attachTrustpilotReviewInvitation(
+            member.id,
+            locale,
+            member.email,
+            evt.firstName,
+            evt.lastName,
+            traits
+        )
+
         sendWithSleep(traits, Objects.toString(evt.memberId))
     }
 
@@ -69,22 +66,20 @@ class CustomerIOEventListener @Autowired constructor(
             else -> throw RuntimeException("Unsupported country code detected $countryCode")
         }
 
-        val trustpilotReviewInvitation = getTrustpilotReviewInvitation(
-            member.id,
-            locale,
-            evt.email,
-            member.firstName,
-            member.lastName
-        )
-
         val traits = mutableMapOf(
             "email" to evt.email,
             "timezone" to timeZone
         )
 
-        if (trustpilotReviewInvitation != null) {
-            traits["trustpilotLink"] = trustpilotReviewInvitation.url
-        }
+        attachTrustpilotReviewInvitation(
+            member.id,
+            locale,
+            evt.email,
+            member.firstName,
+            member.lastName,
+            traits
+        )
+
         sendWithSleep(traits, Objects.toString(evt.memberId))
     }
 
@@ -104,15 +99,21 @@ class CustomerIOEventListener @Autowired constructor(
             ?: LocaleResolver.resolveNullableLocale(member.acceptLanguage)
     }
 
-    private fun getTrustpilotReviewInvitation(
-        memberId: Long, locale: Locale?, email: String?, firstName: String?, lastName: String?
-    ): TrustpilotReviewInvitation? {
-        firstName ?: return null
-        lastName ?: return null
-        email ?: return null
+    private fun attachTrustpilotReviewInvitation(
+        memberId: Long, locale: Locale?, email: String?, firstName: String?, lastName: String?,
+        traits: MutableMap<String, String?>
+    ) {
+        firstName ?: return
+        lastName ?: return
+        email ?: return
 
-        return trustpilotReviewService.generateTrustpilotReviewInvitation(
+        val invitation = trustpilotReviewService.generateTrustpilotReviewInvitation(
             memberId, email, "${firstName.capitalize()} ${lastName.capitalize()}", locale
         )
+
+        invitation?.let {
+            traits["trustpilot_review_link"] = invitation.url
+            traits["trustpilot_review_id"] = invitation.id
+        }
     }
 }

@@ -114,7 +114,7 @@ class CustomerIOEventListenerTest {
 
         every {
             trustpilotReviewService.generateTrustpilotReviewInvitation(any(), any(), any(), any())
-        } returns TrustpilotReviewInvitation("id", "expected-url")
+        } returns TrustpilotReviewInvitation("expected-id", "expected-url")
 
         val sut = CustomerIOEventListener(notificationService, memberRepository, trustpilotReviewService)
 
@@ -123,7 +123,8 @@ class CustomerIOEventListenerTest {
         val slot = slot<Map<String, Any?>>()
         verify { notificationService.updateCustomer(any(), capture(slot)) }
 
-        assertThat(slot.captured["trustpilotLink"]).isEqualTo("expected-url")
+        assertThat(slot.captured["trustpilot_review_link"]).isEqualTo("expected-url")
+        assertThat(slot.captured["trustpilot_review_id"]).isEqualTo("expected-id")
     }
 
     @Test
