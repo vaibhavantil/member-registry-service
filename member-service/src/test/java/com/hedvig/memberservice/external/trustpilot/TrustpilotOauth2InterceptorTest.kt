@@ -20,7 +20,7 @@ internal class TrustpilotOauth2InterceptorTest {
     @MockK
     lateinit var template: RestTemplate
 
-    @Before
+    @BeforeEach
     fun setUp() = MockKAnnotations.init(this)
 
     @Test
