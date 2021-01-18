@@ -28,6 +28,7 @@ class TrustpilotOauth2Interceptor(
     private lateinit var accessToken: String
     private lateinit var refreshToken: String
 
+    @Synchronized // this is stateful and executed from multiple threads
     override fun apply(template: RequestTemplate) {
         if (Instant.now().isAfter(accessTokenExpiryTime)) {
             authorize()
