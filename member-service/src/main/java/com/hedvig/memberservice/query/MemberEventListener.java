@@ -12,15 +12,16 @@ import org.axonframework.eventhandling.Timestamp;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.Ordered;
+import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
 import java.time.Instant;
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.util.concurrent.CompletableFuture;
 
 @Component
 @Slf4j
+@Order(Ordered.HIGHEST_PRECEDENCE)
 public class MemberEventListener {
 
   private final Logger logger = LoggerFactory.getLogger(MemberEventListener.class);
