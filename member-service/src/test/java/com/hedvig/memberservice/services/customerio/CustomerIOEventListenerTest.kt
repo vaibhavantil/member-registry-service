@@ -17,6 +17,8 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test
 
 import org.junit.Before
+import org.junit.Rule
+import org.junit.rules.ExpectedException
 import java.lang.IllegalStateException
 import java.util.Optional
 
@@ -148,17 +150,16 @@ class CustomerIOEventListenerTest {
         assertThat(slot.captured["trustpilotLink"]).isNull()
     }
 
-    @Test(expected = IllegalStateException::class)
-    fun `no memberentity found fails`() {
+    @get:Rule
+    val thrown = ExpectedException.none()
 
+    @Test
+    fun `no memberentity found fails`() {
         every { memberRepository.findById(any()) } returns Optional.empty()
 
         val sut = CustomerIOEventListener(notificationService, memberRepository, trustpilotReviewService)
 
-        every {
-            trustpilotReviewService.generateTrustpilotReviewInvitation(any(), any(), any(), any())
-        } returns TrustpilotReviewInvitation("id", "url")
-
+        thrown.expect(IllegalStateException::class.java)
         sut.on(EmailUpdatedEvent(1337L, "omse@lkj.com"))
     }
 }
