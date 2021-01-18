@@ -19,7 +19,7 @@ import java.util.Objects
 @Component
 @Profile("customer.io")
 @ProcessingGroup("SegmentProcessorGroup")
-class CustomerIOEventListener @Autowired constructor(
+class CustomerIOEventListener(
     private val notificationService: NotificationService,
     private val memberRepository: MemberRepository,
     private val trustpilotReviewService: TrustpilotReviewService
