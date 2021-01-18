@@ -253,14 +253,13 @@ class MemberAggregateTests {
             .expectEvents(
                 NewCashbackSelectedEvent(memberId, DEFAULT_CASHBACK.toString()),
                 NorwegianSSNUpdatedEvent(memberId, personalNumber),
-                /** TODO: BackfillMemberIdentifiedEventNorwayListener
                  MemberIdentifiedEvent(
                     memberId,
                     MemberIdentifiedEvent.NationalIdentification(personalNumber, MemberIdentifiedEvent.Nationality.NORWAY),
                     MemberIdentifiedEvent.IdentificationMethod.NORWEGIAN_BANK_ID,
                     "Test",
                     "Testsson"
-                ),*/
+                ),
                 NorwegianMemberSignedEvent(memberId, personalNumber, provideJsonResponse, referenceId)
             )
     }
