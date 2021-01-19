@@ -1,10 +1,31 @@
 package com.hedvig.memberservice.query;
 
-import com.hedvig.memberservice.aggregates.MemberStatus;
-import com.hedvig.memberservice.events.*;
 import com.hedvig.integration.botService.BotService;
 import com.hedvig.integration.productsPricing.CampaignService;
 import com.hedvig.integration.productsPricing.dto.EditMemberNameRequestDTO;
+import com.hedvig.memberservice.aggregates.MemberStatus;
+import com.hedvig.memberservice.events.AcceptLanguageUpdatedEvent;
+import com.hedvig.memberservice.events.BirthDateUpdatedEvent;
+import com.hedvig.memberservice.events.DanishMemberSignedEvent;
+import com.hedvig.memberservice.events.DanishSSNUpdatedEvent;
+import com.hedvig.memberservice.events.EmailUpdatedEvent;
+import com.hedvig.memberservice.events.FraudulentStatusUpdatedEvent;
+import com.hedvig.memberservice.events.LivingAddressUpdatedEvent;
+import com.hedvig.memberservice.events.MemberCancellationEvent;
+import com.hedvig.memberservice.events.MemberCreatedEvent;
+import com.hedvig.memberservice.events.MemberInactivatedEvent;
+import com.hedvig.memberservice.events.MemberSignedEvent;
+import com.hedvig.memberservice.events.MemberSignedWithoutBankId;
+import com.hedvig.memberservice.events.MemberSimpleSignedEvent;
+import com.hedvig.memberservice.events.MemberStartedOnBoardingEvent;
+import com.hedvig.memberservice.events.NameUpdatedEvent;
+import com.hedvig.memberservice.events.NewCashbackSelectedEvent;
+import com.hedvig.memberservice.events.NorwegianMemberSignedEvent;
+import com.hedvig.memberservice.events.NorwegianSSNUpdatedEvent;
+import com.hedvig.memberservice.events.PhoneNumberUpdatedEvent;
+import com.hedvig.memberservice.events.PickedLocaleUpdatedEvent;
+import com.hedvig.memberservice.events.SSNUpdatedEvent;
+import com.hedvig.memberservice.events.TrackingIdCreatedEvent;
 import lombok.extern.slf4j.Slf4j;
 import org.axonframework.eventhandling.EventHandler;
 import org.axonframework.eventhandling.EventMessage;
@@ -12,8 +33,6 @@ import org.axonframework.eventhandling.Timestamp;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.Ordered;
-import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
 import java.time.Instant;
@@ -21,7 +40,6 @@ import java.util.concurrent.CompletableFuture;
 
 @Component
 @Slf4j
-@Order(Ordered.HIGHEST_PRECEDENCE)
 public class MemberEventListener {
 
   private final Logger logger = LoggerFactory.getLogger(MemberEventListener.class);
