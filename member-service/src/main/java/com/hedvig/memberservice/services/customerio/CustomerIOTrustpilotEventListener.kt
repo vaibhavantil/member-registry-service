@@ -17,7 +17,7 @@ import java.util.Objects
 
 @Component
 @Profile("customer.io")
-@ProcessingGroup("CustomerIOTrustpilotBackfill")
+@ProcessingGroup("CustomerIOTrustpilot")
 class CustomerIOTrustpilotEventListener(
     private val notificationService: NotificationService,
     private val memberRepository: MemberRepository,
