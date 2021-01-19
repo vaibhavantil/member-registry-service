@@ -43,21 +43,21 @@ class CustomerIOTrustpilotEventListener(
     }
 
     @EventHandler
-    fun on(evt: EmailUpdatedEvent) {
-        val member = memberRepository.findById(evt.memberId).orElseThrow {
-            IllegalStateException("No member found for ${evt.memberId}")
+    fun on(event: EmailUpdatedEvent) {
+        val member = memberRepository.findById(event.memberId).orElseThrow {
+            IllegalStateException("No member found when generating Trustpilot link (memberId=${event.memberId})")
         }
 
         val attributes = createTrustpilotReviewAttributes(
             member.id,
             getLocaleForMember(member),
-            evt.email,
+            event.email,
             member.firstName,
             member.lastName
         )
 
         if (attributes.isNotEmpty()) {
-            sendWithSleep(attributes, Objects.toString(evt.memberId))
+            sendWithSleep(attributes, Objects.toString(event.memberId))
         }
     }
 
