@@ -27,7 +27,7 @@ class CustomerIOTrustpilotEventListener(
     @EventHandler
     fun on(evt: NameUpdatedEvent) {
         val member = memberRepository.findById(evt.memberId).orElseThrow {
-            IllegalStateException("No member found for ${evt.memberId}")
+            IllegalStateException("No member found when generating Trustpilot link (memberId=${event.memberId})")
         }
 
         val attributes = createTrustpilotReviewAttributes(
