@@ -68,7 +68,11 @@ class CustomerIOTrustpilotEventListener(
     }
 
     private fun createTrustpilotReviewAttributes(
-        memberId: Long, locale: Locale?, email: String?, firstName: String?, lastName: String?
+        memberId: Long, 
+        locale: Locale?,
+        email: String?, 
+        firstName: String?, 
+        lastName: String?
     ): Map<String, String> {
         firstName ?: return emptyMap()
         lastName ?: return emptyMap()
