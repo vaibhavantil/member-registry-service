@@ -7,7 +7,6 @@ import com.hedvig.memberservice.query.MemberEntity
 import com.hedvig.memberservice.query.MemberRepository
 import com.hedvig.memberservice.services.trustpilot.TrustpilotReviewService
 import com.hedvig.resolver.LocaleResolver
-import com.neovisionaries.i18n.CountryCode
 import org.axonframework.config.ProcessingGroup
 import org.axonframework.eventhandling.EventHandler
 import org.springframework.context.annotation.Profile
@@ -25,8 +24,8 @@ class CustomerIOTrustpilotEventListener(
 ) {
 
     @EventHandler
-    fun on(evt: NameUpdatedEvent) {
-        val member = memberRepository.findById(evt.memberId).orElseThrow {
+    fun on(event: NameUpdatedEvent) {
+        val member = memberRepository.findById(event.memberId).orElseThrow {
             IllegalStateException("No member found when generating Trustpilot link (memberId=${event.memberId})")
         }
 
@@ -34,12 +33,12 @@ class CustomerIOTrustpilotEventListener(
             member.id,
             getLocaleForMember(member),
             member.email,
-            evt.firstName,
-            evt.lastName
+            event.firstName,
+            event.lastName
         )
 
         if (attributes.isNotEmpty()) {
-            sendWithSleep(attributes, Objects.toString(evt.memberId))
+            sendWithSleep(attributes, Objects.toString(event.memberId))
         }
     }
 
@@ -68,10 +67,10 @@ class CustomerIOTrustpilotEventListener(
     }
 
     private fun createTrustpilotReviewAttributes(
-        memberId: Long, 
+        memberId: Long,
         locale: Locale?,
-        email: String?, 
-        firstName: String?, 
+        email: String?,
+        firstName: String?,
         lastName: String?
     ): Map<String, String> {
         firstName ?: return emptyMap()

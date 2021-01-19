@@ -21,13 +21,13 @@ class CustomerIOEventListener(
 ) {
 
     @EventHandler
-    fun on(evt: NameUpdatedEvent) {
+    fun on(event: NameUpdatedEvent) {
         val traits = mapOf(
-            "first_name" to evt.firstName,
-            "last_name" to evt.lastName
+            "first_name" to event.firstName,
+            "last_name" to event.lastName
         )
 
-        sendWithSleep(traits, Objects.toString(evt.memberId))
+        sendWithSleep(traits, Objects.toString(event.memberId))
     }
 
     @EventHandler

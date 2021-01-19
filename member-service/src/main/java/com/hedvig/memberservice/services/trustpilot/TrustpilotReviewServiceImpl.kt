@@ -21,12 +21,14 @@ class TrustpilotReviewServiceImpl(
     ): TrustpilotReviewInvitation? {
         val locale = locale ?: LocaleResolver.DEFAULT_LOCALE
         return try {
-            val response = trustpilotClient.createReviewLink(
-                businessUnitId,
-                TrustpilotReviewLinkRequestDto(
-                    memberId.toString(), email, name, "${locale.language}-${locale.country}"
-                )
+            val body = TrustpilotReviewLinkRequestDto(
+                referenceId = memberId.toString(),
+                email = email,
+                name = name,
+                locale = "${locale.language}-${locale.country}"
             )
+            val response = trustpilotClient.createReviewLink(businessUnitId, body)
+
             logger.info("Trustpilot review link created for member $memberId, link id = ${response.id}")
             TrustpilotReviewInvitation(response.id, response.url)
         } catch (exception: Exception) {
