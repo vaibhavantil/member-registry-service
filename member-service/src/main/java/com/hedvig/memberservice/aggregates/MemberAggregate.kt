@@ -5,8 +5,6 @@ import org.axonframework.commandhandling.model.AggregateLifecycle.apply
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.hedvig.common.UUIDGenerator
 import com.hedvig.external.bisnodeBCI.BisnodeClient
-import com.hedvig.memberservice.backfill.BackfillMemberIdentifiedEventNorwayListener
-import com.hedvig.memberservice.backfill.MemberIdentifiedCommand
 import com.hedvig.memberservice.commands.CreateMemberCommand
 import com.hedvig.memberservice.commands.EditMemberInfoCommand
 import com.hedvig.memberservice.commands.EditMemberInformationCommand
@@ -283,13 +281,11 @@ class MemberAggregate() {
             ZignSecAuthenticationMarket.NORWAY -> {
                 when {
                     member.ssn == null ->
-                     apply(NorwegianSSNUpdatedEvent(id, cmd.personalNumber))
+                        apply(NorwegianSSNUpdatedEvent(id, cmd.personalNumber))
                     member.ssn != cmd.personalNumber ->
                         logger.warn("Handling `ZignSecSignCommand` with different ssn [member ssn: ${member.ssn}, cmd personalNumber: ${cmd.personalNumber}]")
                 }
-                if (Instant.now().isAfter(BackfillMemberIdentifiedEventNorwayListener.backfillUpUntilThisPoint)) {
-                    applyMemberIdentifiedEventFromZignSecSignCommand(cmd)
-                }
+                applyMemberIdentifiedEventFromZignSecSignCommand(cmd)
                 apply(
                     NorwegianMemberSignedEvent(
                         id, cmd.personalNumber, cmd.provideJsonResponse, cmd.referenceId))
@@ -526,19 +522,6 @@ class MemberAggregate() {
     @CommandHandler
     fun handle(cmd: UpdateBirthDateCommand) {
         apply(BirthDateUpdatedEvent(cmd.memberId, cmd.birthDate))
-    }
-
-    @CommandHandler
-    fun handle(cmd: MemberIdentifiedCommand) {
-        apply(
-            MemberIdentifiedEvent(
-                cmd.id,
-                cmd.nationalIdentification,
-                cmd.identificationMethod,
-                cmd.firstName,
-                cmd.lastName
-            )
-        )
     }
 
     @EventSourcingHandler
