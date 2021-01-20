@@ -25,7 +25,7 @@ internal class TrustpilotReviewServiceImplTest {
     fun `response is propagated accordingly`() {
 
         every {
-            client.createReviewLink("buid", any())
+            client.createReviewLink(any(), any())
         } returns TrustpilotReviewLinkResponseDto("invite-id", "invite-url")
 
         val sut = TrustpilotReviewServiceImpl(client)
@@ -42,7 +42,7 @@ internal class TrustpilotReviewServiceImplTest {
     fun `trustpilot API failures returns null`() {
 
         every {
-            client.createReviewLink("buid", any())
+            client.createReviewLink(any(), any())
         } throws RuntimeException()
 
         val sut = TrustpilotReviewServiceImpl(client)
@@ -59,7 +59,7 @@ internal class TrustpilotReviewServiceImplTest {
 
         val slot = slot<TrustpilotReviewLinkRequestDto>()
         every {
-            client.createReviewLink("buid", capture(slot))
+            client.createReviewLink(any(), capture(slot))
         } returns TrustpilotReviewLinkResponseDto("invite-id", "invite-url")
 
         val sut = TrustpilotReviewServiceImpl(client)
