@@ -10,9 +10,14 @@ import java.util.Locale
 
 @Service
 class TrustpilotReviewServiceImpl(
-    private val trustpilotClient: TrustpilotClient,
-    @Value("\${trustpilot.businessUnitId}") val businessUnitId: String
+    private val trustpilotClient: TrustpilotClient
 ): TrustpilotReviewService {
+
+    companion object {
+        // fetched through their public API by looking up www.hedvig.com (name of our service in their system)
+        private const val hedvigBusinessUnitId = "5b62ebf41788620001d3c4ae"
+    }
+
     override fun generateTrustpilotReviewInvitation(
         memberId: Long,
         email: String,
@@ -27,7 +32,7 @@ class TrustpilotReviewServiceImpl(
                 name = name,
                 locale = "${locale.language}-${locale.country}"
             )
-            val response = trustpilotClient.createReviewLink(businessUnitId, body)
+            val response = trustpilotClient.createReviewLink(hedvigBusinessUnitId, body)
 
             logger.info("Trustpilot review link created for member $memberId, link id = ${response.id}")
             TrustpilotReviewInvitation(response.id, response.url)

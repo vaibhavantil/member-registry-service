@@ -10,12 +10,11 @@ class TrustpilotFeignConfig {
     @Bean
     fun oauth2RequestInterceptor(
         template: RestTemplate,
-        @Value("\${trustpilot.oauth.basepath}") basePath: String,
         @Value("\${trustpilot.oauth.apikey}") apikey: String,
         @Value("\${trustpilot.oauth.secret}") secret: String,
         @Value("\${trustpilot.oauth.username}") username: String,
         @Value("\${trustpilot.oauth.password}") password: String
     ): RequestInterceptor {
-        return TrustpilotOauth2Interceptor(template, basePath, apikey, secret, username, password)
+        return TrustpilotOauth2Interceptor(template, apikey, secret, username, password)
     }
 }

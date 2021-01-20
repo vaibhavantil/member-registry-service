@@ -34,7 +34,7 @@ internal class TrustpilotOauth2InterceptorTest {
         )
 
         val sut = TrustpilotOauth2Interceptor(
-            template, "api.com", "apikey", "secret", "user", "pw"
+            template, "apikey", "secret", "user", "pw"
         )
         val request = RequestTemplate()
         sut.apply(request)
@@ -54,11 +54,11 @@ internal class TrustpilotOauth2InterceptorTest {
         )
 
         val sut = TrustpilotOauth2Interceptor(
-            template, "api.com", "apikey", "secret", "user", "pw"
+            template, "apikey", "secret", "user", "pw"
         )
         sut.apply(RequestTemplate())
 
-        assertThat(url.captured).isEqualTo("api.com/accesstoken")
+        assertThat(url.captured).endsWith("api.com/accesstoken")
         assertThat(body.captured.body!!["username"]?.first()).isEqualTo("user")
         assertThat(body.captured.body!!["password"]?.first()).isEqualTo("pw")
     }
@@ -75,14 +75,14 @@ internal class TrustpilotOauth2InterceptorTest {
         )
 
         val sut = TrustpilotOauth2Interceptor(
-            template, "api.com", "apikey", "secret", "user", "pw"
+            template, "apikey", "secret", "user", "pw"
         )
         sut.apply(RequestTemplate()) // will be /accesstoken
         url.clear()
         body.clear()
         sut.apply(RequestTemplate()) // should be /refresh
 
-        assertThat(url.captured).isEqualTo("api.com/refresh")
+        assertThat(url.captured).endsWith("api.com/refresh")
         assertThat(body.captured.body!!["refresh_token"]?.first()).isEqualTo("refresh-token")
     }
 
@@ -98,14 +98,14 @@ internal class TrustpilotOauth2InterceptorTest {
         )
 
         val sut = TrustpilotOauth2Interceptor(
-            template, "api.com", "apikey", "secret", "user", "pw"
+            template, "apikey", "secret", "user", "pw"
         )
         sut.apply(RequestTemplate()) // will be /accesstoken
         url.clear()
         body.clear()
         sut.apply(RequestTemplate()) // should be /accesstoken again since the expiry duration is negative
 
-        assertThat(url.captured).isEqualTo("api.com/accesstoken")
+        assertThat(url.captured).endsWith("/accesstoken")
         assertThat(body.captured.body!!["username"]?.first()).isEqualTo("user")
         assertThat(body.captured.body!!["password"]?.first()).isEqualTo("pw")
     }

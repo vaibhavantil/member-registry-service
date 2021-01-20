@@ -15,12 +15,15 @@ import java.time.Instant
 
 class TrustpilotOauth2Interceptor(
     val template: RestTemplate,
-    val basePath: String,
     val apikey: String,
     val secret: String,
     val username: String,
     val password: String
 ) : RequestInterceptor {
+
+    companion object {
+        private const val basePath = "https://api.trustpilot.com/v1/oauth/oauth-business-users-for-applications"
+    }
 
     private var accessTokenExpiryTime: Instant = Instant.now()
     private var refreshTokenExpiryTime: Instant = Instant.now()

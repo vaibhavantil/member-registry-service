@@ -28,7 +28,7 @@ internal class TrustpilotReviewServiceImplTest {
             client.createReviewLink("buid", any())
         } returns TrustpilotReviewLinkResponseDto("invite-id", "invite-url")
 
-        val sut = TrustpilotReviewServiceImpl(client, "buid")
+        val sut = TrustpilotReviewServiceImpl(client)
 
         val output = sut.generateTrustpilotReviewInvitation(
             123, "email@hedvig.com", "Person", Locale.UK
@@ -45,7 +45,7 @@ internal class TrustpilotReviewServiceImplTest {
             client.createReviewLink("buid", any())
         } throws RuntimeException()
 
-        val sut = TrustpilotReviewServiceImpl(client, "buid")
+        val sut = TrustpilotReviewServiceImpl(client)
 
         val output = sut.generateTrustpilotReviewInvitation(
             123, "email@hedvig.com", "Person", Locale.UK
@@ -62,7 +62,7 @@ internal class TrustpilotReviewServiceImplTest {
             client.createReviewLink("buid", capture(slot))
         } returns TrustpilotReviewLinkResponseDto("invite-id", "invite-url")
 
-        val sut = TrustpilotReviewServiceImpl(client, "buid")
+        val sut = TrustpilotReviewServiceImpl(client)
 
         sut.generateTrustpilotReviewInvitation(
             123, "email@hedvig.com", "Person", null
