@@ -58,7 +58,7 @@ internal class TrustpilotOauth2InterceptorTest {
         )
         sut.apply(RequestTemplate())
 
-        assertThat(url.captured).endsWith("api.com/accesstoken")
+        assertThat(url.captured).endsWith("accesstoken")
         assertThat(body.captured.body!!["username"]?.first()).isEqualTo("user")
         assertThat(body.captured.body!!["password"]?.first()).isEqualTo("pw")
     }
@@ -82,7 +82,7 @@ internal class TrustpilotOauth2InterceptorTest {
         body.clear()
         sut.apply(RequestTemplate()) // should be /refresh
 
-        assertThat(url.captured).endsWith("api.com/refresh")
+        assertThat(url.captured).endsWith("refresh")
         assertThat(body.captured.body!!["refresh_token"]?.first()).isEqualTo("refresh-token")
     }
 
