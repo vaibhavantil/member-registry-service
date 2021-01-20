@@ -72,6 +72,12 @@ public class AxonConfig {
           x ->
               TrackingEventProcessorConfiguration.forSingleThreadedProcessing()
                   .andInitialTrackingToken(StreamableMessageSource::createHeadToken));
+
+      config.registerTrackingEventProcessor(
+          "CustomerIOTrustpilot",
+          x ->
+              TrackingEventProcessorConfiguration.forSingleThreadedProcessing()
+                  .andInitialTrackingToken(StreamableMessageSource::createTailToken));
   }
 
 

@@ -10,13 +10,14 @@ import io.mockk.every
 import io.mockk.impl.annotations.MockK
 import io.mockk.slot
 import io.mockk.verify
-import org.junit.Test
-
-import org.junit.Assert.*
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.Before
+import org.junit.Rule
+import org.junit.Test
+import org.junit.rules.ExpectedException
 import java.util.Optional
 
-class EventListenerTest {
+class CustomerIOEventListenerTest {
 
     @MockK(relaxed = true)
     lateinit var notificationService: NotificationService
@@ -24,74 +25,74 @@ class EventListenerTest {
     @MockK
     lateinit var memberRepository: MemberRepository
 
-
     @Before
     fun setup(){
         MockKAnnotations.init(this)
     }
 
     @Test
-    fun swedish_picked_locale_sets_timezone_to_sockholm() {
+    fun `swedish picked locale sets timezone to stockholm`() {
 
         val member = MemberEntity()
         member.pickedLocale = PickedLocale.en_SE
+        member.id = 123
         every { memberRepository.findById(any()) } returns Optional.of(member)
 
-
-        val sut = EventListener(notificationService, memberRepository)
+        val sut = CustomerIOEventListener(notificationService, memberRepository)
 
         sut.on(EmailUpdatedEvent(1337L, "omse@lkj.com"))
 
         val slot = slot<Map<String, Any?>>()
         verify { notificationService.updateCustomer(any(), capture(slot)) }
 
-        assert(slot.captured["timezone"] == "Europe/Stockholm")
+        assertThat(slot.captured["timezone"]).isEqualTo("Europe/Stockholm")
     }
 
     @Test
-    fun norwegian_picked_locale_sets_timezone_to_oslo() {
+    fun `norwegian picked locale sets timezone to oslo`() {
 
         val member = MemberEntity()
+        member.id = 123
         member.pickedLocale = PickedLocale.nb_NO
         every { memberRepository.findById(any()) } returns Optional.of(member)
 
-        val sut = EventListener(notificationService, memberRepository)
+        val sut = CustomerIOEventListener(notificationService, memberRepository)
 
         sut.on(EmailUpdatedEvent(1337L, "omse@lkj.com"))
 
         val slot = slot<Map<String, Any?>>()
         verify { notificationService.updateCustomer(any(), capture(slot)) }
 
-        assert(slot.captured["timezone"] == "Europe/Oslo")
+        assertThat(slot.captured["timezone"]).isEqualTo("Europe/Oslo")
     }
 
     @Test
-    fun no_picked_locale_sets_timezone_to_null() {
-
+    fun `no picked locale sets timezone to null`() {
         val member = MemberEntity()
+        member.id = "123".toLong()
         member.pickedLocale = null
         every { memberRepository.findById(any()) } returns Optional.of(member)
 
-        val sut = EventListener(notificationService, memberRepository)
+        val sut = CustomerIOEventListener(notificationService, memberRepository)
 
         sut.on(EmailUpdatedEvent(1337L, "omse@lkj.com"))
 
         val slot = slot<Map<String, Any?>>()
         verify { notificationService.updateCustomer(any(), capture(slot)) }
 
-        assert(slot.captured["timezone"] == null)
+        assertThat(slot.captured["timezone"]).isNull()
     }
 
-    @Test
-    fun no_memberentity_found_does_nothing() {
+    @get:Rule
+    val thrown = ExpectedException.none()
 
+    @Test
+    fun `no memberentity found fails`() {
         every { memberRepository.findById(any()) } returns Optional.empty()
 
-        val sut = EventListener(notificationService, memberRepository)
+        val sut = CustomerIOEventListener(notificationService, memberRepository)
 
+        thrown.expect(IllegalStateException::class.java)
         sut.on(EmailUpdatedEvent(1337L, "omse@lkj.com"))
-
-        verify(inverse = true) { notificationService.updateCustomer(any(), any()) }
-
     }
 }
