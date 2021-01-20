@@ -3,6 +3,7 @@ package com.hedvig.memberservice.web
 import org.axonframework.config.EventProcessingConfiguration
 import org.axonframework.eventhandling.TrackingEventProcessor
 import org.springframework.web.bind.annotation.DeleteMapping
+import org.springframework.web.bind.annotation.PutMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 
@@ -15,6 +16,17 @@ class ResetController(
     fun resetCleanCustomerIO() {
         eventProcessingConfiguration
             .eventProcessorByProcessingGroup("CleanCustomerIO", TrackingEventProcessor::class.java)
+            .ifPresent { trackingEventProcessor ->
+                trackingEventProcessor.shutDown()
+                trackingEventProcessor.resetTokens()
+                trackingEventProcessor.start()
+            }
+    }
+
+    @PutMapping("/CustomerIOTrustpilot")
+    fun resetCustomerIOTrustpilotSegmentProcessorGroup() {
+        eventProcessingConfiguration
+            .eventProcessorByProcessingGroup("CustomerIOTrustpilot", TrackingEventProcessor::class.java)
             .ifPresent { trackingEventProcessor ->
                 trackingEventProcessor.shutDown()
                 trackingEventProcessor.resetTokens()
