@@ -45,10 +45,3 @@ spring:
 
 lokalise:
   useFakes: true
-
-trustpilot:
-  businessUnitId: 5b62ebf41788620001d3c4ae
-  api:
-    basepath: https://invitations-api.trustpilot.com/v1/private
-  oauth:
-    basepath: https://api.trustpilot.com/v1/oauth/oauth-business-users-for-applications
