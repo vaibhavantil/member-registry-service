@@ -387,11 +387,7 @@ class ZignSecSessionServiceImplTest {
             Optional.of(session)
         )
         whenever(zignSecAuthenticationEntityRepository.findByIdProviderPersonId("9578-6000-4-365161")).thenReturn(null)
-        whenever(zignSecAuthenticationEntityRepository.save<ZignSecAuthenticationEntity>(any())).thenReturn(ZignSecAuthenticationEntity(
-            personalNumber = "1212120000",
-            idProviderPersonId = "9578-6000-4-365161"
-        ))
-        
+
         classUnderTest.handleNotification(zignSecSuccessAuthNotificationRequest)
 
         verify(authenticationEventPublisher).publishAuthenticationEvent(ZignSecAuthenticationResult.Failed(REFERENCE_ID, 1337))
