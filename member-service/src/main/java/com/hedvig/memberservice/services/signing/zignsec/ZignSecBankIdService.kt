@@ -78,25 +78,27 @@ class ZignSecBankIdService(
     fun completeAuthentication(result: ZignSecAuthenticationResult) {
         when (result) {
             is ZignSecAuthenticationResult.Completed -> {
-                val signedMember = signedMemberRepository.findBySsn(result.ssn)
-                if (signedMember.isPresent) {
-                    if (result.memberId != signedMember.get().id) {
-                        commandGateway.sendAndWait<Any>(InactivateMemberCommand(result.memberId))
-                        apiGatewayService.reassignMember(result.memberId, signedMember.get().id)
+                signedMemberRepository.findBySsn(result.ssn).ifPresentOrElse(
+                    { signedMember ->
+                        if (result.memberId != signedMember.id) {
+                            commandGateway.sendAndWait<Any>(InactivateMemberCommand(result.memberId))
+                            apiGatewayService.reassignMember(result.memberId, signedMember.id)
+                        }
+                        commandGateway.sendAndWait<Any>(
+                            ZignSecSuccessfulAuthenticationCommand(
+                                signedMember.id,
+                                result.id,
+                                result.ssn,
+                                ZignSecAuthenticationMarket.fromAuthenticationMethod(result.authenticationMethod),
+                                result.firstName,
+                                result.lastName
+                            ))
+                        redisEventPublisher.onAuthSessionUpdated(result.memberId, AuthSessionUpdatedEventStatus.SUCCESS)
+                    },
+                    {
+                        redisEventPublisher.onAuthSessionUpdated(result.memberId, AuthSessionUpdatedEventStatus.FAILED)
                     }
-                    commandGateway.sendAndWait<Any>(
-                        ZignSecSuccessfulAuthenticationCommand(
-                            result.memberId,
-                            result.id,
-                            result.ssn,
-                            ZignSecAuthenticationMarket.fromAuthenticationMethod(result.authenticationMethod),
-                            result.firstName,
-                            result.lastName
-                        ))
-                    redisEventPublisher.onAuthSessionUpdated(result.memberId, AuthSessionUpdatedEventStatus.SUCCESS)
-                } else {
-                    redisEventPublisher.onAuthSessionUpdated(result.memberId, AuthSessionUpdatedEventStatus.FAILED)
-                }
+                )
             }
             is ZignSecAuthenticationResult.Failed ->
                 redisEventPublisher.onAuthSessionUpdated(result.memberId, AuthSessionUpdatedEventStatus.FAILED)

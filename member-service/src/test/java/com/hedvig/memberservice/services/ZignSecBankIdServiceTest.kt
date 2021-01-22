@@ -62,8 +62,8 @@ class ZignSecBankIdServiceTest {
             MEMBER_ID,
             SSN,
             ZignSecAuthenticationMethod.NORWAY_WEB_OR_MOBILE,
-            null,
-            null
+            "Test",
+            "Testsson"
         )
 
         val signedMemberEntity = SignedMemberEntity()
@@ -78,6 +78,7 @@ class ZignSecBankIdServiceTest {
 
         verify(commandGateway).sendAndWait<Any>(InactivateMemberCommand(MEMBER_ID))
         verify(apiGatewayService).reassignMember(MEMBER_ID, MEMBERS_ORIGIGINAL_ID)
+        verify(commandGateway).sendAndWait<Any>(ZignSecSuccessfulAuthenticationCommand(MEMBERS_ORIGIGINAL_ID,RESULT_ID, SSN, ZignSecAuthenticationMarket.NORWAY, "Test", "Testsson"))
         verify(redisEventPublisher).onAuthSessionUpdated(MEMBER_ID, AuthSessionUpdatedEventStatus.SUCCESS)
     }
 
