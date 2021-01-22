@@ -52,8 +52,7 @@ class ZignSecBankIdService(
                         zignSecAuthenticationMarket.getAuthenticationMethod()
                     )
                 )
-            } ?: StartZignSecAuthenticationResult.Success(
-                UUID.randomUUID(), // should not be used
+            } ?: StartZignSecAuthenticationResult.StaticRedirect(
                 loginUrl
             )
         }
