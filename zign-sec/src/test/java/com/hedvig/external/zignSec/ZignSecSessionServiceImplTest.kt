@@ -18,10 +18,10 @@ import com.hedvig.external.zignSec.client.dto.ZignSecCollectState
 import com.hedvig.external.zignSec.client.dto.ZignSecResponse
 import com.hedvig.external.zignSec.client.dto.ZignSecResponseError
 import com.hedvig.external.zignSec.repository.ZignSecSessionRepository
-import com.hedvig.external.zignSec.repository.ZignSecSignEntityRepository
+import com.hedvig.external.zignSec.repository.ZignSecAuthenticationEntityRepository
 import com.hedvig.external.zignSec.repository.entitys.ZignSecAuthenticationType
 import com.hedvig.external.zignSec.repository.entitys.ZignSecSession
-import com.hedvig.external.zignSec.repository.entitys.ZignSecSignEntity
+import com.hedvig.external.zignSec.repository.entitys.ZignSecAuthenticationEntity
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Before
 import org.junit.Ignore
@@ -48,7 +48,7 @@ class ZignSecSessionServiceImplTest {
     lateinit var sessionRepository: ZignSecSessionRepository
 
     @Mock
-    lateinit var zignSecSignEntityRepository: ZignSecSignEntityRepository
+    lateinit var zignSecAuthenticationEntityRepository: ZignSecAuthenticationEntityRepository
 
     @Mock
     lateinit var zignSecService: ZignSecService
@@ -63,7 +63,7 @@ class ZignSecSessionServiceImplTest {
     lateinit var captor: ArgumentCaptor<ZignSecSession>
 
     @Captor
-    lateinit var secSignEntityCaptor: ArgumentCaptor<ZignSecSignEntity>
+    lateinit var secAuthenticationEntityCaptor: ArgumentCaptor<ZignSecAuthenticationEntity>
 
     lateinit var objectMapper: ObjectMapper
 
@@ -72,7 +72,7 @@ class ZignSecSessionServiceImplTest {
     @Before
     fun before() {
         objectMapper = ObjectMapper().registerKotlinModule().registerModule(JavaTimeModule())
-        classUnderTest = ZignSecSessionServiceImpl(sessionRepository, zignSecSignEntityRepository, zignSecService, authenticationEventPublisher, objectMapper, metrics)
+        classUnderTest = ZignSecSessionServiceImpl(sessionRepository, zignSecAuthenticationEntityRepository, zignSecService, authenticationEventPublisher, objectMapper, metrics)
     }
 
     @Test
@@ -311,8 +311,8 @@ class ZignSecSessionServiceImplTest {
         whenever(sessionRepository.findByReferenceId(REFERENCE_ID)).thenReturn(
             Optional.of(session)
         )
-        whenever(zignSecSignEntityRepository.findByIdProviderPersonId("9578-6000-4-365161")).thenReturn(
-            ZignSecSignEntity(
+        whenever(zignSecAuthenticationEntityRepository.findByIdProviderPersonId("9578-6000-4-365161")).thenReturn(
+            ZignSecAuthenticationEntity(
                 personalNumber = "1212120000",
                 idProviderPersonId = "9578-6000-4-365161"
             )
@@ -328,6 +328,73 @@ class ZignSecSessionServiceImplTest {
         assertThat(savedSession.status).isEqualTo(ZignSecBankIdProgressStatus.COMPLETED)
         assertThat(savedSession.requestType).isEqualTo(ZignSecAuthenticationType.AUTH)
         assertThat(savedSession.notification).isNotNull
+    }
+
+    @Test
+    fun handleAuthenticationSuccessNotificationWithRequestPersonalNumberAndNoAuthenticationEntity() {
+        val timestamp = Instant.now()
+        val session = ZignSecSession(
+            referenceId = REFERENCE_ID,
+            memberId = 1337,
+            redirectUrl = REDIRECT_URL,
+            status = ZignSecBankIdProgressStatus.INITIATED,
+            requestType = ZignSecAuthenticationType.AUTH,
+            notification = null,
+            createdAt = timestamp,
+            updatedAt = timestamp,
+            requestPersonalNumber = "1212120000",
+            authenticationMethod = ZignSecAuthenticationMethod.NORWAY_WEB_OR_MOBILE
+        )
+
+        whenever(sessionRepository.findByReferenceId(REFERENCE_ID)).thenReturn(
+            Optional.of(session)
+        )
+        whenever(zignSecAuthenticationEntityRepository.findByIdProviderPersonId("9578-6000-4-365161")).thenReturn(null)
+        whenever(zignSecAuthenticationEntityRepository.save<ZignSecAuthenticationEntity>(any())).thenReturn(ZignSecAuthenticationEntity(
+            personalNumber = "1212120000",
+            idProviderPersonId = "9578-6000-4-365161"
+        ))
+
+        classUnderTest.handleNotification(zignSecSuccessAuthNotificationRequest)
+
+        verify(authenticationEventPublisher).publishAuthenticationEvent(ZignSecAuthenticationResult.Completed(REFERENCE_ID, 1337, "1212120000", ZignSecAuthenticationMethod.NORWAY_WEB_OR_MOBILE, "first", "last"))
+
+        val savedSession = sessionRepository.findByReferenceId(REFERENCE_ID).get()
+        assertThat(savedSession.referenceId).isEqualTo(REFERENCE_ID)
+        assertThat(savedSession.memberId).isEqualTo(1337)
+        assertThat(savedSession.status).isEqualTo(ZignSecBankIdProgressStatus.COMPLETED)
+        assertThat(savedSession.requestType).isEqualTo(ZignSecAuthenticationType.AUTH)
+        assertThat(savedSession.notification).isNotNull
+    }
+
+    @Test
+    fun handleAuthenticationSuccessNotificationWithNoRequestPersonalNumberAndNoAuthenticationEntityFails() {
+        val timestamp = Instant.now()
+        val session = ZignSecSession(
+            referenceId = REFERENCE_ID,
+            memberId = 1337,
+            redirectUrl = REDIRECT_URL,
+            status = ZignSecBankIdProgressStatus.INITIATED,
+            requestType = ZignSecAuthenticationType.AUTH,
+            notification = null,
+            createdAt = timestamp,
+            updatedAt = timestamp,
+            requestPersonalNumber = null,
+            authenticationMethod = ZignSecAuthenticationMethod.NORWAY_WEB_OR_MOBILE
+        )
+
+        whenever(sessionRepository.findByReferenceId(REFERENCE_ID)).thenReturn(
+            Optional.of(session)
+        )
+        whenever(zignSecAuthenticationEntityRepository.findByIdProviderPersonId("9578-6000-4-365161")).thenReturn(null)
+        whenever(zignSecAuthenticationEntityRepository.save<ZignSecAuthenticationEntity>(any())).thenReturn(ZignSecAuthenticationEntity(
+            personalNumber = "1212120000",
+            idProviderPersonId = "9578-6000-4-365161"
+        ))
+        
+        classUnderTest.handleNotification(zignSecSuccessAuthNotificationRequest)
+
+        verify(authenticationEventPublisher).publishAuthenticationEvent(ZignSecAuthenticationResult.Failed(REFERENCE_ID, 1337))
     }
 
     @Test
@@ -350,8 +417,8 @@ class ZignSecSessionServiceImplTest {
             Optional.of(session)
         )
 
-        whenever(zignSecSignEntityRepository.save(secSignEntityCaptor.capture())).thenReturn(
-            ZignSecSignEntity(
+        whenever(zignSecAuthenticationEntityRepository.save(secAuthenticationEntityCaptor.capture())).thenReturn(
+            ZignSecAuthenticationEntity(
                 personalNumber = "12121200000",
                 idProviderPersonId = "9578-6000-4-365161"
             )
@@ -361,8 +428,8 @@ class ZignSecSessionServiceImplTest {
 
         verify(authenticationEventPublisher).publishSignEvent(ZignSecSignResult.Signed(REFERENCE_ID, 1337, "12121200000", zignSecSuccessAuthNotificationRequest, ZignSecAuthenticationMethod.NORWAY_WEB_OR_MOBILE, "first", "last"))
 
-        assertThat(secSignEntityCaptor.value.personalNumber).isEqualTo("12121200000")
-        assertThat(secSignEntityCaptor.value.idProviderPersonId).isEqualTo("9578-6000-4-365161")
+        assertThat(secAuthenticationEntityCaptor.value.personalNumber).isEqualTo("12121200000")
+        assertThat(secAuthenticationEntityCaptor.value.idProviderPersonId).isEqualTo("9578-6000-4-365161")
 
         val savedSession = sessionRepository.findByReferenceId(REFERENCE_ID).get()
         assertThat(savedSession.referenceId).isEqualTo(REFERENCE_ID)
