@@ -39,35 +39,24 @@ class ZignSecBankIdService(
     fun authenticate(
         memberId: Long,
         request: GenericBankIdAuthenticationRequest,
-        zignSecAuthenticationMarket: ZignSecAuthenticationMarket) = when (zignSecAuthenticationMarket) {
-        ZignSecAuthenticationMarket.NORWAY -> {
-            request.personalNumber?.let {
-                zignSecAuthentication.auth(
-                    ZignSecBankIdAuthenticationRequest(
-                        memberId.toString(),
-                        it,
-                        resolveTwoLetterLanguageFromMember(memberId),
-                        authenticationSuccessUrl,
-                        authenticationFailUrl,
-                        zignSecAuthenticationMarket.getAuthenticationMethod()
-                    )
-                )
-            } ?: StartZignSecAuthenticationResult.StaticRedirect(
+        zignSecAuthenticationMarket: ZignSecAuthenticationMarket): StartZignSecAuthenticationResult {
+        if (zignSecAuthenticationMarket == ZignSecAuthenticationMarket.NORWAY &&
+            request.personalNumber == null) {
+            return StartZignSecAuthenticationResult.StaticRedirect(
                 loginUrl
             )
         }
-        ZignSecAuthenticationMarket.DENMARK -> {
-            zignSecAuthentication.auth(
-                ZignSecBankIdAuthenticationRequest(
-                    memberId.toString(),
-                    request.personalNumber,
-                    resolveTwoLetterLanguageFromMember(memberId),
-                    authenticationSuccessUrl,
-                    authenticationFailUrl,
-                    zignSecAuthenticationMarket.getAuthenticationMethod()
-                )
+
+        return zignSecAuthentication.auth(
+            ZignSecBankIdAuthenticationRequest(
+                memberId.toString(),
+                request.personalNumber,
+                resolveTwoLetterLanguageFromMember(memberId),
+                authenticationSuccessUrl,
+                authenticationFailUrl,
+                zignSecAuthenticationMarket.getAuthenticationMethod()
             )
-        }
+        )
     }
 
     fun sign(
