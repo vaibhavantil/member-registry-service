@@ -1,6 +1,7 @@
 package com.hedvig.memberservice.services.signing.zignsec
 
 import com.hedvig.external.authentication.ZignSecAuthentication
+import com.hedvig.external.authentication.dto.StartZignSecAuthenticationResult
 import com.hedvig.external.authentication.dto.ZignSecAuthenticationResult
 import com.hedvig.external.authentication.dto.ZignSecBankIdAuthenticationRequest
 import com.hedvig.integration.apigateway.ApiGatewayService
@@ -31,19 +32,44 @@ class ZignSecBankIdService(
     @Value("\${redirect.authentication.failUrl}")
     private val authenticationFailUrl: String
 ) {
+
+    //will change this once the page is done
+    val loginUrl = "TODO"
+
     fun authenticate(
         memberId: Long,
         request: GenericBankIdAuthenticationRequest,
-        zignSecAuthenticationMarket: ZignSecAuthenticationMarket) = zignSecAuthentication.auth(
-        ZignSecBankIdAuthenticationRequest(
-            memberId.toString(),
-            request.personalNumber,
-            resolveTwoLetterLanguageFromMember(memberId),
-            authenticationSuccessUrl,
-            authenticationFailUrl,
-            zignSecAuthenticationMarket.getAuthenticationMethod()
-        )
-    )
+        zignSecAuthenticationMarket: ZignSecAuthenticationMarket) = when (zignSecAuthenticationMarket) {
+        ZignSecAuthenticationMarket.NORWAY -> {
+            request.personalNumber?.let {
+                zignSecAuthentication.auth(
+                    ZignSecBankIdAuthenticationRequest(
+                        memberId.toString(),
+                        it,
+                        resolveTwoLetterLanguageFromMember(memberId),
+                        authenticationSuccessUrl,
+                        authenticationFailUrl,
+                        zignSecAuthenticationMarket.getAuthenticationMethod()
+                    )
+                )
+            } ?: StartZignSecAuthenticationResult.Success(
+                UUID.randomUUID(), // should not be used
+                loginUrl
+            )
+        }
+        ZignSecAuthenticationMarket.DENMARK -> {
+            zignSecAuthentication.auth(
+                ZignSecBankIdAuthenticationRequest(
+                    memberId.toString(),
+                    request.personalNumber,
+                    resolveTwoLetterLanguageFromMember(memberId),
+                    authenticationSuccessUrl,
+                    authenticationFailUrl,
+                    zignSecAuthenticationMarket.getAuthenticationMethod()
+                )
+            )
+        }
+    }
 
     fun sign(
         memberId: String,
