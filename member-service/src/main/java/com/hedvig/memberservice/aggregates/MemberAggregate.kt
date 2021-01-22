@@ -359,6 +359,7 @@ class MemberAggregate() {
     fun handle(cmd: MemberSimpleSignedCommand) {
         val identification = cmd.nationalIdentification.identification
         val nationality = cmd.nationalIdentification.nationality
+        apply(NewCashbackSelectedEvent(id, cashbackService.getDefaultId(id).toString()))
         apply(MemberSimpleSignedEvent(cmd.id, identification, toMemberSimpleSignedEventNationality(nationality), cmd.referenceId))
         apply(SSNUpdatedEvent(id, identification, toSSNUpdatedEventNationality(nationality)))
     }
