@@ -16,6 +16,7 @@ import com.hedvig.memberservice.web.dto.GenericBankIdAuthenticationRequest
 import com.hedvig.resolver.LocaleResolver
 import org.axonframework.commandhandling.gateway.CommandGateway
 import org.springframework.beans.factory.annotation.Value
+import org.springframework.core.env.Environment
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import java.util.*
@@ -28,15 +29,21 @@ class ZignSecBankIdService(
     private val signedMemberRepository: SignedMemberRepository,
     private val apiGatewayService: ApiGatewayService,
     private val memberRepository: MemberRepository,
+    private val env: Environment,
     @Value("\${redirect.authentication.successUrl}")
     private val authenticationSuccessUrl: String,
     @Value("\${redirect.authentication.failUrl}")
     private val authenticationFailUrl: String
 ) {
 
+    private val baseUrl
+        get() = if (env.activeProfiles.contains("production")) BASE_URL_PRODUCTION else BASE_URL_STAGING
+
     companion object {
-        const val NORWEGIAN_BANK_ID_NORWEGIAN_LOGIN_URL = "https://www.hedvig.com/no/login"
-        const val NORWEGIAN_BANK_ID_ENGLISH_LOGIN_URL = "https://www.hedvig.com/no-en/login"
+        const val BASE_URL_STAGING = "https://www.dev.hedvigit.com/"
+        const val BASE_URL_PRODUCTION = "https://www.hedvig.com/"
+        const val NORWEGIAN_BANK_ID_NORWEGIAN_LOGIN_PATH = "no/login"
+        const val NORWEGIAN_BANK_ID_ENGLISH_LOGIN_PATH = "no-en/login"
     }
 
     fun authenticate(
@@ -115,8 +122,8 @@ class ZignSecBankIdService(
     fun notifyContractsCreated(memberId: Long) = zignSecAuthentication.notifyContractsCreated(memberId)
 
     private fun resolveNorwegianLoginUrl(memberId: Long, acceptLanguage: String?) = when (resolveLocaleFromMember(memberId, acceptLanguage)?.language) {
-        Locale("nb").language -> NORWEGIAN_BANK_ID_NORWEGIAN_LOGIN_URL
-        else -> NORWEGIAN_BANK_ID_ENGLISH_LOGIN_URL
+        Locale("nb").language -> baseUrl + NORWEGIAN_BANK_ID_NORWEGIAN_LOGIN_PATH
+        else -> baseUrl + NORWEGIAN_BANK_ID_ENGLISH_LOGIN_PATH
     }
 
     private fun resolveTwoLetterLanguageFromMember(memberId: Long, acceptLanguage: String?) = when (resolveLocaleFromMember(memberId, acceptLanguage)?.language) {

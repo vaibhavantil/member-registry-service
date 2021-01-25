@@ -1,4 +1,4 @@
-package com.hedvig.memberservice.services
+package com.hedvig.memberservice.services.signing.zignsec
 
 import com.hedvig.external.authentication.ZignSecAuthentication
 import com.hedvig.external.authentication.dto.ZignSecAuthenticationMethod
@@ -12,18 +12,18 @@ import com.hedvig.memberservice.query.SignedMemberEntity
 import com.hedvig.memberservice.query.SignedMemberRepository
 import com.hedvig.memberservice.services.redispublisher.AuthSessionUpdatedEventStatus
 import com.hedvig.memberservice.services.redispublisher.RedisEventPublisher
-import com.hedvig.memberservice.services.signing.zignsec.ZignSecBankIdService
+import io.mockk.mockk
 import org.axonframework.commandhandling.gateway.CommandGateway
 import org.junit.Test
 
 import org.junit.Before
 import org.junit.runner.RunWith
 import org.mockito.Mock
-import org.mockito.Mockito.any
 import org.mockito.Mockito.anyLong
 import org.mockito.Mockito.never
 import org.mockito.Mockito.verify
 import org.mockito.junit.MockitoJUnitRunner
+import org.springframework.core.env.Environment
 import java.util.*
 import org.mockito.Mockito.`when` as whenever
 
@@ -48,11 +48,14 @@ class ZignSecBankIdServiceTest {
     @Mock
     lateinit var memberRepository: MemberRepository
 
+    @Mock
+    lateinit var env: Environment
+
     lateinit var classUnderTest: ZignSecBankIdService
 
     @Before
     fun before() {
-        classUnderTest = ZignSecBankIdService(zignSecAuthentication, commandGateway, redisEventPublisher, signedMemberRepository, apiGatewayService, memberRepository, "success", "fail")
+        classUnderTest = ZignSecBankIdService(zignSecAuthentication, commandGateway, redisEventPublisher, signedMemberRepository, apiGatewayService, memberRepository, env, "success", "fail")
     }
 
     @Test
@@ -78,7 +81,7 @@ class ZignSecBankIdServiceTest {
 
         verify(commandGateway).sendAndWait<Any>(InactivateMemberCommand(MEMBER_ID))
         verify(apiGatewayService).reassignMember(MEMBER_ID, MEMBERS_ORIGIGINAL_ID)
-        verify(commandGateway).sendAndWait<Any>(ZignSecSuccessfulAuthenticationCommand(MEMBERS_ORIGIGINAL_ID,RESULT_ID, SSN, ZignSecAuthenticationMarket.NORWAY, "Test", "Testsson"))
+        verify(commandGateway).sendAndWait<Any>(ZignSecSuccessfulAuthenticationCommand(MEMBERS_ORIGIGINAL_ID, RESULT_ID, SSN, ZignSecAuthenticationMarket.NORWAY, "Test", "Testsson"))
         verify(redisEventPublisher).onAuthSessionUpdated(MEMBER_ID, AuthSessionUpdatedEventStatus.SUCCESS)
     }
 
