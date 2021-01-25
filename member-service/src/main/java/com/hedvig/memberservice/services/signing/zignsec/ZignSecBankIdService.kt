@@ -73,7 +73,7 @@ class ZignSecBankIdService(
             ZignSecBankIdAuthenticationRequest(
                 memberId,
                 ssn,
-                resolveTwoLetterLanguageFromMember(memberId.toLong()),
+                resolveTwoLetterLanguageFromMember(memberId.toLong(), null),
                 successUrl,
                 failUrl,
                 zignSecAuthenticationMarket.getAuthenticationMethod()
