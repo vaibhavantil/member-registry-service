@@ -16,6 +16,7 @@ import com.hedvig.memberservice.web.dto.GenericBankIdAuthenticationRequest
 import com.hedvig.resolver.LocaleResolver
 import org.axonframework.commandhandling.gateway.CommandGateway
 import org.springframework.beans.factory.annotation.Value
+import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import java.util.*
 
@@ -33,17 +34,21 @@ class ZignSecBankIdService(
     private val authenticationFailUrl: String
 ) {
 
-    //will change this once the page is done
-    val loginUrl = "TODO"
+    companion object {
+        const val NORWEGIAN_BANK_ID_NORWEGIAN_LOGIN_URL = "https://www.hedvig.com/no/login"
+        const val NORWEGIAN_BANK_ID_ENGLISH_LOGIN_URL = "https://www.hedvig.com/no-en/login"
+    }
 
     fun authenticate(
         memberId: Long,
         request: GenericBankIdAuthenticationRequest,
-        zignSecAuthenticationMarket: ZignSecAuthenticationMarket): StartZignSecAuthenticationResult {
+        zignSecAuthenticationMarket: ZignSecAuthenticationMarket,
+        acceptLanguage: String?
+    ): StartZignSecAuthenticationResult {
         if (zignSecAuthenticationMarket == ZignSecAuthenticationMarket.NORWAY &&
             request.personalNumber == null) {
             return StartZignSecAuthenticationResult.StaticRedirect(
-                loginUrl
+                resolveNorwegianLoginUrl(memberId, acceptLanguage)
             )
         }
 
@@ -109,16 +114,25 @@ class ZignSecBankIdService(
 
     fun notifyContractsCreated(memberId: Long) = zignSecAuthentication.notifyContractsCreated(memberId)
 
-    private fun resolveTwoLetterLanguageFromMember(memberId: Long): String {
-        val acceptLanguage = memberRepository.findById(memberId).get().acceptLanguage
-        return getTwoLetterLanguageFromLocale(LocaleResolver.resolveLocale(acceptLanguage))
+    private fun resolveNorwegianLoginUrl(memberId: Long, acceptLanguage: String?) = when (resolveLocaleFromMember(memberId, acceptLanguage)?.language) {
+        Locale("nb").language -> NORWEGIAN_BANK_ID_NORWEGIAN_LOGIN_URL
+        else -> NORWEGIAN_BANK_ID_ENGLISH_LOGIN_URL
     }
 
-    private fun getTwoLetterLanguageFromLocale(locale: Locale) = when (locale.language) {
-        "sv" -> "SV"
-        "en" -> "EN"
-        "da" -> "DA"
-        else -> "NO"
+    private fun resolveTwoLetterLanguageFromMember(memberId: Long, acceptLanguage: String?) = when (resolveLocaleFromMember(memberId, acceptLanguage)?.language) {
+        Locale("sv").language -> "SV"
+        Locale("en").language -> "EN"
+        Locale("nb").language -> "NO"
+        Locale("da").language -> "DA"
+        else -> "EN"
+    }
+
+    private fun resolveLocaleFromMember(memberId: Long, acceptLanguage: String?): Locale? {
+        return memberRepository.findByIdOrNull(memberId)?.let {
+            it.pickedLocale?.locale
+                ?: LocaleResolver.resolveNullableLocale(acceptLanguage)
+                ?: LocaleResolver.resolveNullableLocale(it.acceptLanguage)
+        } ?: LocaleResolver.resolveNullableLocale(acceptLanguage)
     }
 }
 
