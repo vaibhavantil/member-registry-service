@@ -406,6 +406,7 @@ class MemberAggregateTests {
         val personalNumber = "198902171234"
         val nationalIdentification = NationalIdentification(personalNumber, Nationality.SWEDEN)
         val refId = UUID.randomUUID()
+        every { cashbackService.getDefaultId(any()) } returns DEFAULT_CASHBACK
         fixture
             .given(
                 MemberCreatedEvent(memberId, MemberStatus.INITIATED, Instant.now())
@@ -413,6 +414,7 @@ class MemberAggregateTests {
             .`when`(MemberSimpleSignedCommand(memberId, nationalIdentification, refId))
             .expectSuccessfulHandlerExecution()
             .expectEvents(
+                NewCashbackSelectedEvent(memberId, DEFAULT_CASHBACK.toString()),
                 MemberSimpleSignedEvent(memberId, personalNumber, MemberSimpleSignedEvent.Nationality.SWEDEN, refId),
                 SSNUpdatedEvent(memberId, personalNumber, SSNUpdatedEvent.Nationality.SWEDEN)
             )
