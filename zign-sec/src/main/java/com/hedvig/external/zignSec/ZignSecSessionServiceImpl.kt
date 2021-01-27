@@ -252,7 +252,7 @@ class ZignSecSessionServiceImpl(
                                 )
                             )
                         } else {
-                            logger.error("Member tried to login whit no ZignSecSignEntity and requestPersonalNumber was null [MemberId:${session.memberId}] [idProviderPersonId: $idProviderPersonId] [SessionId:${session.sessionId}] [session:$session]")
+                            logger.error("Member tried to login with no ZignSecSignEntity and requestPersonalNumber was null [MemberId:${session.memberId}] [idProviderPersonId: $idProviderPersonId] [SessionId:${session.sessionId}] [session:$session]")
                             authenticationEventPublisher.publishAuthenticationEvent(
                                 ZignSecAuthenticationResult.Failed(
                                     session.referenceId,
