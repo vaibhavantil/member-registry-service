@@ -193,8 +193,17 @@ class ZignSecSessionServiceImpl(
                     }
                     ZignSecBankIdProgressStatus.COMPLETED -> {
                         metrics.authSessionSuccess(session.authenticationMethod, session.requestType)
-                        if (validatePersonNumberAgainstDateOfBirth(session.requestPersonalNumber!!, notification.identity!!.dateOfBirth!!, session.authenticationMethod)) {
-                            memberSigned(session, jsonRequest, notification.identity.firstName, notification.identity.lastName)
+                        if (validatePersonNumberAgainstDateOfBirth(
+                                personNumber = session.requestPersonalNumber!!,
+                                dateOfBirth = notification.identity!!.dateOfBirth!!,
+                                method = session.authenticationMethod
+                            )) {
+                            memberSigned(
+                                session = session,
+                                jsonRequest = jsonRequest,
+                                firstName = notification.identity.firstName,
+                                lastName = notification.identity.lastName
+                            )
                         } else {
                             session.status = ZignSecBankIdProgressStatus.FAILED
                             authenticationEventPublisher.publishSignEvent(
