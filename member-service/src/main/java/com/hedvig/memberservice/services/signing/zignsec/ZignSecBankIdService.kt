@@ -29,19 +29,15 @@ class ZignSecBankIdService(
     private val signedMemberRepository: SignedMemberRepository,
     private val apiGatewayService: ApiGatewayService,
     private val memberRepository: MemberRepository,
-    private val env: Environment,
     @Value("\${redirect.authentication.successUrl}")
     private val authenticationSuccessUrl: String,
     @Value("\${redirect.authentication.failUrl}")
-    private val authenticationFailUrl: String
+    private val authenticationFailUrl: String,
+    @Value("\${static.authentication.redirect.baseUrl}")
+    private val baseUrl: String
 ) {
 
-    private val baseUrl
-        get() = if (env.activeProfiles.contains("production")) BASE_URL_PRODUCTION else BASE_URL_STAGING
-
     companion object {
-        const val BASE_URL_STAGING = "https://www.dev.hedvigit.com/"
-        const val BASE_URL_PRODUCTION = "https://www.hedvig.com/"
         const val NORWEGIAN_BANK_ID_NORWEGIAN_LOGIN_PATH = "no/login"
         const val NORWEGIAN_BANK_ID_ENGLISH_LOGIN_PATH = "no-en/login"
     }
@@ -93,10 +89,10 @@ class ZignSecBankIdService(
                 signedMemberRepository.findBySsn(result.ssn).ifPresentOrElse(
                     { signedMember ->
                         if (result.memberId != signedMember.id) {
-                            commandGateway.sendAndWait<Any>(InactivateMemberCommand(result.memberId))
+                            commandGateway.sendAndWait<Void>(InactivateMemberCommand(result.memberId))
                             apiGatewayService.reassignMember(result.memberId, signedMember.id)
                         }
-                        commandGateway.sendAndWait<Any>(
+                        commandGateway.sendAndWait<Void>(
                             ZignSecSuccessfulAuthenticationCommand(
                                 signedMember.id,
                                 result.id,

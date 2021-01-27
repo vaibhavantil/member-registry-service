@@ -27,7 +27,6 @@ class ZignSecBankIdServiceAuthenticateTest {
     private val signedMemberRepository: SignedMemberRepository = mockk()
     private val apiGatewayService: ApiGatewayService = mockk()
     private val memberRepository: MemberRepository = mockk()
-    private val env: Environment = mockk()
 
     private val sut = ZignSecBankIdService(
         zignSecAuthentication,
@@ -36,9 +35,9 @@ class ZignSecBankIdServiceAuthenticateTest {
         signedMemberRepository,
         apiGatewayService,
         memberRepository,
-        env,
         "",
-        ""
+        "",
+        "https://www.dev.hedvigit.com/"
     )
 
     @Test
@@ -78,7 +77,6 @@ class ZignSecBankIdServiceAuthenticateTest {
     @Test
     fun `authenticate market norway without ssn returns static redirect`() {
         every { memberRepository.findById(any()) } returns Optional.empty()
-        every { env.activeProfiles } returns arrayOf()
 
         val response = sut.authenticate(
             memberId,
@@ -88,45 +86,12 @@ class ZignSecBankIdServiceAuthenticateTest {
         )
 
         assertThat(response).isInstanceOf(StartZignSecAuthenticationResult.StaticRedirect::class.java)
-        assertThat((response as StartZignSecAuthenticationResult.StaticRedirect).redirectUrl).isEqualTo(stagingEnglishUrl)
-    }
-
-    @Test
-    fun `authenticate market norway without ssn and active profile of production returns static redirect of prod url`() {
-        every { memberRepository.findById(any()) } returns Optional.empty()
-        every { env.activeProfiles } returns arrayOf("production")
-
-        val response = sut.authenticate(
-            memberId,
-            GenericBankIdAuthenticationRequest(null),
-            ZignSecAuthenticationMarket.NORWAY,
-            null
-        )
-
-        assertThat(response).isInstanceOf(StartZignSecAuthenticationResult.StaticRedirect::class.java)
-        assertThat((response as StartZignSecAuthenticationResult.StaticRedirect).redirectUrl).isEqualTo(prodEnglishUrl)
-    }
-
-    @Test
-    fun `authenticate market norway without ssn and accept languge nb-NO and active profile of production returns static redirect of prod url`() {
-        every { memberRepository.findById(any()) } returns Optional.empty()
-        every { env.activeProfiles } returns arrayOf("production")
-
-        val response = sut.authenticate(
-            memberId,
-            GenericBankIdAuthenticationRequest(null),
-            ZignSecAuthenticationMarket.NORWAY,
-            "nb-NO"
-        )
-
-        assertThat(response).isInstanceOf(StartZignSecAuthenticationResult.StaticRedirect::class.java)
-        assertThat((response as StartZignSecAuthenticationResult.StaticRedirect).redirectUrl).isEqualTo(prodNorwegianUrl)
+        assertThat((response as StartZignSecAuthenticationResult.StaticRedirect).redirectUrl).isEqualTo(englishUrl)
     }
 
     @Test
     fun `authenticate with no member accept language nb-NO returns norwegian url`() {
         every { memberRepository.findById(any()) } returns Optional.empty()
-        every { env.activeProfiles } returns arrayOf()
 
         val response = sut.authenticate(
             memberId,
@@ -136,13 +101,12 @@ class ZignSecBankIdServiceAuthenticateTest {
         )
 
         assertThat(response).isInstanceOf(StartZignSecAuthenticationResult.StaticRedirect::class.java)
-        assertThat((response as StartZignSecAuthenticationResult.StaticRedirect).redirectUrl).isEqualTo(stagingNorwegianUrl)
+        assertThat((response as StartZignSecAuthenticationResult.StaticRedirect).redirectUrl).isEqualTo(norwegianUrl)
     }
 
     @Test
     fun `authenticate with member with picked locale nb_NO returns norwegian url`() {
         every { memberRepository.findById(any()) } returns Optional.of(createMemberWithPickedLocale(PickedLocale.nb_NO))
-        every { env.activeProfiles } returns arrayOf()
 
         val response = sut.authenticate(
             memberId,
@@ -152,13 +116,12 @@ class ZignSecBankIdServiceAuthenticateTest {
         )
 
         assertThat(response).isInstanceOf(StartZignSecAuthenticationResult.StaticRedirect::class.java)
-        assertThat((response as StartZignSecAuthenticationResult.StaticRedirect).redirectUrl).isEqualTo(stagingNorwegianUrl)
+        assertThat((response as StartZignSecAuthenticationResult.StaticRedirect).redirectUrl).isEqualTo(norwegianUrl)
     }
 
     @Test
     fun `authenticate with no member accept language en-NO returns english url`() {
         every { memberRepository.findById(any()) } returns Optional.empty()
-        every { env.activeProfiles } returns arrayOf()
 
         val response = sut.authenticate(
             memberId,
@@ -168,13 +131,12 @@ class ZignSecBankIdServiceAuthenticateTest {
         )
 
         assertThat(response).isInstanceOf(StartZignSecAuthenticationResult.StaticRedirect::class.java)
-        assertThat((response as StartZignSecAuthenticationResult.StaticRedirect).redirectUrl).isEqualTo(stagingEnglishUrl)
+        assertThat((response as StartZignSecAuthenticationResult.StaticRedirect).redirectUrl).isEqualTo(englishUrl)
     }
 
     @Test
     fun `authenticate with member with picked locale en_NO returns english url`() {
         every { memberRepository.findById(any()) } returns Optional.of(createMemberWithPickedLocale(PickedLocale.en_NO))
-        every { env.activeProfiles } returns arrayOf()
 
         val response = sut.authenticate(
             memberId,
@@ -184,13 +146,12 @@ class ZignSecBankIdServiceAuthenticateTest {
         )
 
         assertThat(response).isInstanceOf(StartZignSecAuthenticationResult.StaticRedirect::class.java)
-        assertThat((response as StartZignSecAuthenticationResult.StaticRedirect).redirectUrl).isEqualTo(stagingEnglishUrl)
+        assertThat((response as StartZignSecAuthenticationResult.StaticRedirect).redirectUrl).isEqualTo(englishUrl)
     }
 
     @Test
     fun `authenticate with no member and no accept language returns english url`() {
         every { memberRepository.findById(any()) } returns Optional.empty()
-        every { env.activeProfiles } returns arrayOf()
 
         val response = sut.authenticate(
             memberId,
@@ -200,7 +161,7 @@ class ZignSecBankIdServiceAuthenticateTest {
         )
 
         assertThat(response).isInstanceOf(StartZignSecAuthenticationResult.StaticRedirect::class.java)
-        assertThat((response as StartZignSecAuthenticationResult.StaticRedirect).redirectUrl).isEqualTo(stagingEnglishUrl)
+        assertThat((response as StartZignSecAuthenticationResult.StaticRedirect).redirectUrl).isEqualTo(englishUrl)
     }
 
     private fun createMemberWithPickedLocale(pickedLocale: PickedLocale) = MemberEntity().apply {
@@ -209,9 +170,7 @@ class ZignSecBankIdServiceAuthenticateTest {
 
     companion object {
         private const val memberId = 1234L
-        private const val stagingEnglishUrl = "https://www.dev.hedvigit.com/no-en/login"
-        private const val stagingNorwegianUrl = "https://www.dev.hedvigit.com/no/login"
-        private const val prodEnglishUrl = "https://www.hedvig.com/no-en/login"
-        private const val prodNorwegianUrl = "https://www.hedvig.com/no/login"
+        private const val englishUrl = "https://www.dev.hedvigit.com/no-en/login"
+        private const val norwegianUrl = "https://www.dev.hedvigit.com/no/login"
     }
 }

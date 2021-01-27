@@ -39,9 +39,19 @@ graphcms:
   url: https://api-euwest.graphcms.com/v1/cjmawd9hw036a01cuzmjhplka/master
   project: MemberService
 
+static:
+  authentication:
+    redirect:
+      baseUrl: https://www.hedvig.com/
+
 ---
 spring:
   profiles: test, development
 
 lokalise:
   useFakes: true
+
+static:
+  authentication:
+    redirect:
+      baseUrl: https://www.dev.hedvigit.com/
