@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.hedvig.external.authentication.dto.ZignSecAuthenticationResult
 import com.hedvig.external.authentication.dto.ZignSecSignResult
 import com.hedvig.external.authentication.dto.StartZignSecAuthenticationResult
+import com.hedvig.external.authentication.dto.ZignSecAuthenticationMethod
 import com.hedvig.external.authentication.dto.ZignSecAuthenticationResponseError
 import com.hedvig.external.authentication.dto.ZignSecBankIdAuthenticationRequest
 import com.hedvig.external.authentication.dto.ZignSecBankIdProgressStatus
@@ -18,6 +19,7 @@ import com.hedvig.external.zignSec.repository.entitys.ZignSecSession
 import com.hedvig.external.zignSec.repository.entitys.ZignSecSignEntity
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
+import java.text.DecimalFormat
 
 @Service
 class ZignSecSessionServiceImpl(
@@ -191,11 +193,18 @@ class ZignSecSessionServiceImpl(
                     }
                     ZignSecBankIdProgressStatus.COMPLETED -> {
                         metrics.authSessionSuccess(session.authenticationMethod, session.requestType)
-                        //TODO: re add this when everything is in order with zign sec and person number also un ignore the test in ZignSecSessionServiceImplTest
-                        //NOTE: this is also used in denmark so make sure both work on changing
-                        //check that personal number is matching when signing
-//                        if (notification.identity!!.personalNumber!! != session.requestPersonalNumber!!) {
-                        if (notification.identity!!.dateOfBirth!!.dayMonthAndTwoDigitYearFromDateOfBirth() != session.requestPersonalNumber!!.dayMonthAndTwoDigitYearFromNorwegianOrDanishSsn()) {
+                        if (validatePersonNumberAgainstDateOfBirth(
+                                personNumber = session.requestPersonalNumber!!,
+                                dateOfBirth = notification.identity!!.dateOfBirth!!,
+                                method = session.authenticationMethod
+                            )) {
+                            memberSigned(
+                                session = session,
+                                jsonRequest = jsonRequest,
+                                firstName = notification.identity.firstName,
+                                lastName = notification.identity.lastName
+                            )
+                        } else {
                             session.status = ZignSecBankIdProgressStatus.FAILED
                             authenticationEventPublisher.publishSignEvent(
                                 ZignSecSignResult.Failed(
@@ -204,8 +213,6 @@ class ZignSecSessionServiceImpl(
                                     session.authenticationMethod
                                 )
                             )
-                        } else {
-                            memberSigned(session, jsonRequest, notification.identity.firstName, notification.identity.lastName)
                         }
                     }
                 }
@@ -293,23 +300,73 @@ class ZignSecSessionServiceImpl(
         ZignSecBankIdProgressStatus.FAILED
     }
 
+    fun validatePersonNumberAgainstDateOfBirth(personNumber: String, dateOfBirth: String, method: ZignSecAuthenticationMethod): Boolean {
+        if (personNumber.dayMonthAndTwoDigitYearFromNorwegianOrDanishSsn() == dateOfBirth.dayMonthAndTwoDigitYearFromDateOfBirth()) {
+            return true
+        }
+
+        return when (method) {
+            ZignSecAuthenticationMethod.NORWAY_WEB_OR_MOBILE ->
+                validatePersonNumberAgainstDateOfBirthWithKnownNorwegianBankIdBug(personNumber, dateOfBirth) ||
+                    validateDNumberAgainstDateOfBirth(personNumber, dateOfBirth)
+            ZignSecAuthenticationMethod.DENMARK -> false
+        }
+    }
+
+    /**
+     * On 26:th of january 2021 we found a bug where norwegian bank id returns the birthdate off by one day
+     *
+     * Note: To this date this has never changed month so for now this is not something we want to include in this fix
+     */
+    fun validatePersonNumberAgainstDateOfBirthWithKnownNorwegianBankIdBug(personNumber: String, dateOfBirth: String): Boolean {
+        val personNumberTriple = personNumber.dayMonthAndTwoDigitYearFromNorwegianOrDanishSsn()
+        val dayMonthAndTwoDigitYearTriple = dateOfBirth.dayMonthAndTwoDigitYearFromDateOfBirth()
+
+        val birthdayIncreasedByOne = DATE_FORMAT.format(dayMonthAndTwoDigitYearTriple.first.toInt() + 1)
+        return (
+            personNumberTriple.first == birthdayIncreasedByOne &&
+                personNumberTriple.second == dayMonthAndTwoDigitYearTriple.second &&
+                personNumberTriple.third == dayMonthAndTwoDigitYearTriple.third
+            )
+    }
+
+    /**
+     * https://www.skatteetaten.no/en/person/foreign/norwegian-identification-number/d-number/
+     */
+    fun validateDNumberAgainstDateOfBirth(personNumber: String, dateOfBirth: String): Boolean {
+        val personNumberTriple = personNumber.dayMonthAndTwoDigitYearFromNorwegianOrDanishSsn()
+
+        if (personNumberTriple.first.toInt() < 5) {
+            return false
+        }
+        val firstOfPersonNumberDecreasedBy4 = DATE_FORMAT.format(personNumberTriple.first.toInt() - 4)
+        val dayMonthAndTwoDigitYearTriple = dateOfBirth.dayMonthAndTwoDigitYearFromDateOfBirth()
+
+        return (
+            firstOfPersonNumberDecreasedBy4 == dayMonthAndTwoDigitYearTriple.first &&
+                personNumberTriple.second == dayMonthAndTwoDigitYearTriple.second &&
+                personNumberTriple.third == dayMonthAndTwoDigitYearTriple.third
+            )
+    }
+
+    fun String.dayMonthAndTwoDigitYearFromNorwegianOrDanishSsn(): Triple<String, String, String> {
+        val trimmedInput = this.trim().replace("-", "").replace(" ", "")
+        val day = trimmedInput.substring(0, 2)
+        val month = trimmedInput.substring(2, 4)
+        val twoDigitYear = trimmedInput.substring(4, 6)
+        return Triple(day, month, twoDigitYear)
+    }
+
+    //Format `yyyy-mm-dd`
+    fun String.dayMonthAndTwoDigitYearFromDateOfBirth(): Triple<String, String, String> {
+        val twoDigitYear = this.substring(2, 4)
+        val month = this.substring(5, 7)
+        val day = this.substring(8, 10)
+        return Triple(day, month, twoDigitYear)
+    }
+
     companion object {
         private val logger = LoggerFactory.getLogger(ZignSecServiceImpl::class.java)
+        val DATE_FORMAT = DecimalFormat("00");
     }
-}
-
-fun String.dayMonthAndTwoDigitYearFromNorwegianOrDanishSsn(): Triple<String, String, String> {
-    val trimmedInput = this.trim().replace("-", "").replace(" ", "")
-    val day = trimmedInput.substring(0, 2)
-    val month = trimmedInput.substring(2, 4)
-    val twoDigitYear = trimmedInput.substring(4, 6)
-    return Triple(day, month, twoDigitYear)
-}
-
-//Format `yyyy-mm-dd`
-fun String.dayMonthAndTwoDigitYearFromDateOfBirth(): Triple<String, String, String> {
-    val twoDigitYear = this.substring(2, 4)
-    val month = this.substring(5, 7)
-    val day = this.substring(8, 10)
-    return Triple(day, month, twoDigitYear)
 }
