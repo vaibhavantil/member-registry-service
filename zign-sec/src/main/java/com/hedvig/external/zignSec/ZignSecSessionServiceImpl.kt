@@ -314,7 +314,7 @@ class ZignSecSessionServiceImpl(
     }
 
     /**
-     * On 26:th of january 2021 we found a bug where norwegian bank id returns the birthdate of by one day
+     * On 26:th of january 2021 we found a bug where norwegian bank id returns the birthdate off by one day
      *
      * Note: To this date this has never changed month so for now this is not something we want to include in this fix
      */
