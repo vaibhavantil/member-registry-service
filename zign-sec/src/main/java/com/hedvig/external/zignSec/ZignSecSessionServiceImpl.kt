@@ -236,8 +236,11 @@ class ZignSecSessionServiceImpl(
 
                         val authEntity = zignSecAuthenticationEntityRepository.findByIdProviderPersonId(idProviderPersonId)
                             ?: run {
-                                if (session.requestPersonalNumber != null &&
-                                    notification.identity!!.dateOfBirth!!.dayMonthAndTwoDigitYearFromDateOfBirth() == session.requestPersonalNumber!!.dayMonthAndTwoDigitYearFromNorwegianOrDanishSsn()) {
+                                if (validatePersonNumberAgainstDateOfBirth(
+                                        personNumber = session.requestPersonalNumber!!,
+                                        dateOfBirth = notification.identity!!.dateOfBirth!!,
+                                        method = session.authenticationMethod
+                                    )) {
                                     zignSecAuthenticationEntityRepository.save(ZignSecAuthenticationEntity(
                                         personalNumber = session.requestPersonalNumber!!,
                                         idProviderPersonId = session.notification!!.identity!!.idProviderPersonId!!
