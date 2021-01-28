@@ -583,12 +583,75 @@ class ZignSecSessionServiceImplTest {
     }
 
     @Test
-    fun testSsnAndBirthDateExtensionsWorks() {
-        assertThat("12121212120".dayMonthAndTwoDigitYearFromNorwegianOrDanishSsn()).isEqualTo("1912-12-12".dayMonthAndTwoDigitYearFromDateOfBirth())
-        assertThat("20059412120".dayMonthAndTwoDigitYearFromNorwegianOrDanishSsn()).isEqualTo("1994-05-20".dayMonthAndTwoDigitYearFromDateOfBirth())
-        assertThat("29018912120".dayMonthAndTwoDigitYearFromNorwegianOrDanishSsn()).isEqualTo("1989-01-29".dayMonthAndTwoDigitYearFromDateOfBirth())
-        assertThat("1408300921".dayMonthAndTwoDigitYearFromNorwegianOrDanishSsn()).isEqualTo("1930-08-14".dayMonthAndTwoDigitYearFromDateOfBirth())
-        assertThat("1507161027".dayMonthAndTwoDigitYearFromNorwegianOrDanishSsn()).isEqualTo("2016-07-15".dayMonthAndTwoDigitYearFromDateOfBirth())
+    fun validateNorwegianPersonNumberAgainstDateOfBirth() {
+        val personNumber1 = "12121212120"
+        val birthDate1 = "1912-12-12"
+        assertThat(classUnderTest.validatePersonNumberAgainstDateOfBirth(personNumber1, birthDate1, ZignSecAuthenticationMethod.NORWAY_WEB_OR_MOBILE)).isTrue()
+
+        val personNumber2 = "20059412120"
+        val birthDate2 = "1994-05-20"
+        assertThat(classUnderTest.validatePersonNumberAgainstDateOfBirth(personNumber2, birthDate2, ZignSecAuthenticationMethod.NORWAY_WEB_OR_MOBILE)).isTrue()
+
+        val personNumber3 = "29018912120"
+        val birthDate3 = "1989-01-29"
+        assertThat(classUnderTest.validatePersonNumberAgainstDateOfBirth(personNumber3, birthDate3, ZignSecAuthenticationMethod.NORWAY_WEB_OR_MOBILE)).isTrue()
+
+        val notMatchingBirthdate = "1989-01-31"
+        assertThat(classUnderTest.validatePersonNumberAgainstDateOfBirth(personNumber1, notMatchingBirthdate, ZignSecAuthenticationMethod.NORWAY_WEB_OR_MOBILE)).isFalse()
+        assertThat(classUnderTest.validatePersonNumberAgainstDateOfBirth(personNumber2, notMatchingBirthdate, ZignSecAuthenticationMethod.NORWAY_WEB_OR_MOBILE)).isFalse()
+        assertThat(classUnderTest.validatePersonNumberAgainstDateOfBirth(personNumber3, notMatchingBirthdate, ZignSecAuthenticationMethod.NORWAY_WEB_OR_MOBILE)).isFalse()
+    }
+
+    @Test
+    fun validateNorwegianPersonalNumberAgainstNorwegianBankIdBugDateOfBirth() {
+        val personNumber1 = "12121212120"
+        val norwegianBankIdBugBirthDate1 = "1912-12-11"
+        assertThat(classUnderTest.validatePersonNumberAgainstDateOfBirth(personNumber1, norwegianBankIdBugBirthDate1, ZignSecAuthenticationMethod.NORWAY_WEB_OR_MOBILE)).isTrue()
+
+        val personNumber2 = "20059412120"
+        val norwegianBankIdBugBirthDate2 = "1994-05-19"
+        assertThat(classUnderTest.validatePersonNumberAgainstDateOfBirth(personNumber2, norwegianBankIdBugBirthDate2, ZignSecAuthenticationMethod.NORWAY_WEB_OR_MOBILE)).isTrue()
+
+        val personNumber3 = "02012012120"
+        val norwegianBankIdBugBirthDate3 = "2020-01-01"
+        assertThat(classUnderTest.validatePersonNumberAgainstDateOfBirth(personNumber3, norwegianBankIdBugBirthDate3, ZignSecAuthenticationMethod.NORWAY_WEB_OR_MOBILE)).isTrue()
+    }
+
+    @Test
+    fun validateNorwegianDNumberAgainstDateOfBirth() {
+        val norwegianDNumber1 = "24059412120"
+        val birthDate1 = "1994-05-20"
+        assertThat(classUnderTest.validatePersonNumberAgainstDateOfBirth(norwegianDNumber1, birthDate1, ZignSecAuthenticationMethod.NORWAY_WEB_OR_MOBILE)).isTrue()
+
+        val norwegianDNumber2 = "33018912120"
+        val birthDate2 = "1989-01-29"
+        assertThat(classUnderTest.validatePersonNumberAgainstDateOfBirth(norwegianDNumber2, birthDate2, ZignSecAuthenticationMethod.NORWAY_WEB_OR_MOBILE)).isTrue()
+
+        val norwegianDNumber3 = "05012012120"
+        val birthDate3 = "2020-01-01"
+        assertThat(classUnderTest.validatePersonNumberAgainstDateOfBirth(norwegianDNumber3, birthDate3, ZignSecAuthenticationMethod.NORWAY_WEB_OR_MOBILE)).isTrue()
+    }
+
+    @Test
+    fun validateDanishPersonNumberAgainstDateOfBirth() {
+        val personNumber1 = "1408300921"
+        val birthDate1 = "1930-08-14"
+        assertThat(classUnderTest.validatePersonNumberAgainstDateOfBirth(personNumber1, birthDate1, ZignSecAuthenticationMethod.DENMARK)).isTrue()
+
+        val personNumber2 = "1507161027"
+        val birthDate2 = "2016-07-15"
+        assertThat(classUnderTest.validatePersonNumberAgainstDateOfBirth(personNumber2, birthDate2, ZignSecAuthenticationMethod.DENMARK)).isTrue()
+    }
+
+    @Test
+    fun validateNorwegianDNumberAndNorwegianBugDoseNotWorkInDenmark() {
+        val norwegianDNumber = "24059412120"
+        val birthDateForDNumber = "1994-05-20"
+        assertThat(classUnderTest.validatePersonNumberAgainstDateOfBirth(norwegianDNumber, birthDateForDNumber, ZignSecAuthenticationMethod.DENMARK)).isFalse()
+
+        val personNumber = "30018912120"
+        val norwegianBankIdBugBirthDate = "1989-01-29"
+        assertThat(classUnderTest.validatePersonNumberAgainstDateOfBirth(personNumber, norwegianBankIdBugBirthDate, ZignSecAuthenticationMethod.DENMARK)).isFalse()
     }
 
     companion object {
