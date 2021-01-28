@@ -236,12 +236,11 @@ class ZignSecSessionServiceImpl(
 
                         val authEntity = zignSecAuthenticationEntityRepository.findByIdProviderPersonId(idProviderPersonId)
                             ?: run {
-                                if (validatePersonNumberAgainstDateOfBirth(
+                                if (session.requestPersonalNumber != null && validatePersonNumberAgainstDateOfBirth(
                                         personNumber = session.requestPersonalNumber!!,
                                         dateOfBirth = notification.identity!!.dateOfBirth!!,
                                         method = session.authenticationMethod
-                                    )) {
-                                    zignSecAuthenticationEntityRepository.save(ZignSecAuthenticationEntity(
+                                    )) {      zignSecAuthenticationEntityRepository.save(ZignSecAuthenticationEntity(
                                         personalNumber = session.requestPersonalNumber!!,
                                         idProviderPersonId = session.notification!!.identity!!.idProviderPersonId!!
                                     ))
