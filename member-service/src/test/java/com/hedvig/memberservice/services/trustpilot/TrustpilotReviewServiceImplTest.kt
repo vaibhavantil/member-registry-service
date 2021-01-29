@@ -1,8 +1,8 @@
 package com.hedvig.memberservice.services.trustpilot
 
-import com.hedvig.memberservice.external.trustpilot.TrustpilotClient
-import com.hedvig.memberservice.external.trustpilot.TrustpilotReviewLinkRequestDto
-import com.hedvig.memberservice.external.trustpilot.TrustpilotReviewLinkResponseDto
+import com.hedvig.memberservice.services.trustpilot.api.TrustpilotClient
+import com.hedvig.memberservice.services.trustpilot.api.TrustpilotReviewLinkRequestDto
+import com.hedvig.memberservice.services.trustpilot.api.TrustpilotReviewLinkResponseDto
 import io.mockk.MockKAnnotations
 import io.mockk.every
 import io.mockk.impl.annotations.MockK

@@ -5,6 +5,7 @@ import com.hedvig.memberservice.aggregates.PickedLocale
 import com.hedvig.memberservice.events.EmailUpdatedEvent
 import com.hedvig.memberservice.query.MemberEntity
 import com.hedvig.memberservice.query.MemberRepository
+import com.hedvig.memberservice.services.trustpilot.CustomerIOTrustpilotEventListener
 import com.hedvig.memberservice.services.trustpilot.TrustpilotReviewInvitation
 import com.hedvig.memberservice.services.trustpilot.TrustpilotReviewService
 import io.mockk.MockKAnnotations
