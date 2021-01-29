@@ -43,6 +43,14 @@ static:
   authentication:
     redirect:
       baseUrl: https://www.hedvig.com/
+---
+spring:
+  profiles: test, development, staging
+
+static:
+  authentication:
+    redirect:
+      baseUrl: https://www.dev.hedvigit.com/
 
 ---
 spring:
@@ -50,8 +58,3 @@ spring:
 
 lokalise:
   useFakes: true
-
-static:
-  authentication:
-    redirect:
-      baseUrl: https://www.dev.hedvigit.com/
