@@ -1,6 +1,6 @@
 package com.hedvig.memberservice.services
 
-import com.hedvig.external.zignSec.repository.ZignSecSignEntityRepository
+import com.hedvig.external.zignSec.repository.ZignSecAuthenticationEntityRepository
 import com.hedvig.memberservice.query.SignedMemberRepository
 import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Service
@@ -9,20 +9,20 @@ import org.springframework.stereotype.Service
 @Profile("staging", "development")
 class QualityAssuranceServiceImpl(
     private val signedMemberRepository: SignedMemberRepository,
-    private val zignSecSignEntityRepository: ZignSecSignEntityRepository
+    private val zignSecAuthenticationEntityRepository: ZignSecAuthenticationEntityRepository
 ) : QualityAssuranceService {
 
     override fun unsignMember(ssn: String): Boolean {
         val signedMemberEntity = signedMemberRepository.findBySsn(ssn)
 
-        val zignSecSignEntity = zignSecSignEntityRepository.findByPersonalNumber(ssn)
+        val zignSecAuthenticationEntity = zignSecAuthenticationEntityRepository.findByPersonalNumber(ssn)
 
         if (signedMemberEntity.isPresent) {
             signedMemberRepository.delete(signedMemberEntity.get())
         }
-        zignSecSignEntity?.let {
-            zignSecSignEntityRepository.delete(zignSecSignEntity)
+        zignSecAuthenticationEntity?.let {
+            zignSecAuthenticationEntityRepository.delete(zignSecAuthenticationEntity)
         }
-        return signedMemberEntity.isPresent || zignSecSignEntity != null
+        return signedMemberEntity.isPresent || zignSecAuthenticationEntity != null
     }
 }

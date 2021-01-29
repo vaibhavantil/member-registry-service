@@ -60,12 +60,12 @@ class AuthController @Autowired constructor(
     }
 
     @PostMapping(path = ["/{country}/bankid/auth"])
-    private fun auth(@RequestHeader("hedvig.token") memberId: Long, @PathVariable("country") country: BankIdAuthCountry, @RequestBody request: GenericBankIdAuthenticationRequest): ResponseEntity<StartZignSecAuthenticationResult> {
+    private fun auth(@RequestHeader("hedvig.token") memberId: Long, @RequestHeader(value = "Accept-Language", required = false) acceptLanguage: String?, @PathVariable("country") country: BankIdAuthCountry, @RequestBody request: GenericBankIdAuthenticationRequest): ResponseEntity<StartZignSecAuthenticationResult> {
         return when (country) {
             BankIdAuthCountry.norway ->
-                ResponseEntity.ok(zignSecBankIdService.authenticate(memberId, request, ZignSecAuthenticationMarket.NORWAY))
+                ResponseEntity.ok(zignSecBankIdService.authenticate(memberId, request, ZignSecAuthenticationMarket.NORWAY, acceptLanguage))
             BankIdAuthCountry.denmark ->
-                ResponseEntity.ok(zignSecBankIdService.authenticate(memberId, request, ZignSecAuthenticationMarket.DENMARK))
+                ResponseEntity.ok(zignSecBankIdService.authenticate(memberId, request, ZignSecAuthenticationMarket.DENMARK, acceptLanguage))
         }
     }
 

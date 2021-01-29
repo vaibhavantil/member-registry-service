@@ -7,6 +7,7 @@ import com.hedvig.memberservice.web.dto.UnderwriterStartSignSessionResponse
 import com.hedvig.memberservice.web.dto.toZignSecAuthenticationMarket
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
+import java.lang.RuntimeException
 import java.net.URL
 import java.util.UUID
 
@@ -57,6 +58,8 @@ class StartRedirectBankIdSignSessionStrategy(
                     ),
                     signStrategy
                 )
+            is StartZignSecAuthenticationResult.StaticRedirect ->
+                throw RuntimeException("We should not do StaticRedirect on signing")
         }
     }
 

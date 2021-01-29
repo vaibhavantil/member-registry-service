@@ -1,6 +1,7 @@
 package com.hedvig.memberservice.services.signing.zignsec
 
 import com.hedvig.external.authentication.ZignSecAuthentication
+import com.hedvig.external.authentication.dto.StartZignSecAuthenticationResult
 import com.hedvig.external.authentication.dto.ZignSecAuthenticationResult
 import com.hedvig.external.authentication.dto.ZignSecBankIdAuthenticationRequest
 import com.hedvig.integration.apigateway.ApiGatewayService
@@ -15,6 +16,8 @@ import com.hedvig.memberservice.web.dto.GenericBankIdAuthenticationRequest
 import com.hedvig.resolver.LocaleResolver
 import org.axonframework.commandhandling.gateway.CommandGateway
 import org.springframework.beans.factory.annotation.Value
+import org.springframework.core.env.Environment
+import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import java.util.*
 
@@ -29,21 +32,40 @@ class ZignSecBankIdService(
     @Value("\${redirect.authentication.successUrl}")
     private val authenticationSuccessUrl: String,
     @Value("\${redirect.authentication.failUrl}")
-    private val authenticationFailUrl: String
+    private val authenticationFailUrl: String,
+    @Value("\${static.authentication.redirect.baseUrl}")
+    private val baseUrl: String
 ) {
+
+    companion object {
+        const val NORWEGIAN_BANK_ID_NORWEGIAN_LOGIN_PATH = "no/login"
+        const val NORWEGIAN_BANK_ID_ENGLISH_LOGIN_PATH = "no-en/login"
+    }
+
     fun authenticate(
         memberId: Long,
         request: GenericBankIdAuthenticationRequest,
-        zignSecAuthenticationMarket: ZignSecAuthenticationMarket) = zignSecAuthentication.auth(
-        ZignSecBankIdAuthenticationRequest(
-            memberId.toString(),
-            request.personalNumber,
-            resolveTwoLetterLanguageFromMember(memberId),
-            authenticationSuccessUrl,
-            authenticationFailUrl,
-            zignSecAuthenticationMarket.getAuthenticationMethod()
+        zignSecAuthenticationMarket: ZignSecAuthenticationMarket,
+        acceptLanguage: String?
+    ): StartZignSecAuthenticationResult {
+        if (zignSecAuthenticationMarket == ZignSecAuthenticationMarket.NORWAY &&
+            request.personalNumber == null) {
+            return StartZignSecAuthenticationResult.StaticRedirect(
+                resolveNorwegianLoginUrl(memberId, acceptLanguage)
+            )
+        }
+
+        return zignSecAuthentication.auth(
+            ZignSecBankIdAuthenticationRequest(
+                memberId.toString(),
+                request.personalNumber,
+                resolveTwoLetterLanguageFromMember(memberId, acceptLanguage),
+                authenticationSuccessUrl,
+                authenticationFailUrl,
+                zignSecAuthenticationMarket.getAuthenticationMethod()
+            )
         )
-    )
+    }
 
     fun sign(
         memberId: String,
@@ -54,7 +76,7 @@ class ZignSecBankIdService(
             ZignSecBankIdAuthenticationRequest(
                 memberId,
                 ssn,
-                resolveTwoLetterLanguageFromMember(memberId.toLong()),
+                resolveTwoLetterLanguageFromMember(memberId.toLong(), null),
                 successUrl,
                 failUrl,
                 zignSecAuthenticationMarket.getAuthenticationMethod()
@@ -64,25 +86,27 @@ class ZignSecBankIdService(
     fun completeAuthentication(result: ZignSecAuthenticationResult) {
         when (result) {
             is ZignSecAuthenticationResult.Completed -> {
-                val signedMember = signedMemberRepository.findBySsn(result.ssn)
-                if (signedMember.isPresent) {
-                    if (result.memberId != signedMember.get().id) {
-                        commandGateway.sendAndWait<Any>(InactivateMemberCommand(result.memberId))
-                        apiGatewayService.reassignMember(result.memberId, signedMember.get().id)
+                signedMemberRepository.findBySsn(result.ssn).ifPresentOrElse(
+                    { signedMember ->
+                        if (result.memberId != signedMember.id) {
+                            commandGateway.sendAndWait<Void>(InactivateMemberCommand(result.memberId))
+                            apiGatewayService.reassignMember(result.memberId, signedMember.id)
+                        }
+                        commandGateway.sendAndWait<Void>(
+                            ZignSecSuccessfulAuthenticationCommand(
+                                signedMember.id,
+                                result.id,
+                                result.ssn,
+                                ZignSecAuthenticationMarket.fromAuthenticationMethod(result.authenticationMethod),
+                                result.firstName,
+                                result.lastName
+                            ))
+                        redisEventPublisher.onAuthSessionUpdated(result.memberId, AuthSessionUpdatedEventStatus.SUCCESS)
+                    },
+                    {
+                        redisEventPublisher.onAuthSessionUpdated(result.memberId, AuthSessionUpdatedEventStatus.FAILED)
                     }
-                    commandGateway.sendAndWait<Any>(
-                        ZignSecSuccessfulAuthenticationCommand(
-                            result.memberId,
-                            result.id,
-                            result.ssn,
-                            ZignSecAuthenticationMarket.fromAuthenticationMethod(result.authenticationMethod),
-                            result.firstName,
-                            result.lastName
-                        ))
-                    redisEventPublisher.onAuthSessionUpdated(result.memberId, AuthSessionUpdatedEventStatus.SUCCESS)
-                } else {
-                    redisEventPublisher.onAuthSessionUpdated(result.memberId, AuthSessionUpdatedEventStatus.FAILED)
-                }
+                )
             }
             is ZignSecAuthenticationResult.Failed ->
                 redisEventPublisher.onAuthSessionUpdated(result.memberId, AuthSessionUpdatedEventStatus.FAILED)
@@ -93,16 +117,25 @@ class ZignSecBankIdService(
 
     fun notifyContractsCreated(memberId: Long) = zignSecAuthentication.notifyContractsCreated(memberId)
 
-    private fun resolveTwoLetterLanguageFromMember(memberId: Long): String {
-        val acceptLanguage = memberRepository.findById(memberId).get().acceptLanguage
-        return getTwoLetterLanguageFromLocale(LocaleResolver.resolveLocale(acceptLanguage))
+    private fun resolveNorwegianLoginUrl(memberId: Long, acceptLanguage: String?) = when (resolveLocaleFromMember(memberId, acceptLanguage)?.language) {
+        Locale("nb").language -> baseUrl + NORWEGIAN_BANK_ID_NORWEGIAN_LOGIN_PATH
+        else -> baseUrl + NORWEGIAN_BANK_ID_ENGLISH_LOGIN_PATH
     }
 
-    private fun getTwoLetterLanguageFromLocale(locale: Locale) = when (locale.language) {
-        "sv" -> "SV"
-        "en" -> "EN"
-        "da" -> "DA"
-        else -> "NO"
+    private fun resolveTwoLetterLanguageFromMember(memberId: Long, acceptLanguage: String?) = when (resolveLocaleFromMember(memberId, acceptLanguage)?.language) {
+        Locale("sv").language -> "SV"
+        Locale("en").language -> "EN"
+        Locale("nb").language -> "NO"
+        Locale("da").language -> "DA"
+        else -> "EN"
+    }
+
+    private fun resolveLocaleFromMember(memberId: Long, acceptLanguage: String?): Locale? {
+        return memberRepository.findByIdOrNull(memberId)?.let {
+            it.pickedLocale?.locale
+                ?: LocaleResolver.resolveNullableLocale(acceptLanguage)
+                ?: LocaleResolver.resolveNullableLocale(it.acceptLanguage)
+        } ?: LocaleResolver.resolveNullableLocale(acceptLanguage)
     }
 }
 

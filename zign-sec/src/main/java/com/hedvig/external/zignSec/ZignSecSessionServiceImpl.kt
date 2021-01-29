@@ -12,11 +12,11 @@ import com.hedvig.external.event.AuthenticationEventPublisher
 import com.hedvig.external.zignSec.client.dto.ZignSecCollectState
 import com.hedvig.external.zignSec.client.dto.ZignSecNotificationRequest
 import com.hedvig.external.zignSec.repository.ZignSecSessionRepository
-import com.hedvig.external.zignSec.repository.ZignSecSignEntityRepository
+import com.hedvig.external.zignSec.repository.ZignSecAuthenticationEntityRepository
 import com.hedvig.external.zignSec.repository.entitys.ZignSecAuthenticationType
 import com.hedvig.external.zignSec.repository.entitys.ZignSecNotification
 import com.hedvig.external.zignSec.repository.entitys.ZignSecSession
-import com.hedvig.external.zignSec.repository.entitys.ZignSecSignEntity
+import com.hedvig.external.zignSec.repository.entitys.ZignSecAuthenticationEntity
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.text.DecimalFormat
@@ -24,7 +24,7 @@ import java.text.DecimalFormat
 @Service
 class ZignSecSessionServiceImpl(
     private val sessionRepository: ZignSecSessionRepository,
-    private val zignSecSignEntityRepository: ZignSecSignEntityRepository,
+    private val zignSecAuthenticationEntityRepository: ZignSecAuthenticationEntityRepository,
     private val zignSecService: ZignSecService,
     private val authenticationEventPublisher: AuthenticationEventPublisher,
     private val objectMapper: ObjectMapper,
@@ -234,21 +234,34 @@ class ZignSecSessionServiceImpl(
 
                         val idProviderPersonId = session.notification!!.identity!!.idProviderPersonId!!
 
-                        val signEntity = zignSecSignEntityRepository.findByIdProviderPersonId(idProviderPersonId)
+                        val authEntity = zignSecAuthenticationEntityRepository.findByIdProviderPersonId(idProviderPersonId)
+                            ?: run {
+                                if (session.requestPersonalNumber != null && validatePersonNumberAgainstDateOfBirth(
+                                        personNumber = session.requestPersonalNumber!!,
+                                        dateOfBirth = notification.identity!!.dateOfBirth!!,
+                                        method = session.authenticationMethod
+                                    )) {      zignSecAuthenticationEntityRepository.save(ZignSecAuthenticationEntity(
+                                        personalNumber = session.requestPersonalNumber!!,
+                                        idProviderPersonId = session.notification!!.identity!!.idProviderPersonId!!
+                                    ))
+                                } else {
+                                    null
+                                }
+                            }
 
-                        if (signEntity != null) {
+                        if (authEntity != null) {
                             authenticationEventPublisher.publishAuthenticationEvent(
                                 ZignSecAuthenticationResult.Completed(
                                     session.referenceId,
                                     session.memberId,
-                                    signEntity.personalNumber,
+                                    authEntity.personalNumber,
                                     session.authenticationMethod,
                                     notification.identity?.firstName,
                                     notification.identity?.lastName
                                 )
                             )
                         } else {
-                            logger.error("Member tried to login whit no ZignSecSignEntity [MemberId:${session.memberId}] [idProviderPersonId: $idProviderPersonId] [SessionId:${session.sessionId}] [session:$session]")
+                            logger.error("Member tried to login with no ZignSecSignEntity and requestPersonalNumber was null [MemberId:${session.memberId}] [idProviderPersonId: $idProviderPersonId] [SessionId:${session.sessionId}] [session:$session]")
                             authenticationEventPublisher.publishAuthenticationEvent(
                                 ZignSecAuthenticationResult.Failed(
                                     session.referenceId,
@@ -276,11 +289,11 @@ class ZignSecSessionServiceImpl(
             return@assert "Must have requestPersonalNumber on session to sign member"
         }
 
-        val signEntity = ZignSecSignEntity(
+        val signEntity = ZignSecAuthenticationEntity(
             personalNumber = session.requestPersonalNumber!!,
             idProviderPersonId = session.notification!!.identity!!.idProviderPersonId!!
         )
-        zignSecSignEntityRepository.save(signEntity)
+        zignSecAuthenticationEntityRepository.save(signEntity)
         authenticationEventPublisher.publishSignEvent(
             ZignSecSignResult.Signed(
                 session.referenceId,

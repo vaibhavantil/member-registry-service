@@ -1,4 +1,4 @@
-package com.hedvig.memberservice.services
+package com.hedvig.memberservice.services.signing.zignsec
 
 import com.hedvig.external.authentication.dto.ZignSecAuthenticationResponseError
 import com.hedvig.external.authentication.dto.ZignSecSignResult
@@ -8,8 +8,6 @@ import com.hedvig.memberservice.commands.models.ZignSecAuthenticationMarket
 import com.hedvig.memberservice.services.events.SignSessionCompleteEvent
 import com.hedvig.memberservice.services.member.MemberService
 import com.hedvig.memberservice.services.redispublisher.RedisEventPublisher
-import com.hedvig.memberservice.services.signing.zignsec.ZignSecBankIdService
-import com.hedvig.memberservice.services.signing.zignsec.ZignSecSigningService
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test
 import org.junit.Before

@@ -8,6 +8,10 @@ sealed class StartZignSecAuthenticationResult {
         val redirectUrl: String
     ): StartZignSecAuthenticationResult()
 
+    data class StaticRedirect(
+        val redirectUrl: String
+    ): StartZignSecAuthenticationResult()
+
     data class Failed(
         val errors: List<ZignSecAuthenticationResponseError>
     ): StartZignSecAuthenticationResult()
