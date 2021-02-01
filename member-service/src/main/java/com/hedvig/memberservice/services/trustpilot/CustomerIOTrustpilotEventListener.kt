@@ -1,20 +1,17 @@
-package com.hedvig.memberservice.services.customerio
+package com.hedvig.memberservice.services.trustpilot
 
 import com.hedvig.integration.notificationService.NotificationService
 import com.hedvig.memberservice.events.EmailUpdatedEvent
 import com.hedvig.memberservice.events.NameUpdatedEvent
 import com.hedvig.memberservice.query.MemberEntity
 import com.hedvig.memberservice.query.MemberRepository
-import com.hedvig.memberservice.services.trustpilot.TrustpilotReviewService
 import com.hedvig.resolver.LocaleResolver
 import org.axonframework.config.ProcessingGroup
 import org.axonframework.eventhandling.EventHandler
 import org.springframework.context.annotation.Profile
-import org.springframework.stereotype.Component
 import java.util.Locale
 import java.util.Objects
 
-@Component
 @Profile("customer.io")
 @ProcessingGroup("CustomerIOTrustpilot")
 class CustomerIOTrustpilotEventListener(

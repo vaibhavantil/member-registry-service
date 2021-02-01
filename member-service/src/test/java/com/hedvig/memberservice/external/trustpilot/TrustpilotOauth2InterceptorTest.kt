@@ -1,6 +1,7 @@
 package com.hedvig.memberservice.external.trustpilot
 
-import com.hedvig.memberservice.external.trustpilot.TrustpilotOauth2Interceptor.TokenResponse
+import com.hedvig.memberservice.services.trustpilot.api.TrustpilotOauth2Interceptor
+import com.hedvig.memberservice.services.trustpilot.api.TrustpilotOauth2Interceptor.TokenResponse
 import feign.RequestTemplate
 import io.mockk.MockKAnnotations
 import io.mockk.every

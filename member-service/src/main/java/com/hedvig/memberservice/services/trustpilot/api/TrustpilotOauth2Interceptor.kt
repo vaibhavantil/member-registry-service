@@ -1,4 +1,4 @@
-package com.hedvig.memberservice.external.trustpilot
+package com.hedvig.memberservice.services.trustpilot.api
 
 import feign.RequestInterceptor
 import feign.RequestTemplate

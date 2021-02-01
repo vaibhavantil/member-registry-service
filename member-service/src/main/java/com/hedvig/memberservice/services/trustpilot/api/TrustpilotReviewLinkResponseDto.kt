@@ -1,4 +1,4 @@
-package com.hedvig.memberservice.external.trustpilot
+package com.hedvig.memberservice.services.trustpilot.api
 
 data class TrustpilotReviewLinkResponseDto(
     val id: String,
