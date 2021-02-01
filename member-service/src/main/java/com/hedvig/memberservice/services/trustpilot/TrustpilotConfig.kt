@@ -9,6 +9,7 @@ import feign.Feign
 import feign.codec.Decoder
 import feign.codec.Encoder
 import org.springframework.beans.factory.annotation.Value
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.cloud.openfeign.FeignClientsConfiguration
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
