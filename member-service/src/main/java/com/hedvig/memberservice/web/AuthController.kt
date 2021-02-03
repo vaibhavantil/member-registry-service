@@ -78,7 +78,8 @@ class AuthController @Autowired constructor(
                 BankIdAuthCountry.norway -> ZignSecAuthenticationMarket.NORWAY
                 BankIdAuthCountry.denmark -> ZignSecAuthenticationMarket.DENMARK
             },
-            acceptLanguage = acceptLanguage
+            acceptLanguage = acceptLanguage,
+            authorization = authorization.replace("Bearer ", "")
         )
 
         return when (result) {

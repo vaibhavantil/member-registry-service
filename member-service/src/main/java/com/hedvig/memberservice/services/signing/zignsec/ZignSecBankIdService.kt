@@ -44,11 +44,12 @@ class ZignSecBankIdService(
         memberId: Long,
         personalNumber: String?,
         market: ZignSecAuthenticationMarket,
-        acceptLanguage: String?
+        acceptLanguage: String?,
+        authorization: String
     ): StartZignSecAuthenticationResult {
         if (market == ZignSecAuthenticationMarket.NORWAY && personalNumber == null) {
             return StartZignSecAuthenticationResult.StaticRedirect(
-                resolveNorwegianLoginUrl(memberId, acceptLanguage)
+                resolveNorwegianLoginUrl(memberId, acceptLanguage, authorization)
             )
         }
 
@@ -115,9 +116,13 @@ class ZignSecBankIdService(
 
     fun notifyContractsCreated(memberId: Long) = zignSecAuthentication.notifyContractsCreated(memberId)
 
-    private fun resolveNorwegianLoginUrl(memberId: Long, acceptLanguage: String?) = when (resolveLocaleFromMember(memberId, acceptLanguage)?.language) {
-        Locale("nb").language -> baseUrl + NORWEGIAN_BANK_ID_NORWEGIAN_LOGIN_PATH
-        else -> baseUrl + NORWEGIAN_BANK_ID_ENGLISH_LOGIN_PATH
+    private fun resolveNorwegianLoginUrl(
+        memberId: Long,
+        acceptLanguage: String?,
+        authorization: String
+    ) = when (resolveLocaleFromMember(memberId, acceptLanguage)?.language) {
+        Locale("nb").language -> "$baseUrl$NORWEGIAN_BANK_ID_NORWEGIAN_LOGIN_PATH?auth_token=$authorization"
+        else -> "$baseUrl$NORWEGIAN_BANK_ID_ENGLISH_LOGIN_PATH?auth_token=$authorization"
     }
 
     private fun resolveTwoLetterLanguageFromMember(memberId: Long, acceptLanguage: String?) = when (resolveLocaleFromMember(memberId, acceptLanguage)?.language) {

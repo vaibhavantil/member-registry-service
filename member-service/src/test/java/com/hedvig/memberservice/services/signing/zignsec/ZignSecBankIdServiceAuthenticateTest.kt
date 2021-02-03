@@ -50,7 +50,8 @@ class ZignSecBankIdServiceAuthenticateTest {
             memberId,
             "ssn",
             ZignSecAuthenticationMarket.NORWAY,
-            null
+            null,
+            "token"
         )
 
         assertThat(response).isInstanceOf(StartZignSecAuthenticationResult.Success::class.java)
@@ -67,7 +68,8 @@ class ZignSecBankIdServiceAuthenticateTest {
             memberId,
             null,
             ZignSecAuthenticationMarket.DENMARK,
-            null
+            null,
+            "token"
         )
 
         assertThat(response).isInstanceOf(StartZignSecAuthenticationResult.Success::class.java)
@@ -82,7 +84,8 @@ class ZignSecBankIdServiceAuthenticateTest {
             memberId,
             null,
             ZignSecAuthenticationMarket.NORWAY,
-            null
+            null,
+            "token"
         )
 
         assertThat(response).isInstanceOf(StartZignSecAuthenticationResult.StaticRedirect::class.java)
@@ -97,7 +100,8 @@ class ZignSecBankIdServiceAuthenticateTest {
             memberId,
             null,
             ZignSecAuthenticationMarket.NORWAY,
-            "nb-NO"
+            "nb-NO",
+            "token"
         )
 
         assertThat(response).isInstanceOf(StartZignSecAuthenticationResult.StaticRedirect::class.java)
@@ -112,7 +116,8 @@ class ZignSecBankIdServiceAuthenticateTest {
             memberId,
             null,
             ZignSecAuthenticationMarket.NORWAY,
-            null
+            null,
+            "token"
         )
 
         assertThat(response).isInstanceOf(StartZignSecAuthenticationResult.StaticRedirect::class.java)
@@ -127,7 +132,8 @@ class ZignSecBankIdServiceAuthenticateTest {
             memberId,
             null,
             ZignSecAuthenticationMarket.NORWAY,
-            "en-NO"
+            "en-NO",
+            "token"
         )
 
         assertThat(response).isInstanceOf(StartZignSecAuthenticationResult.StaticRedirect::class.java)
@@ -142,7 +148,8 @@ class ZignSecBankIdServiceAuthenticateTest {
             memberId,
             null,
             ZignSecAuthenticationMarket.NORWAY,
-            null
+            null,
+            "token"
         )
 
         assertThat(response).isInstanceOf(StartZignSecAuthenticationResult.StaticRedirect::class.java)
@@ -157,7 +164,8 @@ class ZignSecBankIdServiceAuthenticateTest {
             memberId,
             null,
             ZignSecAuthenticationMarket.NORWAY,
-            null
+            null,
+            "token"
         )
 
         assertThat(response).isInstanceOf(StartZignSecAuthenticationResult.StaticRedirect::class.java)
@@ -170,7 +178,7 @@ class ZignSecBankIdServiceAuthenticateTest {
 
     companion object {
         private const val memberId = 1234L
-        private const val englishUrl = "https://www.dev.hedvigit.com/no-en/login"
-        private const val norwegianUrl = "https://www.dev.hedvigit.com/no/login"
+        private const val englishUrl = "https://www.dev.hedvigit.com/no-en/login?auth_token=token"
+        private const val norwegianUrl = "https://www.dev.hedvigit.com/no/login?auth_token=token"
     }
 }
