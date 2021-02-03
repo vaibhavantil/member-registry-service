@@ -12,11 +12,9 @@ import com.hedvig.memberservice.query.MemberRepository
 import com.hedvig.memberservice.query.SignedMemberRepository
 import com.hedvig.memberservice.services.redispublisher.AuthSessionUpdatedEventStatus
 import com.hedvig.memberservice.services.redispublisher.RedisEventPublisher
-import com.hedvig.memberservice.web.dto.GenericBankIdAuthenticationRequest
 import com.hedvig.resolver.LocaleResolver
 import org.axonframework.commandhandling.gateway.CommandGateway
 import org.springframework.beans.factory.annotation.Value
-import org.springframework.core.env.Environment
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import java.util.*
@@ -44,12 +42,11 @@ class ZignSecBankIdService(
 
     fun authenticate(
         memberId: Long,
-        request: GenericBankIdAuthenticationRequest,
-        zignSecAuthenticationMarket: ZignSecAuthenticationMarket,
+        personalNumber: String?,
+        market: ZignSecAuthenticationMarket,
         acceptLanguage: String?
     ): StartZignSecAuthenticationResult {
-        if (zignSecAuthenticationMarket == ZignSecAuthenticationMarket.NORWAY &&
-            request.personalNumber == null) {
+        if (market == ZignSecAuthenticationMarket.NORWAY && personalNumber == null) {
             return StartZignSecAuthenticationResult.StaticRedirect(
                 resolveNorwegianLoginUrl(memberId, acceptLanguage)
             )
@@ -58,30 +55,31 @@ class ZignSecBankIdService(
         return zignSecAuthentication.auth(
             ZignSecBankIdAuthenticationRequest(
                 memberId.toString(),
-                request.personalNumber,
+                personalNumber,
                 resolveTwoLetterLanguageFromMember(memberId, acceptLanguage),
                 authenticationSuccessUrl,
                 authenticationFailUrl,
-                zignSecAuthenticationMarket.getAuthenticationMethod()
+                market.getAuthenticationMethod()
             )
         )
     }
 
     fun sign(
         memberId: String,
-        ssn: String, successUrl: String,
+        ssn: String,
+        successUrl: String,
         failUrl: String,
-        zignSecAuthenticationMarket: ZignSecAuthenticationMarket) =
-        zignSecAuthentication.sign(
-            ZignSecBankIdAuthenticationRequest(
-                memberId,
-                ssn,
-                resolveTwoLetterLanguageFromMember(memberId.toLong(), null),
-                successUrl,
-                failUrl,
-                zignSecAuthenticationMarket.getAuthenticationMethod()
-            )
+        zignSecAuthenticationMarket: ZignSecAuthenticationMarket
+    ) = zignSecAuthentication.sign(
+        ZignSecBankIdAuthenticationRequest(
+            memberId,
+            ssn,
+            resolveTwoLetterLanguageFromMember(memberId.toLong(), null),
+            successUrl,
+            failUrl,
+            zignSecAuthenticationMarket.getAuthenticationMethod()
         )
+    )
 
     fun completeAuthentication(result: ZignSecAuthenticationResult) {
         when (result) {

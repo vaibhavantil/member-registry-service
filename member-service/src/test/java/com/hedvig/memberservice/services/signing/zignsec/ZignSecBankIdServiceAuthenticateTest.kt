@@ -48,7 +48,7 @@ class ZignSecBankIdServiceAuthenticateTest {
 
         val response = sut.authenticate(
             memberId,
-            GenericBankIdAuthenticationRequest("ssn"),
+            "ssn",
             ZignSecAuthenticationMarket.NORWAY,
             null
         )
@@ -65,7 +65,7 @@ class ZignSecBankIdServiceAuthenticateTest {
 
         val response = sut.authenticate(
             memberId,
-            GenericBankIdAuthenticationRequest(null),
+            null,
             ZignSecAuthenticationMarket.DENMARK,
             null
         )
@@ -80,7 +80,7 @@ class ZignSecBankIdServiceAuthenticateTest {
 
         val response = sut.authenticate(
             memberId,
-            GenericBankIdAuthenticationRequest(null),
+            null,
             ZignSecAuthenticationMarket.NORWAY,
             null
         )
@@ -95,7 +95,7 @@ class ZignSecBankIdServiceAuthenticateTest {
 
         val response = sut.authenticate(
             memberId,
-            GenericBankIdAuthenticationRequest(null),
+            null,
             ZignSecAuthenticationMarket.NORWAY,
             "nb-NO"
         )
@@ -110,7 +110,7 @@ class ZignSecBankIdServiceAuthenticateTest {
 
         val response = sut.authenticate(
             memberId,
-            GenericBankIdAuthenticationRequest(null),
+            null,
             ZignSecAuthenticationMarket.NORWAY,
             null
         )
@@ -125,7 +125,7 @@ class ZignSecBankIdServiceAuthenticateTest {
 
         val response = sut.authenticate(
             memberId,
-            GenericBankIdAuthenticationRequest(null),
+            null,
             ZignSecAuthenticationMarket.NORWAY,
             "en-NO"
         )
@@ -140,7 +140,7 @@ class ZignSecBankIdServiceAuthenticateTest {
 
         val response = sut.authenticate(
             memberId,
-            GenericBankIdAuthenticationRequest(null),
+            null,
             ZignSecAuthenticationMarket.NORWAY,
             null
         )
@@ -155,7 +155,7 @@ class ZignSecBankIdServiceAuthenticateTest {
 
         val response = sut.authenticate(
             memberId,
-            GenericBankIdAuthenticationRequest(null),
+            null,
             ZignSecAuthenticationMarket.NORWAY,
             null
         )
