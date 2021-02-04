@@ -178,7 +178,7 @@ class ZignSecBankIdServiceAuthenticateTest {
 
     companion object {
         private const val memberId = 1234L
-        private const val englishUrl = "https://www.dev.hedvigit.com/no-en/login?auth_token=token"
-        private const val norwegianUrl = "https://www.dev.hedvigit.com/no/login?auth_token=token"
+        private const val englishUrl = "https://www.dev.hedvigit.com/no-en/login#token=token"
+        private const val norwegianUrl = "https://www.dev.hedvigit.com/no/login#token=token"
     }
 }

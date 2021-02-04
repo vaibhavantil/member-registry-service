@@ -121,8 +121,8 @@ class ZignSecBankIdService(
         acceptLanguage: String?,
         authorization: String
     ) = when (resolveLocaleFromMember(memberId, acceptLanguage)?.language) {
-        Locale("nb").language -> "$baseUrl$NORWEGIAN_BANK_ID_NORWEGIAN_LOGIN_PATH?auth_token=$authorization"
-        else -> "$baseUrl$NORWEGIAN_BANK_ID_ENGLISH_LOGIN_PATH?auth_token=$authorization"
+        Locale("nb").language -> "$baseUrl$NORWEGIAN_BANK_ID_NORWEGIAN_LOGIN_PATH#token=$authorization"
+        else -> "$baseUrl$NORWEGIAN_BANK_ID_ENGLISH_LOGIN_PATH#token=$authorization"
     }
 
     private fun resolveTwoLetterLanguageFromMember(memberId: Long, acceptLanguage: String?) = when (resolveLocaleFromMember(memberId, acceptLanguage)?.language) {
