@@ -12,8 +12,10 @@ import com.hedvig.memberservice.query.MemberRepository
 import com.hedvig.memberservice.query.SignedMemberRepository
 import com.hedvig.memberservice.services.redispublisher.AuthSessionUpdatedEventStatus
 import com.hedvig.memberservice.services.redispublisher.RedisEventPublisher
+import com.hedvig.memberservice.util.logger
 import com.hedvig.resolver.LocaleResolver
 import org.axonframework.commandhandling.gateway.CommandGateway
+import org.slf4j.MDC
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
@@ -86,12 +88,19 @@ class ZignSecBankIdService(
     fun completeAuthentication(result: ZignSecAuthenticationResult) {
         when (result) {
             is ZignSecAuthenticationResult.Completed -> {
+                MDC.put("zignSecSign.memberId", result.memberId.toString())
+
                 signedMemberRepository.findBySsn(result.ssn).ifPresentOrElse(
                     { signedMember ->
+                        MDC.put("signedMember.memberId", signedMember.id.toString())
+                        logger.info("ZignSec auth completion: Found existing signed member by SSN match")
+
                         if (result.memberId != signedMember.id) {
+                            logger.info("ZignSec auth completion: MemberID mismatch, inactivating ${result.memberId}")
                             commandGateway.sendAndWait<Void>(InactivateMemberCommand(result.memberId))
                             apiGatewayService.reassignMember(result.memberId, signedMember.id)
                         }
+                        logger.info("ZignSec auth completion: Sending success command")
                         commandGateway.sendAndWait<Void>(
                             ZignSecSuccessfulAuthenticationCommand(
                                 signedMember.id,
@@ -100,7 +109,9 @@ class ZignSecBankIdService(
                                 ZignSecAuthenticationMarket.fromAuthenticationMethod(result.authenticationMethod),
                                 result.firstName,
                                 result.lastName
-                            ))
+                            )
+                        )
+                        logger.info("ZignSec auth completion: Publishing session to redis")
                         redisEventPublisher.onAuthSessionUpdated(result.memberId, AuthSessionUpdatedEventStatus.SUCCESS)
                     },
                     {

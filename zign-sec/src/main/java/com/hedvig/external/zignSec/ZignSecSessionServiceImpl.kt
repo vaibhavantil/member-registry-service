@@ -238,20 +238,32 @@ class ZignSecSessionServiceImpl(
 
                         val idProviderPersonId = session.notification!!.identity!!.idProviderPersonId!!
 
-                        val authEntity = zignSecAuthenticationEntityRepository.findByIdProviderPersonId(idProviderPersonId)
-                            ?: run {
-                                if (session.requestPersonalNumber != null && validatePersonNumberAgainstDateOfBirth(
-                                        personNumber = session.requestPersonalNumber!!,
-                                        dateOfBirth = notification.identity!!.dateOfBirth!!,
-                                        method = session.authenticationMethod
-                                    )) {      zignSecAuthenticationEntityRepository.save(ZignSecAuthenticationEntity(
-                                        personalNumber = session.requestPersonalNumber!!,
-                                        idProviderPersonId = session.notification!!.identity!!.idProviderPersonId!!
-                                    ))
-                                } else {
-                                    null
-                                }
+                        val authEntity = zignSecAuthenticationEntityRepository.findByIdProviderPersonId(idProviderPersonId)?.also {
+                          logger.info("Found exact ID number match on authentication entity")
+                        } ?: run {
+                            logger.info("ID number mismatch, checking date of birth")
+                            val requestPersonalNumber = session.requestPersonalNumber ?: return@run null
+
+                            val personalNumberLooksGood = validatePersonNumberAgainstDateOfBirth(
+                                personNumber = requestPersonalNumber,
+                                dateOfBirth = notification.identity!!.dateOfBirth!!,
+                                method = session.authenticationMethod
+                            )
+
+                            if (personalNumberLooksGood) {
+                                logger.info("Personal number looks good based on date-of-birth heuristic")
+                            } else {
+                                logger.info("Personal number looks is too much off - bailing")
+                                return@run null
                             }
+
+                            zignSecAuthenticationEntityRepository.save(
+                                ZignSecAuthenticationEntity(
+                                    personalNumber = requestPersonalNumber,
+                                    idProviderPersonId = session.notification!!.identity!!.idProviderPersonId!!
+                                )
+                            )
+                        }
 
                         if (authEntity != null) {
                             authenticationEventPublisher.publishAuthenticationEvent(
