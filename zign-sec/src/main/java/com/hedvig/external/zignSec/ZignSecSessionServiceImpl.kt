@@ -177,7 +177,7 @@ class ZignSecSessionServiceImpl(
         session.notification = notification
         session.status = getSessionStatusFromNotification(request)
 
-        logger.info("Update session of type ${session.status} to status: ${session.status}")
+        logger.info("Update session of type ${session.requestType} to status: ${session.status}")
 
         when (session.requestType) {
             ZignSecAuthenticationType.SIGN -> {
