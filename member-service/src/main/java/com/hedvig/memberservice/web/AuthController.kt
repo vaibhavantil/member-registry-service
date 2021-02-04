@@ -65,7 +65,6 @@ class AuthController @Autowired constructor(
     private fun auth(
         @RequestHeader("hedvig.token") memberId: Long,
         @RequestHeader(value = "Accept-Language", required = false) acceptLanguage: String?,
-        @RequestHeader("Authorization") authorization: String,
         @PathVariable("country") country: BankIdAuthCountry,
         @RequestBody request: GenericBankIdAuthenticationRequest
     ): ResponseEntity<ZignSecStartDto> {
@@ -79,7 +78,7 @@ class AuthController @Autowired constructor(
                 BankIdAuthCountry.denmark -> ZignSecAuthenticationMarket.DENMARK
             },
             acceptLanguage = acceptLanguage,
-            authorization = authorization.replace("Bearer ", "")
+            token = request.token
         )
 
         return when (result) {

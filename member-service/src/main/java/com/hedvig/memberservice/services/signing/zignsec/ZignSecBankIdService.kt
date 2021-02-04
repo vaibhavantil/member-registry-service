@@ -46,11 +46,11 @@ class ZignSecBankIdService(
         personalNumber: String?,
         market: ZignSecAuthenticationMarket,
         acceptLanguage: String?,
-        authorization: String
+        token: String
     ): StartZignSecAuthenticationResult {
         if (market == ZignSecAuthenticationMarket.NORWAY && personalNumber == null) {
             return StartZignSecAuthenticationResult.StaticRedirect(
-                resolveNorwegianLoginUrl(memberId, acceptLanguage, authorization)
+                resolveNorwegianLoginUrl(memberId, acceptLanguage, token)
             )
         }
 
@@ -120,13 +120,13 @@ class ZignSecBankIdService(
     private fun resolveNorwegianLoginUrl(
         memberId: Long,
         acceptLanguage: String?,
-        authorization: String
+        token: String
     ): String {
         val path = when (resolveLocaleFromMember(memberId, acceptLanguage)?.language) {
             Locale("nb").language -> NORWEGIAN_BANK_ID_NORWEGIAN_LOGIN_PATH
             else -> NORWEGIAN_BANK_ID_ENGLISH_LOGIN_PATH
         }
-        return "$baseUrl$path#token=${URLEncoder.encode(authorization, Charsets.UTF_8)}"
+        return "$baseUrl$path#token=${URLEncoder.encode(token, Charsets.UTF_8)}"
     }
 
     private fun resolveTwoLetterLanguageFromMember(memberId: Long, acceptLanguage: String?) = when (resolveLocaleFromMember(memberId, acceptLanguage)?.language) {
