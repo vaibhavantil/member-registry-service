@@ -18,6 +18,7 @@ import com.hedvig.external.zignSec.repository.entitys.ZignSecNotification
 import com.hedvig.external.zignSec.repository.entitys.ZignSecSession
 import com.hedvig.external.zignSec.repository.entitys.ZignSecAuthenticationEntity
 import org.slf4j.LoggerFactory
+import org.slf4j.MDC
 import org.springframework.stereotype.Service
 import java.text.DecimalFormat
 
@@ -156,6 +157,8 @@ class ZignSecSessionServiceImpl(
     override fun handleNotification(jsonRequest: String) {
         val request = objectMapper.readValue(jsonRequest, ZignSecNotificationRequest::class.java)
         val session = sessionRepository.findByReferenceId(request.id).get()
+        MDC.put("memberId", session.memberId.toString())
+        MDC.put("signSecSessionId", session.sessionId.toString())
 
         when (session.status) {
             ZignSecBankIdProgressStatus.INITIATED,
@@ -172,8 +175,9 @@ class ZignSecSessionServiceImpl(
     private fun updateSession(session: ZignSecSession, request: ZignSecNotificationRequest, jsonRequest: String) {
         val notification = ZignSecNotification.from(request)
         session.notification = notification
-
         session.status = getSessionStatusFromNotification(request)
+
+        logger.info("Update session of type ${session.requestType} to status: ${session.status}")
 
         when (session.requestType) {
             ZignSecAuthenticationType.SIGN -> {
