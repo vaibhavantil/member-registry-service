@@ -9,13 +9,11 @@ import com.hedvig.memberservice.query.MemberEntity
 import com.hedvig.memberservice.query.MemberRepository
 import com.hedvig.memberservice.query.SignedMemberRepository
 import com.hedvig.memberservice.services.redispublisher.RedisEventPublisher
-import com.hedvig.memberservice.web.dto.GenericBankIdAuthenticationRequest
 import io.mockk.every
 import io.mockk.mockk
 import org.assertj.core.api.Assertions.assertThat
 import org.axonframework.commandhandling.gateway.CommandGateway
 import org.junit.jupiter.api.Test
-import org.springframework.core.env.Environment
 import java.util.Optional
 import java.util.UUID
 

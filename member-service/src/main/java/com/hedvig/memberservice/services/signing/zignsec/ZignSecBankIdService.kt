@@ -17,6 +17,7 @@ import org.axonframework.commandhandling.gateway.CommandGateway
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
+import java.net.URLEncoder
 import java.util.*
 
 @Service
@@ -120,9 +121,12 @@ class ZignSecBankIdService(
         memberId: Long,
         acceptLanguage: String?,
         authorization: String
-    ) = when (resolveLocaleFromMember(memberId, acceptLanguage)?.language) {
-        Locale("nb").language -> "$baseUrl$NORWEGIAN_BANK_ID_NORWEGIAN_LOGIN_PATH#token=$authorization"
-        else -> "$baseUrl$NORWEGIAN_BANK_ID_ENGLISH_LOGIN_PATH#token=$authorization"
+    ): String {
+        val path = when (resolveLocaleFromMember(memberId, acceptLanguage)?.language) {
+            Locale("nb").language -> NORWEGIAN_BANK_ID_NORWEGIAN_LOGIN_PATH
+            else -> NORWEGIAN_BANK_ID_ENGLISH_LOGIN_PATH
+        }
+        return "$baseUrl$path#token=${URLEncoder.encode(authorization, Charsets.UTF_8)}"
     }
 
     private fun resolveTwoLetterLanguageFromMember(memberId: Long, acceptLanguage: String?) = when (resolveLocaleFromMember(memberId, acceptLanguage)?.language) {
