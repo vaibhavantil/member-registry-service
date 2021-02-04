@@ -9,13 +9,11 @@ import com.hedvig.memberservice.query.MemberEntity
 import com.hedvig.memberservice.query.MemberRepository
 import com.hedvig.memberservice.query.SignedMemberRepository
 import com.hedvig.memberservice.services.redispublisher.RedisEventPublisher
-import com.hedvig.memberservice.web.dto.GenericBankIdAuthenticationRequest
 import io.mockk.every
 import io.mockk.mockk
 import org.assertj.core.api.Assertions.assertThat
 import org.axonframework.commandhandling.gateway.CommandGateway
 import org.junit.jupiter.api.Test
-import org.springframework.core.env.Environment
 import java.util.Optional
 import java.util.UUID
 
@@ -48,9 +46,10 @@ class ZignSecBankIdServiceAuthenticateTest {
 
         val response = sut.authenticate(
             memberId,
-            GenericBankIdAuthenticationRequest("ssn"),
+            "ssn",
             ZignSecAuthenticationMarket.NORWAY,
-            null
+            null,
+            "token"
         )
 
         assertThat(response).isInstanceOf(StartZignSecAuthenticationResult.Success::class.java)
@@ -65,9 +64,10 @@ class ZignSecBankIdServiceAuthenticateTest {
 
         val response = sut.authenticate(
             memberId,
-            GenericBankIdAuthenticationRequest(null),
+            null,
             ZignSecAuthenticationMarket.DENMARK,
-            null
+            null,
+            "token"
         )
 
         assertThat(response).isInstanceOf(StartZignSecAuthenticationResult.Success::class.java)
@@ -80,9 +80,10 @@ class ZignSecBankIdServiceAuthenticateTest {
 
         val response = sut.authenticate(
             memberId,
-            GenericBankIdAuthenticationRequest(null),
+            null,
             ZignSecAuthenticationMarket.NORWAY,
-            null
+            null,
+            "token"
         )
 
         assertThat(response).isInstanceOf(StartZignSecAuthenticationResult.StaticRedirect::class.java)
@@ -95,9 +96,10 @@ class ZignSecBankIdServiceAuthenticateTest {
 
         val response = sut.authenticate(
             memberId,
-            GenericBankIdAuthenticationRequest(null),
+            null,
             ZignSecAuthenticationMarket.NORWAY,
-            "nb-NO"
+            "nb-NO",
+            "token"
         )
 
         assertThat(response).isInstanceOf(StartZignSecAuthenticationResult.StaticRedirect::class.java)
@@ -110,9 +112,10 @@ class ZignSecBankIdServiceAuthenticateTest {
 
         val response = sut.authenticate(
             memberId,
-            GenericBankIdAuthenticationRequest(null),
+            null,
             ZignSecAuthenticationMarket.NORWAY,
-            null
+            null,
+            "token"
         )
 
         assertThat(response).isInstanceOf(StartZignSecAuthenticationResult.StaticRedirect::class.java)
@@ -125,9 +128,10 @@ class ZignSecBankIdServiceAuthenticateTest {
 
         val response = sut.authenticate(
             memberId,
-            GenericBankIdAuthenticationRequest(null),
+            null,
             ZignSecAuthenticationMarket.NORWAY,
-            "en-NO"
+            "en-NO",
+            "token"
         )
 
         assertThat(response).isInstanceOf(StartZignSecAuthenticationResult.StaticRedirect::class.java)
@@ -140,9 +144,10 @@ class ZignSecBankIdServiceAuthenticateTest {
 
         val response = sut.authenticate(
             memberId,
-            GenericBankIdAuthenticationRequest(null),
+            null,
             ZignSecAuthenticationMarket.NORWAY,
-            null
+            null,
+            "token"
         )
 
         assertThat(response).isInstanceOf(StartZignSecAuthenticationResult.StaticRedirect::class.java)
@@ -155,9 +160,10 @@ class ZignSecBankIdServiceAuthenticateTest {
 
         val response = sut.authenticate(
             memberId,
-            GenericBankIdAuthenticationRequest(null),
+            null,
             ZignSecAuthenticationMarket.NORWAY,
-            null
+            null,
+            "token"
         )
 
         assertThat(response).isInstanceOf(StartZignSecAuthenticationResult.StaticRedirect::class.java)
@@ -170,7 +176,7 @@ class ZignSecBankIdServiceAuthenticateTest {
 
     companion object {
         private const val memberId = 1234L
-        private const val englishUrl = "https://www.dev.hedvigit.com/no-en/login"
-        private const val norwegianUrl = "https://www.dev.hedvigit.com/no/login"
+        private const val englishUrl = "https://www.dev.hedvigit.com/no-en/login#token=token"
+        private const val norwegianUrl = "https://www.dev.hedvigit.com/no/login#token=token"
     }
 }

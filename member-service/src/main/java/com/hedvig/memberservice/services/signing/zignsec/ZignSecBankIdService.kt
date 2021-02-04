@@ -12,13 +12,12 @@ import com.hedvig.memberservice.query.MemberRepository
 import com.hedvig.memberservice.query.SignedMemberRepository
 import com.hedvig.memberservice.services.redispublisher.AuthSessionUpdatedEventStatus
 import com.hedvig.memberservice.services.redispublisher.RedisEventPublisher
-import com.hedvig.memberservice.web.dto.GenericBankIdAuthenticationRequest
 import com.hedvig.resolver.LocaleResolver
 import org.axonframework.commandhandling.gateway.CommandGateway
 import org.springframework.beans.factory.annotation.Value
-import org.springframework.core.env.Environment
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
+import java.net.URLEncoder
 import java.util.*
 
 @Service
@@ -44,44 +43,45 @@ class ZignSecBankIdService(
 
     fun authenticate(
         memberId: Long,
-        request: GenericBankIdAuthenticationRequest,
-        zignSecAuthenticationMarket: ZignSecAuthenticationMarket,
-        acceptLanguage: String?
+        personalNumber: String?,
+        market: ZignSecAuthenticationMarket,
+        acceptLanguage: String?,
+        authorization: String
     ): StartZignSecAuthenticationResult {
-        if (zignSecAuthenticationMarket == ZignSecAuthenticationMarket.NORWAY &&
-            request.personalNumber == null) {
+        if (market == ZignSecAuthenticationMarket.NORWAY && personalNumber == null) {
             return StartZignSecAuthenticationResult.StaticRedirect(
-                resolveNorwegianLoginUrl(memberId, acceptLanguage)
+                resolveNorwegianLoginUrl(memberId, acceptLanguage, authorization)
             )
         }
 
         return zignSecAuthentication.auth(
             ZignSecBankIdAuthenticationRequest(
                 memberId.toString(),
-                request.personalNumber,
+                personalNumber,
                 resolveTwoLetterLanguageFromMember(memberId, acceptLanguage),
                 authenticationSuccessUrl,
                 authenticationFailUrl,
-                zignSecAuthenticationMarket.getAuthenticationMethod()
+                market.getAuthenticationMethod()
             )
         )
     }
 
     fun sign(
         memberId: String,
-        ssn: String, successUrl: String,
+        ssn: String,
+        successUrl: String,
         failUrl: String,
-        zignSecAuthenticationMarket: ZignSecAuthenticationMarket) =
-        zignSecAuthentication.sign(
-            ZignSecBankIdAuthenticationRequest(
-                memberId,
-                ssn,
-                resolveTwoLetterLanguageFromMember(memberId.toLong(), null),
-                successUrl,
-                failUrl,
-                zignSecAuthenticationMarket.getAuthenticationMethod()
-            )
+        zignSecAuthenticationMarket: ZignSecAuthenticationMarket
+    ) = zignSecAuthentication.sign(
+        ZignSecBankIdAuthenticationRequest(
+            memberId,
+            ssn,
+            resolveTwoLetterLanguageFromMember(memberId.toLong(), null),
+            successUrl,
+            failUrl,
+            zignSecAuthenticationMarket.getAuthenticationMethod()
         )
+    )
 
     fun completeAuthentication(result: ZignSecAuthenticationResult) {
         when (result) {
@@ -117,9 +117,16 @@ class ZignSecBankIdService(
 
     fun notifyContractsCreated(memberId: Long) = zignSecAuthentication.notifyContractsCreated(memberId)
 
-    private fun resolveNorwegianLoginUrl(memberId: Long, acceptLanguage: String?) = when (resolveLocaleFromMember(memberId, acceptLanguage)?.language) {
-        Locale("nb").language -> baseUrl + NORWEGIAN_BANK_ID_NORWEGIAN_LOGIN_PATH
-        else -> baseUrl + NORWEGIAN_BANK_ID_ENGLISH_LOGIN_PATH
+    private fun resolveNorwegianLoginUrl(
+        memberId: Long,
+        acceptLanguage: String?,
+        authorization: String
+    ): String {
+        val path = when (resolveLocaleFromMember(memberId, acceptLanguage)?.language) {
+            Locale("nb").language -> NORWEGIAN_BANK_ID_NORWEGIAN_LOGIN_PATH
+            else -> NORWEGIAN_BANK_ID_ENGLISH_LOGIN_PATH
+        }
+        return "$baseUrl$path#token=${URLEncoder.encode(authorization, Charsets.UTF_8)}"
     }
 
     private fun resolveTwoLetterLanguageFromMember(memberId: Long, acceptLanguage: String?) = when (resolveLocaleFromMember(memberId, acceptLanguage)?.language) {

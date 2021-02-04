@@ -10,10 +10,12 @@ import com.hedvig.memberservice.web.dto.BankIdAuthCountry
 import com.hedvig.memberservice.web.dto.BankIdAuthRequest
 import com.hedvig.memberservice.web.dto.BankIdAuthResponse
 import com.hedvig.memberservice.web.dto.GenericBankIdAuthenticationRequest
+import com.hedvig.memberservice.web.dto.ZignSecStartDto
 import net.logstash.logback.argument.StructuredArguments
 import org.slf4j.LoggerFactory
 import org.slf4j.MDC
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.http.converter.HttpMessageNotReadableException
 import org.springframework.web.bind.annotation.PathVariable
@@ -60,12 +62,35 @@ class AuthController @Autowired constructor(
     }
 
     @PostMapping(path = ["/{country}/bankid/auth"])
-    private fun auth(@RequestHeader("hedvig.token") memberId: Long, @RequestHeader(value = "Accept-Language", required = false) acceptLanguage: String?, @PathVariable("country") country: BankIdAuthCountry, @RequestBody request: GenericBankIdAuthenticationRequest): ResponseEntity<StartZignSecAuthenticationResult> {
-        return when (country) {
-            BankIdAuthCountry.norway ->
-                ResponseEntity.ok(zignSecBankIdService.authenticate(memberId, request, ZignSecAuthenticationMarket.NORWAY, acceptLanguage))
-            BankIdAuthCountry.denmark ->
-                ResponseEntity.ok(zignSecBankIdService.authenticate(memberId, request, ZignSecAuthenticationMarket.DENMARK, acceptLanguage))
+    private fun auth(
+        @RequestHeader("hedvig.token") memberId: Long,
+        @RequestHeader(value = "Accept-Language", required = false) acceptLanguage: String?,
+        @RequestHeader("Authorization") authorization: String,
+        @PathVariable("country") country: BankIdAuthCountry,
+        @RequestBody request: GenericBankIdAuthenticationRequest
+    ): ResponseEntity<ZignSecStartDto> {
+        MDC.put("memberId", memberId.toString())
+
+        val result = zignSecBankIdService.authenticate(
+            memberId = memberId,
+            personalNumber = request.personalNumber,
+            market = when (country) {
+                BankIdAuthCountry.norway -> ZignSecAuthenticationMarket.NORWAY
+                BankIdAuthCountry.denmark -> ZignSecAuthenticationMarket.DENMARK
+            },
+            acceptLanguage = acceptLanguage,
+            authorization = authorization.replace("Bearer ", "")
+        )
+
+        return when (result) {
+            is StartZignSecAuthenticationResult.Success ->
+                ResponseEntity.ok(ZignSecStartDto(result.redirectUrl))
+            is StartZignSecAuthenticationResult.StaticRedirect ->
+                ResponseEntity.ok(ZignSecStartDto(result.redirectUrl))
+            is StartZignSecAuthenticationResult.Failed -> {
+                log.warn("ZignSec authentication start failed, codes = ${result.errors.map { it.code }}")
+                ResponseEntity.status(HttpStatus.FORBIDDEN).build()
+            }
         }
     }
 
