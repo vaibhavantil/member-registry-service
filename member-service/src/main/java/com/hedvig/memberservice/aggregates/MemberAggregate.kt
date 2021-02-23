@@ -58,6 +58,7 @@ import com.hedvig.memberservice.events.MemberIdentifiedEvent
 import com.hedvig.memberservice.services.cashback.CashbackService
 import com.hedvig.memberservice.util.SsnUtilImpl.Companion.getBirthdateFromSwedishSsn
 import com.hedvig.memberservice.util.logger
+import com.hedvig.memberservice.web.dto.Nationality
 import com.hedvig.memberservice.web.dto.Nationality.Companion.toMemberSimpleSignedEventNationality
 import com.hedvig.memberservice.web.dto.Nationality.Companion.toSSNUpdatedEventNationality
 import org.axonframework.commandhandling.CommandHandler
@@ -451,7 +452,9 @@ class MemberAggregate() {
     fun handle(cmd: UpdateSSNCommand) {
         logger.debug("Updating ssn for member {}, ssn: {}", cmd.memberId, cmd.ssn)
         apply(SSNUpdatedEvent(cmd.memberId, cmd.ssn, toSSNUpdatedEventNationality(cmd.nationality)))
-        getBirthdateFromSwedishSsnAndApplyEvent(cmd.ssn, null)
+        if (cmd.nationality == Nationality.SWEDEN) {
+            getBirthdateFromSwedishSsnAndApplyEvent(cmd.ssn, null)
+        }
     }
 
     @CommandHandler
