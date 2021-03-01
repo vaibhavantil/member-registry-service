@@ -9,6 +9,6 @@ class CommonSessionCompletion(
     private val underwriterClient: UnderwriterClient
 ) {
     fun signSessionWasCompleted(underwriterSignSessionReference: UUID) {
-        underwriterClient.singSessionComplete(underwriterSignSessionReference)
+        underwriterClient.signSessionComplete(underwriterSignSessionReference)
     }
 }
