@@ -12,28 +12,28 @@ import java.util.UUID;
 @NoArgsConstructor(force = true)
 @AllArgsConstructor
 public class MemberMeDTO {
+    String memberId;
+    String ssn;
+    String name;
+    String firstName;
+    String lastName;
+    LocalDate birthDate;
+    List<String> familyMembers;
+    Integer age;
+    String email;
+    String address;
+    Integer livingAreaSqm;
+    String maskedBankAccountNumber;
+    String selectedCashback;
 
-  private String memberId;
-  private String ssn;
-  private String name;
-  private String firstName;
-  private String lastName;
-  private List<String> familyMembers;
-  private Integer age;
-  private String email;
-  private String address;
-  private Integer livingAreaSqm;
-  private String maskedBankAccountNumber;
-  private String selectedCashback;
+    String paymentStatus;
+    LocalDate nextPaymentDate;
 
-  private String paymentStatus;
-  private LocalDate nextPaymentDate;
+    String selectedCashbackSignature;
+    String selectedCashbackParagraph;
+    String selectedCashbackImageUrl;
 
-  private String selectedCashbackSignature;
-  private String selectedCashbackParagraph;
-  private String selectedCashbackImageUrl;
-
-  private List<String> safetyIncreasers;
-  private UUID trackingId;
-  private String phoneNumber;
+    List<String> safetyIncreasers;
+    UUID trackingId;
+    String phoneNumber;
 }
