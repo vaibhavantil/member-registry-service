@@ -110,6 +110,7 @@ public class MembersController {
       me.getSsn(),
       String.format("%s %s", me.getFirstName(), me.getLastName()), me.getFirstName(),
       me.getLastName(),
+      me.getBirthDate(),
       new ArrayList<>(),
       me.getBirthDate() == null ? null : me.getBirthDate().until(LocalDate.now()).getYears(),
       me.getEmail(),
