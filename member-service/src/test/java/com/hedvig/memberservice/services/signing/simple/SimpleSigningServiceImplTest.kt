@@ -29,15 +29,16 @@ class SimpleSigningServiceImplTest {
     fun `start sign should store simple sign session`() {
         val memberId = 1234L
         val nationalIdentification = NationalIdentification("any ssn", Nationality.SWEDEN)
+        val sessionId = UUID.randomUUID()
 
         val slot = slot<SimpleSignSession>()
         every {
             repository.save(capture(slot))
-        } returns SimpleSignSession(UUID.randomUUID(), memberId, nationalIdentification.identification, nationalIdentification.nationality)
+        } returns SimpleSignSession(sessionId, memberId, nationalIdentification.identification, nationalIdentification.nationality)
 
-        val result = cut.startSign(memberId, nationalIdentification)
+        cut.startSign(sessionId, memberId, nationalIdentification)
 
-        verify { commandGateway.sendAndWait(MemberSimpleSignedCommand(memberId, nationalIdentification, result)) }
+        verify { commandGateway.sendAndWait(MemberSimpleSignedCommand(memberId, nationalIdentification, sessionId)) }
         assertThat(slot.captured.memberId).isEqualTo(memberId)
         assertThat(slot.captured.nationalIdentification).isEqualTo(nationalIdentification.identification)
         assertThat(slot.captured.nationality).isEqualTo(nationalIdentification.nationality)

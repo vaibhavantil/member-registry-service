@@ -6,7 +6,7 @@ import java.util.UUID
 
 interface StartSignSessionStrategy<in T : UnderwriterStartSignSessionRequest, out R : UnderwriterStartSignSessionResponse, in C: UnderwriterSessionCompletedData> {
     val signStrategy: SignStrategy
-    fun startSignSession(memberId: Long, request: T): Triple<UUID?, R, SignStrategy>
+    fun startSignSession(memberId: Long, request: T, update: (UUID, SignStrategy) -> Unit):  R
     fun signSessionWasCompleted(signSessionReference: UUID, data: C)
 }
 

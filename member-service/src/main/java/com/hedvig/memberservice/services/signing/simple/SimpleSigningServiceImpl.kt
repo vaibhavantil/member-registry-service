@@ -25,11 +25,9 @@ class SimpleSigningServiceImpl(
             }
         }
 
-    override fun startSign(memberId: Long, nationalIdentification: NationalIdentification): UUID {
-        val sessionId = UUID.randomUUID()
+    override fun startSign(sessionId: UUID, memberId: Long, nationalIdentification: NationalIdentification) {
         repository.save(SimpleSignSession(sessionId, memberId, nationalIdentification.identification, nationalIdentification.nationality))
         commandGateway.sendAndWait<Void>(MemberSimpleSignedCommand(memberId, nationalIdentification, sessionId))
-        return sessionId
     }
 
     override fun notifyContractsCreated(memberId: Long) {

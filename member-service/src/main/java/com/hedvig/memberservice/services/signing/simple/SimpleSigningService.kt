@@ -7,7 +7,7 @@ import java.util.UUID
 
 interface SimpleSigningService {
     fun getSignStatus(memberId: Long): SimpleSignStatus?
-    fun startSign(memberId: Long, nationalIdentification: NationalIdentification): UUID
+    fun startSign(sessionId: UUID, memberId: Long, nationalIdentification: NationalIdentification)
     fun notifyContractsCreated(memberId: Long)
 }
 
