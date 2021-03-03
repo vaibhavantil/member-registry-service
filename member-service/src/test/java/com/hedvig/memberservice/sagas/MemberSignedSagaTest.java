@@ -179,24 +179,6 @@ public class MemberSignedSagaTest {
     }
 
     @Test
-    public void onNorwegianMemberSignedEvent_whenIsNotUnderwriterHandleSigningSession_callMemberSignedEndpoint() {
-        when(underwriterSigningService.isUnderwriterHandlingSignSession(UUID.fromString("123e4567-e89b-12d3-a456-426655440000"))).thenReturn(false);
-
-        val saga = new MemberSignedSaga();
-        saga.setUnderwriterApi(underwriterApi);
-        saga.setSigningService(signingService);
-        saga.setSnsNotificationService(snsNotificationService);
-        saga.setUnderwriterSigningService(underwriterSigningService);
-
-        verifyNoMoreInteractions(underwriterSigningService);
-
-        final NorwegianMemberSignedEvent e = new NorwegianMemberSignedEvent(1337L, "12121212120", "{ \"json\":true }", UUID.fromString("123e4567-e89b-12d3-a456-426655440000"));
-        saga.onNorwegianMemberSignedEvent(e);
-
-        then(underwriterApi).should().memberSigned("1337", "", "", "");
-    }
-
-    @Test
     public void onDanishMemberSignedEvent_whenUnderwriterApiThrowsRuntimeException_willCallSigningService() {
         when(underwriterSigningService.isUnderwriterHandlingSignSession(UUID.fromString("123e4567-e89b-12d3-a456-426655440001"))).thenReturn(false);
         willThrow(RuntimeException.class).given(underwriterApi).memberSigned(anyString(), anyString(), anyString(), anyString());
@@ -231,5 +213,25 @@ public class MemberSignedSagaTest {
 
         then(signingService).should().productSignConfirmed(e.getMemberId());
         then(snsNotificationService).should().sendMemberSignedNotification(e.getMemberId());
+    }
+
+    @Test
+    public void onDanishMemberSignedEvent_whenUnderwriterHandleSigningSession_dontCallMemberSignedEndpoint() {
+        when(underwriterSigningService.isUnderwriterHandlingSignSession(UUID.fromString("123e4567-e89b-12d3-a456-426655440001"))).thenReturn(true);
+
+        val saga = new MemberSignedSaga();
+        saga.setUnderwriterApi(underwriterApi);
+        saga.setSigningService(signingService);
+        saga.setSnsNotificationService(snsNotificationService);
+        saga.setUnderwriterSigningService(underwriterSigningService);
+
+        final DanishMemberSignedEvent e = new DanishMemberSignedEvent(1337L, "1212121212", "{ \"json\":true }", UUID.fromString("123e4567-e89b-12d3-a456-426655440001"));
+        saga.onDanishMemberSignedEvent(e);
+
+        then(underwriterSigningService).should().signSessionWasCompleted(
+            eq(e.getReferenceId()),
+            any(UnderwriterSessionCompletedData.BankIdRedirect.class)
+        );
+        verifyZeroInteractions(underwriterApi);
     }
 }
