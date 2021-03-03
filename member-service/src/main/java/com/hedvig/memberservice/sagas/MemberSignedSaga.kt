@@ -110,13 +110,12 @@ class MemberSignedSaga {
 
     private fun generifiedUnderwriterSignSession(
         memberId: Long,
-        referenceId: UUID?,
+        referenceId: UUID,
         signMethod: SignMethod,
         underwritingSign: (referenceId: UUID) -> Unit
     ) {
-        val isUnderwriterHandlingSession = referenceId?.let {
-            underwriterSigningService.isUnderwriterHandlingSignSession(it)
-        } ?: false
+        val isUnderwriterHandlingSession =
+            underwriterSigningService.isUnderwriterHandlingSignSession(referenceId)
 
         if (isUnderwriterHandlingSession) {
             try {

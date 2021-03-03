@@ -21,15 +21,11 @@ class StartRedirectBankIdSignSessionStrategy(
 
     override val signStrategy = SignStrategy.REDIRECT_BANK_ID
 
-    override fun startSignSession(memberId: Long, request: UnderwriterStartSignSessionRequest.BankIdRedirect): Triple<UUID?, UnderwriterStartSignSessionResponse.BankIdRedirect, SignStrategy> {
+    override fun startSignSession(memberId: Long, request: UnderwriterStartSignSessionRequest.BankIdRedirect, storeUnderwriterSignSession: (UUID, SignStrategy) -> Unit): UnderwriterStartSignSessionResponse.BankIdRedirect {
         if (!hasValidHost(request.successUrl) || !hasValidHost(request.failUrl)) {
-            return Triple(
-                null,
-                UnderwriterStartSignSessionResponse.BankIdRedirect(
-                    redirectUrl = null,
-                    internalErrorMessage = "Not a valid target url"
-                ),
-                signStrategy
+            return UnderwriterStartSignSessionResponse.BankIdRedirect(
+                redirectUrl = null,
+                internalErrorMessage = "Not a valid target url"
             )
         }
 
@@ -43,20 +39,13 @@ class StartRedirectBankIdSignSessionStrategy(
 
         return when (response) {
             is StartZignSecAuthenticationResult.Success -> {
-                Triple(
-                    response.orderReference,
-                    UnderwriterStartSignSessionResponse.BankIdRedirect(response.redirectUrl.trim()),
-                    signStrategy
-                )
+                storeUnderwriterSignSession.invoke(response.orderReference, signStrategy)
+                UnderwriterStartSignSessionResponse.BankIdRedirect(response.redirectUrl.trim())
             }
             is StartZignSecAuthenticationResult.Failed ->
-                Triple(
-                    null,
-                    UnderwriterStartSignSessionResponse.BankIdRedirect(
-                        redirectUrl = null,
-                        errorMessages = response.errors
-                    ),
-                    signStrategy
+                UnderwriterStartSignSessionResponse.BankIdRedirect(
+                    redirectUrl = null,
+                    errorMessages = response.errors
                 )
             is StartZignSecAuthenticationResult.StaticRedirect ->
                 throw RuntimeException("We should not do StaticRedirect on signing")

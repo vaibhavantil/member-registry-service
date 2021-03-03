@@ -3,6 +3,7 @@ package com.hedvig.memberservice.services.signing.underwriter
 import com.hedvig.memberservice.query.SignedMemberRepository
 import com.hedvig.memberservice.query.UnderwriterSignSessionRepository
 import com.hedvig.memberservice.query.saveOrUpdateReusableSession
+import com.hedvig.memberservice.services.signing.underwriter.strategy.SignStrategy
 import com.hedvig.memberservice.services.signing.underwriter.strategy.StartSignSessionStrategyService
 import com.hedvig.memberservice.services.signing.underwriter.strategy.UnderwriterSessionCompletedData
 import com.hedvig.memberservice.web.dto.UnderwriterStartSignSessionRequest
@@ -22,14 +23,9 @@ class UnderwriterSigningServiceImpl(
             return request.createErrorResponse("Could not start sign")
         }
 
-        val (signSessionReference, response, signStrategy)
-            = startSignSessionStrategyService.startSignSession(memberId, request)
-
-        signSessionReference?.let {
-            underwriterSignSessionRepository.saveOrUpdateReusableSession(request.underwriterSessionReference, it, memberId, signStrategy)
+        return startSignSessionStrategyService.startSignSession(memberId, request) { signReference, signStrategy ->
+            underwriterSignSessionRepository.saveOrUpdateReusableSession(request.underwriterSessionReference, signReference, memberId, signStrategy)
         }
-
-        return response
     }
 
     override fun isUnderwriterHandlingSignSession(signSessionReference: UUID): Boolean =

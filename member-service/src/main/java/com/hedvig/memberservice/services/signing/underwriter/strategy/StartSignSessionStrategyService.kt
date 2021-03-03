@@ -11,10 +11,10 @@ class StartSignSessionStrategyService(
     private val startRedirectBankIdSignSessionStrategy: StartRedirectBankIdSignSessionStrategy,
     private val startSimpleSignSessionStrategy: StartSimpleSignSessionStrategy
 ) {
-    fun startSignSession(memberId: Long, request: UnderwriterStartSignSessionRequest) = when (request) {
-        is UnderwriterStartSignSessionRequest.SwedishBankId -> startSwedishBankIdSignSessionStrategy.startSignSession(memberId, request)
-        is UnderwriterStartSignSessionRequest.BankIdRedirect -> startRedirectBankIdSignSessionStrategy.startSignSession(memberId, request)
-        is UnderwriterStartSignSessionRequest.SimpleSign -> startSimpleSignSessionStrategy.startSignSession(memberId, request)
+    fun startSignSession(memberId: Long, request: UnderwriterStartSignSessionRequest, storeUnderwriterSignSession: (UUID, SignStrategy) -> Unit): UnderwriterStartSignSessionResponse = when (request) {
+        is UnderwriterStartSignSessionRequest.SwedishBankId -> startSwedishBankIdSignSessionStrategy.startSignSession(memberId, request, storeUnderwriterSignSession)
+        is UnderwriterStartSignSessionRequest.BankIdRedirect -> startRedirectBankIdSignSessionStrategy.startSignSession(memberId, request, storeUnderwriterSignSession)
+        is UnderwriterStartSignSessionRequest.SimpleSign -> startSimpleSignSessionStrategy.startSignSession(memberId, request, storeUnderwriterSignSession)
     }
 
     fun signSessionWasCompleted(underwriterSignSessionReference: UUID, data: UnderwriterSessionCompletedData) = when (data) {

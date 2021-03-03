@@ -6,5 +6,5 @@ data class DanishMemberSignedEvent(
     val memberId: Long,
     val ssn: String,
     val providerJsonResponse: String,
-    val referenceId: UUID?
+    val referenceId: UUID
 )
