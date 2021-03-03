@@ -114,22 +114,10 @@ class MemberSignedSaga {
         signMethod: SignMethod,
         underwritingSign: (referenceId: UUID) -> Unit
     ) {
-        val isUnderwriterHandlingSession = referenceId?.let {
-            underwriterSigningService.isUnderwriterHandlingSignSession(it)
-        } ?: false
-
-        if (isUnderwriterHandlingSession) {
-            try {
-                underwritingSign(referenceId!!)
-            } catch (ex: RuntimeException) {
-                logger.error("Could not complete generified underwriter signing session in about signed member [MemberId: ${memberId}] Exception $ex")
-            }
-        } else {
-            try {
-                underwriterApi.memberSigned(memberId.toString(), "", "", "")
-            } catch (ex: RuntimeException) {
-                logger.error("Could not notify underwriter about signed member [MemberId: ${memberId}] Exception $ex")
-            }
+        try {
+            underwritingSign(referenceId!!)
+        } catch (ex: RuntimeException) {
+            logger.error("Could not complete generified underwriter signing session in about signed member [MemberId: ${memberId}] Exception $ex")
         }
 
         signingService.productSignConfirmed(memberId)
