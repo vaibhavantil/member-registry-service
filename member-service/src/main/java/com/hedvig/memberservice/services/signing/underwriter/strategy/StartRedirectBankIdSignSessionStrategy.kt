@@ -21,7 +21,7 @@ class StartRedirectBankIdSignSessionStrategy(
 
     override val signStrategy = SignStrategy.REDIRECT_BANK_ID
 
-    override fun startSignSession(memberId: Long, request: UnderwriterStartSignSessionRequest.BankIdRedirect, storeUnderwriterSignSession: (UUID, SignStrategy) -> Unit): UnderwriterStartSignSessionResponse.BankIdRedirect {
+    override fun startSignSession(memberId: Long, request: UnderwriterStartSignSessionRequest.BankIdRedirect, createUnderwriterSignSession: (UUID, SignStrategy) -> Unit): UnderwriterStartSignSessionResponse.BankIdRedirect {
         if (!hasValidHost(request.successUrl) || !hasValidHost(request.failUrl)) {
             return UnderwriterStartSignSessionResponse.BankIdRedirect(
                 redirectUrl = null,
@@ -39,7 +39,7 @@ class StartRedirectBankIdSignSessionStrategy(
 
         return when (response) {
             is StartZignSecAuthenticationResult.Success -> {
-                storeUnderwriterSignSession.invoke(response.orderReference, signStrategy)
+                createUnderwriterSignSession.invoke(response.orderReference, signStrategy)
                 UnderwriterStartSignSessionResponse.BankIdRedirect(response.redirectUrl.trim())
             }
             is StartZignSecAuthenticationResult.Failed ->
