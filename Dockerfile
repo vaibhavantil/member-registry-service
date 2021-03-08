@@ -17,6 +17,7 @@ RUN mvn install -f syna/pom.xml -s /usr/share/maven/ref/settings-docker.xml
 COPY zign-sec zign-sec
 RUN mvn install -f zign-sec/pom.xml -s /usr/share/maven/ref/settings-docker.xml
 
+
 ##### Dependencies stage #####
 FROM local_dependencies AS dependencies
 
@@ -35,7 +36,6 @@ RUN mvn clean package -pl member-service -s /usr/share/maven/ref/settings-docker
 
 ##### Test stage #####
 FROM build AS test
-# COPY bank-id/src/test bank-id/src/test
 COPY member-service/src/test member-service/src/test
 RUN mvn test -pl member-service -s /usr/share/maven/ref/settings-docker.xml
 
