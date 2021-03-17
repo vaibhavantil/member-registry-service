@@ -25,6 +25,8 @@ logging.level.root: WARN
 logging.level.com.hedvig: INFO
 
 spring:
+  application:
+    name: member-service
   jpa:
     properties:
       hibernate:
