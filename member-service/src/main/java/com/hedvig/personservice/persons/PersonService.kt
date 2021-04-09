@@ -28,6 +28,7 @@ class PersonService @Autowired constructor(
 ) {
 
     fun createPerson(ssn: String) {
+        if (personRepository.findBySsn(ssn) != null) return
         commandGateway.sendAndWait<Void>(CreatePersonCommand(ssn))
     }
 
