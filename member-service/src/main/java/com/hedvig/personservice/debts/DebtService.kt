@@ -23,7 +23,6 @@ class DebtService @Autowired constructor(
             personService.createPerson(ssn)
         } finally {
             personService.checkDebt(ssn)
-            return
         }
     }
 
