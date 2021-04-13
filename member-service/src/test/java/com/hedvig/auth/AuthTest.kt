@@ -1,5 +1,7 @@
 package com.hedvig.auth
 
+import com.hedvig.auth.model.SimpleSignConnection
+import com.hedvig.auth.model.SimpleSignConnectionRepository
 import com.hedvig.auth.model.SwedishBankIdCredential
 import com.hedvig.auth.model.SwedishBankIdCredentialRepository
 import com.hedvig.auth.model.User
@@ -27,6 +29,9 @@ internal class AuthTest {
 
     @Autowired
     lateinit var zignSecCredentialRepository: ZignSecCredentialRepository
+
+    @Autowired
+    lateinit var simpleSignConnectionRepository: SimpleSignConnectionRepository
 
     @Autowired
     lateinit var entityManager: TestEntityManager
@@ -439,6 +444,183 @@ internal class AuthTest {
         entityManager.refresh(user)
         userRepository.deleteById(user.id)
         val credential = zignSecCredentialRepository.findByIdOrNull(newCredential.id)
+        assertThat(credential).isNull()
+    }
+
+    @Test
+    fun `can create SimpleSignConnection for a User with personal number and country`() {
+        val credential = simpleSignConnectionRepository.saveAndFlush(
+            SimpleSignConnection(
+                user = User(associatedMemberId = "test-member-id"),
+                personalNumber = "1234",
+                country = "NO"
+            )
+        )
+        assertThat(credential.id).isNotEqualTo(0)
+    }
+
+    @Test
+    fun `can get SimpleSignConnection for a User`() {
+        val user = User(associatedMemberId = "test-member-id")
+        val connection = SimpleSignConnection(
+            user = user,
+            personalNumber = "1234",
+            country = "NO"
+        )
+        simpleSignConnectionRepository.saveAndFlush(connection)
+        entityManager.refresh(user)
+        assertThat(user.simpleSignConnection).isNotNull
+        assertThat(user.simpleSignConnection!!.id).isEqualTo(connection.id)
+    }
+
+    @Test
+    fun `created SimpleSignConnection can be retrieved with personal number and country`() {
+        simpleSignConnectionRepository.saveAndFlush(
+            SimpleSignConnection(
+                user = User(associatedMemberId = "test-member-id"),
+                personalNumber = "1234",
+                country = "NO"
+            )
+        )
+        val connection = simpleSignConnectionRepository.findByPersonalNumberAndCountry("1234", "NO")
+        assertThat(connection).isNotNull
+    }
+
+    @Test
+    fun `retrieves null if no SimpleSignConnection exists with personal number and country`() {
+        val connection = simpleSignConnectionRepository.findByPersonalNumberAndCountry("1234", "NO")
+        assertThat(connection).isNull()
+    }
+
+    @Test
+    fun `can not create SimpleSignConnection with duplicate personal number and country`() {
+        simpleSignConnectionRepository.saveAndFlush(
+            SimpleSignConnection(
+                user = User(associatedMemberId = "test-member-id1"),
+                personalNumber = "1234",
+                country = "NO"
+            )
+        )
+        assertThrows<DataIntegrityViolationException> {
+            simpleSignConnectionRepository.saveAndFlush(
+                SimpleSignConnection(
+                    user = User(associatedMemberId = "test-member-id2"),
+                    personalNumber = "1234",
+                    country = "NO"
+                )
+            )
+        }
+    }
+
+    @Test
+    fun `can create SimpleSignConnection with same personal number but different country`() {
+        simpleSignConnectionRepository.saveAndFlush(
+            SimpleSignConnection(
+                user = User(associatedMemberId = "test-member-id1"),
+                personalNumber = "1234",
+                country = "NO"
+            )
+        )
+        simpleSignConnectionRepository.saveAndFlush(
+            SimpleSignConnection(
+                user = User(associatedMemberId = "test-member-id2"),
+                personalNumber = "1234",
+                country = "DK"
+            )
+        )
+    }
+
+    @Test
+    fun `can not create two SimpleSignConnection with same user`() {
+        val user = User(associatedMemberId = "test-member-id")
+        simpleSignConnectionRepository.saveAndFlush(
+            SimpleSignConnection(
+                user = user,
+                personalNumber = "1234",
+                country = "DK"
+            )
+        )
+        assertThrows<DataIntegrityViolationException> {
+            simpleSignConnectionRepository.saveAndFlush(
+                SimpleSignConnection(
+                    user = user,
+                    personalNumber = "1234",
+                    country = "DK"
+                )
+            )
+        }
+    }
+
+    @Test
+    fun `created SimpleSignConnection receive a createdAt timestamp`() {
+        val before = Instant.now()
+        val createdConnection = simpleSignConnectionRepository.saveAndFlush(
+            SimpleSignConnection(
+                user = User(associatedMemberId = "test-member-id"),
+                personalNumber = "1234",
+                country = "NO"
+            )
+        )
+        val after = Instant.now()
+        assertThat(createdConnection.createdAt).isAfterOrEqualTo(before)
+        assertThat(createdConnection.createdAt).isBeforeOrEqualTo(after)
+    }
+
+    @Test
+    fun `can retrieve associatedMemberId through SimpleSignConnection personal number and country`() {
+        simpleSignConnectionRepository.saveAndFlush(
+            SimpleSignConnection(
+                user = User(associatedMemberId = "test-member-id"),
+                personalNumber = "1234",
+                country = "NO"
+            )
+        )
+        val connection = simpleSignConnectionRepository.findByPersonalNumberAndCountry("1234", "NO")
+        assertThat(connection).isNotNull
+        assertThat(connection!!.user.associatedMemberId).isEqualTo("test-member-id")
+    }
+
+    @Test
+    fun `can delete SimpleSignConnection`() {
+        val connection = simpleSignConnectionRepository.saveAndFlush(
+            SimpleSignConnection(
+                user = User(associatedMemberId = "test-member-id"),
+                personalNumber = "1234",
+                country = "NO"
+            )
+        )
+        simpleSignConnectionRepository.delete(connection)
+        val connectionAfterDeletion = simpleSignConnectionRepository.findByIdOrNull(connection.id)
+        assertThat(connectionAfterDeletion).isNull()
+    }
+
+    @Test
+    fun `does not delete User when SimpleSignConnection is deleted`() {
+        val connection = simpleSignConnectionRepository.saveAndFlush(
+            SimpleSignConnection(
+                user = User(associatedMemberId = "test-member-id"),
+                personalNumber = "1234",
+                country = "NO"
+            )
+        )
+        simpleSignConnectionRepository.delete(connection)
+        val user = userRepository.findByIdOrNull(connection.user.id)
+        assertThat(user).isNotNull
+    }
+
+    @Test
+    fun `deletes the SimpleSignConnection when deleting a User`() {
+        val user = User(associatedMemberId = "test-member-id")
+        val newConnection = simpleSignConnectionRepository.saveAndFlush(
+            SimpleSignConnection(
+                user = user,
+                personalNumber = "1234",
+                country = "NO"
+            )
+        )
+        entityManager.refresh(user)
+        userRepository.deleteById(user.id)
+        val credential = simpleSignConnectionRepository.findByIdOrNull(newConnection.id)
         assertThat(credential).isNull()
     }
 }

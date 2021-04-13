@@ -28,4 +28,7 @@ class User(
 
     @OneToOne(mappedBy = "user", cascade = [CascadeType.ALL], orphanRemoval = true)
     var zignSecCredential: ZignSecCredential? = null
+
+    @OneToOne(mappedBy = "user", cascade = [CascadeType.ALL], orphanRemoval = true)
+    var simpleSignConnection: SimpleSignConnection? = null
 }
