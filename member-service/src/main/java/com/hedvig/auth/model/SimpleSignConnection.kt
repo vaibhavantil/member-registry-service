@@ -1,6 +1,5 @@
 package com.hedvig.auth.model
 
-import org.hibernate.annotations.CreationTimestamp
 import java.time.Instant
 import javax.persistence.CascadeType
 import javax.persistence.Column
@@ -23,12 +22,9 @@ class SimpleSignConnection(
     @Column(name = "personal_number")
     val personalNumber: String,
     @Column(name = "country")
-    val country: String
+    val country: String,
+    val createdAt: Instant = Instant.now()
 ) {
     @Id @GeneratedValue
     val id: Long = 0
-
-    @field:CreationTimestamp
-    @Column(updatable = false)
-    lateinit var createdAt: Instant
 }

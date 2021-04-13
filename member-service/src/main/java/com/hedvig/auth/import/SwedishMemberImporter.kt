@@ -5,9 +5,11 @@ import com.hedvig.auth.model.SwedishBankIdCredentialRepository
 import com.hedvig.auth.model.User
 import com.hedvig.auth.model.UserRepository
 import com.hedvig.memberservice.events.MemberSignedEvent
+import java.time.Instant
 import javax.transaction.Transactional
 import org.axonframework.config.ProcessingGroup
 import org.axonframework.eventhandling.EventHandler
+import org.axonframework.eventhandling.Timestamp
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 
@@ -22,7 +24,7 @@ class SwedishMemberImporter(
 
     @EventHandler
     @Transactional
-    fun on(e: MemberSignedEvent) {
+    fun on(e: MemberSignedEvent, @Timestamp timestamp: Instant) {
         if (userRepository.findByAssociatedMemberId(e.id.toString()) != null) {
             logger.info("Member ${e.id} was already imported - skipping")
             return
@@ -38,8 +40,12 @@ class SwedishMemberImporter(
         }
 
         val memberId = e.id.toString()
-        val user = User(associatedMemberId = memberId)
-        user.swedishBankIdCredential = SwedishBankIdCredential(user, personalNumber)
+        val user = User(associatedMemberId = memberId, createdAt = timestamp)
+        user.swedishBankIdCredential = SwedishBankIdCredential(
+            user = user,
+            personalNumber = personalNumber,
+            createdAt = timestamp
+        )
         userRepository.save(user)
 
         logger.info("Imported member $memberId as user ${user.id} with Swedish BankID credentials")

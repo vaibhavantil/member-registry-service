@@ -1,11 +1,9 @@
 package com.hedvig.auth.model
 
-import org.hibernate.annotations.CreationTimestamp
 import java.time.Instant
 import javax.persistence.CascadeType
 import javax.persistence.Column
 import javax.persistence.Entity
-import javax.persistence.FetchType
 import javax.persistence.GeneratedValue
 import javax.persistence.Id
 import javax.persistence.JoinColumn
@@ -17,12 +15,9 @@ class SwedishBankIdCredential(
     @JoinColumn(unique = true)
     val user: User,
     @Column(unique = true)
-    val personalNumber: String
+    val personalNumber: String,
+    val createdAt: Instant = Instant.now()
 ) {
     @Id @GeneratedValue
     val id: Long = 0
-
-    @field:CreationTimestamp
-    @Column(updatable = false)
-    lateinit var createdAt: Instant
 }

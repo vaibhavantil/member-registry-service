@@ -5,7 +5,9 @@ import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import com.hedvig.auth.model.UserRepository
 import com.hedvig.auth.model.ZignSecCredentialRepository
 import com.hedvig.memberservice.events.DanishMemberSignedEvent
+import com.hedvig.memberservice.events.MemberSignedEvent
 import com.hedvig.memberservice.events.NorwegianMemberSignedEvent
+import java.time.Instant
 import java.util.UUID
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
@@ -25,7 +27,7 @@ internal class ZignSecMemberImporterTest @Autowired constructor(
     )
 
     @Test
-    fun `Norwegian - signed member is exported on event`() {
+    fun `Norwegian - signed member is imported on event`() {
         val memberId = 123L
         val personalNumber = "01129955131"
         val idProviderName = "test-provider"
@@ -33,7 +35,8 @@ internal class ZignSecMemberImporterTest @Autowired constructor(
         val providerJson = zignSecNotificationJson(idProviderName, idProviderPersonId)
 
         importer.on(
-            NorwegianMemberSignedEvent(memberId, personalNumber, providerJson, null)
+            NorwegianMemberSignedEvent(memberId, personalNumber, providerJson, null),
+            Instant.now()
         )
 
         val user = userRepository.findByAssociatedMemberId(memberId.toString())
@@ -43,7 +46,26 @@ internal class ZignSecMemberImporterTest @Autowired constructor(
     }
 
     @Test
-    fun `Norwegian - exporting the same user twice simply ignored second attempt`() {
+    fun `Norwegian - imported member receives correct timestamp`() {
+        val memberId = 123L
+        val personalNumber = "201212121212"
+        val idProviderName = "test-provider"
+        val idProviderPersonId = "person-id"
+        val providerJson = zignSecNotificationJson(idProviderName, idProviderPersonId)
+        val time = Instant.now().minusSeconds(1000)
+
+        importer.on(
+            NorwegianMemberSignedEvent(memberId, personalNumber, providerJson, null),
+            time
+        )
+
+        val user = userRepository.findByAssociatedMemberId(memberId.toString())
+        assertThat(user?.createdAt).isEqualTo(time)
+        assertThat(user?.zignSecCredential?.createdAt).isEqualTo(time)
+    }
+
+    @Test
+    fun `Norwegian - importing the same user twice simply ignored second attempt`() {
         val memberId = 123L
         val personalNumber = "01129955131"
         val idProviderName = "test-provider"
@@ -51,10 +73,12 @@ internal class ZignSecMemberImporterTest @Autowired constructor(
         val providerJson = zignSecNotificationJson(idProviderName, idProviderPersonId)
 
         importer.on(
-            NorwegianMemberSignedEvent(memberId, personalNumber, providerJson, null)
+            NorwegianMemberSignedEvent(memberId, personalNumber, providerJson, null),
+            Instant.now()
         )
         importer.on(
-            NorwegianMemberSignedEvent(memberId, personalNumber, providerJson, null)
+            NorwegianMemberSignedEvent(memberId, personalNumber, providerJson, null),
+            Instant.now()
         )
 
         val users = userRepository.findAll()
@@ -71,10 +95,12 @@ internal class ZignSecMemberImporterTest @Autowired constructor(
         val providerJson = zignSecNotificationJson(idProviderName, idProviderPersonId)
 
         importer.on(
-            NorwegianMemberSignedEvent(memberId1, personalNumber, providerJson, null)
+            NorwegianMemberSignedEvent(memberId1, personalNumber, providerJson, null),
+            Instant.now()
         )
         importer.on(
-            NorwegianMemberSignedEvent(memberId2, personalNumber, providerJson, null)
+            NorwegianMemberSignedEvent(memberId2, personalNumber, providerJson, null),
+            Instant.now()
         )
 
         val users = userRepository.findAll()
@@ -84,7 +110,7 @@ internal class ZignSecMemberImporterTest @Autowired constructor(
     }
 
     @Test
-    fun `Danish - signed member is exported on event`() {
+    fun `Danish - signed member is imported on event`() {
         val memberId = 123L
         val personalNumber = "220550-6218"
         val idProviderName = "test-provider"
@@ -92,7 +118,8 @@ internal class ZignSecMemberImporterTest @Autowired constructor(
         val providerJson = zignSecNotificationJson(idProviderName, idProviderPersonId)
 
         importer.on(
-            DanishMemberSignedEvent(memberId, personalNumber, providerJson, null)
+            DanishMemberSignedEvent(memberId, personalNumber, providerJson, null),
+            Instant.now()
         )
 
         val user = userRepository.findByAssociatedMemberId(memberId.toString())
@@ -102,7 +129,26 @@ internal class ZignSecMemberImporterTest @Autowired constructor(
     }
 
     @Test
-    fun `Danish - exporting the same user twice simply ignored second attempt`() {
+    fun `Danish - imported member receives correct timestamp`() {
+        val memberId = 123L
+        val personalNumber = "201212121212"
+        val idProviderName = "test-provider"
+        val idProviderPersonId = "person-id"
+        val providerJson = zignSecNotificationJson(idProviderName, idProviderPersonId)
+        val time = Instant.now().minusSeconds(1000)
+
+        importer.on(
+            DanishMemberSignedEvent(memberId, personalNumber, providerJson, null),
+            time
+        )
+
+        val user = userRepository.findByAssociatedMemberId(memberId.toString())
+        assertThat(user?.createdAt).isEqualTo(time)
+        assertThat(user?.zignSecCredential?.createdAt).isEqualTo(time)
+    }
+
+    @Test
+    fun `Danish - importing the same user twice simply ignored second attempt`() {
         val memberId = 123L
         val personalNumber = "220550-6218"
         val idProviderName = "test-provider"
@@ -110,10 +156,12 @@ internal class ZignSecMemberImporterTest @Autowired constructor(
         val providerJson = zignSecNotificationJson(idProviderName, idProviderPersonId)
 
         importer.on(
-            DanishMemberSignedEvent(memberId, personalNumber, providerJson, null)
+            DanishMemberSignedEvent(memberId, personalNumber, providerJson, null),
+            Instant.now()
         )
         importer.on(
-            DanishMemberSignedEvent(memberId, personalNumber, providerJson, null)
+            DanishMemberSignedEvent(memberId, personalNumber, providerJson, null),
+            Instant.now()
         )
 
         val users = userRepository.findAll()
@@ -130,10 +178,12 @@ internal class ZignSecMemberImporterTest @Autowired constructor(
         val providerJson = zignSecNotificationJson(idProviderName, idProviderPersonId)
 
         importer.on(
-            DanishMemberSignedEvent(memberId1, personalNumber, providerJson, null)
+            DanishMemberSignedEvent(memberId1, personalNumber, providerJson, null),
+            Instant.now()
         )
         importer.on(
-            DanishMemberSignedEvent(memberId2, personalNumber, providerJson, null)
+            DanishMemberSignedEvent(memberId2, personalNumber, providerJson, null),
+            Instant.now()
         )
 
         val users = userRepository.findAll()

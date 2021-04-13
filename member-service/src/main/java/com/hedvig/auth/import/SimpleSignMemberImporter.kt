@@ -5,9 +5,11 @@ import com.hedvig.auth.model.SimpleSignConnectionRepository
 import com.hedvig.auth.model.User
 import com.hedvig.auth.model.UserRepository
 import com.hedvig.memberservice.events.MemberSimpleSignedEvent
+import java.time.Instant
 import javax.transaction.Transactional
 import org.axonframework.config.ProcessingGroup
 import org.axonframework.eventhandling.EventHandler
+import org.axonframework.eventhandling.Timestamp
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 
@@ -22,7 +24,7 @@ class SimpleSignMemberImporter(
 
     @EventHandler
     @Transactional
-    fun on(e: MemberSimpleSignedEvent) {
+    fun on(e: MemberSimpleSignedEvent, @Timestamp timestamp: Instant) {
         if (userRepository.findByAssociatedMemberId(e.memberId.toString()) != null) {
             logger.info("Member ${e.memberId} was already imported - skipping")
             return
@@ -40,11 +42,15 @@ class SimpleSignMemberImporter(
             userRepository.flush()
         }
 
-        val user = User(e.memberId.toString())
+        val user = User(
+            associatedMemberId = e.memberId.toString(),
+            createdAt = timestamp
+        )
         user.simpleSignConnection = SimpleSignConnection(
             user = user,
             personalNumber = personalNumber,
-            country = country
+            country = country,
+            createdAt = timestamp
         )
         userRepository.save(user)
 
