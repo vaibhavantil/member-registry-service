@@ -1,6 +1,6 @@
 spring:
   datasource:
-    url: jdbc:h2:mem:product-pricing;MODE=PostgreSQL
+    url: jdbc:h2:mem:member-service;MODE=PostgreSQL
   jpa:
     hibernate:
       naming:
