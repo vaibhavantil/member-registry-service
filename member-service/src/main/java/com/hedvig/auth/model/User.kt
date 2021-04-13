@@ -1,6 +1,5 @@
 package com.hedvig.auth.model
 
-import org.hibernate.annotations.CreationTimestamp
 import java.time.Instant
 import java.util.UUID
 import javax.persistence.CascadeType
@@ -14,14 +13,11 @@ import javax.persistence.Table
 @Table(name = "user_entity")
 class User(
     @Column(unique = true)
-    val associatedMemberId: String
+    val associatedMemberId: String,
+    val createdAt: Instant = Instant.now()
 ) {
     @Id
     val id: UUID = UUID.randomUUID()
-
-    @field:CreationTimestamp
-    @Column(updatable = false)
-    lateinit var createdAt: Instant
 
     @OneToOne(mappedBy = "user", cascade = [CascadeType.ALL], orphanRemoval = true)
     var swedishBankIdCredential: SwedishBankIdCredential? = null

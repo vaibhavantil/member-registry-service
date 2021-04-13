@@ -8,9 +8,11 @@ import com.hedvig.auth.model.ZignSecCredentialRepository
 import com.hedvig.external.zignSec.client.dto.ZignSecNotificationRequest
 import com.hedvig.memberservice.events.DanishMemberSignedEvent
 import com.hedvig.memberservice.events.NorwegianMemberSignedEvent
+import java.time.Instant
 import javax.transaction.Transactional
 import org.axonframework.config.ProcessingGroup
 import org.axonframework.eventhandling.EventHandler
+import org.axonframework.eventhandling.Timestamp
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 
@@ -26,23 +28,29 @@ class ZignSecMemberImporter(
 
     @EventHandler
     @Transactional
-    fun on(e: NorwegianMemberSignedEvent) {
+    fun on(e: NorwegianMemberSignedEvent, @Timestamp timestamp: Instant) {
         importZignSecAuthenticatedMember(
             memberId = e.memberId,
-            zignSecNotification = decodeZignSecNotification(e.providerJsonResponse)
+            zignSecNotification = decodeZignSecNotification(e.providerJsonResponse),
+            timestamp = timestamp
         )
     }
 
     @EventHandler
     @Transactional
-    fun on(e: DanishMemberSignedEvent) {
+    fun on(e: DanishMemberSignedEvent, @Timestamp timestamp: Instant) {
         importZignSecAuthenticatedMember(
             memberId = e.memberId,
-            zignSecNotification = decodeZignSecNotification(e.providerJsonResponse)
+            zignSecNotification = decodeZignSecNotification(e.providerJsonResponse),
+            timestamp = timestamp
         )
     }
 
-    private fun importZignSecAuthenticatedMember(memberId: Long, zignSecNotification: ZignSecNotificationRequest) {
+    private fun importZignSecAuthenticatedMember(
+        memberId: Long,
+        zignSecNotification: ZignSecNotificationRequest,
+        timestamp: Instant
+    ) {
         if (userRepository.findByAssociatedMemberId(memberId.toString()) != null) {
             logger.info("Member $memberId was already imported - skipping")
             return
@@ -62,8 +70,13 @@ class ZignSecMemberImporter(
             userRepository.flush()
         }
 
-        val user = User(associatedMemberId = memberId.toString())
-        user.zignSecCredential = ZignSecCredential(user, idProviderName, idProviderPersonId)
+        val user = User(associatedMemberId = memberId.toString(), createdAt = timestamp)
+        user.zignSecCredential = ZignSecCredential(
+            user = user,
+            idProviderName = idProviderName,
+            idProviderPersonId = idProviderPersonId,
+            createdAt = timestamp
+        )
         userRepository.save(user)
 
         logger.info("Imported member $memberId as user ${user.id} with ZignSec credentials")

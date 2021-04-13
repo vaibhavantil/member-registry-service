@@ -10,7 +10,6 @@ import javax.persistence.JoinColumn
 import javax.persistence.OneToOne
 import javax.persistence.Table
 import javax.persistence.UniqueConstraint
-import org.hibernate.annotations.CreationTimestamp
 
 @Entity
 @Table(
@@ -23,13 +22,10 @@ class ZignSecCredential(
     @Column(name = "id_provider_name")
     val idProviderName: String,
     @Column(name = "id_provider_person_id")
-    val idProviderPersonId: String
+    val idProviderPersonId: String,
+    val createdAt: Instant = Instant.now()
 ) {
     @Id
     @GeneratedValue
     val id: Long = 0
-
-    @field:CreationTimestamp
-    @Column(updatable = false)
-    lateinit var createdAt: Instant
 }
