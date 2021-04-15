@@ -94,7 +94,7 @@ class ZignSecBankIdService(
                             result.identity.idProviderName!!,
                             idProviderPersonId,
                             result.ssn
-                        ), onboardingMemberId = null)
+                        ), onboardingMemberId = result.memberId.toString())
                 }
 
                 if (user != null) {

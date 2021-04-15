@@ -89,7 +89,7 @@ class ZignSecBankIdServiceTest {
                 idProviderName = "BankIDNO",
                 idProviderPersonId = "9578-6000-4-365161",
                 personalNumber = SSN
-            ), onboardingMemberId = null)).thenReturn(user)
+            ), onboardingMemberId = MEMBER_ID.toString())).thenReturn(user)
 
         classUnderTest.completeAuthentication(result)
 
@@ -130,7 +130,7 @@ class ZignSecBankIdServiceTest {
                 idProviderName = "BankIDNO",
                 idProviderPersonId = "9578-6000-4-365161",
                 personalNumber = SSN
-            ), onboardingMemberId = null)).thenReturn(user)
+            ), onboardingMemberId = MEMBER_ID.toString())).thenReturn(user)
 
         classUnderTest.completeAuthentication(result)
 

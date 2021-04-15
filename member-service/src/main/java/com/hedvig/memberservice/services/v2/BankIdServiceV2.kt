@@ -85,7 +85,7 @@ class BankIdServiceV2(
                     val personalNumber = bankIdRes.completionData.user.personalNumber
                     val user = userService.findOrCreateUserWithCredentials(
                         UserService.Credentials.SwedishBankID(personalNumber),
-                        onboardingMemberId = null
+                        onboardingMemberId = memberId.toString()
                     )
                     if (user != null) {
                         if (memberId != user.associatedMemberId.toLong()) {
