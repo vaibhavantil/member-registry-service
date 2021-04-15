@@ -1,21 +1,20 @@
 package com.hedvig.memberservice.services.signing.zignsec
 
+import com.hedvig.auth.services.UserService
+import com.hedvig.auth.models.User
 import com.hedvig.external.authentication.ZignSecAuthentication
 import com.hedvig.external.authentication.dto.ZignSecAuthenticationMethod
 import com.hedvig.external.authentication.dto.ZignSecAuthenticationResult
+import com.hedvig.external.zignSec.repository.entitys.Identity
 import com.hedvig.integration.apigateway.ApiGatewayService
 import com.hedvig.memberservice.commands.InactivateMemberCommand
 import com.hedvig.memberservice.commands.ZignSecSuccessfulAuthenticationCommand
 import com.hedvig.memberservice.commands.models.ZignSecAuthenticationMarket
 import com.hedvig.memberservice.query.MemberRepository
-import com.hedvig.memberservice.query.SignedMemberEntity
-import com.hedvig.memberservice.query.SignedMemberRepository
 import com.hedvig.memberservice.services.redispublisher.AuthSessionUpdatedEventStatus
 import com.hedvig.memberservice.services.redispublisher.RedisEventPublisher
-import io.mockk.mockk
 import org.axonframework.commandhandling.gateway.CommandGateway
 import org.junit.Test
-
 import org.junit.Before
 import org.junit.runner.RunWith
 import org.mockito.Mock
@@ -24,6 +23,7 @@ import org.mockito.Mockito.never
 import org.mockito.Mockito.verify
 import org.mockito.junit.MockitoJUnitRunner
 import org.springframework.core.env.Environment
+import java.time.LocalDateTime
 import java.util.*
 import org.mockito.Mockito.`when` as whenever
 
@@ -40,13 +40,13 @@ class ZignSecBankIdServiceTest {
     lateinit var redisEventPublisher: RedisEventPublisher
 
     @Mock
-    lateinit var signedMemberRepository: SignedMemberRepository
-
-    @Mock
     lateinit var apiGatewayService: ApiGatewayService
 
     @Mock
     lateinit var memberRepository: MemberRepository
+
+    @Mock
+    lateinit var userService: UserService
 
     @Mock
     lateinit var env: Environment
@@ -55,27 +55,41 @@ class ZignSecBankIdServiceTest {
 
     @Before
     fun before() {
-        classUnderTest = ZignSecBankIdService(zignSecAuthentication, commandGateway, redisEventPublisher, signedMemberRepository, apiGatewayService, memberRepository, "success", "fail", "https://www.hedvig.com")
+        classUnderTest = ZignSecBankIdService(zignSecAuthentication, commandGateway, redisEventPublisher, apiGatewayService, memberRepository, userService, "success", "fail", "https://www.hedvig.com")
     }
 
     @Test
-    fun completeCompletedAuthentication_differntMemberId_inactivateMemberAndReassignsMember() {
+    fun completeCompletedAuthentication_differentMemberId_inactivateMemberAndReassignsMember() {
         val result = ZignSecAuthenticationResult.Completed(
+            Identity(
+                countryCode = "NO",
+                firstName = "Test",
+                lastName = "Testsson",
+                fullName = "Test Testsson",
+                personalNumber = null,
+                dateOfBirth = "1900-01-01",
+                age = 121,
+                idProviderName = "BankIDNO",
+                identificationDate = LocalDateTime.now(),
+                idProviderRequestId = null,
+                idProviderPersonId = "9578-6000-4-365161",
+                customerPersonId = null
+            ),
             RESULT_ID,
             MEMBER_ID,
             SSN,
-            ZignSecAuthenticationMethod.NORWAY_WEB_OR_MOBILE,
-            "Test",
-            "Testsson"
+            ZignSecAuthenticationMethod.NORWAY_WEB_OR_MOBILE
         )
 
-        val signedMemberEntity = SignedMemberEntity()
-        signedMemberEntity.id = MEMBERS_ORIGIGINAL_ID
-        signedMemberEntity.ssn = SSN
+        val user = User(associatedMemberId = MEMBERS_ORIGIGINAL_ID.toString())
 
-        whenever(signedMemberRepository.findBySsn(SSN)).thenReturn(Optional.of(
-            signedMemberEntity
-        ))
+        whenever(userService.findOrCreateUserWithCredentials(
+            UserService.Credentials.ZignSec(
+                countryCode = "NO",
+                idProviderName = "BankIDNO",
+                idProviderPersonId = "9578-6000-4-365161",
+                personalNumber = SSN
+            ), onboardingMemberId = null)).thenReturn(user)
 
         classUnderTest.completeAuthentication(result)
 
@@ -88,21 +102,35 @@ class ZignSecBankIdServiceTest {
     @Test
     fun completeCompletedAuthentication_sameMemberId_doesNotInactivateMemberAndDoesNotReassignsMember() {
         val result = ZignSecAuthenticationResult.Completed(
+            Identity(
+                countryCode = "NO",
+                firstName = "Test",
+                lastName = "Testsson",
+                fullName = "Test Testsson",
+                personalNumber = null,
+                dateOfBirth = "1900-01-01",
+                age = 121,
+                idProviderName = "BankIDNO",
+                identificationDate = LocalDateTime.now(),
+                idProviderRequestId = null,
+                idProviderPersonId = "9578-6000-4-365161",
+                customerPersonId = null
+            ),
             RESULT_ID,
             MEMBER_ID,
             SSN,
-            ZignSecAuthenticationMethod.NORWAY_WEB_OR_MOBILE,
-            "Test",
-            "Testsson"
+            ZignSecAuthenticationMethod.NORWAY_WEB_OR_MOBILE
         )
 
-        val signedMemberEntity = SignedMemberEntity()
-        signedMemberEntity.id = MEMBER_ID
-        signedMemberEntity.ssn = SSN
+        val user = User(associatedMemberId = MEMBER_ID.toString())
 
-        whenever(signedMemberRepository.findBySsn(SSN)).thenReturn(Optional.of(
-            signedMemberEntity
-        ))
+        whenever(userService.findOrCreateUserWithCredentials(
+            UserService.Credentials.ZignSec(
+                countryCode = "NO",
+                idProviderName = "BankIDNO",
+                idProviderPersonId = "9578-6000-4-365161",
+                personalNumber = SSN
+            ), onboardingMemberId = null)).thenReturn(user)
 
         classUnderTest.completeAuthentication(result)
 
@@ -123,15 +151,32 @@ class ZignSecBankIdServiceTest {
     @Test
     fun completeCompletedAuthentication_noSignedMember_publishFailedEvent() {
         val result = ZignSecAuthenticationResult.Completed(
+            Identity(
+                countryCode = "NO",
+                firstName = "Test",
+                lastName = "Testsson",
+                fullName = "Test Testsson",
+                personalNumber = null,
+                dateOfBirth = "1900-01-01",
+                age = 121,
+                idProviderName = "BankIDNO",
+                identificationDate = LocalDateTime.now(),
+                idProviderRequestId = null,
+                idProviderPersonId = "9578-6000-4-365161",
+                customerPersonId = null
+            ),
             RESULT_ID,
             MEMBER_ID,
             SSN,
-            ZignSecAuthenticationMethod.NORWAY_WEB_OR_MOBILE,
-            null,
-            null
+            ZignSecAuthenticationMethod.NORWAY_WEB_OR_MOBILE
         )
 
-        whenever(signedMemberRepository.findBySsn(SSN)).thenReturn(Optional.empty())
+        whenever(userService.findOrCreateUserWithCredentials(
+            UserService.Credentials.ZignSec(
+                countryCode = "NO",
+                idProviderName = "BankIDNO",
+                idProviderPersonId = SSN
+            ), onboardingMemberId = MEMBER_ID.toString())).thenReturn(null)
 
         classUnderTest.completeAuthentication(result)
 

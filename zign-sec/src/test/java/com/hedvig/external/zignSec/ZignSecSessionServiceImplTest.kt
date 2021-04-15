@@ -11,14 +11,10 @@ import com.hedvig.external.authentication.dto.StartZignSecAuthenticationResult.S
 import com.hedvig.external.authentication.dto.StartZignSecAuthenticationResult.Failed
 import com.hedvig.external.authentication.dto.ZignSecAuthenticationMethod
 import com.hedvig.external.event.AuthenticationEventPublisher
-import com.hedvig.external.zignSec.client.dto.ZignSecCollectIdentity
-import com.hedvig.external.zignSec.client.dto.ZignSecCollectResponse
-import com.hedvig.external.zignSec.client.dto.ZignSecCollectResult
-import com.hedvig.external.zignSec.client.dto.ZignSecCollectState
-import com.hedvig.external.zignSec.client.dto.ZignSecResponse
-import com.hedvig.external.zignSec.client.dto.ZignSecResponseError
+import com.hedvig.external.zignSec.client.dto.*
 import com.hedvig.external.zignSec.repository.ZignSecSessionRepository
 import com.hedvig.external.zignSec.repository.ZignSecAuthenticationEntityRepository
+import com.hedvig.external.zignSec.repository.entitys.Identity
 import com.hedvig.external.zignSec.repository.entitys.ZignSecAuthenticationType
 import com.hedvig.external.zignSec.repository.entitys.ZignSecSession
 import com.hedvig.external.zignSec.repository.entitys.ZignSecAuthenticationEntity
@@ -38,6 +34,7 @@ import org.mockito.Mockito.`when` as whenever
 import org.mockito.junit.MockitoJUnitRunner
 import java.lang.RuntimeException
 import java.time.Instant
+import java.time.LocalDateTime
 import java.util.*
 
 //TODO: Also test ZignSecAuthenticationMethod.DENMARK
@@ -320,7 +317,7 @@ class ZignSecSessionServiceImplTest {
 
         classUnderTest.handleNotification(zignSecSuccessAuthNotificationRequest)
 
-        verify(authenticationEventPublisher).publishAuthenticationEvent(ZignSecAuthenticationResult.Completed(REFERENCE_ID, 1337, "1212120000", ZignSecAuthenticationMethod.NORWAY_WEB_OR_MOBILE, "first", "last"))
+        verify(authenticationEventPublisher).publishAuthenticationEvent(ZignSecAuthenticationResult.Completed(identity, REFERENCE_ID, 1337, "1212120000", ZignSecAuthenticationMethod.NORWAY_WEB_OR_MOBILE))
 
         val savedSession = sessionRepository.findByReferenceId(REFERENCE_ID).get()
         assertThat(savedSession.referenceId).isEqualTo(REFERENCE_ID)
@@ -357,7 +354,7 @@ class ZignSecSessionServiceImplTest {
 
         classUnderTest.handleNotification(zignSecSuccessAuthNotificationRequest)
 
-        verify(authenticationEventPublisher).publishAuthenticationEvent(ZignSecAuthenticationResult.Completed(REFERENCE_ID, 1337, "1212120000", ZignSecAuthenticationMethod.NORWAY_WEB_OR_MOBILE, "first", "last"))
+        verify(authenticationEventPublisher).publishAuthenticationEvent(ZignSecAuthenticationResult.Completed(identity, REFERENCE_ID, 1337, "1212120000", ZignSecAuthenticationMethod.NORWAY_WEB_OR_MOBILE))
 
         val savedSession = sessionRepository.findByReferenceId(REFERENCE_ID).get()
         assertThat(savedSession.referenceId).isEqualTo(REFERENCE_ID)
@@ -677,6 +674,22 @@ class ZignSecSessionServiceImplTest {
 
         val REFERENCE_ID: UUID = UUID.fromString("a42a8afe-4071-4e99-8f9f-757c5942e1e5")!!
 
+        val identity: Identity = Identity(
+            countryCode = "NO",
+            firstName = "first",
+            lastName = "last",
+            fullName = "first last",
+            personalNumber = null,
+            dateOfBirth = "2012-12-12",
+            age = 8,
+            gender = "",
+            idProviderName = "BankIDNO",
+            identificationDate = LocalDateTime.parse("2020-02-11T15:45:23"),
+            idProviderRequestId = "",
+            idProviderPersonId = "9578-6000-4-365161",
+            customerPersonId = ""
+        )
+
         val zignSecSuccessAuthNotificationRequest = """
             {
               "id": "a42a8afe-4071-4e99-8f9f-757c5942e1e5",
@@ -690,7 +703,7 @@ class ZignSecSessionServiceImplTest {
                 "Age": 8,
                 "Gender": "",
                 "IdProviderName": "BankIDNO",
-                "IdentificationDate": "2020-02-11T15:45:23.8368433Z",
+                "IdentificationDate": "2020-02-11T15:45:23Z",
                 "IdProviderRequestId": "",
                 "IdProviderPersonId": "9578-6000-4-365161",
                 "CustomerPersonId": ""

@@ -1,5 +1,6 @@
 package com.hedvig.memberservice.services.signing.zignsec
 
+import com.hedvig.auth.services.UserService
 import com.hedvig.external.authentication.ZignSecAuthentication
 import com.hedvig.external.authentication.dto.StartZignSecAuthenticationResult
 import com.hedvig.external.authentication.dto.ZignSecAuthenticationResult
@@ -9,7 +10,6 @@ import com.hedvig.memberservice.commands.InactivateMemberCommand
 import com.hedvig.memberservice.commands.ZignSecSuccessfulAuthenticationCommand
 import com.hedvig.memberservice.commands.models.ZignSecAuthenticationMarket
 import com.hedvig.memberservice.query.MemberRepository
-import com.hedvig.memberservice.query.SignedMemberRepository
 import com.hedvig.memberservice.services.redispublisher.AuthSessionUpdatedEventStatus
 import com.hedvig.memberservice.services.redispublisher.RedisEventPublisher
 import com.hedvig.memberservice.util.logger
@@ -26,9 +26,9 @@ class ZignSecBankIdService(
     private val zignSecAuthentication: ZignSecAuthentication,
     private val commandGateway: CommandGateway,
     private val redisEventPublisher: RedisEventPublisher,
-    private val signedMemberRepository: SignedMemberRepository,
     private val apiGatewayService: ApiGatewayService,
     private val memberRepository: MemberRepository,
+    private val userService: UserService,
     @Value("\${redirect.authentication.successUrl}")
     private val authenticationSuccessUrl: String,
     @Value("\${redirect.authentication.failUrl}")
@@ -87,34 +87,39 @@ class ZignSecBankIdService(
     fun completeAuthentication(result: ZignSecAuthenticationResult) {
         when (result) {
             is ZignSecAuthenticationResult.Completed -> {
+                val user = result.identity.idProviderPersonId?.let { idProviderPersonId ->
+                    userService.findOrCreateUserWithCredentials(
+                        UserService.Credentials.ZignSec(
+                            result.identity.countryCode!!,
+                            result.identity.idProviderName!!,
+                            idProviderPersonId,
+                            result.ssn
+                        ), onboardingMemberId = null)
+                }
 
-                signedMemberRepository.findBySsn(result.ssn).ifPresentOrElse(
-                    { signedMember ->
-                        logger.info("ZignSec auth completion: Found existing signed member by SSN match")
-
-                        if (result.memberId != signedMember.id) {
-                            logger.info("ZignSec auth completion: MemberID mismatch, inactivating ${result.memberId}")
-                            commandGateway.sendAndWait<Void>(InactivateMemberCommand(result.memberId))
-                            apiGatewayService.reassignMember(result.memberId, signedMember.id)
-                        }
-                        logger.info("ZignSec auth completion: Sending success command")
-                        commandGateway.sendAndWait<Void>(
-                            ZignSecSuccessfulAuthenticationCommand(
-                                signedMember.id,
-                                result.id,
-                                result.ssn,
-                                ZignSecAuthenticationMarket.fromAuthenticationMethod(result.authenticationMethod),
-                                result.firstName,
-                                result.lastName
-                            )
-                        )
-                        logger.info("ZignSec auth completion: Publishing session to redis")
-                        redisEventPublisher.onAuthSessionUpdated(result.memberId, AuthSessionUpdatedEventStatus.SUCCESS)
-                    },
-                    {
-                        redisEventPublisher.onAuthSessionUpdated(result.memberId, AuthSessionUpdatedEventStatus.FAILED)
+                if (user != null) {
+                    if (result.memberId != user.associatedMemberId.toLong()) {
+                        logger.info("ZignSec auth completion: MemberID mismatch, inactivating ${result.memberId}")
+                        commandGateway.sendAndWait<Void>(InactivateMemberCommand(result.memberId))
+                        apiGatewayService.reassignMember(result.memberId, user.associatedMemberId.toLong())
                     }
-                )
+                    logger.info("ZignSec auth completion: Sending success command")
+                    commandGateway.sendAndWait<Void>(
+                        ZignSecSuccessfulAuthenticationCommand(
+                            user.associatedMemberId.toLong(),
+                            result.id,
+                            result.ssn,
+                            ZignSecAuthenticationMarket.fromAuthenticationMethod(result.authenticationMethod),
+                            result.identity.firstName,
+                            result.identity.lastName
+                        )
+                    )
+                    logger.info("ZignSec auth completion: Publishing session to redis")
+                    redisEventPublisher.onAuthSessionUpdated(result.memberId, AuthSessionUpdatedEventStatus.SUCCESS)
+                } else {
+                    logger.info("ZignSec auth completion: Publishing session to redis")
+                    redisEventPublisher.onAuthSessionUpdated(result.memberId, AuthSessionUpdatedEventStatus.FAILED)
+                }
             }
             is ZignSecAuthenticationResult.Failed ->
                 redisEventPublisher.onAuthSessionUpdated(result.memberId, AuthSessionUpdatedEventStatus.FAILED)

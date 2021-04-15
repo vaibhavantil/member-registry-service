@@ -1,9 +1,10 @@
 package com.hedvig.auth.import
 
-import com.hedvig.auth.model.SwedishBankIdCredential
-import com.hedvig.auth.model.SwedishBankIdCredentialRepository
-import com.hedvig.auth.model.User
-import com.hedvig.auth.model.UserRepository
+import com.hedvig.auth.models.*
+import com.hedvig.auth.models.AuditEvent
+import com.hedvig.auth.models.SwedishBankIdCredential
+import com.hedvig.auth.models.SwedishBankIdCredentialRepository
+import com.hedvig.auth.models.UserRepository
 import com.hedvig.memberservice.events.MemberSignedEvent
 import java.time.Instant
 import javax.transaction.Transactional
@@ -11,14 +12,16 @@ import org.axonframework.config.ProcessingGroup
 import org.axonframework.eventhandling.EventHandler
 import org.axonframework.eventhandling.Timestamp
 import org.slf4j.LoggerFactory
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
 @Component
 @ProcessingGroup("SwedishMemberImporter")
-class SwedishMemberImporter(
-    private val userRepository: UserRepository,
-    private val swedishBankIdCredentialRepository: SwedishBankIdCredentialRepository
-) {
+class SwedishMemberImporter {
+
+    @Autowired private lateinit var auditEventRepository: AuditEventRepository
+    @Autowired private lateinit var userRepository: UserRepository
+    @Autowired private lateinit var swedishBankIdCredentialRepository: SwedishBankIdCredentialRepository
 
     private val logger = LoggerFactory.getLogger(javaClass)
 
@@ -46,7 +49,14 @@ class SwedishMemberImporter(
             personalNumber = personalNumber,
             createdAt = timestamp
         )
-        userRepository.save(user)
+        userRepository.saveAndFlush(user)
+
+        auditEventRepository.save(
+            AuditEvent(
+                user = user,
+                eventType = AuditEvent.EventType.CREATED_ON_IMPORT
+            )
+        )
 
         logger.info("Imported member $memberId as user ${user.id} with Swedish BankID credentials")
     }

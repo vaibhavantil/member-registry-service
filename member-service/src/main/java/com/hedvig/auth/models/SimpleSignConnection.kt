@@ -1,4 +1,4 @@
-package com.hedvig.auth.model
+package com.hedvig.auth.models
 
 import java.time.Instant
 import javax.persistence.CascadeType
@@ -15,7 +15,7 @@ import javax.persistence.UniqueConstraint
 @Table(
     uniqueConstraints = [UniqueConstraint(columnNames = ["personal_number", "country"])]
 )
-class SimpleSignConnection(
+internal class SimpleSignConnection(
     @OneToOne(cascade = [CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH])
     @JoinColumn(unique = true)
     val user: User,

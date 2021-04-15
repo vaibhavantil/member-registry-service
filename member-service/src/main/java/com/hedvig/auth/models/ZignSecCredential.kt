@@ -1,4 +1,4 @@
-package com.hedvig.auth.model
+package com.hedvig.auth.models
 
 import java.time.Instant
 import javax.persistence.CascadeType
@@ -8,16 +8,24 @@ import javax.persistence.GeneratedValue
 import javax.persistence.Id
 import javax.persistence.JoinColumn
 import javax.persistence.OneToOne
+import javax.persistence.Table
+import javax.persistence.UniqueConstraint
 
 @Entity
-class SwedishBankIdCredential(
+@Table(
+    uniqueConstraints = [UniqueConstraint(columnNames = ["id_provider_name", "id_provider_person_id"])]
+)
+internal class ZignSecCredential(
     @OneToOne(cascade = [CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH])
     @JoinColumn(unique = true)
     val user: User,
-    @Column(unique = true)
-    val personalNumber: String,
+    @Column(name = "id_provider_name")
+    val idProviderName: String,
+    @Column(name = "id_provider_person_id")
+    val idProviderPersonId: String,
     val createdAt: Instant = Instant.now()
 ) {
-    @Id @GeneratedValue
+    @Id
+    @GeneratedValue
     val id: Long = 0
 }

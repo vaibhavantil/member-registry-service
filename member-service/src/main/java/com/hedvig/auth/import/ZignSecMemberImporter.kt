@@ -1,10 +1,13 @@
 package com.hedvig.auth.import
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import com.hedvig.auth.model.User
-import com.hedvig.auth.model.UserRepository
-import com.hedvig.auth.model.ZignSecCredential
-import com.hedvig.auth.model.ZignSecCredentialRepository
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
+import com.fasterxml.jackson.module.kotlin.registerKotlinModule
+import com.hedvig.auth.models.*
+import com.hedvig.auth.models.AuditEvent
+import com.hedvig.auth.models.UserRepository
+import com.hedvig.auth.models.ZignSecCredential
+import com.hedvig.auth.models.ZignSecCredentialRepository
 import com.hedvig.external.zignSec.client.dto.ZignSecNotificationRequest
 import com.hedvig.memberservice.events.DanishMemberSignedEvent
 import com.hedvig.memberservice.events.NorwegianMemberSignedEvent
@@ -14,15 +17,20 @@ import org.axonframework.config.ProcessingGroup
 import org.axonframework.eventhandling.EventHandler
 import org.axonframework.eventhandling.Timestamp
 import org.slf4j.LoggerFactory
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
 @Component
 @ProcessingGroup("ZignSecMemberImporter")
-class ZignSecMemberImporter(
-    private val userRepository: UserRepository,
-    private val zignSecCredentialRepository: ZignSecCredentialRepository,
-    private val objectMapper: ObjectMapper
-) {
+class ZignSecMemberImporter {
+
+    @Autowired private lateinit var auditEventRepository: AuditEventRepository
+    @Autowired private lateinit var userRepository: UserRepository
+    @Autowired private lateinit var zignSecCredentialRepository: ZignSecCredentialRepository
+
+    private val objectMapper: ObjectMapper = ObjectMapper()
+        .registerKotlinModule()
+        .registerModule(JavaTimeModule())
 
     private val logger = LoggerFactory.getLogger(javaClass)
 
@@ -77,7 +85,14 @@ class ZignSecMemberImporter(
             idProviderPersonId = idProviderPersonId,
             createdAt = timestamp
         )
-        userRepository.save(user)
+        userRepository.saveAndFlush(user)
+
+        auditEventRepository.save(
+            AuditEvent(
+                user = user,
+                eventType = AuditEvent.EventType.CREATED_ON_IMPORT
+            )
+        )
 
         logger.info("Imported member $memberId as user ${user.id} with ZignSec credentials")
     }

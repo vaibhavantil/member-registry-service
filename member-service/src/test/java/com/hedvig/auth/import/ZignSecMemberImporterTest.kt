@@ -1,30 +1,31 @@
 package com.hedvig.auth.import
 
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.module.kotlin.registerKotlinModule
-import com.hedvig.auth.model.UserRepository
-import com.hedvig.auth.model.ZignSecCredentialRepository
+import com.hedvig.auth.models.UserRepository
 import com.hedvig.memberservice.events.DanishMemberSignedEvent
 import com.hedvig.memberservice.events.MemberSignedEvent
 import com.hedvig.memberservice.events.NorwegianMemberSignedEvent
 import java.time.Instant
 import java.util.UUID
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest
+import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager
+import org.springframework.context.ApplicationContext
 
 @DataJpaTest
 internal class ZignSecMemberImporterTest @Autowired constructor(
     private val userRepository: UserRepository,
-    private val zignSecCredentialRepository: ZignSecCredentialRepository
+    private val entityManager: TestEntityManager
 ) {
 
-    private val importer = ZignSecMemberImporter(
-        userRepository,
-        zignSecCredentialRepository,
-        ObjectMapper().registerKotlinModule()
-    )
+    private lateinit var importer: ZignSecMemberImporter
+
+    @BeforeEach
+    fun setup(@Autowired context: ApplicationContext) {
+        importer = context.autowireCapableBeanFactory.createBean(ZignSecMemberImporter::class.java)
+    }
 
     @Test
     fun `Norwegian - signed member is imported on event`() {
@@ -76,6 +77,7 @@ internal class ZignSecMemberImporterTest @Autowired constructor(
             NorwegianMemberSignedEvent(memberId, personalNumber, providerJson, null),
             Instant.now()
         )
+        entityManager.clear()
         importer.on(
             NorwegianMemberSignedEvent(memberId, personalNumber, providerJson, null),
             Instant.now()
@@ -98,6 +100,7 @@ internal class ZignSecMemberImporterTest @Autowired constructor(
             NorwegianMemberSignedEvent(memberId1, personalNumber, providerJson, null),
             Instant.now()
         )
+        entityManager.clear()
         importer.on(
             NorwegianMemberSignedEvent(memberId2, personalNumber, providerJson, null),
             Instant.now()
@@ -159,6 +162,7 @@ internal class ZignSecMemberImporterTest @Autowired constructor(
             DanishMemberSignedEvent(memberId, personalNumber, providerJson, null),
             Instant.now()
         )
+        entityManager.clear()
         importer.on(
             DanishMemberSignedEvent(memberId, personalNumber, providerJson, null),
             Instant.now()
@@ -181,6 +185,7 @@ internal class ZignSecMemberImporterTest @Autowired constructor(
             DanishMemberSignedEvent(memberId1, personalNumber, providerJson, null),
             Instant.now()
         )
+        entityManager.clear()
         importer.on(
             DanishMemberSignedEvent(memberId2, personalNumber, providerJson, null),
             Instant.now()
@@ -193,12 +198,27 @@ internal class ZignSecMemberImporterTest @Autowired constructor(
     }
 
     // This is given from ZignSec
-    private fun zignSecNotificationJson(idProviderName: String, idProviderPersonId: String) = """{
-        "id": "${UUID.randomUUID()}",
-        "errors": [],
-        "identity": {
-            "IdProviderName": "$idProviderName",
-            "IdProviderPersonId": "$idProviderPersonId"
-        }
-    }""".trimIndent()
+    private fun zignSecNotificationJson(idProviderName: String, idProviderPersonId: String) =
+        """
+            {
+              "id": "a42a8afe-4071-4e99-8f9f-757c5942e1e5",
+              "errors": [],
+              "identity": {
+                "CountryCode": "NO",
+                "FirstName": "first",
+                "LastName": "last",
+                "FullName": "first last",
+                "DateOfBirth": "2012-12-12",
+                "Age": 8,
+                "Gender": "",
+                "IdProviderName": "$idProviderName",
+                "IdentificationDate": "2020-02-11T15:45:23Z",
+                "IdProviderRequestId": "",
+                "IdProviderPersonId": "$idProviderPersonId",
+                "CustomerPersonId": ""
+              },
+              "BANKIdNO_OIDC": "{\r\n  \"access_token\": \"access_token\",\r\n  \"expires_in\": 300,\r\n  \"refresh_expires_in\": 1800,\r\n  \"refresh_token\": \"access_token\",\r\n  \"token_type\": \"bearer\",\r\n  \"id_token\": \"id_token\",\r\n  \"not-before-policy\": 0,\r\n  \"session_state\": \"session_state\",\r\n  \"scope\": \"openid nnin_altsub profile\"\r\n}",
+              "method": "nbid_oidc"
+            }
+        """.trimIndent()
 }

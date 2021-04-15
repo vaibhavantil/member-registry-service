@@ -1,5 +1,6 @@
 package com.hedvig.memberservice.services.signing.zignsec
 
+import com.hedvig.auth.services.UserService
 import com.hedvig.external.authentication.ZignSecAuthentication
 import com.hedvig.external.authentication.dto.StartZignSecAuthenticationResult
 import com.hedvig.integration.apigateway.ApiGatewayService
@@ -7,7 +8,6 @@ import com.hedvig.memberservice.aggregates.PickedLocale
 import com.hedvig.memberservice.commands.models.ZignSecAuthenticationMarket
 import com.hedvig.memberservice.query.MemberEntity
 import com.hedvig.memberservice.query.MemberRepository
-import com.hedvig.memberservice.query.SignedMemberRepository
 import com.hedvig.memberservice.services.redispublisher.RedisEventPublisher
 import io.mockk.every
 import io.mockk.mockk
@@ -22,17 +22,17 @@ class ZignSecBankIdServiceAuthenticateTest {
     private val zignSecAuthentication: ZignSecAuthentication = mockk()
     private val commandGateway: CommandGateway = mockk()
     private val redisEventPublisher: RedisEventPublisher = mockk()
-    private val signedMemberRepository: SignedMemberRepository = mockk()
     private val apiGatewayService: ApiGatewayService = mockk()
     private val memberRepository: MemberRepository = mockk()
+    private val userService: UserService = mockk()
 
     private val sut = ZignSecBankIdService(
         zignSecAuthentication,
         commandGateway,
         redisEventPublisher,
-        signedMemberRepository,
         apiGatewayService,
         memberRepository,
+        userService,
         "",
         "",
         "https://www.dev.hedvigit.com/"

@@ -1,7 +1,6 @@
 package com.hedvig.external.zignSec.repository.entitys
 
 import com.hedvig.external.zignSec.client.dto.ZignSecIdentity
-import java.time.LocalDate
 import java.time.LocalDateTime
 import javax.persistence.Embeddable
 
@@ -38,4 +37,45 @@ class Identity(
             identity.customerPersonId
         )
     }
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as Identity
+
+        if (countryCode != other.countryCode) return false
+        if (firstName != other.firstName) return false
+        if (lastName != other.lastName) return false
+        if (fullName != other.fullName) return false
+        if (personalNumber != other.personalNumber) return false
+        if (dateOfBirth != other.dateOfBirth) return false
+        if (age != other.age) return false
+        if (gender != other.gender) return false
+        if (idProviderName != other.idProviderName) return false
+        if (identificationDate != other.identificationDate) return false
+        if (idProviderRequestId != other.idProviderRequestId) return false
+        if (idProviderPersonId != other.idProviderPersonId) return false
+        if (customerPersonId != other.customerPersonId) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = countryCode?.hashCode() ?: 0
+        result = 31 * result + (firstName?.hashCode() ?: 0)
+        result = 31 * result + (lastName?.hashCode() ?: 0)
+        result = 31 * result + (fullName?.hashCode() ?: 0)
+        result = 31 * result + (personalNumber?.hashCode() ?: 0)
+        result = 31 * result + (dateOfBirth?.hashCode() ?: 0)
+        result = 31 * result + (age ?: 0)
+        result = 31 * result + (gender?.hashCode() ?: 0)
+        result = 31 * result + (idProviderName?.hashCode() ?: 0)
+        result = 31 * result + (identificationDate?.hashCode() ?: 0)
+        result = 31 * result + (idProviderRequestId?.hashCode() ?: 0)
+        result = 31 * result + (idProviderPersonId?.hashCode() ?: 0)
+        result = 31 * result + (customerPersonId?.hashCode() ?: 0)
+        return result
+    }
+
 }

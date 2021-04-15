@@ -1,9 +1,10 @@
 package com.hedvig.auth.import
 
-import com.hedvig.auth.model.SimpleSignConnection
-import com.hedvig.auth.model.SimpleSignConnectionRepository
-import com.hedvig.auth.model.User
-import com.hedvig.auth.model.UserRepository
+import com.hedvig.auth.models.*
+import com.hedvig.auth.models.AuditEvent
+import com.hedvig.auth.models.SimpleSignConnection
+import com.hedvig.auth.models.SimpleSignConnectionRepository
+import com.hedvig.auth.models.UserRepository
 import com.hedvig.memberservice.events.MemberSimpleSignedEvent
 import java.time.Instant
 import javax.transaction.Transactional
@@ -11,14 +12,16 @@ import org.axonframework.config.ProcessingGroup
 import org.axonframework.eventhandling.EventHandler
 import org.axonframework.eventhandling.Timestamp
 import org.slf4j.LoggerFactory
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
 @Component
 @ProcessingGroup("SimpleSignMemberImporter")
-class SimpleSignMemberImporter(
-    private val userRepository: UserRepository,
-    private val simpleSignConnectionRepository: SimpleSignConnectionRepository
-) {
+class SimpleSignMemberImporter {
+
+    @Autowired private lateinit var auditEventRepository: AuditEventRepository
+    @Autowired private lateinit var userRepository: UserRepository
+    @Autowired private lateinit var simpleSignConnectionRepository: SimpleSignConnectionRepository
 
     private val logger = LoggerFactory.getLogger(javaClass)
 
@@ -52,7 +55,14 @@ class SimpleSignMemberImporter(
             country = country,
             createdAt = timestamp
         )
-        userRepository.save(user)
+        userRepository.saveAndFlush(user)
+
+        auditEventRepository.save(
+            AuditEvent(
+                user = user,
+                eventType = AuditEvent.EventType.CREATED_ON_IMPORT
+            )
+        )
 
         logger.info("Imported member ${e.memberId} as user ${user.id} with SimpleSign connection")
     }

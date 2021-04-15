@@ -1,5 +1,6 @@
 package com.hedvig.memberservice.services.v2
 
+import com.hedvig.auth.services.UserService
 import com.hedvig.external.bankID.bankId.BankIdApi
 import com.hedvig.external.bankID.bankIdTypes.CollectRequest
 import com.hedvig.external.bankID.bankIdTypes.CollectStatus
@@ -9,7 +10,6 @@ import com.hedvig.memberservice.commands.InactivateMemberCommand
 import com.hedvig.memberservice.jobs.BankIdAuthCollector
 import com.hedvig.memberservice.query.CollectRepository
 import com.hedvig.memberservice.query.CollectType
-import com.hedvig.memberservice.query.SignedMemberRepository
 import com.hedvig.integration.apigateway.ApiGatewayService
 import com.hedvig.memberservice.jobs.SwedishBankIdMetrics
 import com.hedvig.memberservice.services.redispublisher.AuthSessionUpdatedEventStatus
@@ -20,7 +20,6 @@ import org.quartz.JobBuilder
 import org.quartz.Scheduler
 import org.quartz.SimpleScheduleBuilder
 import org.quartz.TriggerBuilder
-import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.lang.Exception
 import javax.transaction.Transactional
@@ -28,14 +27,13 @@ import javax.transaction.Transactional
 @Service
 class BankIdServiceV2(
     private val bankIdApi: BankIdApi,
-    private val signedMemberRepository: SignedMemberRepository,
     private val commandGateway: CommandGateway,
     private val redisEventPublisher: RedisEventPublisher,
     private val scheduler: Scheduler,
     private val collectRepository: CollectRepository,
     private val apiGatewayService: ApiGatewayService,
-    private val swedishBankIdMetrics: SwedishBankIdMetrics
-
+    private val swedishBankIdMetrics: SwedishBankIdMetrics,
+    private val userService: UserService
 ) {
 
     @Transactional
@@ -85,11 +83,14 @@ class BankIdServiceV2(
                 CollectStatus.complete -> {
                     swedishBankIdMetrics.completeBankIdV2Auth()
                     val personalNumber = bankIdRes.completionData.user.personalNumber
-                    val signedMember = signedMemberRepository.findBySsn(personalNumber)
-                    if (signedMember.isPresent) {
-                        if (memberId != signedMember.get().id) {
+                    val user = userService.findOrCreateUserWithCredentials(
+                        UserService.Credentials.SwedishBankID(personalNumber),
+                        onboardingMemberId = null
+                    )
+                    if (user != null) {
+                        if (memberId != user.associatedMemberId.toLong()) {
                             commandGateway.sendAndWait<Any>(InactivateMemberCommand(memberId))
-                            apiGatewayService.reassignMember(memberId, signedMember.get().id)
+                            apiGatewayService.reassignMember(memberId, user.associatedMemberId.toLong())
                         }
                         redisEventPublisher.onAuthSessionUpdated(memberId, AuthSessionUpdatedEventStatus.SUCCESS)
                     } else {

@@ -1,26 +1,30 @@
 package com.hedvig.auth.import
 
-import com.hedvig.auth.model.SimpleSignConnectionRepository
-import com.hedvig.auth.model.UserRepository
-import com.hedvig.memberservice.events.MemberSignedEvent
+import com.hedvig.auth.models.UserRepository
 import com.hedvig.memberservice.events.MemberSimpleSignedEvent
 import java.time.Instant
 import java.util.UUID
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest
+import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager
+import org.springframework.context.ApplicationContext
+import javax.persistence.EntityManager
 
 @DataJpaTest
 internal class SimpleSignMemberImporterTest @Autowired constructor(
     private val userRepository: UserRepository,
-    private val simpleSignConnectionRepository: SimpleSignConnectionRepository
+    private val entityManager: TestEntityManager
 ) {
 
-    private val importer = SimpleSignMemberImporter(
-        userRepository,
-        simpleSignConnectionRepository
-    )
+    private lateinit var importer: SimpleSignMemberImporter
+
+    @BeforeEach
+    fun setup(@Autowired context: ApplicationContext) {
+        importer = context.autowireCapableBeanFactory.createBean(SimpleSignMemberImporter::class.java)
+    }
 
     @Test
     fun `signed member is imported on event`() {
@@ -63,6 +67,7 @@ internal class SimpleSignMemberImporterTest @Autowired constructor(
             MemberSimpleSignedEvent(memberId, personalNumber, MemberSimpleSignedEvent.Nationality.NORWAY, UUID.randomUUID()),
             Instant.now()
         )
+        entityManager.clear()
         importer.on(
             MemberSimpleSignedEvent(memberId, personalNumber, MemberSimpleSignedEvent.Nationality.NORWAY, UUID.randomUUID()),
             Instant.now()
@@ -82,6 +87,7 @@ internal class SimpleSignMemberImporterTest @Autowired constructor(
             MemberSimpleSignedEvent(memberId1, personalNumber, MemberSimpleSignedEvent.Nationality.NORWAY, UUID.randomUUID()),
             Instant.now()
         )
+        entityManager.clear()
         importer.on(
             MemberSimpleSignedEvent(memberId2, personalNumber, MemberSimpleSignedEvent.Nationality.NORWAY, UUID.randomUUID()),
             Instant.now()
