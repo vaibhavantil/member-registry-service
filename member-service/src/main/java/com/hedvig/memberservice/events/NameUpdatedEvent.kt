@@ -1,6 +1,6 @@
 package com.hedvig.memberservice.events
 
-class NameUpdatedEvent(
+data class NameUpdatedEvent(
     override val memberId: Long,
     val firstName: String?,
     val lastName: String?

@@ -11,6 +11,7 @@ import com.hedvig.memberservice.jobs.BankIdAuthCollector
 import com.hedvig.memberservice.query.CollectRepository
 import com.hedvig.memberservice.query.CollectType
 import com.hedvig.integration.apigateway.ApiGatewayService
+import com.hedvig.memberservice.commands.PopulateMemberThroughLoginDataCommand
 import com.hedvig.memberservice.jobs.SwedishBankIdMetrics
 import com.hedvig.memberservice.services.redispublisher.AuthSessionUpdatedEventStatus
 import com.hedvig.memberservice.services.redispublisher.RedisEventPublisher
@@ -82,17 +83,23 @@ class BankIdServiceV2(
                 }
                 CollectStatus.complete -> {
                     swedishBankIdMetrics.completeBankIdV2Auth()
-                    val personalNumber = bankIdRes.completionData.user.personalNumber
+                    val bankidIdentity = bankIdRes.completionData.user
+                    val personalNumber = bankidIdentity.personalNumber
                     val user = userService.findOrCreateUserWithCredentials(
                         UserService.Credentials.SwedishBankID(personalNumber),
                         onboardingMemberId = memberId.toString()
                     )
                     if (user != null) {
-                        if (memberId != user.associatedMemberId.toLong()) {
+                        val userMemberId = user.associatedMemberId.toLong()
+                        if (memberId != userMemberId) {
                             commandGateway.sendAndWait<Any>(InactivateMemberCommand(memberId))
-                            apiGatewayService.reassignMember(memberId, user.associatedMemberId.toLong())
+                            apiGatewayService.reassignMember(memberId, userMemberId)
                         }
                         redisEventPublisher.onAuthSessionUpdated(memberId, AuthSessionUpdatedEventStatus.SUCCESS)
+
+                        commandGateway.sendAndWait<Unit>(
+                            PopulateMemberThroughLoginDataCommand(userMemberId, bankidIdentity.givenName, bankidIdentity.surname)
+                        )
                     } else {
                         redisEventPublisher.onAuthSessionUpdated(memberId, AuthSessionUpdatedEventStatus.FAILED)
                     }

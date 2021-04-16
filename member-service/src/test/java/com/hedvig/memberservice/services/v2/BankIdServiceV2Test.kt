@@ -2,40 +2,45 @@ package com.hedvig.memberservice.services.v2
 
 import com.hedvig.auth.services.UserService
 import com.hedvig.external.bankID.bankId.BankIdApi
-import com.hedvig.external.bankID.bankIdTypes.*
-import com.hedvig.external.bankID.bankIdTypes.Collect.*
+import com.hedvig.external.bankID.bankIdTypes.Collect.Cert
+import com.hedvig.external.bankID.bankIdTypes.Collect.Device
+import com.hedvig.external.bankID.bankIdTypes.Collect.User
+import com.hedvig.external.bankID.bankIdTypes.CollectRequest
+import com.hedvig.external.bankID.bankIdTypes.CollectResponse
+import com.hedvig.external.bankID.bankIdTypes.CollectStatus
+import com.hedvig.external.bankID.bankIdTypes.CompletionData
 import com.hedvig.integration.apigateway.ApiGatewayService
 import com.hedvig.memberservice.commands.InactivateMemberCommand
+import com.hedvig.memberservice.commands.PopulateMemberThroughLoginDataCommand
 import com.hedvig.memberservice.jobs.SwedishBankIdMetrics
 import com.hedvig.memberservice.query.CollectRepository
 import com.hedvig.memberservice.services.redispublisher.AuthSessionUpdatedEventStatus
 import com.hedvig.memberservice.services.redispublisher.RedisEventPublisher
+import io.mockk.MockKAnnotations
+import io.mockk.every
+import io.mockk.impl.annotations.MockK
+import io.mockk.verify
 import org.axonframework.commandhandling.gateway.CommandGateway
-import org.junit.Before
-import org.junit.Test
-import org.junit.runner.RunWith
-import org.mockito.Mock
-import org.mockito.Mockito
-import org.mockito.junit.MockitoJUnitRunner
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
 import org.quartz.Scheduler
-import org.mockito.Mockito.`when` as whenever
 
-@RunWith(MockitoJUnitRunner::class)
 class BankIdServiceV2Test {
 
-    @Mock lateinit var bankIdApi: BankIdApi
-    @Mock lateinit var commandGateway: CommandGateway
-    @Mock lateinit var redisEventPublisher: RedisEventPublisher
-    @Mock lateinit var scheduler: Scheduler
-    @Mock lateinit var collectRepository: CollectRepository
-    @Mock lateinit var apiGatewayService: ApiGatewayService
-    @Mock lateinit var swedishBankIdMetrics: SwedishBankIdMetrics
-    @Mock lateinit var userService: UserService
+    @MockK lateinit var bankIdApi: BankIdApi
+    @MockK lateinit var commandGateway: CommandGateway
+    @MockK lateinit var redisEventPublisher: RedisEventPublisher
+    @MockK lateinit var scheduler: Scheduler
+    @MockK lateinit var collectRepository: CollectRepository
+    @MockK lateinit var apiGatewayService: ApiGatewayService
+    @MockK lateinit var swedishBankIdMetrics: SwedishBankIdMetrics
+    @MockK lateinit var userService: UserService
 
     lateinit var bankIdServiceV2: BankIdServiceV2
 
-    @Before
+    @BeforeEach
     fun setup() {
+        MockKAnnotations.init(this, relaxed = true)
         bankIdServiceV2 = BankIdServiceV2(
             bankIdApi = bankIdApi,
             commandGateway = commandGateway,
@@ -50,40 +55,89 @@ class BankIdServiceV2Test {
 
     @Test
     fun authCollect_withStatusComplete_shouldUpdateAuthSessionWithSuccess() {
-        whenever(bankIdApi.collect(CollectRequest("xyz")))
-            .thenReturn(CollectResponse(
-                "xyz",
-                CollectStatus.complete,
+        every {
+            bankIdApi.collect(CollectRequest("xyz"))
+        } returns CollectResponse(
+            "xyz",
+            CollectStatus.complete,
+            "",
+            CompletionData(
+                User(
+                    "190001010101",
+                    "Testy Tester",
+                    "Testy",
+                    "Tester"
+                ),
+                Device("0.0.0.0"),
+                Cert(0, 0),
                 "",
-                CompletionData(
-                    User(
-                        "190001010101",
-                        "Testy Tester",
-                        "Testy",
-                        "Tester"
-                    ),
-                    Device("0.0.0.0"),
-                    Cert(0,0),
-                    "",
-                    ""
-                )
-            ))
-
-        val user =
-            com.hedvig.auth.models.User(
-                associatedMemberId = "54321"
+                ""
             )
+        )
 
-        whenever(userService.findOrCreateUserWithCredentials(
-            UserService.Credentials.SwedishBankID(
-                personalNumber = "190001010101"
-            ), onboardingMemberId = "12345")).thenReturn(user)
+        val user = com.hedvig.auth.models.User(
+            associatedMemberId = "54321"
+        )
+
+        every {
+            userService.findOrCreateUserWithCredentials(
+                UserService.Credentials.SwedishBankID(
+                    personalNumber = "190001010101"
+                ), onboardingMemberId = "12345")
+        } returns user
 
         bankIdServiceV2.authCollect(referenceToken = "xyz", memberId = 12345)
 
-        Mockito.verify(commandGateway).sendAndWait<Any>(InactivateMemberCommand(12345))
-        Mockito.verify(apiGatewayService).reassignMember(12345, 54321)
-        Mockito.verify(redisEventPublisher).onAuthSessionUpdated(12345, AuthSessionUpdatedEventStatus.SUCCESS)
+        verify {
+            commandGateway.sendAndWait<Any>(InactivateMemberCommand(12345))
+        }
+        verify {
+            apiGatewayService.reassignMember(12345, 54321)
+        }
+        verify {
+            redisEventPublisher.onAuthSessionUpdated(12345, AuthSessionUpdatedEventStatus.SUCCESS)
+        }
     }
 
+    @Test
+    fun authCollect_withStatusComplete_shouldFireMemberPopulationCommand() {
+        every {
+            bankIdApi.collect(CollectRequest("xyz"))
+        } returns CollectResponse(
+            "xyz",
+            CollectStatus.complete,
+            "",
+            CompletionData(
+                User(
+                    "190001010101",
+                    "Testy Tester",
+                    "Testy",
+                    "Tester"
+                ),
+                Device("0.0.0.0"),
+                Cert(0, 0),
+                "",
+                ""
+            )
+        )
+
+        val user = com.hedvig.auth.models.User(
+            associatedMemberId = "54321"
+        )
+
+        every {
+            userService.findOrCreateUserWithCredentials(
+                UserService.Credentials.SwedishBankID(
+                    personalNumber = "190001010101"
+                ), onboardingMemberId = "12345")
+        } returns user
+
+        bankIdServiceV2.authCollect(referenceToken = "xyz", memberId = 12345)
+
+        verify {
+            commandGateway.sendAndWait<Any>(
+                PopulateMemberThroughLoginDataCommand(54321L, "Testy", "Tester")
+            )
+        }
+    }
 }

@@ -10,6 +10,7 @@ import com.hedvig.memberservice.commands.BankIdAuthenticationStatus
 import com.hedvig.memberservice.commands.InactivateMemberCommand
 import com.hedvig.memberservice.commands.MemberSimpleSignedCommand
 import com.hedvig.memberservice.commands.MemberUpdateContactInformationCommand
+import com.hedvig.memberservice.commands.PopulateMemberThroughLoginDataCommand
 import com.hedvig.memberservice.commands.SelectNewCashbackCommand
 import com.hedvig.memberservice.commands.StartSwedishOnboardingWithSSNCommand
 import com.hedvig.memberservice.commands.SwedishBankIdAuthenticationAttemptCommand
@@ -499,7 +500,36 @@ class MemberAggregateTests {
             )
     }
 
-    private inner class AggregateFactoryM<T> internal constructor(aggregateType: Class<T>?) : AbstractAggregateFactory<T>(aggregateType) {
+    @Test
+    fun `empty member - information is populated through login command`() {
+        val memberId = 1234L
+        fixture
+            .given(
+                MemberCreatedEvent(memberId, MemberStatus.INITIATED, Instant.now())
+            )
+            .`when`(
+                PopulateMemberThroughLoginDataCommand(memberId, "First", "Lastname")
+            )
+            .expectEvents(
+                NameUpdatedEvent(memberId, "First", "Lastname")
+            )
+    }
+
+    @Test
+    fun `empty member - information is not populated through login command if the data is the same`() {
+        val memberId = 1234L
+        fixture
+            .given(
+                MemberCreatedEvent(memberId, MemberStatus.INITIATED, Instant.now()),
+                NameUpdatedEvent(memberId, "First", "Lastname")
+            )
+            .`when`(
+                PopulateMemberThroughLoginDataCommand(memberId, "First", "Lastname")
+            )
+            .expectNoEvents()
+    }
+
+    private inner class AggregateFactoryM<T> constructor(aggregateType: Class<T>?) : AbstractAggregateFactory<T>(aggregateType) {
         override fun doCreateAggregate(aggregateIdentifier: String, firstEvent: DomainEventMessage<*>?): T {
             val m = MemberAggregate()
             m.cashbackService = cashbackService

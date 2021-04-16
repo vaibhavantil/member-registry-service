@@ -12,6 +12,7 @@ import com.hedvig.memberservice.commands.InactivateMemberCommand
 import com.hedvig.memberservice.commands.InitializeAppleUserCommand
 import com.hedvig.memberservice.commands.MemberSimpleSignedCommand
 import com.hedvig.memberservice.commands.MemberUpdateContactInformationCommand
+import com.hedvig.memberservice.commands.PopulateMemberThroughLoginDataCommand
 import com.hedvig.memberservice.commands.SelectNewCashbackCommand
 import com.hedvig.memberservice.commands.SetFraudulentStatusCommand
 import com.hedvig.memberservice.commands.SignMemberFromUnderwriterCommand
@@ -255,6 +256,11 @@ class MemberAggregate() {
             && member.birthDate != cmd.birthDate) {
             apply(BirthDateUpdatedEvent(id, cmd.birthDate))
         }
+    }
+
+    @CommandHandler
+    fun handle(cmd: PopulateMemberThroughLoginDataCommand) {
+        maybeApplyNameUpdatedEvent(cmd.givenName, cmd.surname)
     }
 
     @CommandHandler
