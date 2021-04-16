@@ -516,7 +516,7 @@ class MemberAggregateTests {
     }
 
     @Test
-    fun `empty member - information is not populated through login command if the data is the same`() {
+    fun `already named member - information is not updated populated through login command`() {
         val memberId = 1234L
         fixture
             .given(
@@ -527,6 +527,22 @@ class MemberAggregateTests {
                 PopulateMemberThroughLoginDataCommand(memberId, "First", "Lastname")
             )
             .expectNoEvents()
+    }
+
+    @Test
+    fun `already named member - information is updated if one name changes`() {
+        val memberId = 1234L
+        fixture
+            .given(
+                MemberCreatedEvent(memberId, MemberStatus.INITIATED, Instant.now()),
+                NameUpdatedEvent(memberId, "First", "Lastname")
+            )
+            .`when`(
+                PopulateMemberThroughLoginDataCommand(memberId, "NewFirst", null)
+            )
+            .expectEvents(
+                NameUpdatedEvent(memberId, "NewFirst", "Lastname")
+            )
     }
 
     private inner class AggregateFactoryM<T> constructor(aggregateType: Class<T>?) : AbstractAggregateFactory<T>(aggregateType) {
