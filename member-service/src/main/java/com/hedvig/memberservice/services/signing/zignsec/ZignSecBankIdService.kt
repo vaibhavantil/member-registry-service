@@ -7,7 +7,7 @@ import com.hedvig.external.authentication.dto.ZignSecAuthenticationResult
 import com.hedvig.external.authentication.dto.ZignSecBankIdAuthenticationRequest
 import com.hedvig.integration.apigateway.ApiGatewayService
 import com.hedvig.memberservice.commands.InactivateMemberCommand
-import com.hedvig.memberservice.commands.PopulateMemberThroughLoginDataCommand
+import com.hedvig.memberservice.commands.PopulateMemberFromLoginDataCommand
 import com.hedvig.memberservice.commands.ZignSecSuccessfulAuthenticationCommand
 import com.hedvig.memberservice.commands.models.ZignSecAuthenticationMarket
 import com.hedvig.memberservice.query.MemberRepository
@@ -117,7 +117,7 @@ class ZignSecBankIdService(
                         )
                     )
                     commandGateway.sendAndWait<Unit>(
-                        PopulateMemberThroughLoginDataCommand(userMemberId, result.identity.firstName, result.identity.lastName)
+                        PopulateMemberFromLoginDataCommand(userMemberId, result.identity.firstName, result.identity.lastName)
                     )
                     logger.info("ZignSec auth completion: Publishing session to redis")
                     redisEventPublisher.onAuthSessionUpdated(result.memberId, AuthSessionUpdatedEventStatus.SUCCESS)

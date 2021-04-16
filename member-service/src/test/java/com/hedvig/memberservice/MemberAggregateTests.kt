@@ -10,7 +10,7 @@ import com.hedvig.memberservice.commands.BankIdAuthenticationStatus
 import com.hedvig.memberservice.commands.InactivateMemberCommand
 import com.hedvig.memberservice.commands.MemberSimpleSignedCommand
 import com.hedvig.memberservice.commands.MemberUpdateContactInformationCommand
-import com.hedvig.memberservice.commands.PopulateMemberThroughLoginDataCommand
+import com.hedvig.memberservice.commands.PopulateMemberFromLoginDataCommand
 import com.hedvig.memberservice.commands.SelectNewCashbackCommand
 import com.hedvig.memberservice.commands.StartSwedishOnboardingWithSSNCommand
 import com.hedvig.memberservice.commands.SwedishBankIdAuthenticationAttemptCommand
@@ -508,7 +508,7 @@ class MemberAggregateTests {
                 MemberCreatedEvent(memberId, MemberStatus.INITIATED, Instant.now())
             )
             .`when`(
-                PopulateMemberThroughLoginDataCommand(memberId, "First", "Lastname")
+                PopulateMemberFromLoginDataCommand(memberId, "First", "Lastname")
             )
             .expectEvents(
                 NameUpdatedEvent(memberId, "First", "Lastname")
@@ -524,7 +524,7 @@ class MemberAggregateTests {
                 NameUpdatedEvent(memberId, "First", "Lastname")
             )
             .`when`(
-                PopulateMemberThroughLoginDataCommand(memberId, "First", "Lastname")
+                PopulateMemberFromLoginDataCommand(memberId, "First", "Lastname")
             )
             .expectNoEvents()
     }
@@ -538,7 +538,7 @@ class MemberAggregateTests {
                 NameUpdatedEvent(memberId, "First", "Lastname")
             )
             .`when`(
-                PopulateMemberThroughLoginDataCommand(memberId, "NewFirst", null)
+                PopulateMemberFromLoginDataCommand(memberId, "NewFirst", null)
             )
             .expectEvents(
                 NameUpdatedEvent(memberId, "NewFirst", "Lastname")

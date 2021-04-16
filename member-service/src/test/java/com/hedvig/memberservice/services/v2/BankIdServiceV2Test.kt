@@ -11,7 +11,7 @@ import com.hedvig.external.bankID.bankIdTypes.CollectStatus
 import com.hedvig.external.bankID.bankIdTypes.CompletionData
 import com.hedvig.integration.apigateway.ApiGatewayService
 import com.hedvig.memberservice.commands.InactivateMemberCommand
-import com.hedvig.memberservice.commands.PopulateMemberThroughLoginDataCommand
+import com.hedvig.memberservice.commands.PopulateMemberFromLoginDataCommand
 import com.hedvig.memberservice.jobs.SwedishBankIdMetrics
 import com.hedvig.memberservice.query.CollectRepository
 import com.hedvig.memberservice.services.redispublisher.AuthSessionUpdatedEventStatus
@@ -136,7 +136,7 @@ class BankIdServiceV2Test {
 
         verify {
             commandGateway.sendAndWait<Any>(
-                PopulateMemberThroughLoginDataCommand(54321L, "Testy", "Tester")
+                PopulateMemberFromLoginDataCommand(54321L, "Testy", "Tester")
             )
         }
     }

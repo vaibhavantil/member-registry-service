@@ -8,7 +8,7 @@ import com.hedvig.external.authentication.dto.ZignSecAuthenticationResult
 import com.hedvig.external.zignSec.repository.entitys.Identity
 import com.hedvig.integration.apigateway.ApiGatewayService
 import com.hedvig.memberservice.commands.InactivateMemberCommand
-import com.hedvig.memberservice.commands.PopulateMemberThroughLoginDataCommand
+import com.hedvig.memberservice.commands.PopulateMemberFromLoginDataCommand
 import com.hedvig.memberservice.commands.ZignSecSuccessfulAuthenticationCommand
 import com.hedvig.memberservice.commands.models.ZignSecAuthenticationMarket
 import com.hedvig.memberservice.query.MemberRepository
@@ -259,7 +259,7 @@ class ZignSecBankIdServiceTest {
 
         verify {
             commandGateway.sendAndWait(
-                PopulateMemberThroughLoginDataCommand(MEMBER_ID, "Test", "Testsson")
+                PopulateMemberFromLoginDataCommand(MEMBER_ID, "Test", "Testsson")
             )
         }
     }

@@ -12,7 +12,7 @@ import com.hedvig.memberservice.commands.InactivateMemberCommand
 import com.hedvig.memberservice.commands.InitializeAppleUserCommand
 import com.hedvig.memberservice.commands.MemberSimpleSignedCommand
 import com.hedvig.memberservice.commands.MemberUpdateContactInformationCommand
-import com.hedvig.memberservice.commands.PopulateMemberThroughLoginDataCommand
+import com.hedvig.memberservice.commands.PopulateMemberFromLoginDataCommand
 import com.hedvig.memberservice.commands.SelectNewCashbackCommand
 import com.hedvig.memberservice.commands.SetFraudulentStatusCommand
 import com.hedvig.memberservice.commands.SignMemberFromUnderwriterCommand
@@ -71,7 +71,6 @@ import org.axonframework.messaging.MetaData
 import org.axonframework.spring.stereotype.Aggregate
 import org.springframework.beans.factory.annotation.Autowired
 import java.io.IOException
-import java.time.Instant
 import java.util.UUID
 import java.util.function.Supplier
 
@@ -259,7 +258,7 @@ class MemberAggregate() {
     }
 
     @CommandHandler
-    fun handle(cmd: PopulateMemberThroughLoginDataCommand) {
+    fun handle(cmd: PopulateMemberFromLoginDataCommand) {
         maybeApplyNameUpdatedEvent(cmd.givenName, cmd.surname)
     }
 
