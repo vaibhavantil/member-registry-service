@@ -4,6 +4,6 @@ import org.axonframework.commandhandling.TargetAggregateIdentifier
 
 data class PopulateMemberThroughLoginDataCommand(
     @TargetAggregateIdentifier var id: Long,
-    val givenName: String,
-    val surname: String
+    val givenName: String?,
+    val surname: String?
 )

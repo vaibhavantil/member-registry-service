@@ -7,6 +7,7 @@ import com.hedvig.external.authentication.dto.ZignSecAuthenticationResult
 import com.hedvig.external.authentication.dto.ZignSecBankIdAuthenticationRequest
 import com.hedvig.integration.apigateway.ApiGatewayService
 import com.hedvig.memberservice.commands.InactivateMemberCommand
+import com.hedvig.memberservice.commands.PopulateMemberThroughLoginDataCommand
 import com.hedvig.memberservice.commands.ZignSecSuccessfulAuthenticationCommand
 import com.hedvig.memberservice.commands.models.ZignSecAuthenticationMarket
 import com.hedvig.memberservice.query.MemberRepository
@@ -98,15 +99,16 @@ class ZignSecBankIdService(
                 }
 
                 if (user != null) {
-                    if (result.memberId != user.associatedMemberId.toLong()) {
+                    val userMemberId = user.associatedMemberId.toLong()
+                    if (result.memberId != userMemberId) {
                         logger.info("ZignSec auth completion: MemberID mismatch, inactivating ${result.memberId}")
-                        commandGateway.sendAndWait<Void>(InactivateMemberCommand(result.memberId))
-                        apiGatewayService.reassignMember(result.memberId, user.associatedMemberId.toLong())
+                        commandGateway.sendAndWait<Unit>(InactivateMemberCommand(result.memberId))
+                        apiGatewayService.reassignMember(result.memberId, userMemberId)
                     }
                     logger.info("ZignSec auth completion: Sending success command")
-                    commandGateway.sendAndWait<Void>(
+                    commandGateway.sendAndWait<Unit>(
                         ZignSecSuccessfulAuthenticationCommand(
-                            user.associatedMemberId.toLong(),
+                            userMemberId,
                             result.id,
                             result.ssn,
                             ZignSecAuthenticationMarket.fromAuthenticationMethod(result.authenticationMethod),
@@ -114,10 +116,12 @@ class ZignSecBankIdService(
                             result.identity.lastName
                         )
                     )
+                    commandGateway.sendAndWait<Unit>(
+                        PopulateMemberThroughLoginDataCommand(userMemberId, result.identity.firstName, result.identity.lastName)
+                    )
                     logger.info("ZignSec auth completion: Publishing session to redis")
                     redisEventPublisher.onAuthSessionUpdated(result.memberId, AuthSessionUpdatedEventStatus.SUCCESS)
                 } else {
-                    logger.info("ZignSec auth completion: Publishing session to redis")
                     redisEventPublisher.onAuthSessionUpdated(result.memberId, AuthSessionUpdatedEventStatus.FAILED)
                 }
             }

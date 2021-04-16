@@ -8,54 +8,58 @@ import com.hedvig.external.authentication.dto.ZignSecAuthenticationResult
 import com.hedvig.external.zignSec.repository.entitys.Identity
 import com.hedvig.integration.apigateway.ApiGatewayService
 import com.hedvig.memberservice.commands.InactivateMemberCommand
+import com.hedvig.memberservice.commands.PopulateMemberThroughLoginDataCommand
 import com.hedvig.memberservice.commands.ZignSecSuccessfulAuthenticationCommand
 import com.hedvig.memberservice.commands.models.ZignSecAuthenticationMarket
 import com.hedvig.memberservice.query.MemberRepository
 import com.hedvig.memberservice.services.redispublisher.AuthSessionUpdatedEventStatus
 import com.hedvig.memberservice.services.redispublisher.RedisEventPublisher
+import io.mockk.MockKAnnotations
+import io.mockk.every
+import io.mockk.impl.annotations.MockK
+import io.mockk.verify
 import org.axonframework.commandhandling.gateway.CommandGateway
-import org.junit.Test
-import org.junit.Before
-import org.junit.runner.RunWith
-import org.mockito.Mock
-import org.mockito.Mockito.anyLong
-import org.mockito.Mockito.never
-import org.mockito.Mockito.verify
-import org.mockito.junit.MockitoJUnitRunner
-import org.springframework.core.env.Environment
 import java.time.LocalDateTime
 import java.util.*
-import org.mockito.Mockito.`when` as whenever
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
 
-@RunWith(MockitoJUnitRunner::class)
 class ZignSecBankIdServiceTest {
 
-    @Mock
+    @MockK
     lateinit var zignSecAuthentication: ZignSecAuthentication
 
-    @Mock
+    @MockK
     lateinit var commandGateway: CommandGateway
 
-    @Mock
+    @MockK
     lateinit var redisEventPublisher: RedisEventPublisher
 
-    @Mock
+    @MockK
     lateinit var apiGatewayService: ApiGatewayService
 
-    @Mock
+    @MockK
     lateinit var memberRepository: MemberRepository
 
-    @Mock
+    @MockK
     lateinit var userService: UserService
-
-    @Mock
-    lateinit var env: Environment
 
     lateinit var classUnderTest: ZignSecBankIdService
 
-    @Before
+    @BeforeEach
     fun before() {
-        classUnderTest = ZignSecBankIdService(zignSecAuthentication, commandGateway, redisEventPublisher, apiGatewayService, memberRepository, userService, "success", "fail", "https://www.hedvig.com")
+        MockKAnnotations.init(this, relaxed = true)
+        classUnderTest = ZignSecBankIdService(
+            zignSecAuthentication,
+            commandGateway,
+            redisEventPublisher,
+            apiGatewayService,
+            memberRepository,
+            userService,
+            "success",
+            "fail",
+            "https://www.hedvig.com"
+        )
     }
 
     @Test
@@ -83,20 +87,40 @@ class ZignSecBankIdServiceTest {
 
         val user = User(associatedMemberId = MEMBERS_ORIGIGINAL_ID.toString())
 
-        whenever(userService.findOrCreateUserWithCredentials(
-            UserService.Credentials.ZignSec(
-                countryCode = "NO",
-                idProviderName = "BankIDNO",
-                idProviderPersonId = "9578-6000-4-365161",
-                personalNumber = SSN
-            ), onboardingMemberId = MEMBER_ID.toString())).thenReturn(user)
+        every {
+            userService.findOrCreateUserWithCredentials(
+                UserService.Credentials.ZignSec(
+                    countryCode = "NO",
+                    idProviderName = "BankIDNO",
+                    idProviderPersonId = "9578-6000-4-365161",
+                    personalNumber = SSN
+                ), onboardingMemberId = MEMBER_ID.toString()
+            )
+        } returns user
 
         classUnderTest.completeAuthentication(result)
 
-        verify(commandGateway).sendAndWait<Any>(InactivateMemberCommand(MEMBER_ID))
-        verify(apiGatewayService).reassignMember(MEMBER_ID, MEMBERS_ORIGIGINAL_ID)
-        verify(commandGateway).sendAndWait<Any>(ZignSecSuccessfulAuthenticationCommand(MEMBERS_ORIGIGINAL_ID, RESULT_ID, SSN, ZignSecAuthenticationMarket.NORWAY, "Test", "Testsson"))
-        verify(redisEventPublisher).onAuthSessionUpdated(MEMBER_ID, AuthSessionUpdatedEventStatus.SUCCESS)
+        verify {
+            commandGateway.sendAndWait(InactivateMemberCommand(MEMBER_ID))
+        }
+        verify {
+            apiGatewayService.reassignMember(MEMBER_ID, MEMBERS_ORIGIGINAL_ID)
+        }
+        verify {
+            commandGateway.sendAndWait(
+                ZignSecSuccessfulAuthenticationCommand(
+                    MEMBERS_ORIGIGINAL_ID,
+                    RESULT_ID,
+                    SSN,
+                    ZignSecAuthenticationMarket.NORWAY,
+                    "Test",
+                    "Testsson"
+                )
+            )
+        }
+        verify {
+            redisEventPublisher.onAuthSessionUpdated(MEMBER_ID, AuthSessionUpdatedEventStatus.SUCCESS)
+        }
     }
 
     @Test
@@ -124,28 +148,37 @@ class ZignSecBankIdServiceTest {
 
         val user = User(associatedMemberId = MEMBER_ID.toString())
 
-        whenever(userService.findOrCreateUserWithCredentials(
-            UserService.Credentials.ZignSec(
-                countryCode = "NO",
-                idProviderName = "BankIDNO",
-                idProviderPersonId = "9578-6000-4-365161",
-                personalNumber = SSN
-            ), onboardingMemberId = MEMBER_ID.toString())).thenReturn(user)
+        every {
+            userService.findOrCreateUserWithCredentials(
+                UserService.Credentials.ZignSec(
+                    countryCode = "NO",
+                    idProviderName = "BankIDNO",
+                    idProviderPersonId = "9578-6000-4-365161",
+                    personalNumber = SSN
+                ), onboardingMemberId = MEMBER_ID.toString()
+            )
+        } returns user
 
         classUnderTest.completeAuthentication(result)
 
-        verify(commandGateway).sendAndWait<Any>(
-            ZignSecSuccessfulAuthenticationCommand(
-                MEMBER_ID,
-                RESULT_ID,
-                SSN,
-                ZignSecAuthenticationMarket.NORWAY,
-                "Test",
-                "Testsson"
+        verify {
+            commandGateway.sendAndWait<Any>(
+                ZignSecSuccessfulAuthenticationCommand(
+                    MEMBER_ID,
+                    RESULT_ID,
+                    SSN,
+                    ZignSecAuthenticationMarket.NORWAY,
+                    "Test",
+                    "Testsson"
+                )
             )
-        )
-        verify(apiGatewayService, never()).reassignMember(anyLong(), anyLong())
-        verify(redisEventPublisher).onAuthSessionUpdated(MEMBER_ID, AuthSessionUpdatedEventStatus.SUCCESS)
+        }
+        verify(inverse = true) {
+            apiGatewayService.reassignMember(any(), any())
+        }
+        verify {
+            redisEventPublisher.onAuthSessionUpdated(MEMBER_ID, AuthSessionUpdatedEventStatus.SUCCESS)
+        }
     }
 
     @Test
@@ -171,18 +204,65 @@ class ZignSecBankIdServiceTest {
             ZignSecAuthenticationMethod.NORWAY_WEB_OR_MOBILE
         )
 
-        whenever(userService.findOrCreateUserWithCredentials(
-            UserService.Credentials.ZignSec(
-                countryCode = "NO",
-                idProviderName = "BankIDNO",
-                idProviderPersonId = SSN
-            ), onboardingMemberId = MEMBER_ID.toString())).thenReturn(null)
+        every {
+            userService.findOrCreateUserWithCredentials(
+                UserService.Credentials.ZignSec(
+                    countryCode = "NO",
+                    idProviderName = "BankIDNO",
+                    idProviderPersonId = "9578-6000-4-365161",
+                    personalNumber = SSN
+                ), onboardingMemberId = MEMBER_ID.toString()
+            )
+        } returns null
 
         classUnderTest.completeAuthentication(result)
 
-        verify(redisEventPublisher).onAuthSessionUpdated(MEMBER_ID, AuthSessionUpdatedEventStatus.FAILED)
+        verify { redisEventPublisher.onAuthSessionUpdated(MEMBER_ID, AuthSessionUpdatedEventStatus.FAILED) }
     }
 
+    @Test
+    fun completeCompletedAuthentication_success_populatesMemberData() {
+        val result = ZignSecAuthenticationResult.Completed(
+            Identity(
+                countryCode = "NO",
+                firstName = "Test",
+                lastName = "Testsson",
+                fullName = "Test Testsson",
+                personalNumber = null,
+                dateOfBirth = "1900-01-01",
+                age = 121,
+                idProviderName = "BankIDNO",
+                identificationDate = LocalDateTime.now(),
+                idProviderRequestId = null,
+                idProviderPersonId = "9578-6000-4-365161",
+                customerPersonId = null
+            ),
+            RESULT_ID,
+            MEMBER_ID,
+            SSN,
+            ZignSecAuthenticationMethod.NORWAY_WEB_OR_MOBILE
+        )
+
+        val user = User(associatedMemberId = MEMBER_ID.toString())
+        every {
+            userService.findOrCreateUserWithCredentials(
+                UserService.Credentials.ZignSec(
+                    countryCode = "NO",
+                    idProviderName = "BankIDNO",
+                    idProviderPersonId = "9578-6000-4-365161",
+                    personalNumber = SSN
+                ), onboardingMemberId = MEMBER_ID.toString()
+            )
+        } returns user
+
+        classUnderTest.completeAuthentication(result)
+
+        verify {
+            commandGateway.sendAndWait(
+                PopulateMemberThroughLoginDataCommand(MEMBER_ID, "Test", "Testsson")
+            )
+        }
+    }
 
     @Test
     fun completeFailedAuthentication_sameMemberId_doesNotInactivateMemberAndDoesNotReassignsMember() {
@@ -193,7 +273,7 @@ class ZignSecBankIdServiceTest {
 
         classUnderTest.completeAuthentication(result)
 
-        verify(redisEventPublisher).onAuthSessionUpdated(MEMBER_ID, AuthSessionUpdatedEventStatus.FAILED)
+        verify { redisEventPublisher.onAuthSessionUpdated(MEMBER_ID, AuthSessionUpdatedEventStatus.FAILED) }
     }
 
     companion object {
