@@ -32,13 +32,9 @@
 
   <repositories>
     <repository>
-      <id>jcenter</id>
-      <url>https://jcenter.bintray.com/</url>
-    </repository>
-    <repository>
-      <id>bintray-hedvig-hedvig-java</id>
-      <name>bintray</name>
-      <url>https://dl.bintray.com/hedvig/hedvig-java</url>
+      <id>github</id>
+      <name>Hedvig GitHub Packages</name>
+      <url>https://maven.pkg.github.com/HedvigInsurance/libs</url>
     </repository>
   </repositories>
 

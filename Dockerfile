@@ -3,6 +3,11 @@
 FROM maven:3.6.3-amazoncorretto-11 AS local_dependencies
 WORKDIR /usr/app
 
+ARG GITHUB_USER
+ARG GITHUB_TOKEN
+
+ENV MAVEN_OPTS="-Dmaven.repo.local=/usr/share/maven/ref/repository -DGITHUB_USERNAME=$GITHUB_USER -DGITHUB_TOKEN=$GITHUB_TOKEN"
+
 # Running `mvn dependency:go-offline` and similar will not be able to detect
 # local module dependencies that have not yet been built. In order to make sure
 # we can split up the different build stages, we build+install the local deps
@@ -23,7 +28,8 @@ FROM local_dependencies AS dependencies
 
 # Resolve dependencies and cache them
 COPY member-service/pom.xml member-service/
-RUN mvn dependency:go-offline -pl member-service -s /usr/share/maven/ref/settings-docker.xml
+COPY settings.xml .
+RUN mvn dependency:go-offline -pl member-service -s settings.xml
 
 
 ##### Build stage #####
