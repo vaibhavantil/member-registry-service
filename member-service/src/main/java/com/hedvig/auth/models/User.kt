@@ -20,7 +20,7 @@ class User(
     val id: UUID = UUID.randomUUID()
 
     @OneToMany(mappedBy = "user", cascade = [CascadeType.ALL], orphanRemoval = true)
-    private val auditLog: List<AuditEvent> = listOf()
+    internal val auditLog: List<AuditEvent> = listOf()
 
     @OneToOne(mappedBy = "user", cascade = [CascadeType.ALL], orphanRemoval = true)
     internal var swedishBankIdCredential: SwedishBankIdCredential? = null
