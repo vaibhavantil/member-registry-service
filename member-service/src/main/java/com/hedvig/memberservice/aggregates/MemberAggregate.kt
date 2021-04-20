@@ -5,6 +5,7 @@ import org.axonframework.commandhandling.model.AggregateLifecycle.apply
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.hedvig.common.UUIDGenerator
 import com.hedvig.external.bisnodeBCI.BisnodeClient
+import com.hedvig.memberservice.commands.AuthenticatedIdentificationCommand
 import com.hedvig.memberservice.commands.CreateMemberCommand
 import com.hedvig.memberservice.commands.EditMemberInfoCommand
 import com.hedvig.memberservice.commands.EditMemberInformationCommand
@@ -12,7 +13,6 @@ import com.hedvig.memberservice.commands.InactivateMemberCommand
 import com.hedvig.memberservice.commands.InitializeAppleUserCommand
 import com.hedvig.memberservice.commands.MemberSimpleSignedCommand
 import com.hedvig.memberservice.commands.MemberUpdateContactInformationCommand
-import com.hedvig.memberservice.commands.PopulateMemberFromLoginDataCommand
 import com.hedvig.memberservice.commands.SelectNewCashbackCommand
 import com.hedvig.memberservice.commands.SetFraudulentStatusCommand
 import com.hedvig.memberservice.commands.SignMemberFromUnderwriterCommand
@@ -27,7 +27,6 @@ import com.hedvig.memberservice.commands.UpdatePickedLocaleCommand
 import com.hedvig.memberservice.commands.UpdateSSNCommand
 import com.hedvig.memberservice.commands.UpdateSwedishWebOnBoardingInfoCommand
 import com.hedvig.memberservice.commands.ZignSecSignCommand
-import com.hedvig.memberservice.commands.ZignSecSuccessfulAuthenticationCommand
 import com.hedvig.memberservice.commands.models.ZignSecAuthenticationMarket
 import com.hedvig.memberservice.events.AcceptLanguageUpdatedEvent
 import com.hedvig.memberservice.events.BirthDateUpdatedEvent
@@ -258,11 +257,6 @@ class MemberAggregate() {
     }
 
     @CommandHandler
-    fun handle(cmd: PopulateMemberFromLoginDataCommand) {
-        maybeApplyNameUpdatedEvent(cmd.givenName, cmd.surname)
-    }
-
-    @CommandHandler
     fun handle(cmd: SwedishBankIdSignCommand) {
         if (cmd.personalNumber != null
             && member.ssn != cmd.personalNumber) {
@@ -320,7 +314,10 @@ class MemberAggregate() {
                         ZignSecAuthenticationMarket.DENMARK -> MemberIdentifiedEvent.Nationality.DENMARK
                     }
                 ),
-                cmd.zignSecAuthMarket.toMemberIdentifiedEventIdentificationMethod(),
+                when (cmd.zignSecAuthMarket) {
+                    ZignSecAuthenticationMarket.NORWAY -> MemberIdentifiedEvent.IdentificationMethod.NORWEGIAN_BANK_ID
+                    ZignSecAuthenticationMarket.DENMARK -> MemberIdentifiedEvent.IdentificationMethod.DANISH_BANK_ID
+                },
                 cmd.firstName,
                 cmd.lastName
             )
@@ -328,18 +325,24 @@ class MemberAggregate() {
     }
 
     @CommandHandler
-    fun handle(command: ZignSecSuccessfulAuthenticationCommand) {
+    fun handle(command: AuthenticatedIdentificationCommand) {
+        if (member.firstName == command.firstName &&
+            member.lastName == command.lastName &&
+            member.ssn == command.personalNumber &&
+            member.countryCode == command.countryCode) return
         apply(
             MemberIdentifiedEvent(
                 command.id,
                 MemberIdentifiedEvent.NationalIdentification(
                     command.personalNumber,
-                    when (command.zignSecAuthMarket) {
-                        ZignSecAuthenticationMarket.NORWAY -> MemberIdentifiedEvent.Nationality.NORWAY
-                        ZignSecAuthenticationMarket.DENMARK -> MemberIdentifiedEvent.Nationality.DENMARK
-                    }
+                    MemberIdentifiedEvent.Nationality.fromCountryCode(command.countryCode)
                 ),
-                command.zignSecAuthMarket.toMemberIdentifiedEventIdentificationMethod(),
+                when (command.source) {
+                    AuthenticatedIdentificationCommand.Source.SwedishBankID ->
+                        MemberIdentifiedEvent.IdentificationMethod.SWEDISH_BANK_ID
+                    is AuthenticatedIdentificationCommand.Source.ZignSec ->
+                        MemberIdentifiedEvent.IdentificationMethod.fromIdProviderName(command.source.idProviderName)
+                },
                 command.firstName,
                 command.lastName
             )
@@ -635,5 +638,15 @@ class MemberAggregate() {
     @EventSourcingHandler
     fun on(e: PickedLocaleUpdatedEvent) {
         member = member.copy(pickedLocale = e.pickedLocale)
+    }
+
+    @EventSourcingHandler
+    fun on(e: MemberIdentifiedEvent) {
+        member = member.copy(
+            firstName = e.firstName,
+            lastName = e.lastName,
+            ssn = e.nationalIdentification.identification,
+            countryCode = e.nationalIdentification.nationality.countryCode
+        )
     }
 }

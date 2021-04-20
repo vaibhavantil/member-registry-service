@@ -6,9 +6,8 @@ import com.hedvig.external.authentication.dto.StartZignSecAuthenticationResult
 import com.hedvig.external.authentication.dto.ZignSecAuthenticationResult
 import com.hedvig.external.authentication.dto.ZignSecBankIdAuthenticationRequest
 import com.hedvig.integration.apigateway.ApiGatewayService
+import com.hedvig.memberservice.commands.AuthenticatedIdentificationCommand
 import com.hedvig.memberservice.commands.InactivateMemberCommand
-import com.hedvig.memberservice.commands.PopulateMemberFromLoginDataCommand
-import com.hedvig.memberservice.commands.ZignSecSuccessfulAuthenticationCommand
 import com.hedvig.memberservice.commands.models.ZignSecAuthenticationMarket
 import com.hedvig.memberservice.query.MemberRepository
 import com.hedvig.memberservice.services.redispublisher.AuthSessionUpdatedEventStatus
@@ -107,17 +106,14 @@ class ZignSecBankIdService(
                     }
                     logger.info("ZignSec auth completion: Sending success command")
                     commandGateway.sendAndWait<Unit>(
-                        ZignSecSuccessfulAuthenticationCommand(
+                        AuthenticatedIdentificationCommand(
                             userMemberId,
-                            result.id,
-                            result.ssn,
-                            ZignSecAuthenticationMarket.fromAuthenticationMethod(result.authenticationMethod),
                             result.identity.firstName,
-                            result.identity.lastName
+                            result.identity.lastName,
+                            result.ssn,
+                            result.identity.countryCode!!,
+                            AuthenticatedIdentificationCommand.Source.ZignSec(result.identity.idProviderName!!)
                         )
-                    )
-                    commandGateway.sendAndWait<Unit>(
-                        PopulateMemberFromLoginDataCommand(userMemberId, result.identity.firstName, result.identity.lastName)
                     )
                     logger.info("ZignSec auth completion: Publishing session to redis")
                     redisEventPublisher.onAuthSessionUpdated(result.memberId, AuthSessionUpdatedEventStatus.SUCCESS)

@@ -6,11 +6,11 @@ import com.hedvig.external.bisnodeBCI.BisnodeClient
 import com.hedvig.memberservice.aggregates.MemberAggregate
 import com.hedvig.memberservice.aggregates.MemberStatus
 import com.hedvig.memberservice.aggregates.PickedLocale
+import com.hedvig.memberservice.commands.AuthenticatedIdentificationCommand
 import com.hedvig.memberservice.commands.BankIdAuthenticationStatus
 import com.hedvig.memberservice.commands.InactivateMemberCommand
 import com.hedvig.memberservice.commands.MemberSimpleSignedCommand
 import com.hedvig.memberservice.commands.MemberUpdateContactInformationCommand
-import com.hedvig.memberservice.commands.PopulateMemberFromLoginDataCommand
 import com.hedvig.memberservice.commands.SelectNewCashbackCommand
 import com.hedvig.memberservice.commands.StartSwedishOnboardingWithSSNCommand
 import com.hedvig.memberservice.commands.SwedishBankIdAuthenticationAttemptCommand
@@ -20,7 +20,6 @@ import com.hedvig.memberservice.commands.UpdatePickedLocaleCommand
 import com.hedvig.memberservice.commands.UpdateSSNCommand
 import com.hedvig.memberservice.commands.UpdateSwedishWebOnBoardingInfoCommand
 import com.hedvig.memberservice.commands.ZignSecSignCommand
-import com.hedvig.memberservice.commands.ZignSecSuccessfulAuthenticationCommand
 import com.hedvig.memberservice.commands.models.ZignSecAuthenticationMarket
 import com.hedvig.memberservice.events.BirthDateUpdatedEvent
 import com.hedvig.memberservice.events.DanishMemberSignedEvent
@@ -437,22 +436,23 @@ class MemberAggregateTests {
     }
 
     @Test
-    fun `handle valid norwegian ZignSecSuccessfulAuthenticationCommand should apply ZignSecSuccessfulAuthenticationEvent`() {
+    fun `AuthenticatedIdentificationCommand - produces MemberIdentifiedEvent`() {
         val memberId = 1234L
-        val referenceId = UUID.randomUUID()
         val personalNumber = "12121212120"
         fixture
             .given(
                 MemberCreatedEvent(memberId, MemberStatus.INITIATED, Instant.now())
             )
-            .`when`(ZignSecSuccessfulAuthenticationCommand(
-                memberId,
-                referenceId,
-                personalNumber,
-                ZignSecAuthenticationMarket.NORWAY,
-                "Test",
-                "Testsson"
-            ))
+            .`when`(
+                AuthenticatedIdentificationCommand(
+                    memberId,
+                    "Test",
+                    "Testsson",
+                    personalNumber,
+                    "NO",
+                    AuthenticatedIdentificationCommand.Source.ZignSec("BankIDNO")
+                )
+            )
             .expectSuccessfulHandlerExecution()
             .expectEvents(
                 MemberIdentifiedEvent(
@@ -469,79 +469,77 @@ class MemberAggregateTests {
     }
 
     @Test
-    fun `handle valid danish ZignSecSuccessfulAuthenticationCommand should apply ZignSecSuccessfulAuthenticationEvent`() {
+    fun `AuthenticatedIdentificationCommand - avoid producing duplicates if same data`() {
         val memberId = 1234L
-        val referenceId = UUID.randomUUID()
         val personalNumber = "12121212120"
         fixture
             .given(
-                MemberCreatedEvent(memberId, MemberStatus.INITIATED, Instant.now())
+                MemberCreatedEvent(memberId, MemberStatus.INITIATED, Instant.now()),
+                MemberIdentifiedEvent(
+                    memberId,
+                    MemberIdentifiedEvent.NationalIdentification(
+                        personalNumber,
+                        MemberIdentifiedEvent.Nationality.NORWAY
+                    ),
+                    MemberIdentifiedEvent.IdentificationMethod.NORWEGIAN_BANK_ID,
+                    "Test",
+                    "Testsson"
+                )
             )
-            .`when`(ZignSecSuccessfulAuthenticationCommand(
-                memberId,
-                referenceId,
-                personalNumber,
-                ZignSecAuthenticationMarket.DENMARK,
-                "Test",
-                "Testsson"
-            ))
+            .`when`(
+                AuthenticatedIdentificationCommand(
+                    memberId,
+                    "Test",
+                    "Testsson",
+                    personalNumber,
+                    "NO",
+                    AuthenticatedIdentificationCommand.Source.ZignSec("BankIDNO")
+                )
+            )
+            .expectSuccessfulHandlerExecution()
+            .expectNoEvents()
+    }
+
+    @Test
+    fun `AuthenticatedIdentificationCommand - produces new MemberIdentifiedEvent if data changed`() {
+        val memberId = 1234L
+        val personalNumber = "12121212120"
+        fixture
+            .given(
+                MemberCreatedEvent(memberId, MemberStatus.INITIATED, Instant.now()),
+                MemberIdentifiedEvent(
+                    memberId,
+                    MemberIdentifiedEvent.NationalIdentification(
+                        personalNumber,
+                        MemberIdentifiedEvent.Nationality.NORWAY
+                    ),
+                    MemberIdentifiedEvent.IdentificationMethod.NORWEGIAN_BANK_ID,
+                    "Test",
+                    "Testsson"
+                )
+            )
+            .`when`(
+                AuthenticatedIdentificationCommand(
+                    memberId,
+                    "Test2",
+                    "Testsson",
+                    personalNumber,
+                    "NO",
+                    AuthenticatedIdentificationCommand.Source.ZignSec("BankIDNO")
+                )
+            )
             .expectSuccessfulHandlerExecution()
             .expectEvents(
                 MemberIdentifiedEvent(
                     memberId,
                     MemberIdentifiedEvent.NationalIdentification(
                         personalNumber,
-                        MemberIdentifiedEvent.Nationality.DENMARK
+                        MemberIdentifiedEvent.Nationality.NORWAY
                     ),
-                    MemberIdentifiedEvent.IdentificationMethod.DANISH_BANK_ID,
-                    "Test",
+                    MemberIdentifiedEvent.IdentificationMethod.NORWEGIAN_BANK_ID,
+                    "Test2",
                     "Testsson"
                 )
-            )
-    }
-
-    @Test
-    fun `empty member - information is populated through login command`() {
-        val memberId = 1234L
-        fixture
-            .given(
-                MemberCreatedEvent(memberId, MemberStatus.INITIATED, Instant.now())
-            )
-            .`when`(
-                PopulateMemberFromLoginDataCommand(memberId, "First", "Lastname")
-            )
-            .expectEvents(
-                NameUpdatedEvent(memberId, "First", "Lastname")
-            )
-    }
-
-    @Test
-    fun `already named member - information is not updated populated through login command`() {
-        val memberId = 1234L
-        fixture
-            .given(
-                MemberCreatedEvent(memberId, MemberStatus.INITIATED, Instant.now()),
-                NameUpdatedEvent(memberId, "First", "Lastname")
-            )
-            .`when`(
-                PopulateMemberFromLoginDataCommand(memberId, "First", "Lastname")
-            )
-            .expectNoEvents()
-    }
-
-    @Test
-    fun `already named member - information is updated if one name changes`() {
-        val memberId = 1234L
-        fixture
-            .given(
-                MemberCreatedEvent(memberId, MemberStatus.INITIATED, Instant.now()),
-                NameUpdatedEvent(memberId, "First", "Lastname")
-            )
-            .`when`(
-                PopulateMemberFromLoginDataCommand(memberId, "NewFirst", null)
-            )
-            .expectEvents(
-                NameUpdatedEvent(memberId, "NewFirst", "Lastname")
             )
     }
 

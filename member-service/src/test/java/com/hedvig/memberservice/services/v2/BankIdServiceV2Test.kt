@@ -10,8 +10,8 @@ import com.hedvig.external.bankID.bankIdTypes.CollectResponse
 import com.hedvig.external.bankID.bankIdTypes.CollectStatus
 import com.hedvig.external.bankID.bankIdTypes.CompletionData
 import com.hedvig.integration.apigateway.ApiGatewayService
+import com.hedvig.memberservice.commands.AuthenticatedIdentificationCommand
 import com.hedvig.memberservice.commands.InactivateMemberCommand
-import com.hedvig.memberservice.commands.PopulateMemberFromLoginDataCommand
 import com.hedvig.memberservice.jobs.SwedishBankIdMetrics
 import com.hedvig.memberservice.query.CollectRepository
 import com.hedvig.memberservice.services.redispublisher.AuthSessionUpdatedEventStatus
@@ -100,7 +100,7 @@ class BankIdServiceV2Test {
     }
 
     @Test
-    fun authCollect_withStatusComplete_shouldFireMemberPopulationCommand() {
+    fun authCollect_withStatusComplete_shouldFireAuthenticatedIdentificationCommand() {
         every {
             bankIdApi.collect(CollectRequest("xyz"))
         } returns CollectResponse(
@@ -136,7 +136,14 @@ class BankIdServiceV2Test {
 
         verify {
             commandGateway.sendAndWait<Any>(
-                PopulateMemberFromLoginDataCommand(54321L, "Testy", "Tester")
+                AuthenticatedIdentificationCommand(
+                    54321L,
+                    "Testy",
+                    "Tester",
+                    "190001010101",
+                    "SE",
+                    AuthenticatedIdentificationCommand.Source.SwedishBankID
+                )
             )
         }
     }

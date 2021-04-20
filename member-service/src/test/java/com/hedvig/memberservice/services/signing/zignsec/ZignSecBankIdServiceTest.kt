@@ -7,10 +7,8 @@ import com.hedvig.external.authentication.dto.ZignSecAuthenticationMethod
 import com.hedvig.external.authentication.dto.ZignSecAuthenticationResult
 import com.hedvig.external.zignSec.repository.entitys.Identity
 import com.hedvig.integration.apigateway.ApiGatewayService
+import com.hedvig.memberservice.commands.AuthenticatedIdentificationCommand
 import com.hedvig.memberservice.commands.InactivateMemberCommand
-import com.hedvig.memberservice.commands.PopulateMemberFromLoginDataCommand
-import com.hedvig.memberservice.commands.ZignSecSuccessfulAuthenticationCommand
-import com.hedvig.memberservice.commands.models.ZignSecAuthenticationMarket
 import com.hedvig.memberservice.query.MemberRepository
 import com.hedvig.memberservice.services.redispublisher.AuthSessionUpdatedEventStatus
 import com.hedvig.memberservice.services.redispublisher.RedisEventPublisher
@@ -108,13 +106,13 @@ class ZignSecBankIdServiceTest {
         }
         verify {
             commandGateway.sendAndWait(
-                ZignSecSuccessfulAuthenticationCommand(
+                AuthenticatedIdentificationCommand(
                     MEMBERS_ORIGIGINAL_ID,
-                    RESULT_ID,
-                    SSN,
-                    ZignSecAuthenticationMarket.NORWAY,
                     "Test",
-                    "Testsson"
+                    "Testsson",
+                    SSN,
+                    "NO",
+                    AuthenticatedIdentificationCommand.Source.ZignSec("BankIDNO")
                 )
             )
         }
@@ -163,13 +161,13 @@ class ZignSecBankIdServiceTest {
 
         verify {
             commandGateway.sendAndWait<Any>(
-                ZignSecSuccessfulAuthenticationCommand(
+                AuthenticatedIdentificationCommand(
                     MEMBER_ID,
-                    RESULT_ID,
-                    SSN,
-                    ZignSecAuthenticationMarket.NORWAY,
                     "Test",
-                    "Testsson"
+                    "Testsson",
+                    SSN,
+                    "NO",
+                    AuthenticatedIdentificationCommand.Source.ZignSec("BankIDNO")
                 )
             )
         }
@@ -218,50 +216,6 @@ class ZignSecBankIdServiceTest {
         classUnderTest.completeAuthentication(result)
 
         verify { redisEventPublisher.onAuthSessionUpdated(MEMBER_ID, AuthSessionUpdatedEventStatus.FAILED) }
-    }
-
-    @Test
-    fun completeCompletedAuthentication_success_populatesMemberData() {
-        val result = ZignSecAuthenticationResult.Completed(
-            Identity(
-                countryCode = "NO",
-                firstName = "Test",
-                lastName = "Testsson",
-                fullName = "Test Testsson",
-                personalNumber = null,
-                dateOfBirth = "1900-01-01",
-                age = 121,
-                idProviderName = "BankIDNO",
-                identificationDate = LocalDateTime.now(),
-                idProviderRequestId = null,
-                idProviderPersonId = "9578-6000-4-365161",
-                customerPersonId = null
-            ),
-            RESULT_ID,
-            MEMBER_ID,
-            SSN,
-            ZignSecAuthenticationMethod.NORWAY_WEB_OR_MOBILE
-        )
-
-        val user = User(associatedMemberId = MEMBER_ID.toString())
-        every {
-            userService.findOrCreateUserWithCredentials(
-                UserService.Credentials.ZignSec(
-                    countryCode = "NO",
-                    idProviderName = "BankIDNO",
-                    idProviderPersonId = "9578-6000-4-365161",
-                    personalNumber = SSN
-                ), onboardingMemberId = MEMBER_ID.toString()
-            )
-        } returns user
-
-        classUnderTest.completeAuthentication(result)
-
-        verify {
-            commandGateway.sendAndWait(
-                PopulateMemberFromLoginDataCommand(MEMBER_ID, "Test", "Testsson")
-            )
-        }
     }
 
     @Test

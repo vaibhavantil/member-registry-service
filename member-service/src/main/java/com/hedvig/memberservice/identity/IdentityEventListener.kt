@@ -1,6 +1,5 @@
 package com.hedvig.memberservice.identity
 
-import com.fasterxml.jackson.databind.ObjectMapper
 import com.hedvig.memberservice.events.MemberIdentifiedEvent
 import com.hedvig.memberservice.identity.repository.IdentificationMethod
 import com.hedvig.memberservice.identity.repository.IdentityEntity
@@ -34,6 +33,7 @@ class IdentityEventListener(
             when(event.identificationMethod) {
                 MemberIdentifiedEvent.IdentificationMethod.NORWEGIAN_BANK_ID -> IdentificationMethod.NORWEGIAN_BANK_ID
                 MemberIdentifiedEvent.IdentificationMethod.DANISH_BANK_ID -> IdentificationMethod.DANISH_BANK_ID
+                MemberIdentifiedEvent.IdentificationMethod.SWEDISH_BANK_ID -> TODO()
             },
             event.firstName,
             event.lastName

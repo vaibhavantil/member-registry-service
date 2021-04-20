@@ -11,7 +11,6 @@ import com.hedvig.memberservice.jobs.BankIdAuthCollector
 import com.hedvig.memberservice.query.CollectRepository
 import com.hedvig.memberservice.query.CollectType
 import com.hedvig.integration.apigateway.ApiGatewayService
-import com.hedvig.memberservice.commands.PopulateMemberFromLoginDataCommand
 import com.hedvig.memberservice.jobs.SwedishBankIdMetrics
 import com.hedvig.memberservice.services.redispublisher.AuthSessionUpdatedEventStatus
 import com.hedvig.memberservice.services.redispublisher.RedisEventPublisher
@@ -96,10 +95,6 @@ class BankIdServiceV2(
                             apiGatewayService.reassignMember(memberId, userMemberId)
                         }
                         redisEventPublisher.onAuthSessionUpdated(memberId, AuthSessionUpdatedEventStatus.SUCCESS)
-
-                        commandGateway.sendAndWait<Unit>(
-                            PopulateMemberFromLoginDataCommand(userMemberId, bankidIdentity.givenName, bankidIdentity.surname)
-                        )
                     } else {
                         redisEventPublisher.onAuthSessionUpdated(memberId, AuthSessionUpdatedEventStatus.FAILED)
                     }
