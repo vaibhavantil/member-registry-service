@@ -1,6 +1,8 @@
 package com.hedvig.memberservice
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
+import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import com.hedvig.common.UUIDGenerator
 import com.hedvig.external.bisnodeBCI.BisnodeClient
 import com.hedvig.memberservice.aggregates.MemberAggregate
@@ -73,6 +75,8 @@ class MemberAggregateTests {
     val uuidGenerator = mockk<UUIDGenerator>()
 
     val objectMapper: ObjectMapper = ObjectMapper()
+        .registerKotlinModule()
+        .registerModule(JavaTimeModule())
 
     @Before
     fun setUp() {
@@ -241,7 +245,7 @@ class MemberAggregateTests {
         val memberId = 1234L
         val referenceId = UUID.randomUUID()
         val personalNumber = "12121212120"
-        val provideJsonResponse = "{ \"json\": true }"
+        val provideJsonResponse = zignSecJson("BankIDNO")
         every { cashbackService.getDefaultId(memberId) } returns DEFAULT_CASHBACK
         fixture
             .given(
@@ -256,7 +260,7 @@ class MemberAggregateTests {
                  MemberIdentifiedEvent(
                     memberId,
                     MemberIdentifiedEvent.NationalIdentification(personalNumber, MemberIdentifiedEvent.Nationality.NORWAY),
-                    MemberIdentifiedEvent.IdentificationMethod.NORWEGIAN_BANK_ID,
+                    MemberIdentifiedEvent.IdentificationMethod("BankIDNO"),
                     "Test",
                     "Testsson"
                 ),
@@ -269,7 +273,7 @@ class MemberAggregateTests {
         val memberId = 1234L
         val referenceId = UUID.randomUUID()
         val personalNumber = "1212121212"
-        val provideJsonResponse = "{ \"json\": true }"
+        val provideJsonResponse = zignSecJson("NemID")
         every { cashbackService.getDefaultId(any()) } returns DEFAULT_CASHBACK
         fixture
             .given(
@@ -284,7 +288,7 @@ class MemberAggregateTests {
                 MemberIdentifiedEvent(
                     memberId,
                     MemberIdentifiedEvent.NationalIdentification(personalNumber, MemberIdentifiedEvent.Nationality.DENMARK),
-                    MemberIdentifiedEvent.IdentificationMethod.DANISH_BANK_ID,
+                    MemberIdentifiedEvent.IdentificationMethod("NemID"),
                     "Test",
                     "Testsson"
                 ),
@@ -461,7 +465,7 @@ class MemberAggregateTests {
                         personalNumber,
                         MemberIdentifiedEvent.Nationality.NORWAY
                     ),
-                    MemberIdentifiedEvent.IdentificationMethod.NORWEGIAN_BANK_ID,
+                    MemberIdentifiedEvent.IdentificationMethod("BankIDNO"),
                     "Test",
                     "Testsson"
                 )
@@ -481,7 +485,7 @@ class MemberAggregateTests {
                         personalNumber,
                         MemberIdentifiedEvent.Nationality.NORWAY
                     ),
-                    MemberIdentifiedEvent.IdentificationMethod.NORWEGIAN_BANK_ID,
+                    MemberIdentifiedEvent.IdentificationMethod("BankIDNO"),
                     "Test",
                     "Testsson"
                 )
@@ -513,7 +517,7 @@ class MemberAggregateTests {
                         personalNumber,
                         MemberIdentifiedEvent.Nationality.NORWAY
                     ),
-                    MemberIdentifiedEvent.IdentificationMethod.NORWEGIAN_BANK_ID,
+                    MemberIdentifiedEvent.IdentificationMethod("BankIDNO"),
                     "Test",
                     "Testsson"
                 )
@@ -536,7 +540,7 @@ class MemberAggregateTests {
                         personalNumber,
                         MemberIdentifiedEvent.Nationality.NORWAY
                     ),
-                    MemberIdentifiedEvent.IdentificationMethod.NORWEGIAN_BANK_ID,
+                    MemberIdentifiedEvent.IdentificationMethod("BankIDNO"),
                     "Test2",
                     "Testsson"
                 )
@@ -560,5 +564,28 @@ class MemberAggregateTests {
         private const val TOLVANSSON_SSN = "191212121212"
         private const val TOLVANSSON_FIRST_NAME = "TOLVAN"
         private const val TOLVANSSON_LAST_NAME = "TOLVANSSON"
+
+        private fun zignSecJson(idProviderName: String) = """
+            {
+              "id": "a42a8afe-4071-4e99-8f9f-757c5942e1e5",
+              "errors": [],
+              "identity": {
+                "CountryCode": "NO",
+                "FirstName": "first",
+                "LastName": "last",
+                "FullName": "first last",
+                "DateOfBirth": "2012-12-12",
+                "Age": 8,
+                "Gender": "",
+                "IdProviderName": "$idProviderName",
+                "IdentificationDate": "2020-02-11T15:45:23Z",
+                "IdProviderRequestId": "",
+                "IdProviderPersonId": "abc123",
+                "CustomerPersonId": ""
+              },
+              "BANKIdNO_OIDC": "{\r\n  \"access_token\": \"access_token\",\r\n  \"expires_in\": 300,\r\n  \"refresh_expires_in\": 1800,\r\n  \"refresh_token\": \"access_token\",\r\n  \"token_type\": \"bearer\",\r\n  \"id_token\": \"id_token\",\r\n  \"not-before-policy\": 0,\r\n  \"session_state\": \"session_state\",\r\n  \"scope\": \"openid nnin_altsub profile\"\r\n}",
+              "method": "nbid_oidc"
+            }
+        """.trimIndent()
     }
 }

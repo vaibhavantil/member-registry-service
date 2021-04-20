@@ -49,7 +49,7 @@ class IdentityEventListenerTest {
                     ssn,
                     MemberIdentifiedEvent.Nationality.DENMARK
                 ),
-                MemberIdentifiedEvent.IdentificationMethod.DANISH_BANK_ID,
+                MemberIdentifiedEvent.IdentificationMethod("DANISH_BANK_ID"),
                 "Test",
                 "Testsson"
             )
@@ -86,7 +86,7 @@ class IdentityEventListenerTest {
                     ssn,
                     MemberIdentifiedEvent.Nationality.DENMARK
                 ),
-                MemberIdentifiedEvent.IdentificationMethod.DANISH_BANK_ID,
+                MemberIdentifiedEvent.IdentificationMethod("DANISH_BANK_ID"),
                 "Test",
                 "Testsson"
             )
@@ -120,7 +120,7 @@ class IdentityEventListenerTest {
                     ssn,
                     MemberIdentifiedEvent.Nationality.DENMARK
                 ),
-                MemberIdentifiedEvent.IdentificationMethod.DANISH_BANK_ID,
+                MemberIdentifiedEvent.IdentificationMethod("DANISH_BANK_ID"),
                 null,
                 null
             )
@@ -152,7 +152,7 @@ class IdentityEventListenerTest {
                     ssn,
                     MemberIdentifiedEvent.Nationality.DENMARK
                 ),
-                MemberIdentifiedEvent.IdentificationMethod.DANISH_BANK_ID,
+                MemberIdentifiedEvent.IdentificationMethod("DANISH_BANK_ID"),
                 "Test",
                 "Testsson"
             )

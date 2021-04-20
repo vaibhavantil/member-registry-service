@@ -7,10 +7,10 @@ import org.axonframework.eventhandling.EventHandler
 import org.springframework.stereotype.Component
 
 @Component
-@ProcessingGroup("IdentifiedMembers")
-class MemberIdentifiedEventListener(
-    private val repository: MemberIdentityRevisionRepository
-) {
+@ProcessingGroup("MemberIdentifiedEventListener")
+class MemberIdentifiedEventListener {
+
+    private lateinit var repository: MemberIdentityRevisionRepository
 
     @EventHandler
     fun on(event: MemberIdentifiedEvent) {

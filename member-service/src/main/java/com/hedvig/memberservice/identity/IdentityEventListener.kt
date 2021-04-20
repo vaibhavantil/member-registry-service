@@ -30,10 +30,10 @@ class IdentityEventListener(
                     MemberIdentifiedEvent.Nationality.DENMARK -> Nationality.DENMARK
                 }
             ),
-            when(event.identificationMethod) {
-                MemberIdentifiedEvent.IdentificationMethod.NORWEGIAN_BANK_ID -> IdentificationMethod.NORWEGIAN_BANK_ID
-                MemberIdentifiedEvent.IdentificationMethod.DANISH_BANK_ID -> IdentificationMethod.DANISH_BANK_ID
-                MemberIdentifiedEvent.IdentificationMethod.SWEDISH_BANK_ID -> TODO()
+            when(event.identificationMethod.identifier) {
+                "NORWEGIAN_BANK_ID" -> IdentificationMethod.NORWEGIAN_BANK_ID
+                "DANISH_BANK_ID" -> IdentificationMethod.DANISH_BANK_ID
+                else -> IdentificationMethod.UNKNOWN
             },
             event.firstName,
             event.lastName

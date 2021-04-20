@@ -1,6 +1,7 @@
 package com.hedvig.memberservice.events
 
-import java.lang.IllegalArgumentException
+import com.fasterxml.jackson.annotation.JsonCreator
+import com.fasterxml.jackson.annotation.JsonValue
 
 data class MemberIdentifiedEvent(
     val memberId: Long,
@@ -24,18 +25,8 @@ data class MemberIdentifiedEvent(
         }
     }
 
-    enum class IdentificationMethod {
-        SWEDISH_BANK_ID,
-        NORWEGIAN_BANK_ID,
-        DANISH_BANK_ID;
-
-        companion object {
-            fun fromIdProviderName(name: String) = when (name) {
-                "BankIDSE" -> SWEDISH_BANK_ID
-                "BankIDNO" -> NORWEGIAN_BANK_ID
-                "NemID" -> DANISH_BANK_ID
-                else -> throw IllegalArgumentException("Unknown ID provider type: $name")
-            }
-        }
-    }
+    data class IdentificationMethod @JsonCreator constructor(
+        @JsonValue
+        val identifier: String
+    )
 }

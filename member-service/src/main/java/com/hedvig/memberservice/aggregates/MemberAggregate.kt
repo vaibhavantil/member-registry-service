@@ -5,6 +5,7 @@ import org.axonframework.commandhandling.model.AggregateLifecycle.apply
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.hedvig.common.UUIDGenerator
 import com.hedvig.external.bisnodeBCI.BisnodeClient
+import com.hedvig.external.zignSec.client.dto.ZignSecNotificationRequest
 import com.hedvig.memberservice.commands.AuthenticatedIdentificationCommand
 import com.hedvig.memberservice.commands.CreateMemberCommand
 import com.hedvig.memberservice.commands.EditMemberInfoCommand
@@ -304,6 +305,8 @@ class MemberAggregate() {
     }
 
     private fun applyMemberIdentifiedEventFromZignSecSignCommand(cmd: ZignSecSignCommand) {
+        val request = objectMapper.readValue(cmd.provideJsonResponse, ZignSecNotificationRequest::class.java)
+        val idProvider = request.identity?.idProviderName ?: return
         apply(
             MemberIdentifiedEvent(
                 cmd.id,
@@ -314,10 +317,7 @@ class MemberAggregate() {
                         ZignSecAuthenticationMarket.DENMARK -> MemberIdentifiedEvent.Nationality.DENMARK
                     }
                 ),
-                when (cmd.zignSecAuthMarket) {
-                    ZignSecAuthenticationMarket.NORWAY -> MemberIdentifiedEvent.IdentificationMethod.NORWEGIAN_BANK_ID
-                    ZignSecAuthenticationMarket.DENMARK -> MemberIdentifiedEvent.IdentificationMethod.DANISH_BANK_ID
-                },
+                MemberIdentifiedEvent.IdentificationMethod(idProvider),
                 cmd.firstName,
                 cmd.lastName
             )
@@ -339,9 +339,9 @@ class MemberAggregate() {
                 ),
                 when (command.source) {
                     AuthenticatedIdentificationCommand.Source.SwedishBankID ->
-                        MemberIdentifiedEvent.IdentificationMethod.SWEDISH_BANK_ID
+                        MemberIdentifiedEvent.IdentificationMethod("BankIDSE")
                     is AuthenticatedIdentificationCommand.Source.ZignSec ->
-                        MemberIdentifiedEvent.IdentificationMethod.fromIdProviderName(command.source.idProviderName)
+                        MemberIdentifiedEvent.IdentificationMethod(command.source.idProviderName)
                 },
                 command.firstName,
                 command.lastName
