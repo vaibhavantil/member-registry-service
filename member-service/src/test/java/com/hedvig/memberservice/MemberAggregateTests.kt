@@ -63,6 +63,7 @@ import org.springframework.web.client.RestClientException
 import java.time.Instant
 import java.time.LocalDate
 import java.util.UUID
+import org.assertj.core.api.Assertions.assertThat
 
 @RunWith(SpringRunner::class)
 class MemberAggregateTests {
@@ -470,6 +471,11 @@ class MemberAggregateTests {
                     "Testsson"
                 )
             )
+            .expectState {
+                assertThat(it.member.firstName).isEqualTo("Test")
+                assertThat(it.member.lastName).isEqualTo("Testsson")
+                assertThat(it.member.ssn).isEqualTo(personalNumber)
+            }
     }
 
     @Test
@@ -545,6 +551,11 @@ class MemberAggregateTests {
                     "Testsson"
                 )
             )
+            .expectState {
+                assertThat(it.member.firstName).isEqualTo("Test2")
+                assertThat(it.member.lastName).isEqualTo("Testsson")
+                assertThat(it.member.ssn).isEqualTo(personalNumber)
+            }
     }
 
     private inner class AggregateFactoryM<T> constructor(aggregateType: Class<T>?) : AbstractAggregateFactory<T>(aggregateType) {
