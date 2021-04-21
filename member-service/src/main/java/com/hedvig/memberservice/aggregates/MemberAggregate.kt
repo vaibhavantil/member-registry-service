@@ -318,7 +318,7 @@ class MemberAggregate() {
                     cmd.personalNumber,
                     MemberIdentifiedEvent.Nationality.fromCountryCode(cmd.zignSecAuthMarket.countryCode)
                 ),
-                MemberIdentifiedEvent.IdentificationMethod(idProvider),
+                "com.zignsec:$idProvider",
                 cmd.firstName,
                 cmd.lastName
             )
@@ -339,10 +339,8 @@ class MemberAggregate() {
                     MemberIdentifiedEvent.Nationality.fromCountryCode(command.countryCode)
                 ),
                 when (command.source) {
-                    AuthenticatedIdentificationCommand.Source.SwedishBankID ->
-                        MemberIdentifiedEvent.IdentificationMethod("com.bankid")
-                    is AuthenticatedIdentificationCommand.Source.ZignSec ->
-                        MemberIdentifiedEvent.IdentificationMethod(command.source.idProviderName)
+                    AuthenticatedIdentificationCommand.Source.SwedishBankID -> "com.bankid"
+                    is AuthenticatedIdentificationCommand.Source.ZignSec -> "com.zignsec:${command.source.idProviderName}"
                 },
                 command.firstName,
                 command.lastName
@@ -350,7 +348,7 @@ class MemberAggregate() {
         )
     }
 
-    fun isValidJSON(json: String): Boolean {
+    private fun isValidJSON(json: String): Boolean {
         return try {
             objectMapper.readTree(json)
             true

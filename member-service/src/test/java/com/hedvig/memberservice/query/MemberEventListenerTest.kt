@@ -39,7 +39,7 @@ internal class MemberEventListenerTest @Autowired constructor(
             MemberIdentifiedEvent(
                 memberId = 123L,
                 nationalIdentification = MemberIdentifiedEvent.NationalIdentification("201212121212", MemberIdentifiedEvent.Nationality.SWEDEN),
-                identificationMethod = MemberIdentifiedEvent.IdentificationMethod("com.bankid"),
+                identificationMethod = "com.bankid",
                 firstName = "Test",
                 lastName = "Testsson"
             )

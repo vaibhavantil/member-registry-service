@@ -261,7 +261,7 @@ class MemberAggregateTests {
                  MemberIdentifiedEvent(
                     memberId,
                     MemberIdentifiedEvent.NationalIdentification(personalNumber, MemberIdentifiedEvent.Nationality.NORWAY),
-                    MemberIdentifiedEvent.IdentificationMethod("BankIDNO"),
+                    "com.zignsec:BankIDNO",
                     "Test",
                     "Testsson"
                 ),
@@ -289,7 +289,7 @@ class MemberAggregateTests {
                 MemberIdentifiedEvent(
                     memberId,
                     MemberIdentifiedEvent.NationalIdentification(personalNumber, MemberIdentifiedEvent.Nationality.DENMARK),
-                    MemberIdentifiedEvent.IdentificationMethod("NemID"),
+                    "com.zignsec:NemID",
                     "Test",
                     "Testsson"
                 ),
@@ -466,7 +466,7 @@ class MemberAggregateTests {
                         personalNumber,
                         MemberIdentifiedEvent.Nationality.NORWAY
                     ),
-                    MemberIdentifiedEvent.IdentificationMethod("BankIDNO"),
+                    "com.zignsec:BankIDNO",
                     "Test",
                     "Testsson"
                 )
@@ -491,7 +491,7 @@ class MemberAggregateTests {
                         personalNumber,
                         MemberIdentifiedEvent.Nationality.NORWAY
                     ),
-                    MemberIdentifiedEvent.IdentificationMethod("BankIDNO"),
+                    "com.zignsec:BankIDNO",
                     "Test",
                     "Testsson"
                 )
@@ -523,7 +523,7 @@ class MemberAggregateTests {
                         personalNumber,
                         MemberIdentifiedEvent.Nationality.NORWAY
                     ),
-                    MemberIdentifiedEvent.IdentificationMethod("BankIDNO"),
+                    "com.zignsec:BankIDNO",
                     "Test",
                     "Testsson"
                 )
@@ -546,7 +546,7 @@ class MemberAggregateTests {
                         personalNumber,
                         MemberIdentifiedEvent.Nationality.NORWAY
                     ),
-                    MemberIdentifiedEvent.IdentificationMethod("BankIDNO"),
+                    "com.zignsec:BankIDNO",
                     "Test2",
                     "Testsson"
                 )

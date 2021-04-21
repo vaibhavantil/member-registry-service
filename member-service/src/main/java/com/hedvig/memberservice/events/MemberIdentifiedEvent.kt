@@ -1,12 +1,9 @@
 package com.hedvig.memberservice.events
 
-import com.fasterxml.jackson.annotation.JsonCreator
-import com.fasterxml.jackson.annotation.JsonValue
-
 data class MemberIdentifiedEvent(
     val memberId: Long,
     val nationalIdentification: NationalIdentification,
-    val identificationMethod: IdentificationMethod,
+    val identificationMethod: String,
     val firstName: String?,
     val lastName: String?
 ) {
@@ -24,9 +21,4 @@ data class MemberIdentifiedEvent(
             fun fromCountryCode(countryCode: String): Nationality = values().first { it.countryCode == countryCode }
         }
     }
-
-    data class IdentificationMethod @JsonCreator constructor(
-        @JsonValue
-        val identifier: String
-    )
 }
