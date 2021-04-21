@@ -2,9 +2,9 @@ package com.hedvig.memberservice.commands.models
 
 import com.hedvig.external.authentication.dto.ZignSecAuthenticationMethod
 
-enum class ZignSecAuthenticationMarket {
-    NORWAY,
-    DENMARK;
+enum class ZignSecAuthenticationMarket(val countryCode: String) {
+    NORWAY("NO"),
+    DENMARK("DK");
 
     fun getAuthenticationMethod() = when (this) {
         NORWAY -> ZignSecAuthenticationMethod.NORWAY_WEB_OR_MOBILE

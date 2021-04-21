@@ -101,7 +101,7 @@ class BankIdServiceV2(
                                 id = userMemberId,
                                 firstName = bankidIdentity.givenName,
                                 lastName = bankidIdentity.surname,
-                                personalNumber = personalNumber,
+                                nationalIdentifier = personalNumber,
                                 countryCode = "SE",
                                 source = AuthenticatedIdentificationCommand.Source.SwedishBankID
                             )

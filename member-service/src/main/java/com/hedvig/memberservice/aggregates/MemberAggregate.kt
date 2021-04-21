@@ -307,15 +307,16 @@ class MemberAggregate() {
     private fun applyMemberIdentifiedEventFromZignSecSignCommand(cmd: ZignSecSignCommand) {
         val request = objectMapper.readValue(cmd.provideJsonResponse, ZignSecNotificationRequest::class.java)
         val idProvider = request.identity?.idProviderName ?: return
+        if (member.firstName == cmd.firstName &&
+            member.lastName == cmd.lastName &&
+            member.ssn == cmd.personalNumber &&
+            member.countryCode == cmd.zignSecAuthMarket.countryCode) return
         apply(
             MemberIdentifiedEvent(
                 cmd.id,
                 MemberIdentifiedEvent.NationalIdentification(
                     cmd.personalNumber,
-                    when (cmd.zignSecAuthMarket) {
-                        ZignSecAuthenticationMarket.NORWAY -> MemberIdentifiedEvent.Nationality.NORWAY
-                        ZignSecAuthenticationMarket.DENMARK -> MemberIdentifiedEvent.Nationality.DENMARK
-                    }
+                    MemberIdentifiedEvent.Nationality.fromCountryCode(cmd.zignSecAuthMarket.countryCode)
                 ),
                 MemberIdentifiedEvent.IdentificationMethod(idProvider),
                 cmd.firstName,
@@ -328,18 +329,18 @@ class MemberAggregate() {
     fun handle(command: AuthenticatedIdentificationCommand) {
         if (member.firstName == command.firstName &&
             member.lastName == command.lastName &&
-            member.ssn == command.personalNumber &&
+            member.ssn == command.nationalIdentifier &&
             member.countryCode == command.countryCode) return
         apply(
             MemberIdentifiedEvent(
                 command.id,
                 MemberIdentifiedEvent.NationalIdentification(
-                    command.personalNumber,
+                    command.nationalIdentifier,
                     MemberIdentifiedEvent.Nationality.fromCountryCode(command.countryCode)
                 ),
                 when (command.source) {
                     AuthenticatedIdentificationCommand.Source.SwedishBankID ->
-                        MemberIdentifiedEvent.IdentificationMethod("BankIDSE")
+                        MemberIdentifiedEvent.IdentificationMethod("com.bankid")
                     is AuthenticatedIdentificationCommand.Source.ZignSec ->
                         MemberIdentifiedEvent.IdentificationMethod(command.source.idProviderName)
                 },
