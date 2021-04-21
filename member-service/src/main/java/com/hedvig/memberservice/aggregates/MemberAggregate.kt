@@ -338,10 +338,7 @@ class MemberAggregate() {
                     command.nationalIdentifier,
                     MemberIdentifiedEvent.Nationality.fromCountryCode(command.countryCode)
                 ),
-                when (command.source) {
-                    AuthenticatedIdentificationCommand.Source.SwedishBankID -> "com.bankid"
-                    is AuthenticatedIdentificationCommand.Source.ZignSec -> "com.zignsec:${command.source.idProviderName}"
-                },
+                command.source.identifier,
                 command.firstName,
                 command.lastName
             )

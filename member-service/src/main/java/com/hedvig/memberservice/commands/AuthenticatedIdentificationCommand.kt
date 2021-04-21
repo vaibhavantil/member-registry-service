@@ -10,8 +10,8 @@ data class AuthenticatedIdentificationCommand(
     val countryCode: String,
     val source: Source
 ) {
-    sealed class Source {
-        object SwedishBankID: Source()
-        data class ZignSec(val idProviderName: String): Source()
+    sealed class Source(val identifier: String) {
+        object SwedishBankID: Source("com.bankid")
+        data class ZignSec(val idProviderName: String): Source("com.zignsec:$idProviderName")
     }
 }
