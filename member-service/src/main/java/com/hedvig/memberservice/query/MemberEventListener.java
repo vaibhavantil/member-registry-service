@@ -13,6 +13,7 @@ import com.hedvig.memberservice.events.FraudulentStatusUpdatedEvent;
 import com.hedvig.memberservice.events.LivingAddressUpdatedEvent;
 import com.hedvig.memberservice.events.MemberCancellationEvent;
 import com.hedvig.memberservice.events.MemberCreatedEvent;
+import com.hedvig.memberservice.events.MemberIdentifiedEvent;
 import com.hedvig.memberservice.events.MemberInactivatedEvent;
 import com.hedvig.memberservice.events.MemberSignedEvent;
 import com.hedvig.memberservice.events.MemberSignedWithoutBankId;
@@ -30,6 +31,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.axonframework.eventhandling.EventHandler;
 import org.axonframework.eventhandling.EventMessage;
 import org.axonframework.eventhandling.Timestamp;
+import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,7 +48,6 @@ public class MemberEventListener {
   private final MemberRepository userRepo;
   private final SignedMemberRepository signedMemberRepository;
   private final TrackingIdRepository trackingRepo;
-  private final CampaignService campaignService;
   private final BotService botService;
 
   @Autowired
@@ -54,12 +55,11 @@ public class MemberEventListener {
       MemberRepository userRepo,
       SignedMemberRepository signedMemberRepository,
       TrackingIdRepository trackingRepo,
-      CampaignService campaignService,
-      BotService botService) {
+      BotService botService
+  ) {
     this.userRepo = userRepo;
     this.signedMemberRepository = signedMemberRepository;
     this.trackingRepo = trackingRepo;
-    this.campaignService = campaignService;
     this.botService = botService;
   }
 
@@ -270,5 +270,12 @@ public class MemberEventListener {
     MemberEntity m = userRepo.findById(e.getMemberId()).get();
     m.setPickedLocale(e.getPickedLocale());
     userRepo.save(m);
+  }
+
+  void on(@NotNull MemberIdentifiedEvent event) {
+      MemberEntity m = userRepo.findById(event.getMemberId()).get();
+      m.setFirstName(event.getFirstName());
+      m.setLastName(event.getLastName());
+      m.setSsn(event.getNationalIdentification().getIdentification());
   }
 }
