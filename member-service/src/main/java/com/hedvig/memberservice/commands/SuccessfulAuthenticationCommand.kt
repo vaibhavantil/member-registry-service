@@ -10,7 +10,7 @@ data class SuccessfulAuthenticationCommand(
     val method: AuthMethod
 ) {
 
-    val identity: Identity get() = when (method) {
+    val identity: Identity = when (method) {
         is AuthMethod.SwedishBankID -> Identity(
             firstName = method.completionData.user.givenName,
             lastName = method.completionData.user.surname,
