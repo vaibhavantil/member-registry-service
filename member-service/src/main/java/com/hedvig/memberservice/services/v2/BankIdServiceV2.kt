@@ -96,7 +96,7 @@ class BankIdServiceV2(
                             apiGatewayService.reassignMember(memberId, userMemberId)
                         }
 
-                        commandGateway.sendAndWait<Any>(
+                        commandGateway.sendAndWait<Unit>(
                             AuthenticatedIdentificationCommand(
                                 id = userMemberId,
                                 firstName = bankidIdentity.givenName,
