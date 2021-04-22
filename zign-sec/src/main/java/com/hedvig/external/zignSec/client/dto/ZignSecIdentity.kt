@@ -6,17 +6,17 @@ import java.time.LocalDateTime
 
 @JsonNaming(PropertyNamingStrategy.UpperCamelCaseStrategy::class)
 data class ZignSecIdentity(
-    val countryCode: String?,
-    val firstName: String?,
-    val lastName: String?,
-    val fullName: String?,
-    val personalNumber: String?,
-    val dateOfBirth: String?,
-    val age: Int?,
-    val gender: String?,
-    val idProviderName: String?,
-    val identificationDate: LocalDateTime?,
-    val idProviderRequestId: String?,
-    val idProviderPersonId: String?,
-    val customerPersonId: String?
+    val countryCode: String? = null,
+    val firstName: String? = null,
+    val lastName: String? = null,
+    val fullName: String? = null,
+    val personalNumber: String? = null,
+    val dateOfBirth: String? = null,
+    val age: Int? = null,
+    val gender: String? = null,
+    val idProviderName: String? = null,
+    val identificationDate: LocalDateTime? = null,
+    val idProviderRequestId: String? = null,
+    val idProviderPersonId: String? = null,
+    val customerPersonId: String? = null
 )

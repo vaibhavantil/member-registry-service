@@ -5,10 +5,11 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import com.hedvig.common.UUIDGenerator
 import com.hedvig.external.bisnodeBCI.BisnodeClient
+import com.hedvig.external.zignSec.client.dto.ZignSecIdentity
 import com.hedvig.memberservice.aggregates.MemberAggregate
 import com.hedvig.memberservice.aggregates.MemberStatus
 import com.hedvig.memberservice.aggregates.PickedLocale
-import com.hedvig.memberservice.commands.AuthenticatedIdentificationCommand
+import com.hedvig.memberservice.commands.SuccessfulAuthenticationCommand
 import com.hedvig.memberservice.commands.BankIdAuthenticationStatus
 import com.hedvig.memberservice.commands.InactivateMemberCommand
 import com.hedvig.memberservice.commands.MemberSimpleSignedCommand
@@ -449,13 +450,17 @@ class MemberAggregateTests {
                 MemberCreatedEvent(memberId, MemberStatus.INITIATED, Instant.now())
             )
             .`when`(
-                AuthenticatedIdentificationCommand(
+                SuccessfulAuthenticationCommand(
                     memberId,
-                    "Test",
-                    "Testsson",
-                    personalNumber,
-                    "NO",
-                    AuthenticatedIdentificationCommand.Source.ZignSec("BankIDNO")
+                    method = SuccessfulAuthenticationCommand.AuthMethod.ZignSec(
+                        personalNumber = personalNumber,
+                        identity = ZignSecIdentity(
+                            firstName = "Test",
+                            lastName = "Testsson",
+                            countryCode = "NO",
+                            idProviderName = "BankIDNO"
+                        )
+                    )
                 )
             )
             .expectSuccessfulHandlerExecution()
@@ -497,13 +502,17 @@ class MemberAggregateTests {
                 )
             )
             .`when`(
-                AuthenticatedIdentificationCommand(
+                SuccessfulAuthenticationCommand(
                     memberId,
-                    "Test",
-                    "Testsson",
-                    personalNumber,
-                    "NO",
-                    AuthenticatedIdentificationCommand.Source.ZignSec("BankIDNO")
+                    method = SuccessfulAuthenticationCommand.AuthMethod.ZignSec(
+                        personalNumber = personalNumber,
+                        identity = ZignSecIdentity(
+                            firstName = "Test",
+                            lastName = "Testsson",
+                            countryCode = "NO",
+                            idProviderName = "BankIDNO"
+                        )
+                    )
                 )
             )
             .expectSuccessfulHandlerExecution()
@@ -529,13 +538,17 @@ class MemberAggregateTests {
                 )
             )
             .`when`(
-                AuthenticatedIdentificationCommand(
+                SuccessfulAuthenticationCommand(
                     memberId,
-                    "Test2",
-                    "Testsson",
-                    personalNumber,
-                    "NO",
-                    AuthenticatedIdentificationCommand.Source.ZignSec("BankIDNO")
+                    method = SuccessfulAuthenticationCommand.AuthMethod.ZignSec(
+                        personalNumber = personalNumber,
+                        identity = ZignSecIdentity(
+                            firstName = "Test2",
+                            lastName = "Testsson",
+                            countryCode = "NO",
+                            idProviderName = "BankIDNO"
+                        )
+                    )
                 )
             )
             .expectSuccessfulHandlerExecution()

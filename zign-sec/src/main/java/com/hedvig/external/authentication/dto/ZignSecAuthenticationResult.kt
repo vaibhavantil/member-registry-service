@@ -1,11 +1,11 @@
 package com.hedvig.external.authentication.dto
 
-import com.hedvig.external.zignSec.repository.entitys.Identity
+import com.hedvig.external.zignSec.client.dto.ZignSecIdentity
 import java.util.*
 
 sealed class ZignSecAuthenticationResult {
     data class Completed(
-        val identity: Identity,
+        val identity: ZignSecIdentity,
         val id: UUID,
         val memberId: Long,
         val ssn: String,

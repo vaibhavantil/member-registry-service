@@ -6,7 +6,7 @@ import com.hedvig.external.authentication.dto.StartZignSecAuthenticationResult
 import com.hedvig.external.authentication.dto.ZignSecAuthenticationResult
 import com.hedvig.external.authentication.dto.ZignSecBankIdAuthenticationRequest
 import com.hedvig.integration.apigateway.ApiGatewayService
-import com.hedvig.memberservice.commands.AuthenticatedIdentificationCommand
+import com.hedvig.memberservice.commands.SuccessfulAuthenticationCommand
 import com.hedvig.memberservice.commands.InactivateMemberCommand
 import com.hedvig.memberservice.commands.models.ZignSecAuthenticationMarket
 import com.hedvig.memberservice.query.MemberRepository
@@ -106,13 +106,12 @@ class ZignSecBankIdService(
                     }
                     logger.info("ZignSec auth completion: Sending success command")
                     commandGateway.sendAndWait<Unit>(
-                        AuthenticatedIdentificationCommand(
+                        SuccessfulAuthenticationCommand(
                             userMemberId,
-                            result.identity.firstName,
-                            result.identity.lastName,
-                            result.ssn,
-                            result.identity.countryCode!!,
-                            AuthenticatedIdentificationCommand.Source.ZignSec(result.identity.idProviderName!!)
+                            method = SuccessfulAuthenticationCommand.AuthMethod.ZignSec(
+                                personalNumber = result.ssn,
+                                identity = result.identity
+                            )
                         )
                     )
                     logger.info("ZignSec auth completion: Publishing session to redis")

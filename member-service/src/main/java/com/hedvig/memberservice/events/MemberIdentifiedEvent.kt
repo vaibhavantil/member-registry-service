@@ -1,5 +1,7 @@
 package com.hedvig.memberservice.events
 
+import com.neovisionaries.i18n.CountryCode
+
 data class MemberIdentifiedEvent(
     val memberId: Long,
     val nationalIdentification: NationalIdentification,
@@ -12,13 +14,13 @@ data class MemberIdentifiedEvent(
         val nationality: Nationality
     )
 
-    enum class Nationality(val countryCode: String) {
-        SWEDEN("SE"),
-        NORWAY("NO"),
-        DENMARK("DK");
+    enum class Nationality(val countryCode: CountryCode) {
+        SWEDEN(CountryCode.SE),
+        NORWAY(CountryCode.NO),
+        DENMARK(CountryCode.DK);
 
         companion object {
-            fun fromCountryCode(countryCode: String): Nationality = values().first { it.countryCode == countryCode }
+            fun fromCountryCode(countryCode: CountryCode): Nationality = values().first { it.countryCode == countryCode }
         }
     }
 }

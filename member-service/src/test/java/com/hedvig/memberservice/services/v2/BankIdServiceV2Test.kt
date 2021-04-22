@@ -10,7 +10,7 @@ import com.hedvig.external.bankID.bankIdTypes.CollectResponse
 import com.hedvig.external.bankID.bankIdTypes.CollectStatus
 import com.hedvig.external.bankID.bankIdTypes.CompletionData
 import com.hedvig.integration.apigateway.ApiGatewayService
-import com.hedvig.memberservice.commands.AuthenticatedIdentificationCommand
+import com.hedvig.memberservice.commands.SuccessfulAuthenticationCommand
 import com.hedvig.memberservice.commands.InactivateMemberCommand
 import com.hedvig.memberservice.jobs.SwedishBankIdMetrics
 import com.hedvig.memberservice.query.CollectRepository
@@ -101,24 +101,25 @@ class BankIdServiceV2Test {
 
     @Test
     fun authCollect_withStatusComplete_shouldFireAuthenticatedIdentificationCommand() {
+        val completionData = CompletionData(
+            User(
+                "190001010101",
+                "Testy Tester",
+                "Testy",
+                "Tester"
+            ),
+            Device("0.0.0.0"),
+            Cert(0, 0),
+            "",
+            ""
+        )
         every {
             bankIdApi.collect(CollectRequest("xyz"))
         } returns CollectResponse(
             "xyz",
             CollectStatus.complete,
             "",
-            CompletionData(
-                User(
-                    "190001010101",
-                    "Testy Tester",
-                    "Testy",
-                    "Tester"
-                ),
-                Device("0.0.0.0"),
-                Cert(0, 0),
-                "",
-                ""
-            )
+            completionData
         )
 
         val user = com.hedvig.auth.models.User(
@@ -136,13 +137,11 @@ class BankIdServiceV2Test {
 
         verify {
             commandGateway.sendAndWait<Any>(
-                AuthenticatedIdentificationCommand(
+                SuccessfulAuthenticationCommand(
                     54321L,
-                    "Testy",
-                    "Tester",
-                    "190001010101",
-                    "SE",
-                    AuthenticatedIdentificationCommand.Source.SwedishBankID
+                    method = SuccessfulAuthenticationCommand.AuthMethod.SwedishBankID(
+                        completionData = completionData
+                    )
                 )
             )
         }

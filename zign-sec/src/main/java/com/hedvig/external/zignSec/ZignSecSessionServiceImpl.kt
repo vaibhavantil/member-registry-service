@@ -262,10 +262,10 @@ class ZignSecSessionServiceImpl(
                             )
                         }
 
-                        if (authEntity != null && notification.identity != null) {
+                        if (authEntity != null && request.identity != null) {
                             authenticationEventPublisher.publishAuthenticationEvent(
                                 ZignSecAuthenticationResult.Completed(
-                                    notification.identity,
+                                    request.identity,
                                     session.referenceId,
                                     session.memberId,
                                     authEntity.personalNumber,

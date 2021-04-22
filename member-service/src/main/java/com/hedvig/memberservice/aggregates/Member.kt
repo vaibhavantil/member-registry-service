@@ -11,6 +11,5 @@ data class Member(
     val acceptLanguage: String? = null,
     val pickedLocale: PickedLocale? = null,
     val livingAddress: LivingAddress? = null,
-    val birthDate: LocalDate? = null,
-    val countryCode: String? = null
+    val birthDate: LocalDate? = null
 )

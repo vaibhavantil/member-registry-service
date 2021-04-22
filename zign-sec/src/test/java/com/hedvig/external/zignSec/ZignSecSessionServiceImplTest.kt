@@ -674,7 +674,7 @@ class ZignSecSessionServiceImplTest {
 
         val REFERENCE_ID: UUID = UUID.fromString("a42a8afe-4071-4e99-8f9f-757c5942e1e5")!!
 
-        val identity: Identity = Identity(
+        val identity: ZignSecIdentity = ZignSecIdentity(
             countryCode = "NO",
             firstName = "first",
             lastName = "last",

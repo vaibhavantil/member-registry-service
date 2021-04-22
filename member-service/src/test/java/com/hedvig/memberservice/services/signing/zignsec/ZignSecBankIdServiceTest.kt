@@ -5,9 +5,9 @@ import com.hedvig.auth.models.User
 import com.hedvig.external.authentication.ZignSecAuthentication
 import com.hedvig.external.authentication.dto.ZignSecAuthenticationMethod
 import com.hedvig.external.authentication.dto.ZignSecAuthenticationResult
-import com.hedvig.external.zignSec.repository.entitys.Identity
+import com.hedvig.external.zignSec.client.dto.ZignSecIdentity
 import com.hedvig.integration.apigateway.ApiGatewayService
-import com.hedvig.memberservice.commands.AuthenticatedIdentificationCommand
+import com.hedvig.memberservice.commands.SuccessfulAuthenticationCommand
 import com.hedvig.memberservice.commands.InactivateMemberCommand
 import com.hedvig.memberservice.query.MemberRepository
 import com.hedvig.memberservice.services.redispublisher.AuthSessionUpdatedEventStatus
@@ -62,21 +62,22 @@ class ZignSecBankIdServiceTest {
 
     @Test
     fun completeCompletedAuthentication_differentMemberId_inactivateMemberAndReassignsMember() {
+        val identity = ZignSecIdentity(
+            countryCode = "NO",
+            firstName = "Test",
+            lastName = "Testsson",
+            fullName = "Test Testsson",
+            personalNumber = null,
+            dateOfBirth = "1900-01-01",
+            age = 121,
+            idProviderName = "BankIDNO",
+            identificationDate = LocalDateTime.now(),
+            idProviderRequestId = null,
+            idProviderPersonId = "9578-6000-4-365161",
+            customerPersonId = null
+        )
         val result = ZignSecAuthenticationResult.Completed(
-            Identity(
-                countryCode = "NO",
-                firstName = "Test",
-                lastName = "Testsson",
-                fullName = "Test Testsson",
-                personalNumber = null,
-                dateOfBirth = "1900-01-01",
-                age = 121,
-                idProviderName = "BankIDNO",
-                identificationDate = LocalDateTime.now(),
-                idProviderRequestId = null,
-                idProviderPersonId = "9578-6000-4-365161",
-                customerPersonId = null
-            ),
+            identity,
             RESULT_ID,
             MEMBER_ID,
             SSN,
@@ -106,13 +107,12 @@ class ZignSecBankIdServiceTest {
         }
         verify {
             commandGateway.sendAndWait(
-                AuthenticatedIdentificationCommand(
+                SuccessfulAuthenticationCommand(
                     MEMBERS_ORIGIGINAL_ID,
-                    "Test",
-                    "Testsson",
-                    SSN,
-                    "NO",
-                    AuthenticatedIdentificationCommand.Source.ZignSec("BankIDNO")
+                    method = SuccessfulAuthenticationCommand.AuthMethod.ZignSec(
+                        personalNumber = SSN,
+                        identity = identity
+                    )
                 )
             )
         }
@@ -123,21 +123,22 @@ class ZignSecBankIdServiceTest {
 
     @Test
     fun completeCompletedAuthentication_sameMemberId_doesNotInactivateMemberAndDoesNotReassignsMember() {
+        val identity = ZignSecIdentity(
+            countryCode = "NO",
+            firstName = "Test",
+            lastName = "Testsson",
+            fullName = "Test Testsson",
+            personalNumber = null,
+            dateOfBirth = "1900-01-01",
+            age = 121,
+            idProviderName = "BankIDNO",
+            identificationDate = LocalDateTime.now(),
+            idProviderRequestId = null,
+            idProviderPersonId = "9578-6000-4-365161",
+            customerPersonId = null
+        )
         val result = ZignSecAuthenticationResult.Completed(
-            Identity(
-                countryCode = "NO",
-                firstName = "Test",
-                lastName = "Testsson",
-                fullName = "Test Testsson",
-                personalNumber = null,
-                dateOfBirth = "1900-01-01",
-                age = 121,
-                idProviderName = "BankIDNO",
-                identificationDate = LocalDateTime.now(),
-                idProviderRequestId = null,
-                idProviderPersonId = "9578-6000-4-365161",
-                customerPersonId = null
-            ),
+            identity,
             RESULT_ID,
             MEMBER_ID,
             SSN,
@@ -161,13 +162,12 @@ class ZignSecBankIdServiceTest {
 
         verify {
             commandGateway.sendAndWait<Any>(
-                AuthenticatedIdentificationCommand(
+                SuccessfulAuthenticationCommand(
                     MEMBER_ID,
-                    "Test",
-                    "Testsson",
-                    SSN,
-                    "NO",
-                    AuthenticatedIdentificationCommand.Source.ZignSec("BankIDNO")
+                    method = SuccessfulAuthenticationCommand.AuthMethod.ZignSec(
+                        personalNumber = SSN,
+                        identity = identity
+                    )
                 )
             )
         }
@@ -182,7 +182,7 @@ class ZignSecBankIdServiceTest {
     @Test
     fun completeCompletedAuthentication_noSignedMember_publishFailedEvent() {
         val result = ZignSecAuthenticationResult.Completed(
-            Identity(
+            ZignSecIdentity(
                 countryCode = "NO",
                 firstName = "Test",
                 lastName = "Testsson",

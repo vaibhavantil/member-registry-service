@@ -6,7 +6,7 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.hedvig.common.UUIDGenerator
 import com.hedvig.external.bisnodeBCI.BisnodeClient
 import com.hedvig.external.zignSec.client.dto.ZignSecNotificationRequest
-import com.hedvig.memberservice.commands.AuthenticatedIdentificationCommand
+import com.hedvig.memberservice.commands.SuccessfulAuthenticationCommand
 import com.hedvig.memberservice.commands.CreateMemberCommand
 import com.hedvig.memberservice.commands.EditMemberInfoCommand
 import com.hedvig.memberservice.commands.EditMemberInformationCommand
@@ -309,8 +309,7 @@ class MemberAggregate() {
         val idProvider = request.identity?.idProviderName ?: return
         if (member.firstName == cmd.firstName &&
             member.lastName == cmd.lastName &&
-            member.ssn == cmd.personalNumber &&
-            member.countryCode == cmd.zignSecAuthMarket.countryCode) return
+            member.ssn == cmd.personalNumber) return
         apply(
             MemberIdentifiedEvent(
                 cmd.id,
@@ -326,21 +325,20 @@ class MemberAggregate() {
     }
 
     @CommandHandler
-    fun handle(command: AuthenticatedIdentificationCommand) {
-        if (member.firstName == command.firstName &&
-            member.lastName == command.lastName &&
-            member.ssn == command.nationalIdentifier &&
-            member.countryCode == command.countryCode) return
+    fun handle(command: SuccessfulAuthenticationCommand) {
+        if (member.firstName == command.identity.firstName &&
+            member.lastName == command.identity.lastName &&
+            member.ssn == command.identity.nationalIdentifier) return
         apply(
             MemberIdentifiedEvent(
                 command.id,
                 MemberIdentifiedEvent.NationalIdentification(
-                    command.nationalIdentifier,
-                    MemberIdentifiedEvent.Nationality.fromCountryCode(command.countryCode)
+                    command.identity.nationalIdentifier,
+                    MemberIdentifiedEvent.Nationality.fromCountryCode(command.identity.countryCode)
                 ),
-                command.source.identifier,
-                command.firstName,
-                command.lastName
+                command.method.identifier,
+                command.identity.firstName,
+                command.identity.lastName
             )
         )
     }
@@ -641,8 +639,7 @@ class MemberAggregate() {
         member = member.copy(
             firstName = e.firstName,
             lastName = e.lastName,
-            ssn = e.nationalIdentification.identification,
-            countryCode = e.nationalIdentification.nationality.countryCode
+            ssn = e.nationalIdentification.identification
         )
     }
 }
