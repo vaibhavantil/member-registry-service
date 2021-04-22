@@ -43,13 +43,13 @@ class MemberSignedSaga {
     @StartSaga
     @EndSaga
     fun onMemberSignedEvent(e: MemberSignedEvent) {
-        val isUnderwriterHandlingSession = underwriterSigningService.isUnderwriterHandlingSignSession(UUID.fromString(e.getReferenceId()))
+        val isUnderwriterHandlingSession = underwriterSigningService.isUnderwriterHandlingSignSession(UUID.fromString(e.referenceId))
         if (isUnderwriterHandlingSession) {
             try {
                 underwriterSigningService.signSessionWasCompleted(
-                    UUID.fromString(e.getReferenceId()),
+                    UUID.fromString(e.referenceId),
                     UnderwriterSessionCompletedData.SwedishBankId(
-                        e.getReferenceId(), e.getSignature(), e.getOscpResponse()
+                        e.referenceId, e.signature, e.oscpResponse
                     )
                 )
             } catch (ex: RuntimeException) {
@@ -57,16 +57,16 @@ class MemberSignedSaga {
             }
         } else {
             try {
-                underwriterApi.memberSigned(e.getId().toString(), e.getReferenceId(), e.getSignature(), e.getOscpResponse())
+                underwriterApi.memberSigned(e.id.toString(), e.referenceId, e.signature, e.oscpResponse)
             } catch (ex: RuntimeException) {
                 logger.error("Could not notify underwriter about signed member [MemberId: ${e.id}] Exception $ex")
             }
         }
 
-        signingService.completeSwedishSession(e.getReferenceId())
+        signingService.completeSwedishSession(e.referenceId)
         signingService.productSignConfirmed(e.id)
         signingService.scheduleContractsCreatedJob(e.id, SignMethod.SWEDISH_BANK_ID)
-        snsNotificationService.sendMemberSignedNotification(e.getId())
+        snsNotificationService.sendMemberSignedNotification(e.id)
     }
 
     @SagaEventHandler(associationProperty = "memberId")

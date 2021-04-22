@@ -102,6 +102,12 @@ public class AxonConfig {
           x ->
               TrackingEventProcessorConfiguration.forSingleThreadedProcessing()
                   .andInitialTrackingToken(StreamableMessageSource::createTailToken));
+
+      config.registerTrackingEventProcessor(
+          "OldLoyalSwedishMemberRepairingImporter",
+          x ->
+              TrackingEventProcessorConfiguration.forSingleThreadedProcessing()
+                  .andInitialTrackingToken(StreamableMessageSource::createTailToken));
   }
 
 
