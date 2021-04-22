@@ -21,7 +21,7 @@ class QualityAssuranceServiceImplProductionTest {
     lateinit var mockMvc: MockMvc
 
     @MockBean
-    lateinit var qualityAssuranceServiceImpl: QualityAssuranceServiceImpl
+    lateinit var qualityAssuranceService: QualityAssuranceService
 
     @Test
     fun `When profile is production, the service is NOT available`() {

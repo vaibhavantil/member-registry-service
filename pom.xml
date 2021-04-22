@@ -10,11 +10,13 @@
   <packaging>pom</packaging>
 
   <modules>
+    <module>auth</module>
     <module>member-service</module>
     <module>bisnode-bci</module>
     <module>bank-id</module>
     <module>syna</module>
     <module>zign-sec</module>
   </modules>
+
 
 </project>

@@ -5,5 +5,8 @@ import org.springframework.stereotype.Repository
 
 @Repository
 internal interface ZignSecCredentialRepository : JpaRepository<ZignSecCredential, Long> {
-    fun findByIdProviderNameAndIdProviderPersonId(idProviderName: String, idProviderPersonId: String): ZignSecCredential?
+    fun findByIdProviderNameAndIdProviderPersonId(
+        idProviderName: String,
+        idProviderPersonId: String
+    ): ZignSecCredential?
 }

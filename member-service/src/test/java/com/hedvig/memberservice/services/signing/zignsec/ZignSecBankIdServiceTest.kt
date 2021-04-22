@@ -83,13 +83,17 @@ class ZignSecBankIdServiceTest {
 
         val user = User(associatedMemberId = MEMBERS_ORIGIGINAL_ID.toString())
 
-        whenever(userService.findOrCreateUserWithCredentials(
-            UserService.Credentials.ZignSec(
-                countryCode = "NO",
+        whenever(userService.findOrCreateUserWithCredential(
+            UserService.Credential.ZignSec(
                 idProviderName = "BankIDNO",
                 idProviderPersonId = "9578-6000-4-365161",
-                personalNumber = SSN
-            ), onboardingMemberId = MEMBER_ID.toString())).thenReturn(user)
+                simpleSignFallback = UserService.Credential.SimpleSign(
+                    countryCode = "NO",
+                    personalNumber = SSN
+                )
+            ), UserService.Context(
+                onboardingMemberId = MEMBER_ID.toString()
+            ))).thenReturn(user)
 
         classUnderTest.completeAuthentication(result)
 
@@ -124,13 +128,17 @@ class ZignSecBankIdServiceTest {
 
         val user = User(associatedMemberId = MEMBER_ID.toString())
 
-        whenever(userService.findOrCreateUserWithCredentials(
-            UserService.Credentials.ZignSec(
-                countryCode = "NO",
+        whenever(userService.findOrCreateUserWithCredential(
+            UserService.Credential.ZignSec(
                 idProviderName = "BankIDNO",
                 idProviderPersonId = "9578-6000-4-365161",
-                personalNumber = SSN
-            ), onboardingMemberId = MEMBER_ID.toString())).thenReturn(user)
+                simpleSignFallback = UserService.Credential.SimpleSign(
+                    countryCode = "NO",
+                    personalNumber = SSN
+                )
+            ), UserService.Context(
+                onboardingMemberId = MEMBER_ID.toString()
+            ))).thenReturn(user)
 
         classUnderTest.completeAuthentication(result)
 
@@ -171,12 +179,14 @@ class ZignSecBankIdServiceTest {
             ZignSecAuthenticationMethod.NORWAY_WEB_OR_MOBILE
         )
 
-        whenever(userService.findOrCreateUserWithCredentials(
-            UserService.Credentials.ZignSec(
-                countryCode = "NO",
+        whenever(userService.findOrCreateUserWithCredential(
+            UserService.Credential.ZignSec(
                 idProviderName = "BankIDNO",
                 idProviderPersonId = SSN
-            ), onboardingMemberId = MEMBER_ID.toString())).thenReturn(null)
+            ), UserService.Context(
+                onboardingMemberId = MEMBER_ID.toString(),
+                authType = UserService.AuthType.SIGN
+            ))).thenReturn(null)
 
         classUnderTest.completeAuthentication(result)
 

@@ -83,9 +83,11 @@ class BankIdServiceV2(
                 CollectStatus.complete -> {
                     swedishBankIdMetrics.completeBankIdV2Auth()
                     val personalNumber = bankIdRes.completionData.user.personalNumber
-                    val user = userService.findOrCreateUserWithCredentials(
-                        UserService.Credentials.SwedishBankID(personalNumber),
-                        onboardingMemberId = memberId.toString()
+                    val user = userService.findOrCreateUserWithCredential(
+                        UserService.Credential.SwedishBankID(personalNumber),
+                        UserService.Context(
+                            onboardingMemberId = memberId.toString()
+                        )
                     )
                     if (user != null) {
                         if (memberId != user.associatedMemberId.toLong()) {

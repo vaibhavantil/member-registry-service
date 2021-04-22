@@ -74,10 +74,12 @@ class BankIdServiceV2Test {
                 associatedMemberId = "54321"
             )
 
-        whenever(userService.findOrCreateUserWithCredentials(
-            UserService.Credentials.SwedishBankID(
+        whenever(userService.findOrCreateUserWithCredential(
+            UserService.Credential.SwedishBankID(
                 personalNumber = "190001010101"
-            ), onboardingMemberId = "12345")).thenReturn(user)
+            ), UserService.Context(
+                onboardingMemberId = "12345"
+            ))).thenReturn(user)
 
         bankIdServiceV2.authCollect(referenceToken = "xyz", memberId = 12345)
 

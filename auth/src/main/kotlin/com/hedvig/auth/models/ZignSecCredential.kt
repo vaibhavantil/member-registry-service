@@ -1,5 +1,6 @@
 package com.hedvig.auth.models
 
+import org.hibernate.annotations.CreationTimestamp
 import java.time.Instant
 import javax.persistence.CascadeType
 import javax.persistence.Column
@@ -13,18 +14,21 @@ import javax.persistence.UniqueConstraint
 
 @Entity
 @Table(
-    uniqueConstraints = [UniqueConstraint(columnNames = ["personal_number", "country"])]
+    uniqueConstraints = [UniqueConstraint(columnNames = ["id_provider_name", "id_provider_person_id"])]
 )
-internal class SimpleSignConnection(
+internal class ZignSecCredential(
     @OneToOne(cascade = [CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH])
     @JoinColumn(unique = true)
     val user: User,
-    @Column(name = "personal_number")
-    val personalNumber: String,
-    @Column(name = "country")
-    val country: String,
-    val createdAt: Instant = Instant.now()
+    @Column(name = "id_provider_name")
+    val idProviderName: String,
+    @Column(name = "id_provider_person_id")
+    val idProviderPersonId: String
 ) {
-    @Id @GeneratedValue
+    @Id
+    @GeneratedValue
     val id: Long = 0
+
+    @field:CreationTimestamp
+    lateinit var createdAt: Instant
 }

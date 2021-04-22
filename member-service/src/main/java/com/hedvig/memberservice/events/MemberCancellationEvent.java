@@ -5,6 +5,6 @@ import lombok.Value;
 
 @Value
 public class MemberCancellationEvent {
-  Long memberId;
-  Instant inactivationDate;
+  public Long memberId;
+  public Instant inactivationDate;
 }
