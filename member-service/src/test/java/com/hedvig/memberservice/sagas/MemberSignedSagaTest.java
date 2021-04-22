@@ -118,7 +118,7 @@ public class MemberSignedSagaTest {
             "oscpResponse", "19121212121212");
         saga.onMemberSignedEvent(e);
 
-        then(underwriterApi).should().memberSigned(e.id.toString(), e.referenceId, e.signature, e.oscpResponse);
+        then(underwriterApi).should().memberSigned(String.valueOf(e.getId()), e.getReferenceId(), e.getSignature(), e.getOscpResponse());
     }
 
     @Test

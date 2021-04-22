@@ -6,11 +6,8 @@ import com.hedvig.auth.models.SwedishBankIdCredential
 import com.hedvig.auth.models.SwedishBankIdCredentialRepository
 import com.hedvig.auth.models.User
 import com.hedvig.auth.models.UserRepository
-import com.hedvig.memberservice.events.MemberSignedEvent
 import com.hedvig.memberservice.events.MemberSignedWithoutBankId
-import com.hedvig.memberservice.events.MemberSimpleSignedEvent
 import java.time.Instant
-import java.util.UUID
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
