@@ -82,8 +82,7 @@ public class AxonConfig {
       config.registerTrackingEventProcessor(
           "com.hedvig.memberservice.users",
           x ->
-              TrackingEventProcessorConfiguration.forSingleThreadedProcessing()
-                  .andInitialTrackingToken(StreamableMessageSource::createTailToken));
+              TrackingEventProcessorConfiguration.forSingleThreadedProcessing());
   }
 
 

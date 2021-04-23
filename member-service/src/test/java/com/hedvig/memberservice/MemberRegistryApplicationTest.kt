@@ -1,10 +1,10 @@
-package com.hedvig.auth
+package com.hedvig.memberservice
 
 import org.junit.jupiter.api.Test
 import org.springframework.boot.test.context.SpringBootTest
 
 @SpringBootTest
-class AuthApplicationTests {
+class MemberRegistryApplicationTest {
 
     @Test
     fun contextLoads() {

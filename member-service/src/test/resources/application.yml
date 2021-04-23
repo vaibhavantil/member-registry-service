@@ -8,3 +8,62 @@ spring:
     properties:
       hibernate:
         order_by.default_null_ordering: last
+
+hedvig.bisnode.client.id: bci-test-hedvig
+hedvig.bisnode.client.key: whatever
+cloud.aws.region.static: eu-west-1
+
+hedvig:
+  bot-service.url: localhost:4081
+  segment:
+    writeKey: lalal
+  productsPricing:
+    url: localhost:4085
+  memberService:
+    token: token
+  powner.api.key: 123456
+  appleUser:
+    address:
+      zipCode: 12345
+      city: California
+      street: Palo Alto
+    firstName: Steve
+    lastName: Jobs
+    personalNumber: 195590930334
+    memberId: 111111111
+    phoneNumber: 0000000000
+    email: apple@hedvig.com
+
+hedvig.bankid.signmessage.switcher: Jag har tagit del av förköpsinformation och villkor och bekräftar genom att signera att jag vill byta till Hedvig när min gamla försäkring går ut. Jag ger också  Hedvig fullmakt att byta försäkringen åt mig.
+hedvig.bankid.signmessage.nonSwitcher: Jag har tagit del av förköpsinformation och villkor och bekräftar genom att signera att jag skaffar en försäkring hos Hedvig.
+hedvig.memberAggregate.defaultCharity.enabled: true
+
+zignsec:
+  host: la
+  webhook:
+    url: www
+  success:
+    url: www
+  failed:
+    url: www
+  authentication.token: 123a
+  validSigningTargetHosts: www
+redirect.authentication.successUrl: www
+redirect.authentication.failUrl: www
+hedvig.external.zignSec.eid.baseurl: www
+
+trustpilot.oauth.apikey: test
+trustpilot.oauth.secret: test
+trustpilot.oauth.username: test
+trustpilot.oauth.password: test
+
+static:
+  authentication:
+    redirect:
+      baseUrl: https://www.hedvig.com/
+
+syna:
+  url: syna.dev.hedvigit.com/syna
+  user:
+    name: syna-arkiv
+    password: test
