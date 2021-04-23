@@ -1,6 +1,7 @@
 package com.hedvig.memberservice.users
 
 import com.hedvig.auth.services.UserService
+import com.hedvig.memberservice.events.MemberSignedWithoutBankId
 import com.hedvig.memberservice.events.MemberSimpleSignedEvent
 import javax.transaction.Transactional
 import org.axonframework.eventhandling.EventHandler
@@ -18,24 +19,37 @@ class MemberSimpleSignedEventHandler {
     @EventHandler
     @Transactional
     fun on(e: MemberSimpleSignedEvent) {
-        val memberId = e.memberId.toString()
+        export(
+            memberId = e.memberId.toString(),
+            personalNumber = e.nationalIdentification,
+            countryCode = e.nationality.countryCode.alpha2
+        )
+    }
 
+    @EventHandler
+    @Transactional
+    fun on(e: MemberSignedWithoutBankId) {
+        export(
+            memberId = e.memberId.toString(),
+            personalNumber = e.ssn,
+            countryCode = "SE"
+        )
+    }
+
+    private fun export(
+        memberId: String,
+        personalNumber: String,
+        countryCode: String
+    ) {
         if (userService.findUserByAssociatedMemberId(memberId) != null) {
             logger.info("Member ${memberId} was already has a user - skipping")
             return
         }
 
-        val personalNumber = e.nationalIdentification
-        val country = when (e.nationality) {
-            MemberSimpleSignedEvent.Nationality.SWEDEN -> "SE"
-            MemberSimpleSignedEvent.Nationality.NORWAY -> "NO"
-            MemberSimpleSignedEvent.Nationality.DENMARK -> "DK"
-        }
-
         val user = userService.findOrCreateUserWithCredential(
             UserService.Credential.SimpleSign(
                 personalNumber = personalNumber,
-                countryCode = country
+                countryCode = countryCode
             ),
             UserService.Context(
                 onboardingMemberId = memberId,

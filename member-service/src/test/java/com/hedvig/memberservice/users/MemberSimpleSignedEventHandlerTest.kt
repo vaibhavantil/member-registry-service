@@ -1,6 +1,7 @@
 package com.hedvig.memberservice.users
 
 import com.hedvig.auth.services.UserService
+import com.hedvig.memberservice.events.MemberSignedWithoutBankId
 import com.hedvig.memberservice.events.MemberSimpleSignedEvent
 import java.util.UUID
 import org.assertj.core.api.Assertions.assertThat
@@ -27,7 +28,7 @@ internal class MemberSimpleSignedEventHandlerTest @Autowired constructor(
     }
 
     @Test
-    fun `signed member is imported on event`() {
+    fun `MemberSimpleSignedEvent - signed member is imported on event`() {
         val memberId = 123L
         val personalNumber = "01129955131"
 
@@ -53,7 +54,7 @@ internal class MemberSimpleSignedEventHandlerTest @Autowired constructor(
     }
 
     @Test
-    fun `signed member is simply ignores second attempt`() {
+    fun `MemberSimpleSignedEvent - signed member again simply ignores second attempt`() {
         val memberId = 123L
         val personalNumber = "01129955131"
 
@@ -73,6 +74,40 @@ internal class MemberSimpleSignedEventHandlerTest @Autowired constructor(
                 MemberSimpleSignedEvent.Nationality.NORWAY,
                 UUID.randomUUID()
             )
+        )
+    }
+
+    @Test
+    fun `MemberSignedWithoutBankId - signed member is imported on event`() {
+        val memberId = 123L
+        val personalNumber = "01129955131"
+
+        eventHandler.on(
+            MemberSignedWithoutBankId(memberId, personalNumber)
+        )
+
+        val user = userService.findOrCreateUserWithCredential(
+            UserService.Credential.SimpleSign(
+                countryCode = "SE",
+                personalNumber = personalNumber
+            ),
+            UserService.Context(onboardingMemberId = null)
+        )
+        assertThat(user).isNotNull
+        assertThat(user?.associatedMemberId).isEqualTo(memberId.toString())
+    }
+
+    @Test
+    fun `MemberSignedWithoutBankId - signed member is simply ignored second attempt`() {
+        val memberId = 123L
+        val personalNumber = "01129955131"
+
+        eventHandler.on(
+            MemberSignedWithoutBankId(memberId, personalNumber)
+        )
+        entityManager.clear()
+        eventHandler.on(
+            MemberSignedWithoutBankId(memberId, personalNumber)
         )
     }
 }
