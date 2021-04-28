@@ -84,7 +84,13 @@ class BankIdServiceV2(
                     swedishBankIdMetrics.completeBankIdV2Auth()
                     val personalNumber = bankIdRes.completionData.user.personalNumber
                     val user = userService.findOrCreateUserWithCredential(
-                        UserService.Credential.SwedishBankID(personalNumber),
+                        UserService.Credential.SwedishBankID(
+                            personalNumber = personalNumber,
+                            simpleSignFallback = UserService.Credential.SimpleSign(
+                                countryCode = "SE",
+                                personalNumber = personalNumber
+                            )
+                        ),
                         UserService.Context(
                             onboardingMemberId = memberId.toString()
                         )

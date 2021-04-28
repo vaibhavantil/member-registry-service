@@ -76,7 +76,8 @@ class BankIdServiceV2Test {
 
         whenever(userService.findOrCreateUserWithCredential(
             UserService.Credential.SwedishBankID(
-                personalNumber = "190001010101"
+                personalNumber = "190001010101",
+                simpleSignFallback = UserService.Credential.SimpleSign("SE", "190001010101")
             ), UserService.Context(
                 onboardingMemberId = "12345"
             ))).thenReturn(user)
