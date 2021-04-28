@@ -13,6 +13,8 @@ ENV MAVEN_OPTS="-Dmaven.repo.local=/usr/share/maven/ref/repository -DGITHUB_USER
 # we can split up the different build stages, we build+install the local deps
 # upfront, to then only focus on the actual application module: member-service.
 COPY pom.xml .
+COPY auth auth
+RUN mvn install -f auth/pom.xml -s /usr/share/maven/ref/settings-docker.xml
 COPY bank-id bank-id
 RUN mvn install -f bank-id/pom.xml -s /usr/share/maven/ref/settings-docker.xml
 COPY bisnode-bci bisnode-bci

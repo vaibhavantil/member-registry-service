@@ -88,13 +88,19 @@ class ZignSecBankIdService(
         when (result) {
             is ZignSecAuthenticationResult.Completed -> {
                 val user = result.identity.idProviderPersonId?.let { idProviderPersonId ->
-                    userService.findOrCreateUserWithCredentials(
-                        UserService.Credentials.ZignSec(
-                            result.identity.countryCode!!,
-                            result.identity.idProviderName!!,
-                            idProviderPersonId,
-                            result.ssn
-                        ), onboardingMemberId = result.memberId.toString())
+                    userService.findOrCreateUserWithCredential(
+                        UserService.Credential.ZignSec(
+                            idProviderName = result.identity.idProviderName!!,
+                            idProviderPersonId = idProviderPersonId,
+                            simpleSignFallback = UserService.Credential.SimpleSign(
+                                countryCode = result.identity.countryCode!!,
+                                personalNumber = result.ssn
+                            )
+                        ),
+                        UserService.Context(
+                            onboardingMemberId = result.memberId.toString()
+                        )
+                    )
                 }
 
                 if (user != null) {

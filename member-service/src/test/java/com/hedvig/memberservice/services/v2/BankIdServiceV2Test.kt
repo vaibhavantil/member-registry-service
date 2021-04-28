@@ -80,10 +80,12 @@ class BankIdServiceV2Test {
         )
 
         every {
-            userService.findOrCreateUserWithCredentials(
-                UserService.Credentials.SwedishBankID(
+            userService.findOrCreateUserWithCredential(
+                UserService.Credential.SwedishBankID(
                     personalNumber = "190001010101"
-                ), onboardingMemberId = "12345")
+                ), UserService.Context(
+                    onboardingMemberId = "12345"
+                ))
         } returns user
 
         bankIdServiceV2.authCollect(referenceToken = "xyz", memberId = 12345)
@@ -127,10 +129,13 @@ class BankIdServiceV2Test {
         )
 
         every {
-            userService.findOrCreateUserWithCredentials(
-                UserService.Credentials.SwedishBankID(
+            userService.findOrCreateUserWithCredential(
+                UserService.Credential.SwedishBankID(
                     personalNumber = "190001010101"
-                ), onboardingMemberId = "12345")
+                ), UserService.Context(
+                    onboardingMemberId = "12345"
+                )
+            )
         } returns user
 
         bankIdServiceV2.authCollect(referenceToken = "xyz", memberId = 12345)

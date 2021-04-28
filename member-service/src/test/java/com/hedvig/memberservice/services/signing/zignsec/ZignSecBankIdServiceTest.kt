@@ -87,13 +87,16 @@ class ZignSecBankIdServiceTest {
         val user = User(associatedMemberId = MEMBERS_ORIGIGINAL_ID.toString())
 
         every {
-            userService.findOrCreateUserWithCredentials(
-                UserService.Credentials.ZignSec(
-                    countryCode = "NO",
+            userService.findOrCreateUserWithCredential(
+                UserService.Credential.ZignSec(
                     idProviderName = "BankIDNO",
                     idProviderPersonId = "9578-6000-4-365161",
-                    personalNumber = SSN
-                ), onboardingMemberId = MEMBER_ID.toString()
+                    simpleSignFallback = UserService.Credential.SimpleSign(
+                        "NO", SSN
+                    )
+                ), UserService.Context(
+                    onboardingMemberId = MEMBER_ID.toString()
+                )
             )
         } returns user
 
@@ -148,13 +151,16 @@ class ZignSecBankIdServiceTest {
         val user = User(associatedMemberId = MEMBER_ID.toString())
 
         every {
-            userService.findOrCreateUserWithCredentials(
-                UserService.Credentials.ZignSec(
-                    countryCode = "NO",
+            userService.findOrCreateUserWithCredential(
+                UserService.Credential.ZignSec(
                     idProviderName = "BankIDNO",
                     idProviderPersonId = "9578-6000-4-365161",
-                    personalNumber = SSN
-                ), onboardingMemberId = MEMBER_ID.toString()
+                    simpleSignFallback = UserService.Credential.SimpleSign(
+                        "NO", SSN
+                    )
+                ), UserService.Context(
+                    onboardingMemberId = MEMBER_ID.toString()
+                )
             )
         } returns user
 
@@ -203,13 +209,17 @@ class ZignSecBankIdServiceTest {
         )
 
         every {
-            userService.findOrCreateUserWithCredentials(
-                UserService.Credentials.ZignSec(
-                    countryCode = "NO",
+            userService.findOrCreateUserWithCredential(
+                UserService.Credential.ZignSec(
                     idProviderName = "BankIDNO",
                     idProviderPersonId = "9578-6000-4-365161",
-                    personalNumber = SSN
-                ), onboardingMemberId = MEMBER_ID.toString()
+                    simpleSignFallback = UserService.Credential.SimpleSign(
+                        "NO", SSN
+                    )
+                ), UserService.Context(
+                    onboardingMemberId = MEMBER_ID.toString(),
+                    authType = UserService.AuthType.LOGIN
+                )
             )
         } returns null
 

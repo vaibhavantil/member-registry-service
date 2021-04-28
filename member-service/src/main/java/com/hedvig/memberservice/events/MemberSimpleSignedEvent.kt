@@ -1,5 +1,6 @@
 package com.hedvig.memberservice.events
 
+import com.neovisionaries.i18n.CountryCode
 import java.util.UUID
 
 data class MemberSimpleSignedEvent(
@@ -8,9 +9,9 @@ data class MemberSimpleSignedEvent(
     val nationality: Nationality,
     val referenceId: UUID
 ) {
-    enum class Nationality {
-        SWEDEN,
-        NORWAY,
-        DENMARK
+    enum class Nationality(val countryCode: CountryCode) {
+        SWEDEN(CountryCode.SE),
+        NORWAY(CountryCode.NO),
+        DENMARK(CountryCode.DK)
     }
 }

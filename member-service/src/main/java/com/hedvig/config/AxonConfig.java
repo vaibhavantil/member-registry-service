@@ -80,34 +80,9 @@ public class AxonConfig {
                   .andInitialTrackingToken(StreamableMessageSource::createTailToken));
 
       config.registerTrackingEventProcessor(
-          "SwedishMemberImporter",
+          "com.hedvig.memberservice.users",
           x ->
-              TrackingEventProcessorConfiguration.forSingleThreadedProcessing()
-                  .andInitialTrackingToken(StreamableMessageSource::createTailToken));
-
-      config.registerTrackingEventProcessor(
-          "SimpleSignMemberImporter",
-          x ->
-              TrackingEventProcessorConfiguration.forSingleThreadedProcessing()
-                  .andInitialTrackingToken(StreamableMessageSource::createTailToken));
-
-      config.registerTrackingEventProcessor(
-          "ZignSecMemberImporter",
-          x ->
-              TrackingEventProcessorConfiguration.forSingleThreadedProcessing()
-                  .andInitialTrackingToken(StreamableMessageSource::createTailToken));
-
-      config.registerTrackingEventProcessor(
-          "SwedishRepairingSimpleSignMemberImporter",
-          x ->
-              TrackingEventProcessorConfiguration.forSingleThreadedProcessing()
-                  .andInitialTrackingToken(StreamableMessageSource::createTailToken));
-
-      config.registerTrackingEventProcessor(
-          "OldLoyalSwedishMemberRepairingImporter",
-          x ->
-              TrackingEventProcessorConfiguration.forSingleThreadedProcessing()
-                  .andInitialTrackingToken(StreamableMessageSource::createTailToken));
+              TrackingEventProcessorConfiguration.forSingleThreadedProcessing());
   }
 
 
