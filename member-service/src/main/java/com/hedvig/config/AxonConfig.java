@@ -1,8 +1,9 @@
 package com.hedvig.config;
 
 import com.hedvig.memberservice.aggregates.MemberAggregate;
-import com.hedvig.memberservice.events.upcasters.OnboardingStartedWithSSNEventUpcaster;
-import com.hedvig.memberservice.events.upcasters.SSNUpdatedEventUpcaster;
+import com.hedvig.memberservice.events.MemberIdentifiedEvent;
+import com.hedvig.memberservice.events.OnboardingStartedWithSSNEvent;
+import com.hedvig.memberservice.events.SSNUpdatedEvent;
 import com.hedvig.memberservice.sagas.MemberSignedSaga;
 import lombok.val;
 import org.axonframework.config.EventProcessingConfiguration;
@@ -10,11 +11,15 @@ import org.axonframework.config.SagaConfiguration;
 import org.axonframework.eventhandling.TrackingEventProcessorConfiguration;
 import org.axonframework.eventsourcing.AggregateFactory;
 import org.axonframework.messaging.StreamableMessageSource;
+import org.axonframework.serialization.upcasting.event.EventUpcaster;
 import org.axonframework.serialization.upcasting.event.EventUpcasterChain;
 import org.axonframework.spring.eventsourcing.SpringPrototypeAggregateFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Configuration
 public class AxonConfig {
@@ -88,9 +93,10 @@ public class AxonConfig {
 
     @Bean
     public EventUpcasterChain eventUpcasters() {
-        return new EventUpcasterChain(
-            new OnboardingStartedWithSSNEventUpcaster(),
-            new SSNUpdatedEventUpcaster()
-        );
+      List<EventUpcaster> upcasters = new ArrayList<>();
+      upcasters.addAll(OnboardingStartedWithSSNEvent.Companion.getUpcasters());
+      upcasters.addAll(SSNUpdatedEvent.Companion.getUpcasters());
+      upcasters.addAll(MemberIdentifiedEvent.Companion.getUpcasters());
+      return new EventUpcasterChain(upcasters);
     }
 }
