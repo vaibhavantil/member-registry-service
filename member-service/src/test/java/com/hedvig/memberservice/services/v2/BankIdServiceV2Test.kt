@@ -82,10 +82,12 @@ class BankIdServiceV2Test {
         every {
             userService.findOrCreateUserWithCredential(
                 UserService.Credential.SwedishBankID(
-                    personalNumber = "190001010101"
+                    personalNumber = "190001010101",
+                    simpleSignFallback = UserService.Credential.SimpleSign("SE", "190001010101")
                 ), UserService.Context(
                     onboardingMemberId = "12345"
-                ))
+                )
+            )
         } returns user
 
         bankIdServiceV2.authCollect(referenceToken = "xyz", memberId = 12345)
@@ -131,7 +133,8 @@ class BankIdServiceV2Test {
         every {
             userService.findOrCreateUserWithCredential(
                 UserService.Credential.SwedishBankID(
-                    personalNumber = "190001010101"
+                    personalNumber = "190001010101",
+                    simpleSignFallback = UserService.Credential.SimpleSign("SE", "190001010101")
                 ), UserService.Context(
                     onboardingMemberId = "12345"
                 )
