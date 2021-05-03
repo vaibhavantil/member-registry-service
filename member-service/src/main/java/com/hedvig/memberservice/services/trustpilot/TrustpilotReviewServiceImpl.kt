@@ -21,7 +21,7 @@ class TrustpilotReviewServiceImpl(
         name: String,
         locale: Locale?
     ): TrustpilotReviewInvitation? {
-        val locale = locale ?: LocaleResolver.DEFAULT_LOCALE
+        val locale = locale ?: LocaleResolver.FALLBACK_LOCALE
         return try {
             val body = TrustpilotReviewLinkRequestDto(
                 referenceId = memberId.toString(),
