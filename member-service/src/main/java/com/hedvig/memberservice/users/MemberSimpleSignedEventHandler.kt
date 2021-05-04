@@ -42,7 +42,7 @@ class MemberSimpleSignedEventHandler {
         countryCode: String
     ) {
         if (userService.findUserByAssociatedMemberId(memberId) != null) {
-            logger.info("Member ${memberId} was already has a user - skipping")
+            logger.debug("Member ${memberId} was already has a user - skipping")
             return
         }
 
@@ -58,7 +58,7 @@ class MemberSimpleSignedEventHandler {
         )
 
         if (user != null) {
-            logger.info("Created user ${user.id} for member $memberId with SimpleSign connection")
+            logger.debug("Created user ${user.id} for member $memberId with SimpleSign connection")
         } else {
             throw Exception("Failed to create user for member $memberId with SimpleSign connection")
         }

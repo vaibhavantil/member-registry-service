@@ -21,12 +21,12 @@ class MemberSignedEventHandler {
         val memberId = e.id.toString()
 
         if (userService.findUserByAssociatedMemberId(memberId) != null) {
-            logger.info("Member ${e.id} was already has a user - skipping")
+            logger.debug("Member ${e.id} was already has a user - skipping")
             return
         }
 
         val personalNumber = e.ssn ?: run {
-            logger.info("Member ${e.id} was signed without personal number - skipping")
+            logger.debug("Member ${e.id} was signed without personal number - skipping")
             return
         }
 
@@ -41,7 +41,7 @@ class MemberSignedEventHandler {
         )
 
         if (user != null) {
-            logger.info("Created user ${user.id} for member $memberId with  Swedish BankID credential")
+            logger.debug("Created user ${user.id} for member $memberId with  Swedish BankID credential")
         } else {
             throw Exception("Failed to create user for member $memberId with Swedish BankID credential")
         }

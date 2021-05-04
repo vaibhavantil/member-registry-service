@@ -18,7 +18,7 @@ class NotificationServiceUpdatePhoneNumberEventListener(
 
     @EventHandler
     fun on(event: PhoneNumberUpdatedEvent, eventMessage: DomainEventMessage<Any>) {
-        logger.info("Updating notification service phone number with [event: $event]")
+        logger.debug("Updating notification service phone number with [event: $event]")
         try {
             notificationService.updatePhoneNumber(eventMessage.identifier, event.memberId.toString(), event.phoneNumber)
         } catch (e: RuntimeException) {

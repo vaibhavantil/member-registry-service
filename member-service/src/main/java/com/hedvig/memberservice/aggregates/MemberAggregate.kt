@@ -5,56 +5,9 @@ import org.axonframework.commandhandling.model.AggregateLifecycle.apply
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.hedvig.common.UUIDGenerator
 import com.hedvig.external.bisnodeBCI.BisnodeClient
-import com.hedvig.memberservice.commands.CreateMemberCommand
-import com.hedvig.memberservice.commands.EditMemberInfoCommand
-import com.hedvig.memberservice.commands.EditMemberInformationCommand
-import com.hedvig.memberservice.commands.InactivateMemberCommand
-import com.hedvig.memberservice.commands.InitializeAppleUserCommand
-import com.hedvig.memberservice.commands.MemberSimpleSignedCommand
-import com.hedvig.memberservice.commands.MemberUpdateContactInformationCommand
-import com.hedvig.memberservice.commands.SelectNewCashbackCommand
-import com.hedvig.memberservice.commands.SetFraudulentStatusCommand
-import com.hedvig.memberservice.commands.SignMemberFromUnderwriterCommand
-import com.hedvig.memberservice.commands.StartSwedishOnboardingWithSSNCommand
-import com.hedvig.memberservice.commands.SwedishBankIdAuthenticationAttemptCommand
-import com.hedvig.memberservice.commands.SwedishBankIdSignCommand
-import com.hedvig.memberservice.commands.UpdateAcceptLanguageCommand
-import com.hedvig.memberservice.commands.UpdateBirthDateCommand
-import com.hedvig.memberservice.commands.UpdateEmailCommand
-import com.hedvig.memberservice.commands.UpdatePhoneNumberCommand
-import com.hedvig.memberservice.commands.UpdatePickedLocaleCommand
-import com.hedvig.memberservice.commands.UpdateSSNCommand
-import com.hedvig.memberservice.commands.UpdateSwedishWebOnBoardingInfoCommand
-import com.hedvig.memberservice.commands.ZignSecSignCommand
-import com.hedvig.memberservice.commands.ZignSecSuccessfulAuthenticationCommand
+import com.hedvig.memberservice.commands.*
 import com.hedvig.memberservice.commands.models.ZignSecAuthenticationMarket
-import com.hedvig.memberservice.events.AcceptLanguageUpdatedEvent
-import com.hedvig.memberservice.events.BirthDateUpdatedEvent
-import com.hedvig.memberservice.events.DanishMemberSignedEvent
-import com.hedvig.memberservice.events.DanishSSNUpdatedEvent
-import com.hedvig.memberservice.events.EmailUpdatedEvent
-import com.hedvig.memberservice.events.FraudulentStatusUpdatedEvent
-import com.hedvig.memberservice.events.InsuranceCancellationEvent
-import com.hedvig.memberservice.events.LivingAddressUpdatedEvent
-import com.hedvig.memberservice.events.MemberAuthenticatedEvent
-import com.hedvig.memberservice.events.MemberCancellationEvent
-import com.hedvig.memberservice.events.MemberCreatedEvent
-import com.hedvig.memberservice.events.MemberInactivatedEvent
-import com.hedvig.memberservice.events.MemberSignedEvent
-import com.hedvig.memberservice.events.MemberSignedWithoutBankId
-import com.hedvig.memberservice.events.MemberSimpleSignedEvent
-import com.hedvig.memberservice.events.MemberStartedOnBoardingEvent
-import com.hedvig.memberservice.events.NameUpdatedEvent
-import com.hedvig.memberservice.events.NewCashbackSelectedEvent
-import com.hedvig.memberservice.events.NorwegianMemberSignedEvent
-import com.hedvig.memberservice.events.NorwegianSSNUpdatedEvent
-import com.hedvig.memberservice.events.OnboardingStartedWithSSNEvent
-import com.hedvig.memberservice.events.PersonInformationFromBisnodeEvent
-import com.hedvig.memberservice.events.PhoneNumberUpdatedEvent
-import com.hedvig.memberservice.events.PickedLocaleUpdatedEvent
-import com.hedvig.memberservice.events.SSNUpdatedEvent
-import com.hedvig.memberservice.events.TrackingIdCreatedEvent
-import com.hedvig.memberservice.events.MemberIdentifiedEvent
+import com.hedvig.memberservice.events.*
 import com.hedvig.memberservice.services.cashback.CashbackService
 import com.hedvig.memberservice.util.SsnUtilImpl.Companion.getBirthdateFromSwedishSsn
 import com.hedvig.memberservice.util.logger
@@ -63,6 +16,7 @@ import com.hedvig.memberservice.web.dto.Nationality.Companion.toMemberSimpleSign
 import com.hedvig.memberservice.web.dto.Nationality.Companion.toSSNUpdatedEventNationality
 import org.axonframework.commandhandling.CommandHandler
 import org.axonframework.commandhandling.model.AggregateIdentifier
+import org.axonframework.commandhandling.model.AggregateLifecycle.markDeleted
 import org.axonframework.commandhandling.model.ApplyMore
 import org.axonframework.eventhandling.EventHandler
 import org.axonframework.eventsourcing.EventSourcingHandler
@@ -169,7 +123,7 @@ class MemberAggregate() {
     @Throws(RuntimeException::class)
     private fun getPersonInformationFromBisnode(applyChain: ApplyMore, ssn: String): ApplyMore? {
         var chain = applyChain
-        logger.info("Calling bisnode for person information for {}", ssn)
+        logger.debug("Calling bisnode for person information for {}", ssn)
         val personList = bisnodeClient.match(ssn).persons
         val person = personList[0].person
         if (personList.size != 1) {
@@ -284,7 +238,7 @@ class MemberAggregate() {
                     member.ssn == null ->
                         apply(NorwegianSSNUpdatedEvent(id, cmd.personalNumber))
                     member.ssn != cmd.personalNumber ->
-                        logger.warn("Handling `ZignSecSignCommand` with different ssn [member ssn: ${member.ssn}, cmd personalNumber: ${cmd.personalNumber}]")
+                        logger.debug("Handling `ZignSecSignCommand` with different ssn [member ssn: ${member.ssn}, cmd personalNumber: ${cmd.personalNumber}]")
                 }
                 applyMemberIdentifiedEventFromZignSecSignCommand(cmd)
                 apply(
@@ -420,7 +374,7 @@ class MemberAggregate() {
 
     @CommandHandler
     fun handle(cmd: UpdatePhoneNumberCommand) {
-        logger.info("Updating phoneNumber for member {}, new number: {}", cmd.memberId,
+        logger.debug("Updating phoneNumber for member {}, new number: {}", cmd.memberId,
             cmd.phoneNumber)
         if (cmd.phoneNumber != null
             && member.phoneNumber != cmd.phoneNumber) {
@@ -508,7 +462,7 @@ class MemberAggregate() {
 
     @CommandHandler
     fun handle(cmd: UpdateAcceptLanguageCommand) {
-        logger.info("Updating accept language for member {}, new number: {}", cmd.memberId, cmd.acceptLanguage)
+        logger.debug("Updating accept language for member {}, new number: {}", cmd.memberId, cmd.acceptLanguage)
         if (!cmd.acceptLanguage.isEmpty() &&
             member.acceptLanguage != cmd.acceptLanguage) {
             apply(AcceptLanguageUpdatedEvent(cmd.memberId, cmd.acceptLanguage))
@@ -518,7 +472,7 @@ class MemberAggregate() {
     @CommandHandler
     fun handle(cmd: UpdatePickedLocaleCommand) {
         if (member.pickedLocale != cmd.pickedLocale) {
-            logger.info("Updating picked locale for member {}, new locale: {}", cmd.memberId, cmd.pickedLocale)
+            logger.debug("Updating picked locale for member {}, new locale: {}", cmd.memberId, cmd.pickedLocale)
             apply(PickedLocaleUpdatedEvent(cmd.memberId, cmd.pickedLocale))
         }
     }
@@ -526,6 +480,11 @@ class MemberAggregate() {
     @CommandHandler
     fun handle(cmd: UpdateBirthDateCommand) {
         apply(BirthDateUpdatedEvent(cmd.memberId, cmd.birthDate))
+    }
+
+    @CommandHandler
+    fun handle(cmd: DeleteMemberCommand) {
+        apply(MemberDeletedEvent(cmd.memberId))
     }
 
     @EventSourcingHandler
@@ -589,7 +548,7 @@ class MemberAggregate() {
 
     @EventSourcingHandler
     fun on(e: InsuranceCancellationEvent) {
-        logger.info("Cancel insurance with id {} for member {}", e.insuranceId, e.memberId)
+        logger.debug("Cancel insurance with id {} for member {}", e.insuranceId, e.memberId)
     }
 
     @EventHandler
@@ -630,5 +589,10 @@ class MemberAggregate() {
     @EventSourcingHandler
     fun on(e: PickedLocaleUpdatedEvent) {
         member = member.copy(pickedLocale = e.pickedLocale)
+    }
+
+    @EventSourcingHandler
+    fun on(e: MemberDeletedEvent) {
+        markDeleted()
     }
 }

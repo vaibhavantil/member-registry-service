@@ -28,8 +28,7 @@ import java.util.Objects;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @RunWith(SpringRunner.class)
@@ -206,5 +205,12 @@ public class InternalMembersControllerTests {
       assertThat(argumentCaptor2.getValue().getMemberId()).isEqualTo(1337L);
       assertThat(argumentCaptor2.getValue().getFraudulentDescription()).isEqualTo(emptyFraudulentStatus.getFraudulentStatusDescription());
       assertThat(argumentCaptor2.getValue().getToken()).isEqualTo(token);
+    }
+
+    @Test
+    public void testDeleteMember() throws Exception {
+      final Long memberId = 1337L;
+      mockMvc.perform(delete("/_/member/{memberId}", memberId))
+        .andExpect(status().is2xxSuccessful());
     }
 }

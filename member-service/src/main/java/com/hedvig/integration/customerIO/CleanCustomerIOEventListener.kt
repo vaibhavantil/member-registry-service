@@ -72,7 +72,7 @@ class CleanCustomerIOEventListener(
         membersToDeleteFromCustomerIO.forEach { memberToDelete ->
             try {
                 notificationService.deleteCustomer(memberToDelete.id.toString())
-                logger.info("Deleted member=${memberToDelete.id} from customer.io since member=${member.id} signed")
+                logger.debug("Deleted member=${memberToDelete.id} from customer.io since member=${member.id} signed")
             } catch (exception: Exception) {
                 logger.error("Failed to delete member=${memberToDelete.id} from customer.io (exception=$exception)")
             }

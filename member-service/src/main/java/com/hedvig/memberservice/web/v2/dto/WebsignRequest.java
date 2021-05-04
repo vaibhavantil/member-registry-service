@@ -31,7 +31,7 @@ public class WebsignRequest {
 
   private String GetValidIpAddress(String ipAddress) {
     boolean isValid = InetAddresses.isInetAddress(ipAddress);
-    logger.info("Validating ip {}, isValid {}", ipAddress, isValid);
+    logger.debug("Validating ip {}, isValid {}", ipAddress, isValid);
     return isValid ? ipAddress : "1.1.1.1";
   }
 

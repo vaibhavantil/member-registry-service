@@ -1,6 +1,7 @@
 package com.hedvig.memberservice.identity
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.hedvig.memberservice.events.MemberDeletedEvent
 import com.hedvig.memberservice.events.MemberIdentifiedEvent
 import com.hedvig.memberservice.identity.repository.IdentificationMethod
 import com.hedvig.memberservice.identity.repository.IdentityEntity
@@ -48,6 +49,11 @@ class IdentityEventListener(
                 repository.save(it.update(identityEntity))
             }
         } ?: repository.save(identityEntity)
+    }
+
+    @EventHandler
+    fun on(e: MemberDeletedEvent) {
+        repository.deleteById(e.memberId)
     }
 }
 

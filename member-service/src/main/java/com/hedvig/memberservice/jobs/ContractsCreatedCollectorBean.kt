@@ -25,7 +25,7 @@ class ContractsCreatedCollectorBean(
     fun execute(context: JobExecutionContext) {
 
         val memberId = context.mergedJobDataMap.getLongFromString("memberId")
-        logger.info("Executing has contracts Collect job for memberId: $memberId")
+        logger.debug("Executing has contracts Collect job for memberId: $memberId")
 
         val stopCollecting = contractsService.hasContract(memberId)
 

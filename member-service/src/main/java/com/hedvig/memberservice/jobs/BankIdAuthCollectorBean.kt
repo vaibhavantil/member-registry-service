@@ -18,7 +18,7 @@ class BankIdAuthCollectorBean(
     fun execute(context: JobExecutionContext) {
         val referenceId = context.jobDetail.key.name
 
-        logger.info("Executing Auth Collect job for referenceId: $referenceId")
+        logger.debug("Executing Auth Collect job for referenceId: $referenceId")
 
         val memberId = collectRepository
             .findById(referenceId)

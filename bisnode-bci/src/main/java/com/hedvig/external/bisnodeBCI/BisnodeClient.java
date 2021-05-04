@@ -49,7 +49,7 @@ public class BisnodeClient {
             entity,
             PersonSearchResultListResponse.class);
 
-    logger.info(response.toString());
+    logger.debug(response.toString());
 
     return response.getBody();
   }

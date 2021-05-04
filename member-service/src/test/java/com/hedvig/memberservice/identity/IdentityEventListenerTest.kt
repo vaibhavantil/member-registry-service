@@ -3,6 +3,7 @@ package com.hedvig.memberservice.identity
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
+import com.hedvig.memberservice.events.MemberDeletedEvent
 import com.hedvig.memberservice.events.NorwegianMemberSignedEvent
 import com.hedvig.memberservice.events.MemberIdentifiedEvent
 import com.hedvig.memberservice.identity.repository.IdentificationMethod
@@ -159,6 +160,15 @@ class IdentityEventListenerTest {
         )
 
         verify(exactly = 0) { repository.save(any<IdentityEntity>()) }
+    }
+
+    @Test
+    fun `should delete identity entity on MemberDeletedEvent`() {
+        every {
+            repository.deleteById(memberId)
+        } returns Unit
+        lut.on(MemberDeletedEvent(memberId))
+        verify(exactly = 1) { repository.deleteById(memberId) }
     }
 
     companion object {

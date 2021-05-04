@@ -46,7 +46,7 @@ class MembersControllerV2 @Autowired constructor(
 
         botService.initBotService(id, json)
 
-        logger.info("New member created with id: " + id!!)
+        logger.debug("New member created with id: " + id!!)
         return ResponseEntity.ok().body(HelloHedvigResponse(id))
     }
 }

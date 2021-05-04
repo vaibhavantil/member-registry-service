@@ -34,7 +34,7 @@ class PersonAggregate() {
 
     @CommandHandler
     constructor(command: CreatePersonCommand): this() {
-        logger.info("Person CREATED with ssn=${maskLastDigitsOfSsn(command.ssn)}")
+        logger.debug("Person CREATED with ssn=${maskLastDigitsOfSsn(command.ssn)}")
         AggregateLifecycle.apply(PersonCreatedEvent(UUID.randomUUID(), command.ssn))
     }
 
@@ -47,7 +47,7 @@ class PersonAggregate() {
     @CommandHandler
     fun handle(command: CheckPersonDebtCommand) {
         if (isBeforeFirstFridayOfMonth(lastDebtCheckedAt)) {
-            logger.info("CHECKING debt for ssn=${maskLastDigitsOfSsn(command.ssn)}")
+            logger.debug("CHECKING debt for ssn=${maskLastDigitsOfSsn(command.ssn)}")
             AggregateLifecycle.apply(CheckPersonDebtEvent(command.ssn))
             return
         }
@@ -56,20 +56,20 @@ class PersonAggregate() {
             AggregateLifecycle.apply(PersonDebtAlreadyCheckedEvent(command.ssn))
             return
         }
-        logger.info("CHECKING debt for ssn=${maskLastDigitsOfSsn(command.ssn)}")
+        logger.debug("CHECKING debt for ssn=${maskLastDigitsOfSsn(command.ssn)}")
         AggregateLifecycle.apply(CheckPersonDebtEvent(command.ssn))
     }
 
     @CommandHandler
     fun handle(command: SynaDebtCheckedCommand) {
         if (!command.debtSnapshot.fromDateTime.isEqual(latestDateSnapShotFrom)) {
-            logger.info("Debt CHECKED on SYNA-ARKIV for ssn=${maskLastDigitsOfSsn(command.ssn)}")
+            logger.debug("Debt CHECKED on SYNA-ARKIV for ssn=${maskLastDigitsOfSsn(command.ssn)}")
             AggregateLifecycle.apply(SynaDebtCheckedEvent(
                 ssn = command.ssn,
                 debtSnapshot = command.debtSnapshot
             ))
         } else {
-            logger.info("Debt ALREADY checked with SYNA-ARKIV for ssn=${maskLastDigitsOfSsn(command.ssn)} from=${command.debtSnapshot.fromDateTime}")
+            logger.debug("Debt ALREADY checked with SYNA-ARKIV for ssn=${maskLastDigitsOfSsn(command.ssn)} from=${command.debtSnapshot.fromDateTime}")
             AggregateLifecycle.apply(SameSynaDebtCheckedEvent(command.ssn))
         }
     }

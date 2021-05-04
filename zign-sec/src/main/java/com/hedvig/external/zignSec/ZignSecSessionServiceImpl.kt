@@ -236,9 +236,9 @@ class ZignSecSessionServiceImpl(
                         val idProviderPersonId = session.notification!!.identity!!.idProviderPersonId!!
 
                         val authEntity = zignSecAuthenticationEntityRepository.findByIdProviderPersonId(idProviderPersonId)?.also {
-                          logger.info("Found exact ID number match on authentication entity")
+                          logger.debug("Found exact ID number match on authentication entity")
                         } ?: run {
-                            logger.info("ID number mismatch, checking date of birth")
+                            logger.debug("ID number mismatch, checking date of birth")
                             val requestPersonalNumber = session.requestPersonalNumber ?: return@run null
 
                             val personalNumberLooksGood = validatePersonNumberAgainstDateOfBirth(
@@ -248,9 +248,9 @@ class ZignSecSessionServiceImpl(
                             )
 
                             if (personalNumberLooksGood) {
-                                logger.info("Personal number looks good based on date-of-birth heuristic")
+                                logger.debug("Personal number looks good based on date-of-birth heuristic")
                             } else {
-                                logger.info("Personal number looks is too much off - bailing")
+                                logger.debug("Personal number $requestPersonalNumber is too much off - bailing")
                                 return@run null
                             }
 
@@ -273,7 +273,7 @@ class ZignSecSessionServiceImpl(
                                 )
                             )
                         } else {
-                            logger.error("Member tried to login with no ZignSecSignEntity and requestPersonalNumber was null [MemberId:${session.memberId}] [idProviderPersonId: $idProviderPersonId] [SessionId:${session.sessionId}] [session:$session]")
+                            logger.debug("Member tried to login with no ZignSecSignEntity and requestPersonalNumber was null [MemberId:${session.memberId}] [idProviderPersonId: $idProviderPersonId] [SessionId:${session.sessionId}] [session:$session]")
                             authenticationEventPublisher.publishAuthenticationEvent(
                                 ZignSecAuthenticationResult.Failed(
                                     session.referenceId,

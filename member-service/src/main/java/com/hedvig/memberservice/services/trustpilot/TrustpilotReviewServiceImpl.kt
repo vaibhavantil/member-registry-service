@@ -31,10 +31,10 @@ class TrustpilotReviewServiceImpl(
             )
             val response = trustpilotClient.createReviewLink(hedvigBusinessUnitId, body)
 
-            logger.info("Trustpilot review link created for member $memberId, link id = ${response.id}")
+            logger.debug("Trustpilot review link created for member $memberId, link id = ${response.id}")
             TrustpilotReviewInvitation(response.id, response.url)
         } catch (exception: Exception) {
-            logger.warn("Trustpilot API call failed", exception)
+            logger.error("Trustpilot API call failed", exception)
             null
         }
     }

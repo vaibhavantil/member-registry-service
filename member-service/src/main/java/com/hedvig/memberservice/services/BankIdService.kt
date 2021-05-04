@@ -22,7 +22,7 @@ class BankIdService(
 
     fun auth(memberId: Long?, endUserIp: String?): OrderResponse {
         val status = bankIdApi.auth(OrderAuthRequest(endUserIp))
-        logger.info(
+        logger.debug(
             "Started bankId AUTH autostart:{}, reference:{}",
             status.autoStartToken,
             status.orderRef)

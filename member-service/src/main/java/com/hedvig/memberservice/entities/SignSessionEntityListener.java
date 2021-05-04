@@ -13,7 +13,7 @@ public class SignSessionEntityListener {
 
   @PostUpdate
   public void postUpdateSignSession(SignSession signSession) {
-    logger.info("Triggering event after update signSession {} with status", signSession,
+    logger.debug("Triggering event after update signSession {} with status", signSession,
         signSession.status.name());
     val publisher = BeanUtil.getBean();
     publisher.publishEvent(new

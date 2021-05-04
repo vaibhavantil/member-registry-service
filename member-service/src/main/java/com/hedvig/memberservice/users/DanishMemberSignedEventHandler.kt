@@ -38,16 +38,16 @@ class DanishMemberSignedEventHandler {
         zignSecNotification: ZignSecNotificationRequest
     ) {
         if (userService.findUserByAssociatedMemberId(memberId) != null) {
-            logger.info("Member $memberId was already has a user - skipping")
+            logger.debug("Member $memberId was already has a user - skipping")
             return
         }
 
         val idProviderName = zignSecNotification.identity?.idProviderName ?: run {
-            logger.warn("Member $memberId is missing idProviderName - skipping")
+            logger.debug("Member $memberId is missing idProviderName - skipping")
             return
         }
         val idProviderPersonId = zignSecNotification.identity?.idProviderPersonId ?: run {
-            logger.warn("Member $memberId is missing idProviderPersonId - skipping")
+            logger.debug("Member $memberId is missing idProviderPersonId - skipping")
             return
         }
 
@@ -63,7 +63,7 @@ class DanishMemberSignedEventHandler {
         )
 
         if (user != null) {
-            logger.info("Created user ${user.id} for member $memberId with ZignSec credential")
+            logger.debug("Created user ${user.id} for member $memberId with ZignSec credential")
         } else {
             throw Exception("Failed to create user for member $memberId with ZignSec credential")
         }

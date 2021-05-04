@@ -4,28 +4,7 @@ import com.hedvig.integration.botService.BotService;
 import com.hedvig.integration.productsPricing.CampaignService;
 import com.hedvig.integration.productsPricing.dto.EditMemberNameRequestDTO;
 import com.hedvig.memberservice.aggregates.MemberStatus;
-import com.hedvig.memberservice.events.AcceptLanguageUpdatedEvent;
-import com.hedvig.memberservice.events.BirthDateUpdatedEvent;
-import com.hedvig.memberservice.events.DanishMemberSignedEvent;
-import com.hedvig.memberservice.events.DanishSSNUpdatedEvent;
-import com.hedvig.memberservice.events.EmailUpdatedEvent;
-import com.hedvig.memberservice.events.FraudulentStatusUpdatedEvent;
-import com.hedvig.memberservice.events.LivingAddressUpdatedEvent;
-import com.hedvig.memberservice.events.MemberCancellationEvent;
-import com.hedvig.memberservice.events.MemberCreatedEvent;
-import com.hedvig.memberservice.events.MemberInactivatedEvent;
-import com.hedvig.memberservice.events.MemberSignedEvent;
-import com.hedvig.memberservice.events.MemberSignedWithoutBankId;
-import com.hedvig.memberservice.events.MemberSimpleSignedEvent;
-import com.hedvig.memberservice.events.MemberStartedOnBoardingEvent;
-import com.hedvig.memberservice.events.NameUpdatedEvent;
-import com.hedvig.memberservice.events.NewCashbackSelectedEvent;
-import com.hedvig.memberservice.events.NorwegianMemberSignedEvent;
-import com.hedvig.memberservice.events.NorwegianSSNUpdatedEvent;
-import com.hedvig.memberservice.events.PhoneNumberUpdatedEvent;
-import com.hedvig.memberservice.events.PickedLocaleUpdatedEvent;
-import com.hedvig.memberservice.events.SSNUpdatedEvent;
-import com.hedvig.memberservice.events.TrackingIdCreatedEvent;
+import com.hedvig.memberservice.events.*;
 import lombok.extern.slf4j.Slf4j;
 import org.axonframework.eventhandling.EventHandler;
 import org.axonframework.eventhandling.EventMessage;
@@ -35,6 +14,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import javax.transaction.Transactional;
 import java.time.Instant;
 import java.util.concurrent.CompletableFuture;
 
@@ -43,7 +23,7 @@ import java.util.concurrent.CompletableFuture;
 public class MemberEventListener {
 
   private final Logger logger = LoggerFactory.getLogger(MemberEventListener.class);
-  private final MemberRepository userRepo;
+  private final MemberRepository memberRepository;
   private final SignedMemberRepository signedMemberRepository;
   private final TrackingIdRepository trackingRepo;
   private final CampaignService campaignService;
@@ -51,12 +31,12 @@ public class MemberEventListener {
 
   @Autowired
   public MemberEventListener(
-      MemberRepository userRepo,
+      MemberRepository memberRepository,
       SignedMemberRepository signedMemberRepository,
       TrackingIdRepository trackingRepo,
       CampaignService campaignService,
       BotService botService) {
-    this.userRepo = userRepo;
+    this.memberRepository = memberRepository;
     this.signedMemberRepository = signedMemberRepository;
     this.trackingRepo = trackingRepo;
     this.campaignService = campaignService;
@@ -65,13 +45,13 @@ public class MemberEventListener {
 
   @EventHandler
   public void on(MemberCreatedEvent e) {
-    System.out.println("MemberEventListener: " + e);
+    logger.debug("MemberEventListener: " + e);
     MemberEntity user = new MemberEntity();
     user.setId(e.getId());
     user.setStatus(e.getStatus());
     user.setCreatedOn(e.getCreatedOn());
 
-    userRepo.save(user);
+    memberRepository.save(user);
   }
 
   //    We don't use this event at the moment
@@ -84,37 +64,37 @@ public class MemberEventListener {
 
   @EventHandler
   public void on(EmailUpdatedEvent e) {
-    MemberEntity m = userRepo.findById(e.getId()).get();
+    MemberEntity m = memberRepository.findById(e.getId()).get();
 
     m.setEmail(e.getEmail());
-    userRepo.save(m);
+    memberRepository.save(m);
   }
 
   @EventHandler
   void on(SSNUpdatedEvent e) {
-    MemberEntity m = userRepo.findById(e.getMemberId()).get();
+    MemberEntity m = memberRepository.findById(e.getMemberId()).get();
 
     m.setSsn(e.getSsn());
 
-    userRepo.save(m);
+    memberRepository.save(m);
   }
 
   @EventHandler
   void on(NorwegianSSNUpdatedEvent e) {
-    MemberEntity m = userRepo.findById(e.getMemberId()).get();
+    MemberEntity m = memberRepository.findById(e.getMemberId()).get();
 
     m.setSsn(e.getSsn());
 
-    userRepo.save(m);
+    memberRepository.save(m);
   }
 
   @EventHandler
   void on(DanishSSNUpdatedEvent e) {
-    MemberEntity m = userRepo.findById(e.getMemberId()).get();
+    MemberEntity m = memberRepository.findById(e.getMemberId()).get();
 
     m.setSsn(e.getSsn());
 
-    userRepo.save(m);
+    memberRepository.save(m);
   }
 
   @EventHandler
@@ -135,7 +115,7 @@ public class MemberEventListener {
 
   @EventHandler
   void on(LivingAddressUpdatedEvent e) {
-    MemberEntity m = userRepo.findById(e.getId()).get();
+    MemberEntity m = memberRepository.findById(e.getId()).get();
 
     m.setCity(e.getCity());
     m.setStreet(e.getStreet());
@@ -143,17 +123,17 @@ public class MemberEventListener {
     m.setApartment(e.getApartmentNo());
     m.setFloor(e.getFloor());
 
-    userRepo.save(m);
+    memberRepository.save(m);
   }
 
   @EventHandler
   void on(NameUpdatedEvent e) {
-    MemberEntity m = userRepo.findById(e.getMemberId()).get();
+    MemberEntity m = memberRepository.findById(e.getMemberId()).get();
 
     m.setFirstName(e.getFirstName());
     m.setLastName(e.getLastName());
 
-    userRepo.save(m);
+    memberRepository.save(m);
 
     EditMemberNameRequestDTO editMemberNameRequestDTO = new EditMemberNameRequestDTO(
       String.valueOf(e.getMemberId()),
@@ -168,25 +148,25 @@ public class MemberEventListener {
   public void on(MemberStartedOnBoardingEvent e, EventMessage<MemberStartedOnBoardingEvent> eventMessage) {
     logger.debug("Started handling event: {}", eventMessage.getIdentifier());
 
-    MemberEntity member = userRepo.findById(e.getMemberId()).get();
+    MemberEntity member = memberRepository.findById(e.getMemberId()).get();
     member.setStatus(e.getNewStatus());
 
-    userRepo.saveAndFlush(member);
+    memberRepository.saveAndFlush(member);
     logger.debug("Completed handling event: {}", eventMessage.getIdentifier());
   }
 
   @EventHandler
   void on(MemberInactivatedEvent e) {
-    MemberEntity m = userRepo.findById(e.getId()).get();
+    MemberEntity m = memberRepository.findById(e.getId()).get();
     m.setStatus(MemberStatus.INACTIVATED);
-    userRepo.save(m);
+    memberRepository.save(m);
   }
 
   @EventHandler
   void on(NewCashbackSelectedEvent e) {
-    MemberEntity m = userRepo.findById(e.getMemberId()).get();
+    MemberEntity m = memberRepository.findById(e.getMemberId()).get();
     m.setCashbackId(e.getCashbackId());
-    userRepo.save(m);
+    memberRepository.save(m);
   }
 
   @EventHandler
@@ -215,7 +195,7 @@ public class MemberEventListener {
   }
 
   private void memberSigned(Long memberId, String ssn, Instant timestamp) {
-      MemberEntity m = userRepo.findById(memberId).get();
+      MemberEntity m = memberRepository.findById(memberId).get();
       m.setStatus(MemberStatus.SIGNED);
       m.setSignedOn(timestamp);
 
@@ -223,52 +203,66 @@ public class MemberEventListener {
       sme.setId(memberId);
       sme.setSsn(ssn);
 
-      userRepo.save(m);
+      memberRepository.save(m);
       signedMemberRepository.save(sme);
   }
 
   @EventHandler
   void on(MemberCancellationEvent e) {
-    MemberEntity m = userRepo.findById(e.getMemberId()).get();
+    MemberEntity m = memberRepository.findById(e.getMemberId()).get();
     m.setStatus(MemberStatus.TERMINATED);
 
-    userRepo.save(m);
+    memberRepository.save(m);
   }
 
   @EventHandler
   void on(PhoneNumberUpdatedEvent e) {
-    MemberEntity m = userRepo.findById(e.getId()).get();
+    MemberEntity m = memberRepository.findById(e.getId()).get();
     m.setPhoneNumber(e.getPhoneNumber());
 
-    userRepo.save(m);
+    memberRepository.save(m);
   }
 
   @EventHandler
   void on(BirthDateUpdatedEvent e) {
-    MemberEntity m = userRepo.findById(e.getMemberId()).get();
+    MemberEntity m = memberRepository.findById(e.getMemberId()).get();
     m.setBirthDate(e.getBirthDate());
 
-    userRepo.save(m);
+    memberRepository.save(m);
   }
   @EventHandler
   void on(FraudulentStatusUpdatedEvent e) {
-    MemberEntity m = userRepo.findById(e.getMemberId()).get();
+    MemberEntity m = memberRepository.findById(e.getMemberId()).get();
     m.setFraudulentStatus(e.getFraudulentStatus());
     m.setFraudulentDescription(e.getFraudulentDescription());
-    userRepo.save(m);
+    memberRepository.save(m);
   }
 
   @EventHandler
   void on(AcceptLanguageUpdatedEvent e) {
-    MemberEntity m = userRepo.findById(e.getMemberId()).get();
+    MemberEntity m = memberRepository.findById(e.getMemberId()).get();
     m.setAcceptLanguage(e.getAcceptLanguage());
-    userRepo.save(m);
+    memberRepository.save(m);
   }
 
   @EventHandler
   void on(PickedLocaleUpdatedEvent e) {
-    MemberEntity m = userRepo.findById(e.getMemberId()).get();
+    MemberEntity m = memberRepository.findById(e.getMemberId()).get();
     m.setPickedLocale(e.getPickedLocale());
-    userRepo.save(m);
+    memberRepository.save(m);
+  }
+
+  @EventHandler
+  @Transactional
+  void on(MemberDeletedEvent e) {
+      if (memberRepository.findById(e.getMemberId()).isPresent()) {
+          memberRepository.deleteById(e.getMemberId());
+      }
+      if (signedMemberRepository.findById(e.getMemberId()).isPresent()) {
+          signedMemberRepository.deleteById(e.getMemberId());
+      }
+      if (trackingRepo.findByMemberId(e.getMemberId()).isPresent()) {
+          trackingRepo.deleteById(e.getMemberId());
+      }
   }
 }

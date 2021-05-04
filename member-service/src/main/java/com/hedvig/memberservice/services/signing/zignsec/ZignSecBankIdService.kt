@@ -105,11 +105,11 @@ class ZignSecBankIdService(
 
                 if (user != null) {
                     if (result.memberId != user.associatedMemberId.toLong()) {
-                        logger.info("ZignSec auth completion: MemberID mismatch, inactivating ${result.memberId}")
+                        logger.debug("ZignSec auth completion: MemberID mismatch, inactivating ${result.memberId}")
                         commandGateway.sendAndWait<Void>(InactivateMemberCommand(result.memberId))
                         apiGatewayService.reassignMember(result.memberId, user.associatedMemberId.toLong())
                     }
-                    logger.info("ZignSec auth completion: Sending success command")
+                    logger.debug("ZignSec auth completion: Sending success command")
                     commandGateway.sendAndWait<Void>(
                         ZignSecSuccessfulAuthenticationCommand(
                             user.associatedMemberId.toLong(),
@@ -120,10 +120,10 @@ class ZignSecBankIdService(
                             result.identity.lastName
                         )
                     )
-                    logger.info("ZignSec auth completion: Publishing session to redis")
+                    logger.debug("ZignSec auth completion: Publishing session to redis")
                     redisEventPublisher.onAuthSessionUpdated(result.memberId, AuthSessionUpdatedEventStatus.SUCCESS)
                 } else {
-                    logger.info("ZignSec auth completion: Publishing session to redis")
+                    logger.debug("ZignSec auth completion: Publishing session to redis")
                     redisEventPublisher.onAuthSessionUpdated(result.memberId, AuthSessionUpdatedEventStatus.FAILED)
                 }
             }
