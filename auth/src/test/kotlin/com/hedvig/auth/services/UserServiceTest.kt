@@ -10,7 +10,9 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager
 import org.springframework.context.ApplicationContext
 
-@DataJpaTest
+@DataJpaTest(
+    properties = ["hedvig.auth.canCreateUsersOnLogin=true"]
+)
 class UserServiceTest {
 
     lateinit var userService: UserService

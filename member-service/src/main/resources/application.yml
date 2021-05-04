@@ -51,6 +51,10 @@ static:
     redirect:
       baseUrl: https://www.dev.hedvigit.com/
 
+hedvig:
+  auth:
+    canCreateUsersOnLogin: true
+
 ---
 spring:
   profiles: test, development
