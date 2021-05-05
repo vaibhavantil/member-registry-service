@@ -34,7 +34,9 @@ class ZignSecBankIdService(
     @Value("\${redirect.authentication.failUrl}")
     private val authenticationFailUrl: String,
     @Value("\${static.authentication.redirect.baseUrl}")
-    private val baseUrl: String
+    private val baseUrl: String,
+    @Value("\${hedvig.auth.canCreateUsersOnLogin:false}")
+    private var canCreateUsersOnLogin: Boolean
 ) {
 
     companion object {
@@ -98,7 +100,7 @@ class ZignSecBankIdService(
                             )
                         ),
                         UserService.Context(
-                            onboardingMemberId = result.memberId.toString()
+                            onboardingMemberId = if (canCreateUsersOnLogin) result.memberId.toString() else null
                         )
                     )
                 }

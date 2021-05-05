@@ -55,7 +55,7 @@ class ZignSecBankIdServiceTest {
 
     @Before
     fun before() {
-        classUnderTest = ZignSecBankIdService(zignSecAuthentication, commandGateway, redisEventPublisher, apiGatewayService, memberRepository, userService, "success", "fail", "https://www.hedvig.com")
+        classUnderTest = ZignSecBankIdService(zignSecAuthentication, commandGateway, redisEventPublisher, apiGatewayService, memberRepository, userService, "success", "fail", "https://www.hedvig.com", true)
     }
 
     @Test

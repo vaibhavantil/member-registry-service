@@ -23,6 +23,7 @@ import org.quartz.TriggerBuilder
 import org.springframework.stereotype.Service
 import java.lang.Exception
 import javax.transaction.Transactional
+import org.springframework.beans.factory.annotation.Value
 
 @Service
 class BankIdServiceV2(
@@ -33,7 +34,9 @@ class BankIdServiceV2(
     private val collectRepository: CollectRepository,
     private val apiGatewayService: ApiGatewayService,
     private val swedishBankIdMetrics: SwedishBankIdMetrics,
-    private val userService: UserService
+    private val userService: UserService,
+    @Value("\${hedvig.auth.canCreateUsersOnLogin:false}")
+    private var canCreateUsersOnLogin: Boolean
 ) {
 
     @Transactional
@@ -92,7 +95,7 @@ class BankIdServiceV2(
                             )
                         ),
                         UserService.Context(
-                            onboardingMemberId = memberId.toString()
+                            onboardingMemberId = if (canCreateUsersOnLogin) memberId.toString() else null
                         )
                     )
                     if (user != null) {

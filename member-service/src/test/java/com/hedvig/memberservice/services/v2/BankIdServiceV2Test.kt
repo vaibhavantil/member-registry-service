@@ -44,7 +44,8 @@ class BankIdServiceV2Test {
             collectRepository = collectRepository,
             apiGatewayService = apiGatewayService,
             swedishBankIdMetrics = swedishBankIdMetrics,
-            userService = userService
+            userService = userService,
+            canCreateUsersOnLogin = true
         )
     }
 

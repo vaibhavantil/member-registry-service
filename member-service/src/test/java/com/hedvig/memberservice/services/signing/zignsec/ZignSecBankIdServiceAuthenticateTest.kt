@@ -35,7 +35,8 @@ class ZignSecBankIdServiceAuthenticateTest {
         userService,
         "",
         "",
-        "https://www.dev.hedvigit.com/"
+        "https://www.dev.hedvigit.com/",
+        true
     )
 
     @Test

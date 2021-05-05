@@ -30,9 +30,6 @@ class UserService {
     @Autowired private lateinit var swedishBankIdCredentialRepository: SwedishBankIdCredentialRepository
     @Autowired private lateinit var zignSecCredentialRepository: ZignSecCredentialRepository
 
-    @Value("\${hedvig.auth.canCreateUsersOnLogin:false}")
-    private var canCreateUsersOnLogin: Boolean = false
-
     /**
      * The following credential types are currently supported:
      *
@@ -147,7 +144,7 @@ class UserService {
                     return simpleSignConnection.user
                 }
             }
-            if (context.onboardingMemberId != null && canCreateUsersOnLogin) {
+            if (context.onboardingMemberId != null) {
                 val user = User(associatedMemberId = context.onboardingMemberId)
                 swedishBankIdCredentialRepository.saveAndFlush(
                     SwedishBankIdCredential(
@@ -187,7 +184,7 @@ class UserService {
                     return simpleSignConnection.user
                 }
             }
-            if (context.onboardingMemberId != null && canCreateUsersOnLogin) {
+            if (context.onboardingMemberId != null) {
                 val user = User(associatedMemberId = context.onboardingMemberId)
                 zignSecCredentialRepository.saveAndFlush(
                     ZignSecCredential(
@@ -219,7 +216,7 @@ class UserService {
         return if (simpleSignConnection != null) {
             simpleSignConnection.user
         } else {
-            if (context.onboardingMemberId != null && canCreateUsersOnLogin) {
+            if (context.onboardingMemberId != null) {
                 val user = User(associatedMemberId = context.onboardingMemberId)
                 simpleSignConnectionRepository.saveAndFlush(
                     SimpleSignConnection(
