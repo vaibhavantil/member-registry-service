@@ -1,9 +1,10 @@
 package com.hedvig.external.zignSec.client.dto
 
-import com.fasterxml.jackson.annotation.JsonCreator
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.annotation.JsonProperty
 import java.util.*
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 data class ZignSecNotificationRequest(
     val id: UUID,
     val errors: List<ZignSecResponseError>,
