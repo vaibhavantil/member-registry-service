@@ -25,6 +25,7 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.Collections;
 import java.util.Objects;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
@@ -210,7 +211,15 @@ public class InternalMembersControllerTests {
     @Test
     public void testDeleteMember() throws Exception {
       final Long memberId = 1337L;
+      when(memberRepo.findById(memberId)).thenReturn(Optional.of(new MemberEntity()));
       mockMvc.perform(delete("/_/member/{memberId}", memberId))
         .andExpect(status().is2xxSuccessful());
+    }
+
+    @Test
+    public void testDeleteMissingMember() throws Exception {
+        final Long memberId = 1337L;
+        mockMvc.perform(delete("/_/member/{memberId}", memberId))
+            .andExpect(status().isNotFound());
     }
 }

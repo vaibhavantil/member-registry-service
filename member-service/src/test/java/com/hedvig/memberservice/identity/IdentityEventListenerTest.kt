@@ -167,6 +167,9 @@ class IdentityEventListenerTest {
         every {
             repository.deleteById(memberId)
         } returns Unit
+        every {
+            repository.findById(memberId)
+        } returns Optional.of(stub)
         lut.on(MemberDeletedEvent(memberId))
         verify(exactly = 1) { repository.deleteById(memberId) }
     }

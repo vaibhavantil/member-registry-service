@@ -53,7 +53,9 @@ class IdentityEventListener(
 
     @EventHandler
     fun on(e: MemberDeletedEvent) {
-        repository.deleteById(e.memberId)
+        if (repository.findById(e.memberId).isPresent) {
+            repository.deleteById(e.memberId)
+        }
     }
 }
 

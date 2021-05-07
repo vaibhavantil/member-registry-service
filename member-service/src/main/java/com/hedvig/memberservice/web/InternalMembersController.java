@@ -177,8 +177,12 @@ public class InternalMembersController {
 
     @DeleteMapping("/{memberId}")
     public ResponseEntity<Boolean> deleteMember(@PathVariable Long memberId) {
-        commandBus.sendAndWait(new DeleteMemberCommand(memberId));
-        return ResponseEntity.ok(true);
+        if (memberRepository.findById(memberId).isPresent()) {
+            commandBus.sendAndWait(new DeleteMemberCommand(memberId));
+            return ResponseEntity.ok(true);
+        } else {
+            return ResponseEntity.notFound().build();
+        }
     }
 }
 
