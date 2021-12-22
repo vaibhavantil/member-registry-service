@@ -211,12 +211,12 @@
     <dependency>
       <groupId>com.amazonaws</groupId>
       <artifactId>aws-java-sdk-ses</artifactId>
-      <version>1.11.336</version>
+      <version>1.12.131</version>
     </dependency>
     <dependency>
       <groupId>com.amazonaws</groupId>
       <artifactId>aws-java-sdk-sts</artifactId>
-      <version>1.11.336</version>
+      <version>1.12.131</version>
     </dependency>
     <dependency>
       <groupId>commons-io</groupId>
@@ -236,7 +236,7 @@
     <dependency>
       <groupId>io.sentry</groupId>
       <artifactId>sentry-logback</artifactId>
-      <version>1.7.15</version>
+      <version>5.5.2</version>
     </dependency>
     <dependency>
       <groupId>io.springfox</groupId>
