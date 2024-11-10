@@ -27,7 +27,7 @@
     <kotlin.compiler.incremental>true</kotlin.compiler.incremental>
     <kotlin.code.style>official</kotlin.code.style>
     <mockito.version>2.28.2</mockito.version>
-    <axon.version>3.4.3</axon.version>
+    <axon.version>4.0</axon.version>
   </properties>
 
   <repositories>
